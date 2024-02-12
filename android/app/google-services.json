@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "171330634144",
+    "project_id": "prudapp",
+    "storage_bucket": "prudapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:171330634144:android:f6ecf062f7fec2b1f0e4c5",
+        "android_client_info": {
+          "package_name": "com.PrudGroup.prudapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdmKb_GQMgvq4PbFk6RZ6CmuOuKZmEl1s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
