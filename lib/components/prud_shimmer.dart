@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_shimmer/flutter_shimmer.dart';
 
-class SwitzShimmer extends StatelessWidget {
+class PrudShimmer extends StatelessWidget {
   final int type;
 
-  const SwitzShimmer({super.key, this.type = 0});
+  const PrudShimmer({super.key, this.type = 0});
 
   @override
   Widget build(BuildContext context) {

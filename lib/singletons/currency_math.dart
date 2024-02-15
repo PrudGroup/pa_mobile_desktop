@@ -1,13 +1,11 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:prudapp/singletons/shared_local_storage.dart';
 
 class CurrencyMath extends ChangeNotifier{
 
   static final CurrencyMath _currencyMath = CurrencyMath._internal();
   static get currencyMath => _currencyMath;
 
-  late DateTime lastUpdated;
   bool hasExpired = false;
 
   factory CurrencyMath(){
@@ -16,18 +14,9 @@ class CurrencyMath extends ChangeNotifier{
 
   Future<void> init() async {
     try{
-      _checkIfExpired();
-      notifyListeners();
+
     }catch(ex){
       debugPrint("ErrorHandler: CurrencyMathClass: init(): $ex");
-    }
-  }
-
-  void _checkIfExpired(){
-    if(myStorage.dateDifference(dDate: lastUpdated,) >= 7) {
-      hasExpired = true;
-    } else {
-      hasExpired = false;
     }
   }
 

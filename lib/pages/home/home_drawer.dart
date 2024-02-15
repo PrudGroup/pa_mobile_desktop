@@ -39,7 +39,7 @@ class HomeDrawerState extends State<HomeDrawer> {
               thickness: 1.0,
               indent: 10.0,
               endIndent: 10.0,
-              color: pagadoColorScheme.lineA
+              color: prudColorTheme.lineA
             ),
             SideMenuItem(
               text: "Terms & Conditions",

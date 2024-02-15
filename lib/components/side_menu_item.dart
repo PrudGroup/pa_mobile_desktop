@@ -12,13 +12,13 @@ class SideMenuItem extends StatelessWidget {
   final String text;
 
   const SideMenuItem({
-    Key? key,
+    super.key,
     required this.text,
     required this.page,
     this.icon,
     this.image,
     this.isIcon = true,
-  }) : assert(isIcon? icon != null : image != null), super(key: key);
+  }) : assert(isIcon? icon != null : image != null);
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class SideMenuItem extends StatelessWidget {
       ),
       title: Translate(
         text: text,
-        style: pagadoWidgetStyle.typedTextStyle,
+        style: prudWidgetStyle.typedTextStyle,
       ),
     );
   }

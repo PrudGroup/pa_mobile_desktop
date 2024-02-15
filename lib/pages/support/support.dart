@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Support extends StatefulWidget {
-  const Support({Key? key}) : super(key: key);
+  const Support({super.key});
 
   @override
   SupportState createState() => SupportState();

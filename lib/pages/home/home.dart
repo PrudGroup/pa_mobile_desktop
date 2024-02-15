@@ -99,7 +99,7 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [pagadoColorScheme.bgA, pagadoColorScheme.bgA.withOpacity(0.2)],
+            colors: [prudColorTheme.bgA, prudColorTheme.bgA.withOpacity(0.2)],
           ),
         ),
       ),
@@ -117,7 +117,7 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
       child: Scaffold(
         key: _drawerKey,
         resizeToAvoidBottomInset: false,
-        backgroundColor: pagadoColorScheme.bgA,
+        backgroundColor: prudColorTheme.bgA,
         appBar: AppBar(
           elevation: 0,
           leading: Center(

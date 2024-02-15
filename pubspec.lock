@@ -225,6 +225,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.0.24"
+  country_state_city:
+    dependency: "direct main"
+    description:
+      name: country_state_city
+      sha256: "400bf4f455503021d98a1f21eeec41c0aa0d7b2529ea0b07f6799ed3750513c3"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.1.6"
   credit_card_type_detector:
     dependency: transitive
     description:

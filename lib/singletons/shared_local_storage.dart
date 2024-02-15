@@ -118,10 +118,10 @@ final myStorage = MyStorage();
 
 bool isPhone() => UniversalPlatform.isIOS || UniversalPlatform.isAndroid? true : false;
 ThemeData prudTheme = ThemeData(
-  primarySwatch: Colors.orange,
+  primarySwatch: Colors.pink,
   brightness: Brightness.light,
-  primaryColor: pagadoColorScheme.primary,
-  disabledColor: pagadoColorScheme.bgA,
+  primaryColor: prudColorTheme.primary,
+  disabledColor: prudColorTheme.bgA,
   indicatorColor: Colors.black,
   pageTransitionsTheme: const PageTransitionsTheme(
     builders: <TargetPlatform, PageTransitionsBuilder>{
@@ -134,35 +134,39 @@ ThemeData prudTheme = ThemeData(
   ),
   hintColor: const Color(0xffd0782f),
   colorScheme: ColorScheme(
-    primary: pagadoColorScheme.primary,
-    primaryContainer: pagadoColorScheme.lineA,
-    secondary: pagadoColorScheme.secondary,
+    primary: prudColorTheme.primary,
+    primaryContainer: prudColorTheme.lineA,
+    secondary: prudColorTheme.secondary,
     secondaryContainer: Colors.green,
-    background: pagadoColorScheme.bgB,
-    error: pagadoColorScheme.error,
+    background: prudColorTheme.bgB,
+    error: prudColorTheme.error,
     onBackground: Colors.black,
-    onError: pagadoColorScheme.danger,
-    onPrimary: pagadoColorScheme.bgC,
-    onSecondary: pagadoColorScheme.bgA,
-    onSurface:pagadoColorScheme.buttonD,
-    surface: pagadoColorScheme.buttonC,
+    onError: prudColorTheme.danger,
+    onPrimary: prudColorTheme.bgC,
+    onSecondary: prudColorTheme.bgA,
+    onSurface:prudColorTheme.textA,
+    surface: prudColorTheme.buttonC,
     brightness: Brightness.light,
   ),
-  scaffoldBackgroundColor: Colors.white54,
+  scaffoldBackgroundColor: prudColorTheme.bgA,
   bottomNavigationBarTheme: const BottomNavigationBarThemeData(
     backgroundColor: Color(0xffff6302),
   ),
   unselectedWidgetColor: const Color(0xffffe3b3),
   highlightColor: Colors.white38,
   fontFamily: 'Revans',
-  bottomSheetTheme: const BottomSheetThemeData(
-    backgroundColor: Color(0xfffee8ae),
-    modalBackgroundColor: Color(0xfffee8ae),
+  bottomSheetTheme: BottomSheetThemeData(
+    backgroundColor: prudColorTheme.bgA,
+    modalBackgroundColor: prudColorTheme.bgA,
   ),
-  floatingActionButtonTheme: const FloatingActionButtonThemeData(
-      backgroundColor: Color(0xffff6302),
-      foregroundColor: Color(0xff000000),
-      focusColor: Color(0xffffffff)
+  floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: prudColorTheme.iconB,
+      foregroundColor: prudColorTheme.bgD,
+      focusColor:prudColorTheme.iconB.withOpacity(0.5)
+  ),
+  inputDecorationTheme: InputDecorationTheme(
+    filled: false,
+    fillColor: prudColorTheme.bgA
   ),
   // Define the default TextTheme. Use this to specify the default
   // text styling for headlines, titles, bodies of text, and more.

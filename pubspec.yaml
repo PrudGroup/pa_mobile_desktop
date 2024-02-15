@@ -70,6 +70,7 @@ dependencies:
   flutter_advanced_drawer: ^1.3.5
   flutter_fgbg: ^0.3.0
   motion_tab_bar_v2: ^0.3.0
+  country_state_city: ^0.1.6
 
 dev_dependencies:
   flutter_test:
@@ -144,6 +145,7 @@ flutter:
     - assets/images/settings.png
     - assets/images/user.png
     - assets/images/gh.jpg
+    - assets/images/gg.jpg
     - assets/images/err.jpg
     - assets/images/call-center.png
     - assets/images/document.png

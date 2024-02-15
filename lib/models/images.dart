@@ -11,6 +11,7 @@ class PrudImages {
   String dislike;
   String settings;
   String screen;
+  String bg;
   String user;
   String err;
   String support;
@@ -33,6 +34,7 @@ class PrudImages {
     required this.user,
     required this.support,
     required this.document,
+    required this.bg,
   });
 }
 
@@ -49,6 +51,7 @@ PrudImages prudImages = PrudImages(
   logo: 'assets/images/prud_logo.png',
   prudIcon: 'assets/images/prudapp_icon.png',
   screen: 'assets/images/gh.jpg',
+  bg: 'assets/images/gg.jpg',
   settings: 'assets/images/settings.png',
   user: 'assets/images/user.png',
   support: 'assets/images/call-center.png',

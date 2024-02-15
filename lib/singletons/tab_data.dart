@@ -149,7 +149,6 @@ class TabData extends ChangeNotifier {
     return _tabData;
   }
 
-
   String toTitleCase(String str) {
     return str
         .replaceAllMapped(

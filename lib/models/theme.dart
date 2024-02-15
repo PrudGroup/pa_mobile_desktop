@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/button/gf_button.dart';
 import 'package:getwidget/shape/gf_button_shape.dart';
+import 'package:prudapp/models/shared_classes.dart';
 
 import '../components/translate.dart';
+import '../singletons/tab_data.dart';
 
 class ColorTheme {
   final Color primary;
@@ -23,6 +25,7 @@ class ColorTheme {
   final Color lineA;
   final Color lineB;
   final Color lineC;
+  final Color lineD;
   final Color buttonA;
   final Color buttonB;
   final Color buttonC;
@@ -51,6 +54,7 @@ class ColorTheme {
     required this.lineA,
     required this.lineB,
     required this.lineC,
+    required this.lineD,
     required this.buttonA,
     required this.buttonB,
     required this.buttonC,
@@ -79,13 +83,13 @@ class WidgetStyle{
     fontWeight: FontWeight.w300,
     fontSize: 18,
     fontFamily: "Oswald-Regular",
-    color: pagadoColorScheme.textA
+    color: prudColorTheme.textA
   ),
   centeredTitleStyle = TextStyle(
     fontWeight: FontWeight.w500,
     fontSize: 24,
     fontFamily: "Lato-Italic",
-    color: pagadoColorScheme.textC
+    color: prudColorTheme.textC
   );
 
   WidgetStyle({
@@ -99,7 +103,7 @@ class WidgetStyle{
   }){
     inputDeco = InputDecoration(
       filled: true,
-      fillColor: pagadoColorScheme.bgA,
+      fillColor: prudColorTheme.bgA,
       enabledBorder: enabledBorder,
       focusedBorder: focusedBorder,
       border: enabledBorder,
@@ -109,26 +113,26 @@ class WidgetStyle{
 
     digitInputDeco = InputDecoration(
       filled: true,
-      fillColor: pagadoColorScheme.bgA,
+      fillColor: prudColorTheme.bgA,
       enabledBorder: enabledBorder.copyWith(
-          borderRadius: BorderRadius.circular(10.0)
+          borderRadius: BorderRadius.circular(6.0)
       ),
       focusedBorder: focusedBorder.copyWith(
-          borderRadius: BorderRadius.circular(10.0)
+          borderRadius: BorderRadius.circular(6.0)
       ),
       counter: const SizedBox(),
       contentPadding: EdgeInsets.zero,
       border: OutlineInputBorder(
-        borderSide: BorderSide(color: pagadoColorScheme.lineC),
+        borderSide: BorderSide(color: prudColorTheme.lineC),
         borderRadius: BorderRadius.circular(10.0),
       ),
     );
   }
 
   Widget getLongButton({required Function onPressed, required String text, bool makeLight = false}){
-    Color btnColor = makeLight? pagadoColorScheme.buttonD : pagadoColorScheme.secondary;
+    Color btnColor = makeLight? prudColorTheme.buttonD : prudColorTheme.secondary;
     Color lightColor = btnColor.withOpacity(0.7);
-    Color textColor = makeLight? pagadoColorScheme.secondary : pagadoColorScheme.textC;
+    Color textColor = makeLight? prudColorTheme.secondary : prudColorTheme.textC;
     return GFButton(
       onPressed: () => onPressed(),
       shape: GFButtonShape.pills,
@@ -148,9 +152,9 @@ class WidgetStyle{
   }
 
   Widget getShortButton({required Function onPressed, required String text, bool makeLight = false}){
-    Color btnColor = makeLight? pagadoColorScheme.buttonD : pagadoColorScheme.secondary;
+    Color btnColor = makeLight? prudColorTheme.buttonD : prudColorTheme.secondary;
     Color lightColor = btnColor.withOpacity(0.7);
-    Color textColor = makeLight? pagadoColorScheme.secondary : pagadoColorScheme.textC;
+    Color textColor = makeLight? prudColorTheme.secondary : prudColorTheme.textC;
     return GFButton(
       onPressed: () => onPressed(),
       shape: GFButtonShape.pills,
@@ -175,7 +179,7 @@ Widget getTextButton({required String title, required Function onPressed, Color 
     child: Translate(
       text: title,
       align: TextAlign.center,
-      style: pagadoWidgetStyle.tabTextStyle.copyWith(
+      style: prudWidgetStyle.tabTextStyle.copyWith(
         color: color,
         fontSize: 14.0
       ),
@@ -183,13 +187,13 @@ Widget getTextButton({required String title, required Function onPressed, Color 
   );
 }
 
-ColorTheme pagadoColorScheme = const ColorTheme(
+ColorTheme prudColorTheme = const ColorTheme(
     primary: Color(0xffff6302),
     secondary: Color(0xff127d0c),
     bgA: Color(0xffFFFFFF),
-    bgB: Colors.green,
-    bgC: Color(0xff222222),
-    bgD: Color(0xff1377AE),
+    bgB: Color(0xffe4e1e6),
+    bgC: Color(0xffF2F4F7),
+    bgD: Color(0xffEAECF0),
     bgE: Colors.transparent,
     textA: Color(0xff292929),
     textB: Color(0xff595757),
@@ -201,7 +205,8 @@ ColorTheme pagadoColorScheme = const ColorTheme(
     iconD: Color(0xffFFFFFF),
     lineA: Color(0xffd0782f),
     lineB: Color(0xffC3C8D2),
-    lineC: Colors.black12,
+    lineC: Color(0xffEAECF0),
+    lineD: Color(0xffD0D5DD),
     buttonA: Color(0xff1377AE),
     buttonB: Color(0xff32B6E9),
     buttonC: Colors.orange,
@@ -211,18 +216,18 @@ ColorTheme pagadoColorScheme = const ColorTheme(
     success: Color(0xff219653),
     error: Color(0xffED1111)
 );
-WidgetStyle pagadoWidgetStyle = WidgetStyle(
+WidgetStyle prudWidgetStyle = WidgetStyle(
   enabledBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: pagadoColorScheme.lineC),
-    borderRadius: const BorderRadius.all(Radius.circular(25.0)),
+    borderSide: BorderSide(color: prudColorTheme.lineC),
+    borderRadius: const BorderRadius.all(Radius.circular(10.0)),
   ),
   focusedBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: pagadoColorScheme.lineB),
-    borderRadius: const BorderRadius.all(Radius.circular(25.0)),
+    borderSide: BorderSide(color: prudColorTheme.iconB),
+    borderRadius: const BorderRadius.all(Radius.circular(10.0)),
   ),
   textPadding: const EdgeInsets.only(left: 16, right: 20, top: 8, bottom: 8,),
   hintStyle: TextStyle(
-    color: pagadoColorScheme.textB,
+    color: prudColorTheme.textB,
     fontFamily: "Lato-Italic",
     fontSize: 18,
     fontWeight: FontWeight.w500,
@@ -231,13 +236,13 @@ WidgetStyle pagadoWidgetStyle = WidgetStyle(
     decoration: TextDecoration.none,
     fontSize: 16,
     fontWeight: FontWeight.w500,
-    color: pagadoColorScheme.textA
+    color: prudColorTheme.textA
   ),
   logoStyle: TextStyle(
     fontFamily: "Qhinanttika",
     fontWeight: FontWeight.w600,
     fontSize: 30,
-    color: pagadoColorScheme.secondary,
+    color: prudColorTheme.secondary,
     decoration: TextDecoration.none,
     shadows: [
       Shadow(
@@ -253,4 +258,40 @@ WidgetStyle pagadoWidgetStyle = WidgetStyle(
     fontFamily: "Lato-Italic",
     decoration: TextDecoration.none,
   ),
+);
+
+PrudSpacer spacer = const PrudSpacer(
+  height: SizedBox(height: 10),
+  width: SizedBox(width: 10),
+);
+
+PrudSpacer mediumSpacer = const PrudSpacer(
+  height: SizedBox(height: 30),
+  width: SizedBox(width: 30),
+);
+
+PrudSpacer largeSpacer = const PrudSpacer(
+  height: SizedBox(height: 100),
+  width: SizedBox(width: 100),
+);
+
+PrudSpacer xLargeSpacer = const PrudSpacer(
+  height: SizedBox(height: 200),
+  width: SizedBox(width: 200),
+);
+
+InputDecoration getDeco(String label, {
+  Widget suffixIcon = const SizedBox(),
+  bool filled = false,
+  String hintText = '',
+}) => InputDecoration(
+  labelText: label,
+  filled: filled,
+  suffixIcon: suffixIcon,
+  fillColor: prudColorTheme.bgC,
+  hintText: hintText,
+  labelStyle: tabData.nRStyle,
+  enabledBorder: prudWidgetStyle.enabledBorder,
+  focusedBorder: prudWidgetStyle.focusedBorder,
+  border: prudWidgetStyle.enabledBorder
 );

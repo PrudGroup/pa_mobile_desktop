@@ -129,3 +129,10 @@ class PushMessage{
 
   PushMessage(this.msg, this.notice);
 }
+
+class PrudSpacer{
+  final SizedBox height;
+  final SizedBox width;
+
+  const PrudSpacer({required this.height, required this.width});
+}

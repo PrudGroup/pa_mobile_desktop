@@ -34,7 +34,7 @@ class LoginState extends State<Login> {
         user = await myStorage.getFromStore(key: 'user');
         if(mounted) {
           setState(() {
-            existingUser.pin = user?.pin;
+            existingUser.password = user?.password;
           });
         }
       });

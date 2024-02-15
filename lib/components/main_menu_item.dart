@@ -33,7 +33,7 @@ class MainMenuItem extends StatelessWidget {
           ),
           Translate(
             text: obj.menu.title,
-            style: pagadoWidgetStyle.tabTextStyle,
+            style: prudWidgetStyle.tabTextStyle,
             align: TextAlign.center,
           ),
         ],

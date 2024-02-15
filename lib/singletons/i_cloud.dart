@@ -59,9 +59,15 @@ class ICloud extends ChangeNotifier{
     notifyListeners();
   }
 
-  changeRegisterState({required RegisterState state}) async{
+  void changeRegisterState({required RegisterState state}) async{
     registerState = state;
     await myStorage.addToStore(key: 'registerState', value: translateRegisterState(state: state));
+    notifyListeners();
+  }
+
+  void getRegisterStateFromStore() {
+    dynamic rst = myStorage.getFromStore(key: 'registerState')?? 0;
+    registerState = intToRegisterState(state: rst);
     notifyListeners();
   }
 
@@ -69,16 +75,26 @@ class ICloud extends ChangeNotifier{
     switch(state){
       case RegisterState.first: return 0;
       case RegisterState.second: return 1;
-      case RegisterState.success: return 2;
-      default: return 3;
+      case RegisterState.third: return 2;
+      case RegisterState.success: return 3;
+      default: return 4;
     }
+  }
+
+  void scrollTop(ScrollController ctrl) {
+    ctrl.animateTo(
+        0,
+        duration: const Duration(milliseconds: 500), //duration of scroll
+        curve:Curves.fastOutSlowIn //scroll type
+    );
   }
 
   RegisterState intToRegisterState({required int state}){
     switch(state){
       case 0: return RegisterState.first;
       case 1: return RegisterState.second;
-      case 2: return RegisterState.success;
+      case 2: return RegisterState.third;
+      case 3: return RegisterState.success;
       default: return RegisterState.failed;
     }
   }

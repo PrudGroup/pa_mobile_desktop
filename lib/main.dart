@@ -2,6 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/pages/home/home.dart';
 import 'package:prudapp/pages/register/login.dart';
 import 'package:prudapp/pages/register/register.dart';
@@ -26,12 +27,12 @@ void main() async {
   }
 
   WidgetsFlutterBinding.ensureInitialized();
-  await iCloud.setFirebase();
+  // await iCloud.setFirebase();
   iCloud.checkIfLoggedIn();
   await GetStorage.init();
   await myStorage.initializeValues();
   await currencyMath.init();
-  await messenger.setAutoInitEnabled(true);
+  // await messenger.setAutoInitEnabled(true);
   myStorage.setWindowSize(size: const Size(400, 700));
 
   _setTargetPlatformForDesktop();
@@ -66,6 +67,7 @@ class MyApp extends StatelessWidget {
     await precacheImage( AssetImage(prudImages.intro1), context);
     await precacheImage( AssetImage(prudImages.intro2), context);
     await precacheImage( AssetImage(prudImages.intro3), context);
+    await precacheImage( AssetImage(prudImages.bg), context);
     await precacheImage( AssetImage(prudImages.screen), context);
     await precacheImage( AssetImage(prudImages.user), context);
     await precacheImage( AssetImage(prudImages.err), context);
@@ -98,13 +100,13 @@ class MyApp extends StatelessWidget {
                       color: Colors.white,
                       image: DecorationImage(
                         image: AssetImage(prudImages.screen),
-                        fit: BoxFit.contain,
+                        fit: BoxFit.cover,
                       )),
                     child: Padding(
                       padding: const EdgeInsets.only(top: 400.0),
                       child: SpinKitFadingCircle(
                         size: 40.0,
-                        color: prudTheme.colorScheme.onSurface,
+                        color: prudColorTheme.bgA,
                       ),
                     ),
                   ),
