@@ -159,7 +159,7 @@ class TabData extends ChangeNotifier {
         .replaceAll(RegExp(r'(_|-)+'), ' ');
   }
 
-  getFormattedNumber(int nu){
+  getFormattedNumber(dynamic nu){
     return NumberFormat.compactCurrency(decimalDigits: 0, symbol: '').format(nu);
   }
 
@@ -172,7 +172,7 @@ class TabData extends ChangeNotifier {
           children: [
             Image.asset(
               prudImages.prudIcon,
-              width: 180,
+              width: 100,
               fit: BoxFit.contain,
             ),
             const SizedBox(height: 20,),

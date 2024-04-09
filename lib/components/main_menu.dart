@@ -19,19 +19,33 @@ class MainMenuItemObject{
 class MainMenu extends StatelessWidget {
   final List<Menu> menus;
   final Color bgColor;
+  final bool useWrap;
 
   const MainMenu({
     super.key,
     required this.menus,
-    this.bgColor = Colors.transparent
+    this.bgColor = Colors.transparent,
+    this.useWrap = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
+    return useWrap? Wrap(
+      direction: Axis.horizontal,
+      alignment: WrapAlignment.spaceBetween,
+      runAlignment: WrapAlignment.start,
+      children: menus.map((menu) => MainMenuItem(
+        obj: MainMenuItemObject(
+          menu: menu,
+          bgColor: bgColor
+        ),
+      )).toList(),
+    )
+        :
+    GridView.builder(
       itemCount: menus.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
+        crossAxisCount: 4,
         mainAxisSpacing: 10.0,
       ),
       itemBuilder: (BuildContext ctx, index){

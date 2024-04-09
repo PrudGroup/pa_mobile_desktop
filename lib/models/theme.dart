@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/button/gf_button.dart';
+import 'package:getwidget/getwidget.dart';
 import 'package:getwidget/shape/gf_button_shape.dart';
 import 'package:prudapp/models/shared_classes.dart';
 
@@ -17,6 +18,7 @@ class ColorTheme {
   final Color textA;
   final Color textB;
   final Color textC;
+  final Color textD;
   final Color textHeader;
   final Color iconA;
   final Color iconB;
@@ -46,6 +48,7 @@ class ColorTheme {
     required this.textA,
     required this.textB,
     required this.textC,
+    required this.textD,
     required this.textHeader,
     required this.iconA,
     required this.iconB,
@@ -70,6 +73,7 @@ class ColorTheme {
 class WidgetStyle{
   final OutlineInputBorder enabledBorder;
   final OutlineInputBorder focusedBorder;
+  final OutlinedBorder choiceChipShape;
   final TextStyle hintStyle;
   final TextStyle typedTextStyle;
   final TextStyle logoStyle;
@@ -100,6 +104,7 @@ class WidgetStyle{
     required this.typedTextStyle,
     required this.logoStyle,
     required this.tabTextStyle,
+    required this.choiceChipShape,
   }){
     inputDeco = InputDecoration(
       filled: true,
@@ -129,16 +134,27 @@ class WidgetStyle{
     );
   }
 
-  Widget getLongButton({required Function onPressed, required String text, bool makeLight = false}){
-    Color btnColor = makeLight? prudColorTheme.buttonD : prudColorTheme.secondary;
+  Widget getLongButton({
+    required Function onPressed,
+    required String text,
+    bool makeLight = false,
+    int shape = 0,
+  }){
+    Color btnColor = makeLight? prudColorTheme.buttonD : prudColorTheme.primary;
     Color lightColor = btnColor.withOpacity(0.7);
-    Color textColor = makeLight? prudColorTheme.secondary : prudColorTheme.textC;
+    Color textColor = makeLight? prudColorTheme.error : prudColorTheme.textC;
+    GFButtonShape btShape = GFButtonShape.pills;
+    switch(shape){
+      case 0: btShape = GFButtonShape.pills;
+      case 1: btShape = GFButtonShape.standard;
+      default: btShape = GFButtonShape.square;
+    }
     return GFButton(
       onPressed: () => onPressed(),
-      shape: GFButtonShape.pills,
+      shape: btShape,
       size: btnSize,
       color: btnColor,
-      blockButton: true,
+      // blockButton: true,
       fullWidthButton: true,
       splashColor: lightColor,
       highlightColor: lightColor,
@@ -151,10 +167,36 @@ class WidgetStyle{
     );
   }
 
-  Widget getShortButton({required Function onPressed, required String text, bool makeLight = false}){
-    Color btnColor = makeLight? prudColorTheme.buttonD : prudColorTheme.secondary;
+  Widget getIconButton({
+    required Function onPressed,
+    String? image,
+    IconData? icon,
+    bool isIcon = false,
+    bool makeLight = false,
+  }){
+    Color btnColor = makeLight? prudColorTheme.buttonD : prudColorTheme.primary;
     Color lightColor = btnColor.withOpacity(0.7);
-    Color textColor = makeLight? prudColorTheme.secondary : prudColorTheme.textC;
+    Color textColor = makeLight? prudColorTheme.error : prudColorTheme.textC;
+    return InkWell(
+      onTap: () => onPressed(),
+      splashColor: lightColor,
+      highlightColor: lightColor,
+      hoverColor: lightColor,
+      child: Container(
+        padding: const EdgeInsets.all(5),
+        color: btnColor,
+        child: Center(
+          child: isIcon? Icon(icon, color: textColor, size: 30,)
+              : Image.asset(image!, color: textColor, width: 30, height: 30),
+        ),
+      ),
+    );
+  }
+
+  Widget getShortButton({required Function onPressed, required String text, bool makeLight = false}){
+    Color btnColor = makeLight? prudColorTheme.buttonD : prudColorTheme.primary;
+    Color lightColor = btnColor.withOpacity(0.7);
+    Color textColor = makeLight? prudColorTheme.error : prudColorTheme.textC;
     return GFButton(
       onPressed: () => onPressed(),
       shape: GFButtonShape.pills,
@@ -188,7 +230,7 @@ Widget getTextButton({required String title, required Function onPressed, Color 
 }
 
 ColorTheme prudColorTheme = const ColorTheme(
-    primary: Color(0xffff6302),
+    primary: Color(0xffff0000),
     secondary: Color(0xff127d0c),
     bgA: Color(0xffFFFFFF),
     bgB: Color(0xffe4e1e6),
@@ -198,6 +240,7 @@ ColorTheme prudColorTheme = const ColorTheme(
     textA: Color(0xff292929),
     textB: Color(0xff595757),
     textC: Color(0xffFFFFFF),
+    textD: Color(0xfff76a6a),
     textHeader: Color(0xffFEBF60),
     iconA: Color(0xff38106A),
     iconB: Color(0xffCE1567),
@@ -217,6 +260,10 @@ ColorTheme prudColorTheme = const ColorTheme(
     error: Color(0xffED1111)
 );
 WidgetStyle prudWidgetStyle = WidgetStyle(
+  choiceChipShape: RoundedRectangleBorder(
+    side: BorderSide(color: prudColorTheme.bgD),
+    borderRadius: BorderRadius.circular(10)
+  ),
   enabledBorder: OutlineInputBorder(
     borderSide: BorderSide(color: prudColorTheme.lineC),
     borderRadius: const BorderRadius.all(Radius.circular(10.0)),

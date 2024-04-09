@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/pages/settings/policy.dart';
 import 'package:prudapp/pages/settings/settings.dart';
+import 'package:prudapp/pages/shippers/shippers.dart';
+import 'package:prudapp/pages/shorteners/shortener.dart';
+import 'package:prudapp/pages/switzstores/switz_stores.dart';
+import 'package:prudapp/pages/viewsparks/view_spark.dart';
 
 import '../../components/side_menu_item.dart';
 import '../../models/images.dart';
+import '../ads/ads.dart';
 import '../settings/legal.dart';
 import '../support/support.dart';
 
@@ -25,13 +30,14 @@ class HomeDrawerState extends State<HomeDrawer> {
         child: ListView(
           children: [
             Container(
-              width: 200.0,
-              margin: const EdgeInsets.only(
-                top: 24.0,
-                bottom: 64.0,
+              constraints: const BoxConstraints(
+                maxHeight: 120.0,
               ),
+              margin: const EdgeInsets.symmetric(horizontal: 40),
               child: Image.asset(
-                prudImages.prudIcon,
+                prudImages.logo,
+                width: 100.0,
+                fit: BoxFit.contain
               ),
             ),
             Divider(
@@ -40,6 +46,36 @@ class HomeDrawerState extends State<HomeDrawer> {
               indent: 10.0,
               endIndent: 10.0,
               color: prudColorTheme.lineA
+            ),
+            SideMenuItem(
+              text: "Ads & Promotions",
+              page: const Ads(),
+              isIcon: false,
+              image: prudImages.videoAd,
+            ),
+            SideMenuItem(
+              text: "Views & Audience",
+              page: const ViewSpark(),
+              isIcon: false,
+              image: prudImages.watchVideo,
+            ),
+            SideMenuItem(
+              text: "Switz Stores",
+              page: const SwitzStores(),
+              isIcon: false,
+              image: prudImages.stores,
+            ),
+            SideMenuItem(
+              text: "Shortener",
+              page: const Shortener(),
+              isIcon: false,
+              image: prudImages.shortener,
+            ),
+            SideMenuItem(
+              text: "Shippers & Delivery",
+              page: const Shippers(),
+              isIcon: false,
+              image: prudImages.shipper,
             ),
             SideMenuItem(
               text: "Terms & Conditions",

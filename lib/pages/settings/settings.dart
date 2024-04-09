@@ -2,6 +2,7 @@ import 'package:prudapp/models/locale.dart';
 import 'package:flutter/material.dart';
 
 import '../../components/translate.dart';
+import '../../components/work_in_progress.dart';
 import '../../singletons/shared_local_storage.dart';
 import '../../singletons/tab_data.dart';
 
@@ -55,10 +56,8 @@ class _SettingsState extends State<Settings> {
         ),
         actions: const [
         ],
-        //backgroundColor: pagadoTheme.primaryColor,
-        //foregroundColor: pagadoTheme.colorScheme.background,
       ),
-      body: Container(),
+      body: const WorkInProgress(),
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +10,8 @@ import 'package:translator/translator.dart';
 import 'package:timeago/timeago.dart' as time_ago;
 import 'package:get_storage/get_storage.dart';
 
+import '../models/user.dart';
+
 
 
 class MyStorage extends ChangeNotifier {
@@ -16,6 +20,7 @@ class MyStorage extends ChangeNotifier {
 
   GetStorage lStore = GetStorage();
   bool hasInitialized = false;
+  User? user;
   var alertStyle = AlertStyle(
       animationType: AnimationType.fromTop,
       isCloseButton: true,
@@ -51,7 +56,8 @@ class MyStorage extends ChangeNotifier {
 
   Future<void> initializeValues() async {
     try{
-
+      var storedUser = myStorage.getFromStore(key: 'user');
+      user = storedUser == null? null : User.fromJson(jsonDecode(storedUser));
       hasInitialized = true;
       notifyListeners();
     }catch (ex) {

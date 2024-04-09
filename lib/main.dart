@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,12 +13,13 @@ import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:get_storage/get_storage.dart';
 
+import 'constants.dart';
 import 'models/images.dart';
 
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await iCloud.setFirebase();
+  await iCloud.setFirebase(Constants.fireApiKey, Constants.fireAppID, Constants.fireMessageID);
   iCloud.addPushMessages(message);
 }
 
@@ -27,12 +29,12 @@ void main() async {
   }
 
   WidgetsFlutterBinding.ensureInitialized();
-  // await iCloud.setFirebase();
-  iCloud.checkIfLoggedIn();
+  await iCloud.setFirebase(Constants.fireApiKey, Constants.fireAppID, Constants.fireMessageID);
+  iCloud.setDioHeaders();
   await GetStorage.init();
   await myStorage.initializeValues();
   await currencyMath.init();
-  // await messenger.setAutoInitEnabled(true);
+  await messenger.setAutoInitEnabled(true);
   myStorage.setWindowSize(size: const Size(400, 700));
 
   _setTargetPlatformForDesktop();
@@ -89,7 +91,7 @@ class MyApp extends StatelessWidget {
           case ConnectionState.waiting:
             {
               return MaterialApp(
-                title: 'PrudApp',
+                title: 'Prudapp',
                 theme: prudTheme,
                 home: Scaffold(
                   resizeToAvoidBottomInset: false,
@@ -118,9 +120,9 @@ class MyApp extends StatelessWidget {
             {
               bool isNew = snapshot.data?? false;
               return MaterialApp(
-                title: 'PrudApp',
+                title: 'Prudapp',
                 theme: prudTheme,
-                home: isNew?  const Register() :   MyHomePage(title: "PrudApp"),
+                home: isNew?  const Register() :   MyHomePage(title: "Prudapp"),
                 debugShowCheckedModeBanner: false,
               );
             }

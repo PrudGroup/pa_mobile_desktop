@@ -8,10 +8,11 @@ import 'package:country_state_city/country_state_city.dart' as csc;
 import '../models/theme.dart';
 
 class CountryPicker extends StatefulWidget {
+  final String? selected;
   final List<String>? countries;
   final Function(mc.Country) onChange;
 
-  const CountryPicker({super.key, this.countries, required this.onChange});
+  const CountryPicker({super.key, this.selected, this.countries, required this.onChange});
 
   @override
   CountryPickerState createState() => CountryPickerState();
@@ -72,7 +73,7 @@ class CountryPickerState extends State<CountryPicker> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                selectedCountry?.name?? "Select Country",
+                widget.selected?? selectedCountry?.name?? "Select Country",
                 style: prudWidgetStyle.tabTextStyle.copyWith(
                     fontSize: 16,
                     color: prudColorTheme.textB

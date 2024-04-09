@@ -4,8 +4,10 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:prudapp/components/prud_panel.dart';
 
 import '../models/theme.dart';
+import 'modals/city_modal_sheet.dart';
 
 class CityPicker extends StatefulWidget {
+  final String? selected;
   final List<City> cities;
   final Function(City) onChange;
 
@@ -13,6 +15,7 @@ class CityPicker extends StatefulWidget {
     super.key,
     required this.cities,
     required this.onChange,
+    this.selected
   });
 
   @override
@@ -27,7 +30,7 @@ class CityPickerState extends State<CityPicker> {
     topRight: Radius.circular(30),
   );
 
-  void showStateDialog(double height){
+  void showCityDialog(double height){
     showModalBottomSheet(
       context: context,
       backgroundColor: prudColorTheme.bgA,
@@ -37,21 +40,21 @@ class CityPickerState extends State<CityPicker> {
         borderRadius: rad,
       ),
       builder: (BuildContext context) {
-        return StateModalSheet(
-          states: widget.states,
-          onChange: (ms.State? selected) {
+        return CityModalSheet(
+          cities: widget.cities,
+          onChange: (City? selected) {
             try{
               if(mounted) setState(() => loading = true);
               Future.delayed(Duration.zero, () async {
                 if(selected != null) {
-                  if(mounted) setState(() => selectedState = selected);
+                  if(mounted) setState(() => selectedCity = selected);
                   await widget.onChange(selected);
                 }
                 if(mounted) setState(() => loading = false);
               });
             }catch(ex){
               if(mounted) setState(() => loading = false);
-              debugPrint("State Picker Error: $ex");
+              debugPrint("CityPicker Error: $ex");
             }
           },
           radius: rad,
@@ -66,14 +69,14 @@ class CityPickerState extends State<CityPicker> {
     Size screen = MediaQuery.of(context).size;
     double modalHeight = screen.height * 0.65;
     return InkWell(
-      onTap: () => showStateDialog(modalHeight),
+      onTap: () => showCityDialog(modalHeight),
       child: PrudPanel(
           title: "Select City",
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                selectedState?.name?? "Select City",
+                widget.selected?? selectedCity?.name?? "Select City",
                 style: prudWidgetStyle.tabTextStyle.copyWith(
                     fontSize: 16,
                     color: prudColorTheme.textB

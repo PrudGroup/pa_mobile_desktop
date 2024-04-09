@@ -4,23 +4,34 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
+import 'package:getwidget/getwidget.dart';
 import 'package:prudapp/components/main_menu.dart';
+import 'package:prudapp/components/prud_showroom.dart';
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/pages/influencers/influencers.dart';
+import 'package:prudapp/pages/shippers/shippers.dart';
+import 'package:prudapp/pages/shorteners/shortener.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:rate_my_app/rate_my_app.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 import 'package:flutter_fgbg/flutter_fgbg.dart';
 
+import '../../components/prud_container.dart';
 import '../../models/images.dart';
 import '../../singletons/shared_local_storage.dart';
+import '../account/my_account.dart';
+import '../ads/ads.dart';
+import '../settings/settings.dart';
+import '../switzstores/switz_stores.dart';
+import '../viewsparks/view_spark.dart';
 import 'home_drawer.dart';
 
 
 // ignore: must_be_immutable
 class MyHomePage extends StatefulWidget {
-  MyHomePage({super.key, required this.title});
-
   String title;
+
+  MyHomePage({super.key, required this.title});
 
   @override
   MyHomePageState createState() => MyHomePageState();
@@ -29,7 +40,6 @@ class MyHomePage extends StatefulWidget {
 class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
   final _advDrawerController = AdvancedDrawerController();
-  String tabTitle = "Prud";
   bool hasCartContent = false;
   final MethodChannel platform =
   const MethodChannel('reactivestreams.io/resourceResolver');
@@ -42,17 +52,196 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
   );
   StreamSubscription? subscription;
   StreamSubscription? messageStream;
-  final GlobalKey _imageKey = GlobalKey();
   double imageHeight = 0;
-  List<Menu> menus = [
+  List<Widget> carousels = [
+    Image.asset(prudImages.front1),
+    Image.asset(prudImages.front2),
+    Image.asset(prudImages.front3),
+    Image.asset(prudImages.front4),
+    Image.asset(prudImages.front5),
   ];
+  List<Menu> menus = [
+    Menu(
+      title: 'Switz Stores',
+      page: const SwitzStores(),
+      icon: prudImages.stores
+    ),
+    Menu(
+      title: 'View Sparks',
+      page: const ViewSpark(),
+      icon: prudImages.watchVideo
+    ),
+    Menu(
+      title: 'Influencers',
+      page: const Influencers(),
+      icon: prudImages.influencerFemale
+    ),
+    Menu(
+      title: 'Ads & Promotions',
+      page: const Ads(),
+      icon: prudImages.videoAd
+    ),
+    Menu(
+      title: 'Shippers',
+      page: const Shippers(),
+      icon: prudImages.shipper
+    ),
+    Menu(
+      title: 'Url Shortener',
+      page: const Shortener(),
+      icon: prudImages.shortener
+    ),
+    Menu(
+      title: 'My Account',
+      page: const MyAccount(),
+      icon: prudImages.account
+    ),
+    Menu(
+      title: 'Settings',
+      page: const Settings(),
+      icon: prudImages.settings
+    ),
+  ];
+  List<Widget> showroom = [];
 
-  MyHomePageState({this.tabTitle ="Prud"});
 
   @override
   void initState(){
+    carousels.shuffle();
+    showroom = [
+      InkWell(
+        onTap: () => iCloud.goto(context, const ViewSpark()),
+        child: PrudContainer(
+            hasPadding: false,
+            child: Image.asset(
+                prudImages.front7
+            )
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const ViewSpark()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          title: "Get Views/Sparks",
+          child: Image.asset(
+              prudImages.front4
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const Ads()),
+        child: PrudContainer(
+            hasPadding: false,
+            child: Image.asset(
+                prudImages.front1
+            )
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const Ads()),
+        child: PrudContainer(
+          hasPadding: false,
+          child: Image.asset(
+            prudImages.front6
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const SwitzStores()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          title: "Best Marketplace",
+          child: Image.asset(
+            prudImages.front13
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const SwitzStores()),
+        child: PrudContainer(
+          hasPadding: false,
+          child: Image.asset(
+            prudImages.front12
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const Shippers()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          title: "Shippers",
+          child: Image.asset(
+            prudImages.front15
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const SwitzStores()),
+        child: PrudContainer(
+          hasPadding: false,
+          child: Image.asset(
+            prudImages.front10
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const SwitzStores()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          title: "Switz Stores",
+          child: Image.asset(
+            prudImages.front2
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const SwitzStores()),
+        child: PrudContainer(
+          hasPadding: false,
+          child: Image.asset(
+            prudImages.front11
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const Shippers()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          titleAlignment: MainAxisAlignment.end,
+          title: "Shipping Easily",
+          child: Image.asset(
+            prudImages.front14
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const SwitzStores()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          title: "Shopping",
+          child: Image.asset(
+            prudImages.front9
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const SwitzStores()),
+        child: PrudContainer(
+          hasPadding: false,
+          child: Image.asset(
+            prudImages.front8
+          ),
+        ),
+      ),
+    ];
+    loginAutomatically();
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => getSizeAndPosition());
     _rateMyApp.init();
     subscription = FGBGEvents.stream.listen((event) {
       if(event == FGBGType.background) {
@@ -63,9 +252,8 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
     });
   }
 
-  getSizeAndPosition() {
-    imageHeight = _imageKey.currentContext!.size!.height;
-    setState(() {});
+  void loginAutomatically(){
+    iCloud.checkIfAffLoggedIn("$prudApiUrl/affiliates/auth/login");
   }
 
   void listenForMessages() async {
@@ -117,7 +305,7 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
       child: Scaffold(
         key: _drawerKey,
         resizeToAvoidBottomInset: false,
-        backgroundColor: prudColorTheme.bgA,
+        backgroundColor: prudColorTheme.bgC,
         appBar: AppBar(
           elevation: 0,
           leading: Center(
@@ -140,33 +328,50 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
               onPressed: _handleDrawer
             ),
           ),
-          title: Center(
-            child: Text('Prud', style: tabData.titleStyle, textAlign: TextAlign.center,),
+          title: Text(
+            widget.title,
+            style: tabData.titleStyle,
+            textAlign: TextAlign.center,
           ),
           backgroundColor: prudTheme.primaryColor,
           foregroundColor: prudTheme.colorScheme.background,
         ),
-        body: Wrap(
-          direction: Axis.horizontal,
-          children: [
-            SizedBox(
-              key: _imageKey,
-              width: width,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Image(
-                  image: AssetImage(prudImages.err),
-                ),
+        body: SizedBox(
+          height: height,
+          width: width,
+          child: SingleChildScrollView(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                children: [
+                  PrudContainer(
+                    hasPadding: false,
+                    child: GFCarousel(
+                        height: 137.0,
+                        autoPlay: true,
+                        aspectRatio: double.maxFinite,
+                        viewportFraction: 1.0,
+                        enlargeMainPage: true,
+                        enableInfiniteScroll: true,
+                        pauseAutoPlayOnTouch: const Duration(seconds: 10),
+                        autoPlayInterval: const Duration(seconds: 5),
+                        items: carousels
+                    ),
+                  ),
+                  spacer.height,
+                  PrudContainer(
+                    hasPadding: true,
+                    child: MainMenu(
+                      menus: menus,
+                      bgColor: prudColorTheme.bgC,
+                      useWrap: true,
+                    )
+                  ),
+                  spacer.height,
+                  PrudShowroom(items: showroom),
+                  largeSpacer.height,
+                ],
               )
-            ),
-            SizedBox(
-              width: width,
-              height: height - imageHeight,
-              child: MainMenu(
-                menus: menus,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -30,7 +30,10 @@ class SideMenuItem extends StatelessWidget {
       ),
       title: Translate(
         text: text,
-        style: prudWidgetStyle.typedTextStyle,
+        style: prudWidgetStyle.tabTextStyle.copyWith(
+          color: prudColorTheme.primary,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }

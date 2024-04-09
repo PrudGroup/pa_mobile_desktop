@@ -17,24 +17,31 @@ class MainMenuItem extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 90.0,
-            height: 100.0,
+            width: 50.0,
+            height: 50.0,
             decoration: BoxDecoration(
               color: obj.bgColor,
-              // border: Border.all(color: prudColorScheme.lineB,width: 5,),
-              // borderRadius: BorderRadius.circular(20.0),
+              border: Border.all(color: prudColorTheme.bgD,width: 3,),
+              borderRadius: BorderRadius.circular(20.0),
             ),
             child: Center(
               child: Image(
                 image: AssetImage(obj.menu.icon),
-                width: 80.0,
+                width: 30.0,
+                color: prudColorTheme.primary
               ),
             ),
           ),
-          Translate(
-            text: obj.menu.title,
-            style: prudWidgetStyle.tabTextStyle,
-            align: TextAlign.center,
+          SizedBox(
+            width: 80.0,
+            child: Translate(
+              text: obj.menu.title,
+              style: prudWidgetStyle.tabTextStyle.copyWith(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+              align: TextAlign.center,
+            )
           ),
         ],
       ),

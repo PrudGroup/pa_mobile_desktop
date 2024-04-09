@@ -7,10 +7,11 @@ import 'package:prudapp/components/modals/state_modal_sheet.dart';
 import '../models/theme.dart';
 
 class StatePicker extends StatefulWidget {
+  final String? selected;
   final List<ms.State> states;
   final Function(ms.State) onChange;
 
-  const StatePicker({super.key, required this.states, required this.onChange});
+  const StatePicker({super.key, required this.states, required this.onChange, this.selected});
 
   @override
   StatePickerState createState() => StatePickerState();
@@ -71,7 +72,7 @@ class StatePickerState extends State<StatePicker> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                selectedState?.name?? "Select State/Province",
+                widget.selected?? selectedState?.name?? "Select State/Province",
                 style: prudWidgetStyle.tabTextStyle.copyWith(
                     fontSize: 16,
                     color: prudColorTheme.textB

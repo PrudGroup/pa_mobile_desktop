@@ -14,7 +14,7 @@ class NoNetworkComponent extends StatelessWidget {
         children: [
           Image.asset(
             prudImages.prudIcon,
-            width: 300,
+            width: 100,
             fit: BoxFit.cover,
           ),
           const SizedBox(height: 20,),

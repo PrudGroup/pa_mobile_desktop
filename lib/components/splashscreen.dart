@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intro_slider/intro_slider.dart';
 import 'package:prudapp/components/page_transitions/slideright.dart';
 import 'package:prudapp/models/images.dart';
+import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/pages/home/home.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 
@@ -82,8 +83,8 @@ class SplashScreenState extends State<SplashScreen> {
     await myStorage.addToStore(key: 'isNew', value: false);
     if(context.mounted){
       Navigator.push(
-          context,
-          SlideRightRoute(page: MyHomePage(title: 'Prud'))
+        context,
+        SlideRightRoute(page: MyHomePage(title: 'PrudApp'))
       );
     }
   }
@@ -91,17 +92,17 @@ class SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: prudTheme.colorScheme.background,
+      backgroundColor: prudColorTheme.bgA,
       body: IntroSlider(
         // key: UniqueKey(),
         listContentConfig: listContentConfig,
-        backgroundColorAllTabs: prudTheme.primaryColor,
+        backgroundColorAllTabs: prudColorTheme.bgA,
         onDonePress: goToHome,
         onSkipPress: goToHome,
         indicatorConfig: IndicatorConfig(
           isShowIndicator: true,
           colorIndicator: color,
-          colorActiveIndicator: prudTheme.primaryColor.withOpacity(0.5),
+          colorActiveIndicator: prudTheme.primaryColor,
         ),
         skipButtonStyle: buttonStyle,
         nextButtonStyle: buttonStyle,

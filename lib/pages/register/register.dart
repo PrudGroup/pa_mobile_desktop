@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:country_state_city/models/city.dart';
 import 'package:country_state_city/models/country.dart' as mc;
 import 'package:country_state_city/models/state.dart' as ms;
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -22,6 +23,8 @@ import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
+import '../../components/city_picker.dart';
+import '../../components/splashscreen.dart';
 import '../../components/translate.dart';
 import '../../models/images.dart';
 import '../../models/theme.dart';
@@ -53,14 +56,11 @@ class RegisteredState extends State<Register> {
   Color primaryShade = prudColorTheme.primary.withOpacity(0.5);
   bool signingIn = false;
   bool isRegistering = true;
-  String errorMsg = "Network Issues!";
+  String? errorMsg;
   final _formKey = GlobalKey<FormBuilderState>();
   final _formKey1 = GlobalKey<FormBuilderState>();
   PhoneNumber pNumber = PhoneNumber(isoCode: "NG", phoneNumber: '', dialCode: '+234');
   TextEditingController phoneTextController = TextEditingController();
-  bool phoneVerified = false;
-  String smsCode = "";
-  int? smsSendToken;
   bool loadingStates = false;
   bool loadingCities = false;
 
@@ -71,8 +71,6 @@ class RegisteredState extends State<Register> {
       iCloud.scrollTop(scrollCtrl);
     }
   }
-
-  void showCityDialog(){}
 
   void showTownDialog(){}
 
@@ -99,27 +97,27 @@ class RegisteredState extends State<Register> {
           });
           List<ms.State> dStates = await csc.getStatesOfCountry('NG');
           List<City> dCities = await csc.getCountryCities('NG');
-          PhoneNumber? phe = await PhoneNumber.getRegionInfoFromPhoneNumber(user?.phoneNo?? '');
-          debugPrint("phone: ${phe.dialCode}: ${phe.isoCode}: ${phe.phoneNumber}: ${phe.props}");
+          PhoneNumber? phe;
+          if(user?.phoneNo != null) phe = await PhoneNumber.getRegionInfoFromPhoneNumber(user?.phoneNo?? '');
           setState(() {
-              loadingCities = false;
-              loadingStates = false;
-              countries = dCountries ;
-              presentState = iCloud.registerState;
-              newUser.email = user?.email?? '';
-              newUser.fullName = user?.fullName?? '';
-              newUser.country = user?.country;
-              newUser.phoneNo = user?.phoneNo?? '';
-              newUser.password = user?.password?? '';
-              newUser.state = user?.state;
-              newUser.city = user?.city;
-              newUser.town = user?.town;
-              if(newUser.phoneNo != null) {
-                pNumber = phe;
-                // phoneTextController.text = newUser.phoneNo!;
-              }
-              states = dStates;
-              cities = dCities;
+            loadingCities = false;
+            loadingStates = false;
+            countries = dCountries ;
+            presentState = iCloud.registerState;
+            newUser.email = user?.email?? '';
+            newUser.fullName = user?.fullName?? '';
+            newUser.country = user?.country;
+            newUser.phoneNo = user?.phoneNo?? '';
+            newUser.password = user?.password?? '';
+            newUser.state = user?.state;
+            newUser.city = user?.city;
+            newUser.town = user?.town;
+            if(phe != null) {
+              pNumber = phe;
+              // phoneTextController.text = newUser.phoneNo!;
+            }
+            states = dStates;
+            cities = dCities;
           });
         }
         if(mounted) setState(() => loading = false);
@@ -146,19 +144,46 @@ class RegisteredState extends State<Register> {
 
   void register() async {
     try{
-      if (_formKey1.currentState!.validate()) {
+      if (newUser.city != null) {
         setState(() => loading = true);
-
-        setState(() => loading = false);
-        iCloud.changeRegisterState(state: phoneVerified? RegisterState.success : RegisterState.third);
+        await saveUserLocally();
+        String apiUrl = "$apiEndPoint/affiliates/";
+        Response res = await iCloud.addAffiliate(apiUrl, newUser);
+        if(res.statusCode == 201){
+          debugPrint("user_id: ${res.data["affiliate_id"]}");
+          newUser.id = res.data["affiliate_id"];
+          await saveUserLocally();
+          iCloud.changeRegisterState(state: RegisterState.success);
+        }else{
+          if(mounted){
+            setState(() {
+              errorMsg = "${res.statusCode} ${res.statusMessage}: ${res.data}";
+            });
+          }
+          iCloud.changeRegisterState(state: RegisterState.failed);
+        }
       }
       setState(() => loading = false);
-    }catch(ex){
+    }on DioException catch(ex){
+      debugPrint("Register Error: ${ex.message}: ${ex.error}");
+      if(mounted) {
+        setState(() {
+          errorMsg = "${ex.message}: ${ex.error}";
+          loading = false;
+        });
+        iCloud.changeRegisterState(state: RegisterState.failed);
+      }
+    }catch (ex){
+      await saveUserLocally();
       debugPrint("Register Error: $ex");
-      setState(() => loading = false);
-      iCloud.showSnackBar("$ex", context, title: "Register", type: 3);
+      if(mounted) {
+        setState(() {
+          errorMsg = "$ex";
+          loading = false;
+        });
+        iCloud.changeRegisterState(state: RegisterState.failed);
+      }
     }
-
   }
 
   void _goBack(){
@@ -171,34 +196,67 @@ class RegisteredState extends State<Register> {
     }
   }
 
-  Future<void> saveUserLocally() async{
-    if(isLoggedIn) {
-      messenger.getToken().then((String? token) async{
-        if(token != null){
-          newUser.deviceRegToken = token;
+  void displayIntro(){
+    iCloud.goto(context, const SplashScreen());
+  }
+
+  Future<void> checkIfEmailVerified() async {
+    try{
+      if (newUser.city != null) {
+        setState(() => loading = true);
+        String apiUrl = "$apiEndPoint/affiliates/${newUser.id}/verify/email";
+        Response res = await iCloud.verifyAffiliateEmail(apiUrl);
+        if(res.statusCode == 200){
+          bool verified = res.data["verified"];
+          if(verified && mounted){
+            iCloud.goto(context, const SplashScreen());
+          }else{
+            if(mounted){
+              setState(() {
+                errorMsg = "You are not yet verified";
+                loading = false;
+              });
+            }
+          }
+        }else{
+          if(mounted){
+            setState(() {
+              errorMsg = "${res.statusMessage}, ${res.data}";
+            });
+          }
+          iCloud.changeRegisterState(state: RegisterState.failed);
         }
-        await messenger.subscribeToTopic(newUser.country?? 'Nigeria');
-        await messenger.subscribeToTopic('all');
-      }).catchError((ex){
-        iCloud.showSnackBar(
-          "$ex",
-          context,
-          title: 'Messenger',
-          type: 3
-        );
-      });
-      if(newUser.password != null) {
-        newUser.password = tabData.encryptString(newUser.password!);
-        debugPrint("New Password: ${newUser.password}");
-        myStorage.addToStore(key: "password", value: newUser.password);
       }
-      newUser.password = '';
-      myStorage.addToStore(key: "user", value: jsonEncode(newUser));
+      setState(() => loading = false);
+    }catch(ex){
+      debugPrint("Register Error: $ex");
+      if(mounted) {
+        setState(() {
+          errorMsg = "$ex";
+          loading = false;
+        });
+      }
     }
   }
 
-  void _signUp(){
-    setState(() => loading = true);
+  Future<void> saveUserLocally() async{
+    debugPrint("token: AB");
+    await messenger.getToken().then((String? token) async{
+      debugPrint("token: $token");
+      if(token != null){
+        debugPrint("token: AC");
+        newUser.deviceRegToken = token;
+      }
+    }).catchError((ex){
+      iCloud.showSnackBar(
+        "$ex",
+        context,
+        title: 'Messenger',
+        type: 3
+      );
+    });
+    myStorage.addToStore(key: "user", value: jsonEncode(newUser));
+    debugPrint("token: BB");
   }
 
   @override
@@ -491,6 +549,7 @@ class RegisteredState extends State<Register> {
                             children: <Widget>[
                               spacer.height,
                               CountryPicker(
+                                selected: newUser.country,
                                 countries: strCountries,
                                 onChange: (mc.Country ctry) async {
                                   if(mounted) {
@@ -513,7 +572,8 @@ class RegisteredState extends State<Register> {
                                 },
                               ),
                               spacer.height,
-                              if(states.isNotEmpty && !loadingStates) StatePicker(
+                              if(newUser.country != null || (states.isNotEmpty && !loadingStates)) StatePicker(
+                                selected: newUser.state,
                                 states: states,
                                 onChange: (ms.State st) async {
                                   List<City> dCities = await csc.getStateCities(st.countryCode, st.isoCode);
@@ -523,45 +583,37 @@ class RegisteredState extends State<Register> {
                                       cities = dCities;
                                     });
                                   }
-                                  debugPrint("selected State: ${newUser.state}");
-                                  debugPrint("selected city: ${cities[0].name}");
                                 }
                               ),
                               spacer.height,
-                              GFButton(
-                                color: prudColorTheme.lineC,
-                                splashColor: prudColorTheme.lineC.withOpacity(0.7),
-                                hoverColor: prudTheme.disabledColor.withOpacity(0.7),
-                                shape: GFButtonShape.pills,
-                                hoverElevation: 0.0,
-                                fullWidthButton: true,
-                                elevation: 0.0,
-                                size: GFSize.LARGE,
-                                type: GFButtonType.outline,
-                                child: Translate(
-                                  text: "Select City: ${newUser.city}",
-                                  style: tabData.bStyle.copyWith(color: Colors.black),
-                                  align: TextAlign.left,
-                                ),
-                                onPressed: () => showCityDialog(),
+                              if(cities.isNotEmpty && !loadingCities) CityPicker(
+                                selected: newUser.city,
+                                cities: cities,
+                                onChange: (City city) async {
+                                    if(mounted) {
+                                      setState(() {
+                                        newUser.city = city.name;
+                                      });
+                                    }
+                                  }
                               ),
                               spacer.height,
-                              GFButton(
-                                color: prudColorTheme.lineC,
-                                splashColor: prudColorTheme.lineC.withOpacity(0.7),
-                                hoverColor: prudTheme.disabledColor.withOpacity(0.7),
-                                shape: GFButtonShape.pills,
-                                hoverElevation: 0.0,
-                                fullWidthButton: true,
-                                elevation: 0.0,
-                                size: GFSize.LARGE,
-                                type: GFButtonType.outline,
-                                child: Translate(
-                                  text: "Select Town: ${newUser.town}",
-                                  style: tabData.bStyle.copyWith(color: Colors.black),
-                                  align: TextAlign.left,
-                                ),
-                                onPressed: () => showTownDialog(),
+                              FormBuilderTextField(
+                                initialValue: newUser.town,
+                                name: 'town',
+                                autofocus: true,
+                                style: tabData.npStyle,
+                                keyboardType: TextInputType.streetAddress,
+                                decoration: getDeco("Town"),
+                                onChanged: (dynamic value){
+                                  setState(() {
+                                    newUser.town = value?.trim();
+                                  });
+                                },
+                                valueTransformer: (text) => num.tryParse(text!),
+                                validator: FormBuilderValidators.compose([
+                                  FormBuilderValidators.required(),
+                                ]),
                               ),
                               spacer.height,
                               Flex(
@@ -603,7 +655,7 @@ class RegisteredState extends State<Register> {
                                       type: GFButtonType.solid,
                                       child: Center(
                                         child: Translate(
-                                          text: "Next",
+                                          text: "Submit",
                                           style: tabData.bStyle,
                                         ),
                                       ),
@@ -620,13 +672,60 @@ class RegisteredState extends State<Register> {
                             presentState == RegisterState.success?
                             Column(
                               children: [
-                                spacer.height
+                                spacer.height,
+                                Translate(
+                                  text: "Welcome to PrudApp. A mail has been sent to you. Verify your mail and "
+                                      "when you are done, click below.",
+                                  style: prudWidgetStyle.tabTextStyle.copyWith(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w500,
+                                    color: prudColorTheme.textA
+                                  ),
+                                  align: TextAlign.center
+                                ),
+                                spacer.height,
+                                prudWidgetStyle.getLongButton(
+                                  onPressed: checkIfEmailVerified,
+                                  shape: 2,
+                                  text: "Email Verified"
+                                ),
+                                spacer.height,
+                                prudWidgetStyle.getLongButton(
+                                  onPressed: displayIntro,
+                                  shape: 2,
+                                  text: "Verified Later",
+                                  makeLight: true,
+                                ),
+                                spacer.height,
+                                if(errorMsg != null) Translate(
+                                  text: errorMsg!,
+                                  style: prudWidgetStyle.tabTextStyle.copyWith(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w500,
+                                    color: prudColorTheme.error
+                                  ),
+                                  align: TextAlign.center
+                                ),
                               ],
                             )
                                 :
                             Column(
                               children: [
-                                spacer.height
+                                spacer.height,
+                                if(errorMsg != null) Translate(
+                                  text: errorMsg!,
+                                  style: prudWidgetStyle.tabTextStyle.copyWith(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w500,
+                                    color: prudColorTheme.error
+                                  )
+                                ),
+                                spacer.height,
+                                prudWidgetStyle.getLongButton(
+                                  onPressed: _goBack,
+                                  shape: 2,
+                                  text: "GO BACK"
+                                )
                               ],
                             )
                         )
