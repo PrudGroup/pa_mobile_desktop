@@ -104,7 +104,8 @@ class RegisteredState extends State<Register> {
             loadingStates = false;
             countries = dCountries ;
             presentState = iCloud.registerState;
-            newUser.email = user?.email?? '';
+            newUser.id = user?.id;
+            newUser.email = user?.email;
             newUser.fullName = user?.fullName?? '';
             newUser.country = user?.country;
             newUser.phoneNo = user?.phoneNo?? '';
@@ -157,7 +158,7 @@ class RegisteredState extends State<Register> {
         }else{
           if(mounted){
             setState(() {
-              errorMsg = "${res.statusCode} ${res.statusMessage}: ${res.data}";
+              errorMsg = "${res.statusCode} Network Issues.";
             });
           }
           iCloud.changeRegisterState(state: RegisterState.failed);
@@ -168,7 +169,7 @@ class RegisteredState extends State<Register> {
       debugPrint("Register Error: ${ex.message}: ${ex.error}");
       if(mounted) {
         setState(() {
-          errorMsg = "${ex.message}: ${ex.error}";
+          errorMsg = " Network Issues: ${ex.error}";
           loading = false;
         });
         iCloud.changeRegisterState(state: RegisterState.failed);
@@ -178,7 +179,7 @@ class RegisteredState extends State<Register> {
       debugPrint("Register Error: $ex");
       if(mounted) {
         setState(() {
-          errorMsg = "$ex";
+          errorMsg = " Network Issues";
           loading = false;
         });
         iCloud.changeRegisterState(state: RegisterState.failed);
@@ -202,7 +203,7 @@ class RegisteredState extends State<Register> {
 
   Future<void> checkIfEmailVerified() async {
     try{
-      if (newUser.city != null) {
+      if (newUser.city != null && newUser.id != null) {
         setState(() => loading = true);
         String apiUrl = "$apiEndPoint/affiliates/${newUser.id}/verify/email";
         Response res = await iCloud.verifyAffiliateEmail(apiUrl);
@@ -221,7 +222,7 @@ class RegisteredState extends State<Register> {
         }else{
           if(mounted){
             setState(() {
-              errorMsg = "${res.statusMessage}, ${res.data}";
+              errorMsg = " Network Issues: ${res.data}";
             });
           }
           iCloud.changeRegisterState(state: RegisterState.failed);
@@ -232,7 +233,7 @@ class RegisteredState extends State<Register> {
       debugPrint("Register Error: $ex");
       if(mounted) {
         setState(() {
-          errorMsg = "$ex";
+          errorMsg = " Network Issues.";
           loading = false;
         });
       }
@@ -601,7 +602,6 @@ class RegisteredState extends State<Register> {
                               FormBuilderTextField(
                                 initialValue: newUser.town,
                                 name: 'town',
-                                autofocus: true,
                                 style: tabData.npStyle,
                                 keyboardType: TextInputType.streetAddress,
                                 decoration: getDeco("Town"),

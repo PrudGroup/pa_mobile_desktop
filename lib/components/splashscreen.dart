@@ -81,7 +81,7 @@ class SplashScreenState extends State<SplashScreen> {
 
   void goToHome() async {
     await myStorage.addToStore(key: 'isNew', value: false);
-    if(context.mounted){
+    if(context.mounted && mounted){
       Navigator.push(
         context,
         SlideRightRoute(page: MyHomePage(title: 'PrudApp'))

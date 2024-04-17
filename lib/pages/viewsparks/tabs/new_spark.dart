@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:country_picker/country_picker.dart';
 import 'package:country_state_city/models/city.dart';
 import 'package:dio/dio.dart';
@@ -17,11 +15,13 @@ import 'package:country_state_city/models/state.dart' as ms;
 
 import '../../../components/countries_picker.dart';
 import '../../../components/figure_display.dart';
+import '../../../components/loading_component.dart';
 import '../../../components/pay_in.dart';
 import '../../../components/prud_data_viewer.dart';
 import '../../../components/translate.dart';
 import '../../../models/spark_cost.dart';
 import '../../../models/theme.dart';
+import '../../../singletons/currency_math.dart';
 import '../../../singletons/shared_local_storage.dart';
 import '../../../singletons/tab_data.dart';
 import '../../settings/legal.dart';
@@ -63,7 +63,12 @@ class NewSparkState extends State<NewSpark> {
   String? selectedCategory = "youtube";
   String? selectedType = "all";
   String? selectedTarget = "country";
-  Spark newSpark = Spark();
+  Spark newSpark = Spark(
+    targetTowns: [],
+    targetStates: [],
+    targetCountries: [],
+    targetCities: []
+  );
   List<ms.State> allStates = [];
   List<City> stateCities = [];
   String? countryCode;
@@ -94,6 +99,7 @@ class NewSparkState extends State<NewSpark> {
         "description": newSpark.description,
         "title": newSpark.title,
       };
+      debugPrint("Headers: ${iCloud.affAuthToken}");
       Response res = await prudDio.post(sparkUrl, data: sparkDetails);
       debugPrint("Spark: $res : Spark_data: ${res.data}");
       if (res.statusCode == 200 && res.data != null && mounted) {
@@ -125,42 +131,31 @@ class NewSparkState extends State<NewSpark> {
         }
       }
     }catch(ex){
-      debugPrint("CheckPaymentStatus: $ex");
+      debugPrint("savePaymentToCloud: $ex");
     }
     return result;
   }
 
   bool validateLocations() {
     switch(newSpark.locationTarget){
-      case "country": return newSpark.targetCountries != null &&
-          newSpark.targetCountries!.isNotEmpty;
-      case "countries": return newSpark.targetCountries != null &&
-          newSpark.targetCountries!.isNotEmpty &&
-          newSpark.targetCountries!.length > 1;
-      case "state": return newSpark.targetCountries != null &&
-          newSpark.targetCountries!.isNotEmpty && newSpark.targetStates != null &&
-          newSpark.targetStates!.isNotEmpty;
-      case "states": return newSpark.targetCountries != null &&
-          newSpark.targetCountries!.isNotEmpty && newSpark.targetStates != null &&
-          newSpark.targetStates!.isNotEmpty && newSpark.targetStates!.length > 1;
-      case "city": return newSpark.targetCountries != null &&
-          newSpark.targetCountries!.isNotEmpty && newSpark.targetStates != null &&
-          newSpark.targetStates!.isNotEmpty && newSpark.targetCities != null &&
-          newSpark.targetCities!.isNotEmpty;
-      case "cities": return newSpark.targetCountries != null &&
-          newSpark.targetCountries!.isNotEmpty && newSpark.targetStates != null &&
-          newSpark.targetStates!.isNotEmpty && newSpark.targetCities != null &&
-          newSpark.targetCities!.isNotEmpty && newSpark.targetCities!.length > 1;
-      case "town": return newSpark.targetCountries != null &&
-          newSpark.targetCountries!.isNotEmpty && newSpark.targetStates != null &&
-          newSpark.targetStates!.isNotEmpty && newSpark.targetCities != null &&
-          newSpark.targetCities!.isNotEmpty && newSpark.targetTowns != null &&
-          newSpark.targetTowns!.isNotEmpty;
-      default: return newSpark.targetCountries != null &&
-          newSpark.targetCountries!.isNotEmpty && newSpark.targetStates != null &&
-          newSpark.targetStates!.isNotEmpty && newSpark.targetCities != null &&
-          newSpark.targetCities!.isNotEmpty && newSpark.targetTowns != null &&
-          newSpark.targetTowns!.isNotEmpty && newSpark.targetTowns!.length > 1;
+      case "country": return newSpark.targetCountries.isNotEmpty;
+      case "countries": return newSpark.targetCountries.isNotEmpty &&
+          newSpark.targetCountries.length > 1;
+      case "state": return newSpark.targetCountries.isNotEmpty &&
+          newSpark.targetStates.isNotEmpty;
+      case "states": return newSpark.targetCountries.isNotEmpty &&
+          newSpark.targetStates.isNotEmpty && newSpark.targetStates.length > 1;
+      case "city": return newSpark.targetCountries.isNotEmpty &&
+          newSpark.targetStates.isNotEmpty && newSpark.targetCities.isNotEmpty;
+      case "cities": return newSpark.targetCountries.isNotEmpty &&
+          newSpark.targetStates.isNotEmpty && newSpark.targetCities.isNotEmpty &&
+          newSpark.targetCities.length > 1;
+      case "town": return newSpark.targetCountries.isNotEmpty &&
+          newSpark.targetStates.isNotEmpty && newSpark.targetCities.isNotEmpty &&
+          newSpark.targetTowns.isNotEmpty;
+      default: return newSpark.targetCountries.isNotEmpty &&
+          newSpark.targetStates.isNotEmpty && newSpark.targetCities.isNotEmpty &&
+          newSpark.targetTowns.isNotEmpty && newSpark.targetTowns.length > 1;
     }
   }
 
@@ -182,7 +177,7 @@ class NewSparkState extends State<NewSpark> {
     if(widget.goToTab != null) widget.goToTab!(index);
   }
 
-  String turnListToString(List<String> arr) =>  arr.join(", ");
+  String turnListToString(List<dynamic> arr) =>  arr.join(", ");
 
   void _goBack(){
     if(mounted){
@@ -232,10 +227,10 @@ class NewSparkState extends State<NewSpark> {
 
   String _convertLocationTargetsToString(){
     List newArray = [];
-    newArray.addAll(newSpark.targetCountries!);
-    newArray.addAll(newSpark.targetStates!);
-    newArray.addAll(newSpark.targetCities!);
-    newArray.addAll(newSpark.targetTowns!);
+    newArray.addAll(newSpark.targetCountries);
+    newArray.addAll(newSpark.targetStates);
+    newArray.addAll(newSpark.targetCities);
+    newArray.addAll(newSpark.targetTowns);
     return newSpark.locationTarget == "global"? newSpark.locationTarget! : newArray.join(", ");
   }
 
@@ -325,9 +320,9 @@ class NewSparkState extends State<NewSpark> {
           res = cost * newSpark.targetSparks! * newSpark.duration!;
           if(mounted) {
             setState(() {
-              totalCost = res;
-              vat = res * waveVat;
-              sumTotal = res + vat!;
+              totalCost = currencyMath.roundDouble(res, 2);
+              vat = currencyMath.roundDouble((res * waveVat), 2);
+              sumTotal = currencyMath.roundDouble((res + vat!), 2);
             });
           }
         }
@@ -368,7 +363,7 @@ class NewSparkState extends State<NewSpark> {
             color: prudColorTheme.buttonD,
           ),
           if(presentPhase != SparkCreationPhase.info) spacer.width,
-          if(presentPhase != SparkCreationPhase.info && presentPhase != SparkCreationPhase.sixth) IconButton(
+          if(presentPhase != SparkCreationPhase.info && presentPhase != SparkCreationPhase.sixth && presentPhase != SparkCreationPhase.payment) IconButton(
             icon: const Icon(Icons.arrow_forward_ios),
             onPressed: _next,
             color: prudColorTheme.buttonD,
@@ -522,6 +517,7 @@ class NewSparkState extends State<NewSpark> {
                       name: "spark_type",
                       initialValue: selectedType,
                       spacing: 10.0,
+                      runSpacing: 7.0,
                       alignment: WrapAlignment.start,
                       runAlignment: WrapAlignment.center,
                       selectedColor: prudColorTheme.primary,
@@ -531,9 +527,9 @@ class NewSparkState extends State<NewSpark> {
                       options: sparkTypes.map((String t) => FormBuilderChipOption(
                         value: t,
                         child: Translate(
-                            style: prudWidgetStyle.btnTextStyle.copyWith(
-                                color: t == selectedType? prudColorTheme.bgA : prudColorTheme.primary
-                            ),
+                          style: prudWidgetStyle.btnTextStyle.copyWith(
+                            color: t == selectedType? prudColorTheme.bgA : prudColorTheme.primary
+                          ),
                             text: t
                         ),
                       )).toList(),
@@ -552,6 +548,7 @@ class NewSparkState extends State<NewSpark> {
                       name: "spark_target",
                       initialValue: selectedTarget,
                       spacing: 10.0,
+                      runSpacing: 7.0,
                       alignment: WrapAlignment.start,
                       runAlignment: WrapAlignment.center,
                       selectedColor: prudColorTheme.primary,
@@ -808,9 +805,9 @@ class NewSparkState extends State<NewSpark> {
                                 try{
                                   if(mounted) setState(() => newSpark.targetCountries = selected);
                                   if(selectedTarget != "global" && selectedTarget != "country" && selectedTarget != "countries"){
-                                    if(newSpark.targetCountries != null && newSpark.targetCountries!.isNotEmpty){
+                                    if(newSpark.targetCountries.isNotEmpty){
                                       Future.delayed(Duration.zero, () async {
-                                        Country? ctry = CountryService().findByName(newSpark.targetCountries![0]);
+                                        Country? ctry = CountryService().findByName(newSpark.targetCountries[0]);
                                         if(ctry != null){
                                           List<ms.State> dStates = await csc.getStatesOfCountry(ctry.countryCode);
                                           if(mounted) {
@@ -838,7 +835,7 @@ class NewSparkState extends State<NewSpark> {
                                 try{
                                   if(mounted) setState(() => newSpark.targetStates = selected);
                                   if(countryCode != null && selectedTarget!.indexOf("cit") == 0 || selectedTarget!.indexOf("town") == 0){
-                                    if(newSpark.targetStates != null && newSpark.targetStates!.isNotEmpty && firstStateCode != null){
+                                    if(newSpark.targetStates.isNotEmpty && firstStateCode != null){
                                       Future.delayed(Duration.zero, () async {
                                         List<City> dCities = await csc.getStateCities(countryCode!, firstStateCode);
                                         if(mounted) setState(() => stateCities = dCities);
@@ -860,7 +857,7 @@ class NewSparkState extends State<NewSpark> {
                                 try{
                                   if(mounted) setState(() => newSpark.targetCities = selected);
                                   if(selectedTarget!.indexOf("town") == 0){
-                                    if(newSpark.targetCities != null && newSpark.targetCities!.isNotEmpty){
+                                    if(newSpark.targetCities.isNotEmpty){
                                       if(mounted) setState(() => showTown = true);
                                     }
                                   }
@@ -888,7 +885,7 @@ class NewSparkState extends State<NewSpark> {
                                     align: TextAlign.center,
                                   ),
                                   FormBuilderTextField(
-                                    initialValue: newSpark.targetTowns != null? turnListToString(newSpark.targetTowns!) : "Type Town(s)",
+                                    initialValue: newSpark.targetTowns.isNotEmpty? turnListToString(newSpark.targetTowns) : "Type Town(s)",
                                     name: 'towns',
                                     style: tabData.npStyle,
                                     keyboardType: TextInputType.text,
@@ -1058,19 +1055,34 @@ class NewSparkState extends State<NewSpark> {
                               Column(
                                 children: [
                                   spacer.height,
+                                  if(loading) LoadingComponent(
+                                    shimmerType: 1,
+                                    height: screen.height - 100,
+                                  ),
                                   PayIn(
                                     amount: sumTotal!,
                                     onPaymentMade: (bool verified, String transID){
                                       debugPrint("verify: $verified");
+                                      if(mounted) setState(() => loading = true);
                                       if(verified){
                                         Future.delayed(Duration.zero, () async {
-                                          bool saved = await savePaymentToCloud(transID);
-                                          if(saved && mounted){
-                                            setState((){
-                                              presentPhase = SparkCreationPhase.success;
-                                            });
+                                          await currencyMath.loginAutomatically();
+                                          if(iCloud.affAuthToken != null) {
+                                            bool saved = await savePaymentToCloud(transID);
+                                            if (saved && mounted) {
+                                              setState(() {
+                                                presentPhase = SparkCreationPhase.success;
+                                              });
+                                            } else {
+                                              if (mounted) setState(() => presentPhase = SparkCreationPhase.failed);
+                                            }
                                           }else{
-                                            if(mounted) setState(() => presentPhase = SparkCreationPhase.failed);
+                                            if (mounted) {
+                                              setState(() {
+                                                errorMsg = "Unable to login to server. Check your network.";
+                                                presentPhase = SparkCreationPhase.failed;
+                                              });
+                                            }
                                           }
                                         });
                                       }else{
@@ -1082,7 +1094,16 @@ class NewSparkState extends State<NewSpark> {
                                           });
                                         }
                                       }
+                                      if(mounted) setState(() => loading = false);
                                     },
+                                    onCancel: (){
+                                      if (mounted) {
+                                        setState(() {
+                                          errorMsg = "Payment Canceled";
+                                          presentPhase = SparkCreationPhase.failed;
+                                        });
+                                      }
+                                    }
                                   ),
                                   largeSpacer.height,
                                 ],

@@ -1,10 +1,7 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutterwave_standard/models/responses/charge_response.dart';
 import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/components/work_in_progress.dart';
-import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutterwave_standard/core/flutterwave.dart';
@@ -16,11 +13,13 @@ import '../singletons/i_cloud.dart';
 class PayIn extends StatefulWidget {
   final double amount;
   final Function(bool, String) onPaymentMade;
+  final Function onCancel;
 
   const PayIn({
     super.key,
     required this.amount,
-    required this.onPaymentMade
+    required this.onPaymentMade,
+    required this.onCancel,aq
   });
 
   @override
@@ -32,10 +31,9 @@ class PayInState extends State<PayIn> {
   bool loading = false;
 
   handlePaymentInitialization() async {
-    var uuid = Uuid();
+    const uuid = Uuid();
     String ranRef = uuid.v1();
     String wave = Constants.wavePublicKey;
-    debugPrint("TXREF: $ranRef");
     final Customer customer = Customer(
       name: "PrudApp",
       phoneNumber: "+2349135049783",
@@ -46,17 +44,17 @@ class PayInState extends State<PayIn> {
           context: context,
           publicKey: wave,
           currency: "EUR",
-          redirectUrl: "https://www.prudapp.com",
+          redirectUrl: "$apiEndPoint/payments/pay/wave_in",
           txRef: ranRef,
           amount: "${widget.amount}",
           customer: customer,
           paymentOptions: "ussd, card, barter, payattitude",
           customization: Customization(
-              title: "PrudApp Pay",
-              description: "Making Payments Blissful",
-              logo: "https://firebasestorage.googleapis.com/v0/b/prudapp.appspot.com/o/images%2Fprud_api_server%2Fprudapp_icon.png?alt=media&token=177a8f5e-a0ca-45fa-8324-7f1c9782dd14"
+            title: "PrudApp Pay",
+            description: "Making Payments Blissful",
+            logo: "https://firebasestorage.googleapis.com/v0/b/prudapp.appspot.com/o/images%2Fprud_api_server%2Fprudapp_icon.png?alt=media&token=177a8f5e-a0ca-45fa-8324-7f1c9782dd14"
           ),
-          isTestMode: isProduction? false : true
+          isTestMode: paymentIsInTestMode,
       );
     }
   }
@@ -81,6 +79,7 @@ class PayInState extends State<PayIn> {
         }
         if(mounted) setState(() => loading = false);
       }catch(ex){
+        widget.onCancel();
         debugPrint("PayIn InitState: $ex");
       }
     });

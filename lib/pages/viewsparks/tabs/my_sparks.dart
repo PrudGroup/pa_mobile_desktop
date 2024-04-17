@@ -8,6 +8,7 @@ import '../../../components/spark_container.dart';
 import '../../../components/translate.dart';
 import '../../../models/spark.dart';
 import '../../../models/theme.dart';
+import '../../../singletons/currency_math.dart';
 import '../../../singletons/i_cloud.dart';
 import '../../../singletons/shared_local_storage.dart';
 import '../spark_detail_page.dart';
@@ -65,23 +66,27 @@ class MySparksState extends State<MySparks> {
     if(iCloud.mySparks.isNotEmpty){
       if(mounted) setState(() => mySparks = iCloud.mySparks);
     }else{
-      String url = "$apiEndPoint/sparks/aff/${myStorage.user!.id}";
-      Response res = await prudDio.get(url, queryParameters: {
-        "limit": 200
-      });
-      if(res.statusCode == 200){
-        var resData = res.data;
-        if(resData.length > 0) {
-          List<Spark> spks = [];
-          resData.forEach((dynamic spk) {
-            spks.add(Spark.fromJson(spk));
-          });
-          iCloud.updateMySpark(spks);
-          if(mounted) {
-            setState(() {
-              mySparks = spks;
-              foundSparks = spks;
-            });
+      await currencyMath.loginAutomatically();
+      if(iCloud.affAuthToken != null) {
+        String url = "$apiEndPoint/sparks/aff/NniMlp8xumSPUSASYjJA";
+        Response res = await prudDio.get(url, queryParameters: {
+          "limit": 200
+        });
+        if (res.statusCode == 200) {
+          List resData = res.data;
+          if (resData.isNotEmpty) {
+            List<Spark> spks = [];
+            debugPrint("Length; $resData");
+            for (var spk in resData) {
+              spks.add(Spark.fromJson(spk));
+            }
+            iCloud.updateMySpark(spks);
+            if (mounted) {
+              setState(() {
+                mySparks = spks;
+                foundSparks = spks;
+              });
+            }
           }
         }
       }

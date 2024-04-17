@@ -8,11 +8,11 @@ import 'modals/state_modal_sheet.dart';
 class StatesPicker extends StatefulWidget {
   final bool isMultiple;
   final List<ms.State> allStates;
-  final List<String>? selected;
+  final List<dynamic> selected;
   final Function(List<String>, String?) onChange;
 
   const StatesPicker({
-    super.key, this.selected,
+    super.key, required this.selected,
     this.isMultiple = true,
     required this.onChange,
     required this.allStates
@@ -36,7 +36,7 @@ class StatesPickerState extends State<StatesPicker> {
   @override
   void initState(){
     super.initState();
-    if(mounted) setState(() => selectedStates = widget.selected);
+    if(mounted) setState(() => selectedStates = widget.selected.cast<String>());
   }
 
   void addStateDialog(double height){

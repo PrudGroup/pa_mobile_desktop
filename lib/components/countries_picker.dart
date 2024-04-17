@@ -7,11 +7,11 @@ import '../models/theme.dart';
 
 class CountriesPicker extends StatefulWidget {
   final bool isMultiple;
-  final List<String>? selected;
+  final List<dynamic> selected;
   final Function(List<String> selectedCountries) onChange;
 
   const CountriesPicker({
-    super.key, this.selected,
+    super.key, required this.selected,
     this.isMultiple = true,
     required this.onChange
   });
@@ -29,7 +29,7 @@ class CountriesPickerState extends State<CountriesPicker> {
   @override
   void initState(){
     super.initState();
-    if(mounted) setState(() => selectedCountries = widget.selected);
+    if(mounted) setState(() => selectedCountries = widget.selected.cast<String>());
   }
 
   void addCountryDialog(){

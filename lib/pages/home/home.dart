@@ -240,7 +240,6 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
         ),
       ),
     ];
-    loginAutomatically();
     super.initState();
     _rateMyApp.init();
     subscription = FGBGEvents.stream.listen((event) {
@@ -250,10 +249,6 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
         listenForMessages();
       }
     });
-  }
-
-  void loginAutomatically(){
-    iCloud.checkIfAffLoggedIn("$prudApiUrl/affiliates/auth/login");
   }
 
   void listenForMessages() async {
@@ -310,22 +305,22 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
           elevation: 0,
           leading: Center(
             child: IconButton(
-              icon: ValueListenableBuilder<AdvancedDrawerValue>(
-                valueListenable: _advDrawerController,
-                builder: (_, value, __){
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 250),
-                    child: Icon(
-                      value.visible? Icons.clear : Icons.notes,
-                      key: ValueKey<bool>(value.visible),
-                      color: Colors.white,
-                    ),
-                  );
-                },
-              ),
-              color: prudTheme.cardColor,
-              splashRadius: 20,
-              onPressed: _handleDrawer
+                icon: ValueListenableBuilder<AdvancedDrawerValue>(
+                  valueListenable: _advDrawerController,
+                  builder: (_, value, __){
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      child: Icon(
+                        value.visible? Icons.clear : Icons.notes,
+                        key: ValueKey<bool>(value.visible),
+                        color: Colors.white,
+                      ),
+                    );
+                  },
+                ),
+                color: prudTheme.cardColor,
+                splashRadius: 20,
+                onPressed: _handleDrawer
             ),
           ),
           title: Text(
@@ -359,12 +354,12 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
                   ),
                   spacer.height,
                   PrudContainer(
-                    hasPadding: true,
-                    child: MainMenu(
-                      menus: menus,
-                      bgColor: prudColorTheme.bgC,
-                      useWrap: true,
-                    )
+                      hasPadding: true,
+                      child: MainMenu(
+                        menus: menus,
+                        bgColor: prudColorTheme.bgC,
+                        useWrap: true,
+                      )
                   ),
                   spacer.height,
                   PrudShowroom(items: showroom),

@@ -9,14 +9,14 @@ import 'modals/city_modal_sheet.dart';
 class CitiesPicker extends StatefulWidget {
   final bool isMultiple;
   final List<City> cities;
-  final List<String>? selected;
+  final List<dynamic> selected;
   final Function(List<String>) onChange;
 
   const CitiesPicker({
     super.key,
     required this.onChange,
     required this.cities,
-    this.selected,
+    required this.selected,
     this.isMultiple = true,
   });
 
@@ -36,7 +36,7 @@ class CitiesPickerState extends State<CitiesPicker> {
   @override
   void initState(){
     super.initState();
-    if(mounted) setState(() => selectedCities = widget.selected);
+    if(mounted) setState(() => selectedCities = widget.selected.cast<String>());
   }
 
   void addCityDialog(double height){

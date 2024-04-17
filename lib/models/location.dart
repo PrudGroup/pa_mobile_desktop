@@ -19,7 +19,7 @@ class Location{
       if(state != null) "state": state,
       if(city != null) "city": city,
       if(town != null) "town": town,
-      "limit": limit,
+      if(limit != null) "limit": limit,
       if(offsetId != null) "offset_id": offsetId,
     };
   }

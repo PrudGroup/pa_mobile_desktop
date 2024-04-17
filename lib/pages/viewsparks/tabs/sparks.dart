@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:prudapp/singletons/currency_math.dart';
 
 import '../../../components/loading_component.dart';
 import '../../../components/spark_container.dart';
@@ -67,33 +68,35 @@ class SparksState extends State<Sparks> {
     if(iCloud.sparks.isNotEmpty){
       if(mounted) setState(() => sparks = iCloud.sparks);
     }else{
-      User user = myStorage.user!;
-      String url = "$apiEndPoint/sparks/locates/by_location";
-      Location local = Location(
-        country: user.country,
-        state: user.state,
-        city: user.city,
-        town: user.town,
-        limit: 200,
-      );
-      Response res = await prudDio.get(url, queryParameters: {
-        "location": local.toJson(),
-        "exclude_aff_id": myStorage.user!.id,
-        "limit": 200
-      });
-      if(res.statusCode == 200){
-        var resData = res.data;
-        if(resData.length > 0) {
-          List<Spark> spks = [];
-          resData.forEach((dynamic spk) {
-            spks.add(Spark.fromJson(spk));
-          });
-          iCloud.updateMySpark(spks);
-          if(mounted) {
-            setState(() {
-              sparks = spks;
-              foundSparks = spks;
+      await currencyMath.loginAutomatically();
+      if(iCloud.affAuthToken != null) {
+        User user = myStorage.user!;
+        String url = "$apiEndPoint/sparks/locates/by_location";
+        Location local = Location(
+          country: user.country,
+          state: user.state,
+          city: user.city,
+          town: user.town,
+          limit: 200,
+        );
+        Response res = await prudDio.get(url, queryParameters: {
+          "location": local.toJson(),
+          "exclude_aff_id": myStorage.user!.id,
+        });
+        if (res.statusCode == 200) {
+          var resData = res.data;
+          if (resData.length > 0) {
+            List<Spark> spks = [];
+            resData.forEach((dynamic spk) {
+              spks.add(Spark.fromJson(spk));
             });
+            iCloud.updateMySpark(spks);
+            if (mounted) {
+              setState(() {
+                sparks = spks;
+                foundSparks = spks;
+              });
+            }
           }
         }
       }

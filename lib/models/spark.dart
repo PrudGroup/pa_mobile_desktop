@@ -1,3 +1,4 @@
+
 class Spark {
   String? id;
   String? targetLink;
@@ -5,10 +6,10 @@ class Spark {
   String? sparkCategory;
   int? targetSparks;
   String? locationTarget;
-  List<String>? targetCountries;
-  List<String>? targetStates;
-  List<String>? targetCities;
-  List<String>? targetTowns;
+  List<dynamic> targetCountries;
+  List<dynamic> targetStates;
+  List<dynamic> targetCities;
+  List<dynamic> targetTowns;
   int? duration;
   String? affId;
   DateTime? createdAt;
@@ -35,12 +36,12 @@ class Spark {
     this.sparkCategory,
     this.sparkType,
     this.startDate,
-    this.targetCities,
-    this.targetCountries,
+    required this.targetCities,
+    required this.targetCountries,
     this.targetLink,
     this.targetSparks,
-    this.targetStates,
-    this.targetTowns,
+    required this.targetStates,
+    required this.targetTowns,
     this.status = "Pending",
     this.sparksCount = 0,
   });
@@ -59,12 +60,12 @@ class Spark {
     if(sparkCategory != null) 'spark_category': sparkCategory,
     if(sparkType != null) 'spark_type': sparkType,
     if(startDate != null) 'start_date': startDate!.toIso8601String(),
-    if(targetCities != null) 'target_cities': targetCities,
-    if(targetCountries != null) 'target_countries': targetCountries,
+    'target_cities': targetCities,
+    'target_countries': targetCountries,
     if(targetLink != null) 'target_link': targetLink,
     if(targetSparks != null) 'target_sparks': targetSparks,
-    if(targetStates != null) 'target_states': targetStates,
-    if(targetTowns != null) 'target_towns': targetTowns,
+    'target_states': targetStates,
+    'target_towns': targetTowns,
     if(status != null) 'status': status,
     if(sparksCount != null) 'sparks_count': sparksCount,
   };
@@ -77,19 +78,19 @@ class Spark {
       sparkCategory: json["spark_category"] as String?,
       targetSparks: json["target_sparks"] as int?,
       locationTarget: json["location_target"] as String?,
-      targetCountries: json["target_countries"] as List<String>?,
-      targetStates: json["target_states"] as List<String>?,
-      targetCities: json["target_cities"] as List<String>?,
-      targetTowns: json["target_towns"] as List<String>?,
+      targetCountries: json["target_countries"] as List<dynamic>,
+      targetStates: json["target_states"] as List<dynamic>,
+      targetCities: json["target_cities"] as List<dynamic>,
+      targetTowns: json["target_towns"] as List<dynamic>,
       duration: json["duration"] as int?,
       affId: json["aff_id"] as String?,
-      createdAt: json["created_at"] != null? DateTime(json["created_at"]) : null,
-      updatedAt: json["updated_at"] != null? DateTime(json["updated_at"]) : null,
+      createdAt: json["created_at"] != null? DateTime.parse(json["created_at"]) : null,
+      updatedAt: json["updated_at"] != null? DateTime.parse(json["updated_at"]) : null,
       monthCreated: json["month_created"] as int?,
       yearCreated: json["year_created"] as int?,
       description: json["description"] as String?,
       title: json["title"] as String?,
-      startDate: json["start_date"] != null? DateTime(json["start_date"]) : null,
+      startDate: json["start_date"] != null? DateTime.parse(json["start_date"]) : null,
       status: json["status"] as String?,
       sparksCount: json["sparks_count"] as int?,
     );

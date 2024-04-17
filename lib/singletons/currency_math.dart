@@ -92,6 +92,11 @@ class CurrencyMath extends ChangeNotifier{
     return false;
   }
 
+  Future<void> loginAutomatically() async {
+    await iCloud.checkIfAffLoggedIn("$prudApiUrl/affiliates/auth/login");
+    debugPrint("Auth Token: ${iCloud.affAuthToken}");
+  }
+
   onError(dynamic ex){
     debugPrint("Error: Transaction: CurrencyMath: $ex");
     return false;

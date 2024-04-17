@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/pages/register/login.dart';
 import 'package:prudapp/pages/settings/policy.dart';
 import 'package:prudapp/pages/settings/settings.dart';
 import 'package:prudapp/pages/shippers/shippers.dart';
@@ -100,6 +101,12 @@ class HomeDrawerState extends State<HomeDrawer> {
               page: const Support(),
               isIcon: false,
               image: prudImages.support,
+            ),
+            const SideMenuItem(
+              text: "LogIn",
+              page: Login(),
+              isIcon: true,
+              icon: Icons.signpost_outlined,
             ),
           ],
         ),

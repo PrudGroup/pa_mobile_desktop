@@ -177,16 +177,22 @@ class ICloud extends ChangeNotifier{
   }
 
   Future<bool> checkIfAffLoggedIn(String url) async {
+    bool loggedIn = false;
     if(affAuthToken != null){
-      return true;
+      loggedIn = true;
     }else{
       List logged = await logAffiliateIn(url);
-      bool loggedIn = logged[1];
+      loggedIn = logged[1];
       if(loggedIn){
-        affAuthToken = 'PrudApp ${logged[0]["auth_token"]}' ;
+        affAuthToken = 'Bearer PrudApp ${logged[0]["auth_token"]}';
       }
-      return loggedIn;
     }
+    prudDio.options.headers.clear();
+    prudDio.options.headers.addAll({
+      "Authorization": affAuthToken,
+      "AppCredential": prudApiKey,
+    });
+    return loggedIn;
   }
 
   Future<Response> addAffiliate(String url, User newUser) async => await prudDio.post(url, data: newUser.toJson());
@@ -244,7 +250,7 @@ class ICloud extends ChangeNotifier{
 
   void setDioHeaders(){
     prudDio.options.headers.addAll({
-      "AppCredential": prudApiKey
+      "AppCredential": prudApiKey,
     });
   }
 
@@ -290,6 +296,7 @@ const String prudApiKey = Constants.prudApiKey;
 const String apiEndPoint = isProduction? prudApiUrl : localApiUrl;
 const String waveApiUrl = "https://api.flutterwave.com/v3";
 const double waveVat = 0.07;
+const bool paymentIsInTestMode = isProduction? false : true;
 List<PushMessage> pushMessages = [];
 FirebaseMessaging messenger = FirebaseMessaging.instance;
 Dio prudDio = Dio(BaseOptions(validateStatus: (statusCode) {
