@@ -150,7 +150,7 @@ flutter:
     - assets/images/settings.png
     - assets/images/user.png
     - assets/images/gh.jpg
-    - assets/images/.jpg
+    - assets/images/plain-gh.jpg
     - assets/images/gg.jpg
     - assets/images/err.jpg
     - assets/images/carousels/1.jpg
