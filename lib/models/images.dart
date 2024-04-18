@@ -11,6 +11,7 @@ class PrudImages {
   String dislike;
   String settings;
   String screen;
+  String plain_screen;
   String bg;
   String user;
   String err;
@@ -101,6 +102,7 @@ class PrudImages {
     required this.sparks,
     required this.newSpark,
     required this.mySparks,
+    required this.plain_screen,
   });
 }
 
@@ -132,6 +134,7 @@ PrudImages prudImages = PrudImages(
   logo: 'assets/images/prud_logo.png',
   prudIcon: 'assets/images/prudapp_icon.png',
   screen: 'assets/images/gh.jpg',
+  plain_screen: 'assets/images/plain_gh.jpg',
   bg: 'assets/images/gg.jpg',
   settings: 'assets/images/settings.png',
   user: 'assets/images/user.png',
