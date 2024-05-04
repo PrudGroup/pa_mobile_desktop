@@ -17,6 +17,7 @@ import 'models/images.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  debugPrint("fire app id: ${Constants.fireMessageID}");
   await iCloud.setFirebase(Constants.fireApiKey, Constants.fireAppID, Constants.fireMessageID);
   iCloud.addPushMessages(message);
 }
@@ -32,7 +33,7 @@ void main() async {
   await GetStorage.init();
   await myStorage.initializeValues();
   await currencyMath.init();
-  await messenger.setAutoInitEnabled(true);
+  // await messenger.setAutoInitEnabled(true);
   myStorage.setWindowSize(size: const Size(400, 700));
 
   _setTargetPlatformForDesktop();
@@ -78,6 +79,9 @@ class MyApp extends StatelessWidget {
     isNew = res?? true;
     if(isNew == false){
       await currencyMath.loginAutomatically();
+      if(iCloud.affAuthToken == null){
+        iCloud.showSnackBar("PrudApp Service Unreachable", context);
+      }
     }
     return isNew;
   }

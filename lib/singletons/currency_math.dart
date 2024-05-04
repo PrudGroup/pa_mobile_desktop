@@ -94,7 +94,6 @@ class CurrencyMath extends ChangeNotifier{
 
   Future<void> loginAutomatically() async {
     await iCloud.checkIfAffLoggedIn("$prudApiUrl/affiliates/auth/login");
-    debugPrint("Auth Token: ${iCloud.affAuthToken}");
   }
 
   onError(dynamic ex){

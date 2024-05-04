@@ -67,8 +67,9 @@ class MySparksState extends State<MySparks> {
       if(mounted) setState(() => mySparks = iCloud.mySparks);
     }else{
       await currencyMath.loginAutomatically();
-      if(iCloud.affAuthToken != null) {
-        String url = "$apiEndPoint/sparks/aff/NniMlp8xumSPUSASYjJA";
+      debugPrint("userID: ${myStorage.user?.id} : NniMlp8xumSPUSASYjJA");
+      if(iCloud.affAuthToken != null && myStorage.user?.id != null) {
+        String url = "$apiEndPoint/sparks/aff/${myStorage.user?.id}";
         Response res = await prudDio.get(url, queryParameters: {
           "limit": 200
         });
@@ -83,8 +84,8 @@ class MySparksState extends State<MySparks> {
             iCloud.updateMySpark(spks);
             if (mounted) {
               setState(() {
-                mySparks = spks;
-                foundSparks = spks;
+                mySparks = spks.reversed.toList();
+                foundSparks = mySparks;
               });
             }
           }

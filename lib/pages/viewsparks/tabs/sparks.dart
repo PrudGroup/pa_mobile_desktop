@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 
 import '../../../components/loading_component.dart';
@@ -64,42 +65,47 @@ class SparksState extends State<Sparks> {
     if(widget.goToTab != null) widget.goToTab!(index);
   }
 
+  Future<void> getSparksFromService() async {
+    if(mounted) setState(() => loading = true);
+    await currencyMath.loginAutomatically();
+    if(iCloud.affAuthToken != null) {
+      User user = myStorage.user!;
+      String url = "$apiEndPoint/sparks/locates/by_location";
+      Location local = Location(
+        country: user.country,
+        state: user.state,
+        city: user.city,
+        town: user.town,
+        limit: 200,
+      );
+      Response res = await prudDio.get(url, queryParameters: {
+        "exclude_aff_id": myStorage.user!.id,
+      }, data: local.toJson());
+      if (res.statusCode == 200) {
+        var resData = res.data;
+        if (resData.length > 0) {
+          List<Spark> spks = [];
+          resData.forEach((dynamic spk) {
+            spks.add(Spark.fromJson(spk));
+          });
+          iCloud.updateSparks(spks);
+          if (mounted) {
+            setState(() {
+              sparks = spks.reversed.toList();
+              foundSparks = sparks;
+            });
+          }
+        }
+      }
+      if(mounted) setState(() => loading = false);
+    }
+  }
+
   Future<void> getSparks() async {
     if(iCloud.sparks.isNotEmpty){
       if(mounted) setState(() => sparks = iCloud.sparks);
     }else{
-      await currencyMath.loginAutomatically();
-      if(iCloud.affAuthToken != null) {
-        User user = myStorage.user!;
-        String url = "$apiEndPoint/sparks/locates/by_location";
-        Location local = Location(
-          country: user.country,
-          state: user.state,
-          city: user.city,
-          town: user.town,
-          limit: 200,
-        );
-        Response res = await prudDio.get(url, queryParameters: {
-          "location": local.toJson(),
-          "exclude_aff_id": myStorage.user!.id,
-        });
-        if (res.statusCode == 200) {
-          var resData = res.data;
-          if (resData.length > 0) {
-            List<Spark> spks = [];
-            resData.forEach((dynamic spk) {
-              spks.add(Spark.fromJson(spk));
-            });
-            iCloud.updateMySpark(spks);
-            if (mounted) {
-              setState(() {
-                sparks = spks;
-                foundSparks = spks;
-              });
-            }
-          }
-        }
-      }
+      await getSparksFromService();
     }
   }
 
@@ -144,6 +150,13 @@ class SparksState extends State<Sparks> {
             color: prudColorTheme.bgA
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const FaIcon(FontAwesomeIcons.arrowsRotate),
+            onPressed: getSparksFromService,
+            color: prudColorTheme.bgB,
+          ),
+        ],
       ),
       body: SizedBox(
         height: screen.height,
