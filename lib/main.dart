@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,8 +19,12 @@ import 'models/images.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  debugPrint("fire app id: ${Constants.fireMessageID}");
-  await iCloud.setFirebase(Constants.fireApiKey, Constants.fireAppID, Constants.fireMessageID);
+  await iCloud.setFirebase(
+      Constants.fireApiKey,
+      Platform.isAndroid? Constants.fireAndroidAppID :
+      (Platform.isIOS? Constants.fireIOSAppID : Constants.fireAppID),
+      Constants.fireMessageID
+  );
   iCloud.addPushMessages(message);
 }
 
@@ -28,7 +34,12 @@ void main() async {
   }
 
   WidgetsFlutterBinding.ensureInitialized();
-  await iCloud.setFirebase(Constants.fireApiKey, Constants.fireAppID, Constants.fireMessageID);
+  await iCloud.setFirebase(
+      Constants.fireApiKey,
+      Platform.isAndroid? Constants.fireAndroidAppID :
+      (Platform.isIOS? Constants.fireIOSAppID : Constants.fireAppID),
+      Constants.fireMessageID
+  );
   iCloud.setDioHeaders();
   await GetStorage.init();
   await myStorage.initializeValues();

@@ -233,7 +233,7 @@ class ICloud extends ChangeNotifier{
 
   Future<FirebaseApp> setFirebase(String apiKey, String appId, String msgID) async {
     FirebaseApp? fireApp;
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || Platform.isIOS) {
       fireApp = await Firebase.initializeApp(
         options: FirebaseOptions(
           apiKey: apiKey,

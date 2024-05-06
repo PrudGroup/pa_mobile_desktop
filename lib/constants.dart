@@ -30,6 +30,16 @@ abstract class Constants {
     defaultValue: '',
   );
 
+  static const String fireAndroidAppID = String.fromEnvironment(
+    'FIRE_ANDROID_APP_ID',
+    defaultValue: '',
+  );
+
+  static const String fireIOSAppID = String.fromEnvironment(
+    'FIRE_IOS_APP_ID',
+    defaultValue: '',
+  );
+
   static const String fireMessageID = String.fromEnvironment(
     'FIRE_MSG_ID',
     defaultValue: '',

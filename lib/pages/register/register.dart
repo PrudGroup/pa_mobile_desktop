@@ -241,11 +241,9 @@ class RegisteredState extends State<Register> {
   }
 
   Future<void> saveUserLocally() async{
-    debugPrint("token: AB");
     await messenger.getToken().then((String? token) async{
       debugPrint("token: $token");
       if(token != null){
-        debugPrint("token: AC");
         newUser.deviceRegToken = token;
       }
     }).catchError((ex){
@@ -257,7 +255,6 @@ class RegisteredState extends State<Register> {
       );
     });
     myStorage.addToStore(key: "user", value: jsonEncode(newUser));
-    debugPrint("token: BB");
   }
 
   @override

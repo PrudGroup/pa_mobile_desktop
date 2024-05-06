@@ -37,55 +37,84 @@ class LoginState extends State<Login> {
   Future<void> _signIn() async{
     try{
       if(mounted) setState(() => loading = true);
-      if(email != null && password != null){
-        String url = "$prudApiUrl/affiliates/auth/login";
-        Response res = await prudDio.get(url, queryParameters: {
-          "email": email,
-          "password": password,
-          "is_renew": true,
-        });
-        if (res.statusCode == 200) {
-          if(res.data != null && res.data["user"] != null){
-            User user = User.fromJson(res.data["user"]);
-            user.password = password;
-            iCloud.affAuthToken = 'PrudApp ${res.data["auth_token"]}';
-            prudDio.options.headers.addAll({
-              "Authorization": iCloud.affAuthToken,
+      await messenger.getToken().then((String? token) async{
+        if(token != null){
+          String deviceRegToken = token;
+          if(email != null && password != null){
+            String url = "$prudApiUrl/affiliates/auth/login";
+            Response res = await prudDio.get(url, queryParameters: {
+              "email": email,
+              "password": password,
+              "device_token": deviceRegToken,
+              "is_renew": true,
             });
-            if(user.id != null) {
-              await myStorage.addToStore(key: 'isNew', value: false);
-              await myStorage.addToStore(key: "user", value: jsonEncode(user));
+            if (res.statusCode == 200) {
+              if(res.data != null && res.data["user"] != null){
+                User user = User.fromJson(res.data["user"]);
+                user.password = password;
+                user.deviceRegToken = deviceRegToken;
+                iCloud.affAuthToken = 'PrudApp ${res.data["auth_token"]}';
+                prudDio.options.headers.addAll({
+                  "Authorization": iCloud.affAuthToken,
+                });
+                if(user.id != null) {
+                  await myStorage.addToStore(key: 'isNew', value: false);
+                  await myStorage.addToStore(key: "user", value: jsonEncode(user));
+                  myStorage.user = user;
+                  if(mounted) {
+                    iCloud.showSnackBar(
+                        "Authenticated",  context,
+                        title: "Authentication", type: 2
+                    );
+                  }
+                }
+                if(mounted) iCloud.goto(context, MyHomePage(title: "Prudapp",));
+              }else{
+                if(mounted) {
+                  iCloud.showSnackBar(
+                      "Unable To Retrieve User Details.",  context,
+                      title: "Authentication", type: 1
+                  );
+                }
+              }
+            } else {
               if(mounted) {
                 iCloud.showSnackBar(
-                  "Authenticated",  context,
-                  title: "Authentication", type: 2
+                    "PrudService: Access Denied",  context,
+                    title: "Authentication", type: 3
                 );
               }
             }
-            if(mounted) iCloud.goto(context, MyHomePage(title: "Prudapp",));
-          }else{
+          }else {
             if(mounted) {
               iCloud.showSnackBar(
-                "Unable To Retrieve User Details.",  context,
-                title: "Authentication", type: 1
+                  "Email and Password needed.",  context,
+                  title: "Authentication", type: 3
               );
             }
           }
-        } else {
+          if(mounted) setState(() => loading = false);
+        }else{
           if(mounted) {
+            setState(() => loading = false);
             iCloud.showSnackBar(
-              "PrudService: Access Denied",  context,
-              title: "Authentication", type: 3
+              "Device token inaccessible!",
+              context,
+              title: 'Token',
+              type: 3
             );
           }
         }
-      }else {
+      }).catchError((ex){
+        if(mounted) setState(() => loading = false);
+        debugPrint("Firebase: $ex");
         iCloud.showSnackBar(
-          "Email and Password needed.",  context,
-          title: "Authentication", type: 3
+          "$ex",
+          context,
+          title: 'Messenger',
+          type: 3
         );
-      }
-      if(mounted) setState(() => loading = false);
+      });
     }catch(ex){
       debugPrint("Renew SignIn Error: $ex");
       if(mounted) {

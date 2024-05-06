@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:prudapp/components/prud_data_viewer.dart';
+import 'package:prudapp/components/prud_panel.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -28,6 +30,10 @@ class SparkDetailPage extends StatefulWidget {
 class SparkDetailPageState extends State<SparkDetailPage> {
   bool checkingLink = false;
   bool linkExist = false;
+
+  void showLinkDetails() {
+
+  }
 
   Future<bool> createAffLink() async {
     bool created = false;
@@ -61,6 +67,7 @@ class SparkDetailPageState extends State<SparkDetailPage> {
       try{
         String url = "$apiEndPoint/sparks/spk_aff_links/check_if_exists/${widget.spark.id}/${myStorage.user!.id}";
         Response res = await prudDio.get(url);
+        debugPrint("Result: ${res.data}: ${res.statusCode}");
         if(res.statusCode == 200){
           result = res.data;
         }
@@ -89,7 +96,7 @@ class SparkDetailPageState extends State<SparkDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    Size screen = MediaQuery.of(context).size;
+    // Size screen = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: prudColorTheme.bgC,
       resizeToAvoidBottomInset: false,
@@ -126,19 +133,6 @@ class SparkDetailPageState extends State<SparkDetailPage> {
             ),
           ]
         ),
-        actions: [
-          checkingLink? SpinKitFadingCircle(
-            color: prudColorTheme.textHeader,
-            size: 25
-          ) :
-          (
-            widget.canCreateAffLink && linkExist? getTextButton(
-              title: "Create Aff Link",
-              color: prudColorTheme.textHeader,
-              onPressed: createAffLink
-            ) : const SizedBox()
-          )
-        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -146,13 +140,94 @@ class SparkDetailPageState extends State<SparkDetailPage> {
             spacer.height,
             Padding(
               padding: const EdgeInsets.only(left: 10, right: 10),
-              child: prudWidgetStyle.getLongButton(
-                onPressed: gotoUrl,
-                text: "Watch/Visit Now",
-                shape: 1
+              child: Flex(
+                direction: Axis.horizontal,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if(widget.canCreateAffLink) Expanded(
+                    child: checkingLink? SpinKitFadingCircle(
+                      color: prudColorTheme.textHeader,
+                      size: 25
+                    ) :
+                    (
+                      linkExist? prudWidgetStyle.getLongButton(
+                        onPressed: showLinkDetails,
+                        text: "Check Link",
+                        shape: 2,
+                        makeLight: true
+                      ) : prudWidgetStyle.getLongButton(
+                        onPressed: createAffLink,
+                        text: "Create Affiliate Link",
+                        shape: 2,
+                        makeLight: true
+                      )
+                    ),
+                  ),
+                  Expanded(
+                    child: prudWidgetStyle.getLongButton(
+                      onPressed: gotoUrl,
+                      text: "Watch/Visit Now",
+                      shape: 2
+                    ),
+                  )
+                ],
               ),
             ),
-
+            spacer.height,
+            SizedBox(
+              height: 150,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.all(10),
+                children: [
+                  PrudDataViewer(field: "Type", value: widget.spark.sparkType),
+                  spacer.width,
+                  PrudDataViewer(field: "Category", value: widget.spark.sparkCategory),
+                  spacer.width,
+                  PrudDataViewer(field: "Targeted Sparks", value: widget.spark.targetSparks),
+                ],
+              ),
+            ),
+            spacer.height,
+            Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              child: PrudPanel(
+                title: "Description",
+                bgColor: prudColorTheme.bgC,
+                child: Column(
+                  children: [
+                    spacer.height,
+                    SizedBox(
+                        child: Translate(
+                          text: "${widget.spark.description}",
+                          align: TextAlign.center,
+                          style: prudWidgetStyle.tabTextStyle.copyWith(
+                            color: prudColorTheme.iconB,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        )
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            spacer.height,
+            SizedBox(
+              height: 150,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.all(10),
+                children: [
+                  PrudDataViewer(field: "Coverage", value: widget.spark.locationTarget),
+                  spacer.width,
+                  PrudDataViewer(field: "Duration (Months)", value: widget.spark.duration),
+                  spacer.width,
+                  PrudDataViewer(field: "Month/Year", value: "${widget.spark.monthCreated}/${widget.spark.yearCreated}"),
+                  spacer.height,
+                ],
+              ),
+            ),
           ],
         ),
       ),

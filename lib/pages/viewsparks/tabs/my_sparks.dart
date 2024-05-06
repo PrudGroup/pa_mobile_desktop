@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
@@ -62,35 +63,40 @@ class MySparksState extends State<MySparks> {
     if(widget.goToTab != null) widget.goToTab!(index);
   }
 
+  Future<void> getSparksFromService() async {
+    if(mounted) setState(() => loading = true);
+    await currencyMath.loginAutomatically();
+    if(iCloud.affAuthToken != null && myStorage.user?.id != null) {
+      String url = "$apiEndPoint/sparks/aff/${myStorage.user?.id}";
+      Response res = await prudDio.get(url, queryParameters: {
+        "limit": 200
+      });
+      if (res.statusCode == 200) {
+        List resData = res.data;
+        if (resData.isNotEmpty) {
+          List<Spark> spks = [];
+          debugPrint("Length; $resData");
+          for (var spk in resData) {
+            spks.add(Spark.fromJson(spk));
+          }
+          iCloud.updateMySpark(spks);
+          if (mounted) {
+            setState(() {
+              mySparks = spks.reversed.toList();
+              foundSparks = mySparks;
+            });
+          }
+        }
+      }
+      if(mounted) setState(() => loading = false);
+    }
+  }
+
   Future<void> getSparks() async {
     if(iCloud.mySparks.isNotEmpty){
       if(mounted) setState(() => mySparks = iCloud.mySparks);
     }else{
-      await currencyMath.loginAutomatically();
-      debugPrint("userID: ${myStorage.user?.id} : NniMlp8xumSPUSASYjJA");
-      if(iCloud.affAuthToken != null && myStorage.user?.id != null) {
-        String url = "$apiEndPoint/sparks/aff/${myStorage.user?.id}";
-        Response res = await prudDio.get(url, queryParameters: {
-          "limit": 200
-        });
-        if (res.statusCode == 200) {
-          List resData = res.data;
-          if (resData.isNotEmpty) {
-            List<Spark> spks = [];
-            debugPrint("Length; $resData");
-            for (var spk in resData) {
-              spks.add(Spark.fromJson(spk));
-            }
-            iCloud.updateMySpark(spks);
-            if (mounted) {
-              setState(() {
-                mySparks = spks.reversed.toList();
-                foundSparks = mySparks;
-              });
-            }
-          }
-        }
-      }
+      await getSparksFromService();
     }
   }
 
@@ -135,6 +141,13 @@ class MySparksState extends State<MySparks> {
             color: prudColorTheme.bgA
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const FaIcon(FontAwesomeIcons.arrowsRotate),
+            onPressed: getSparksFromService,
+            color: prudColorTheme.bgB,
+          ),
+        ],
       ),
       body: SizedBox(
         height: screen.height,
