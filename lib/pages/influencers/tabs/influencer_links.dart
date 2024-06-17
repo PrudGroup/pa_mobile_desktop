@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 
-import '../../components/translate.dart';
-import '../../components/work_in_progress.dart';
-import '../../models/theme.dart';
+import '../../../components/translate.dart';
+import '../../../components/work_in_progress.dart';
+import '../../../models/theme.dart';
 
-class SwitzStores extends StatefulWidget {
-  const SwitzStores({super.key});
+class InfluencerLinks extends StatefulWidget {
+  final Function(int)? goToTab;
+  const InfluencerLinks({super.key, this.goToTab});
 
   @override
-  SwitzStoresState createState() => SwitzStoresState();
+  InfluencerLinksState createState() => InfluencerLinksState();
 }
 
-class SwitzStoresState extends State<SwitzStores> {
+class InfluencerLinksState extends State<InfluencerLinks> {
+  void gotoTab(index){
+    if(widget.goToTab != null) widget.goToTab!(index);
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,15 +27,15 @@ class SwitzStoresState extends State<SwitzStores> {
           onPressed: () => Navigator.pop(context),
           splashRadius: 20,
         ),
+        backgroundColor: prudColorTheme.primary,
         title: Translate(
-          text: "Switz Stores",
+          text: "Influencer Links",
           style: prudWidgetStyle.tabTextStyle.copyWith(
               fontSize: 16,
               color: prudColorTheme.bgA
           ),
         ),
-        actions: const [
-        ],
+        actions: const [],
       ),
       body: const WorkInProgress(),
     );

@@ -124,7 +124,7 @@ final myStorage = MyStorage();
 
 bool isPhone() => UniversalPlatform.isIOS || UniversalPlatform.isAndroid? true : false;
 ThemeData prudTheme = ThemeData(
-  primarySwatch: Colors.pink,
+  primarySwatch: Colors.red,
   brightness: Brightness.light,
   primaryColor: prudColorTheme.primary,
   disabledColor: prudColorTheme.bgA,
@@ -155,8 +155,12 @@ ThemeData prudTheme = ThemeData(
     brightness: Brightness.light,
   ),
   scaffoldBackgroundColor: prudColorTheme.bgA,
-  bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-    backgroundColor: Color(0xffff6302),
+  appBarTheme: AppBarTheme(
+    backgroundColor: prudColorTheme.primary,
+    elevation: 0.0,
+  ),
+  bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    backgroundColor: prudColorTheme.primary,
   ),
   unselectedWidgetColor: const Color(0xffffe3b3),
   highlightColor: Colors.white38,

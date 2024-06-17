@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../components/translate.dart';
 import '../../components/work_in_progress.dart';
-import '../../singletons/shared_local_storage.dart';
-import '../../singletons/tab_data.dart';
+import '../../models/theme.dart';
 
 class Settings extends StatefulWidget {
 
@@ -25,13 +24,6 @@ enum SettingsState{
 class _SettingsState extends State<Settings> {
   final List locale = locales;
   bool hasAuthority = false;
-  final TextStyle tStyle = const TextStyle(
-    fontWeight: FontWeight.w600,
-    color: Colors.black,
-    fontSize: 18.0,
-    fontFamily: "Lato-Italic",
-    decoration: TextDecoration.none,
-  );
 
   @override
   void initState() {
@@ -41,18 +33,20 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white70,
+      backgroundColor: prudColorTheme.bgC,
       resizeToAvoidBottomInset: false,
       appBar:  AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: prudTheme.cardColor,),
+          icon: Icon(Icons.arrow_back_ios, color: prudColorTheme.bgA,),
           onPressed: () => Navigator.pop(context),
           splashRadius: 20,
         ),
-        elevation: 2.0,
         title: Translate(
           text: "Settings",
-          style: tabData.eStyle.copyWith(fontSize: 16),
+          style: prudWidgetStyle.tabTextStyle.copyWith(
+              fontSize: 16,
+              color: prudColorTheme.bgA
+          ),
         ),
         actions: const [
         ],

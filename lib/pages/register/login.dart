@@ -172,7 +172,7 @@ class LoginState extends State<Login> {
               height: screen.height,
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage(prudImages.plain_screen,),
+                  image: AssetImage(prudImages.plainScreen,),
                   fit: BoxFit.cover,
                 )
               ),

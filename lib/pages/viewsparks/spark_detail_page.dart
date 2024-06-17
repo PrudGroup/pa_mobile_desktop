@@ -6,7 +6,9 @@ import 'package:prudapp/components/prud_panel.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../components/modals/link_modal_sheet.dart';
 import '../../components/translate.dart';
+import '../../models/aff_link.dart';
 import '../../models/spark.dart';
 import '../../models/theme.dart';
 import '../../singletons/shared_local_storage.dart';
@@ -29,25 +31,55 @@ class SparkDetailPage extends StatefulWidget {
 
 class SparkDetailPageState extends State<SparkDetailPage> {
   bool checkingLink = false;
+  AffLink? affLink;
   bool linkExist = false;
+  bool creatingLink = false;
+  BorderRadiusGeometry rad = const BorderRadius.only(
+    topLeft: Radius.circular(30),
+    topRight: Radius.circular(30),
+  );
 
-  void showLinkDetails() {
-
+  void showLinkDetails(double height) {
+    if(affLink != null) {
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: prudColorTheme.bgA,
+        elevation: 10,
+        isScrollControlled: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: rad,
+        ),
+        builder: (BuildContext context) => Scaffold(
+          body: LinkModalSheet(
+            affLink: affLink!,
+            radius: rad,
+            height: height,
+          ),
+        ),
+      );
+    }
   }
 
   Future<bool> createAffLink() async {
     bool created = false;
     if(myStorage.user != null && myStorage.user!.id != null && widget.spark.id != null) {
       try{
-        String url = "$apiEndPoint/sparks/spk_aff_links/${widget.spark.id}/${myStorage.user!.id}";
-        Response res = await prudDio.get(url);
-        if(res.statusCode == 200){
-          created = res.data;
+        if(mounted) setState(() => creatingLink = true);
+        String url = "$apiEndPoint/sparks/spk_aff_links/";
+        AffLink afLink = AffLink(sparkId: widget.spark.id, affId: myStorage.user!.id);
+        Response res = await prudDio.post(url, data: afLink.toJson());
+        if(res.statusCode == 201 && mounted){
+          created = true;
+          setState(() {
+            affLink = AffLink.fromJson(res.data);
+            linkExist = true;
+          });
         }
       }catch(ex){
         debugPrint("createAffLink Error: $ex");
       }
     }
+    if(mounted) setState(() => creatingLink = false);
     return created;
   }
 
@@ -69,7 +101,10 @@ class SparkDetailPageState extends State<SparkDetailPage> {
         Response res = await prudDio.get(url);
         debugPrint("Result: ${res.data}: ${res.statusCode}");
         if(res.statusCode == 200){
-          result = res.data;
+          if(res.data != false){
+            result = true;
+            if(mounted) setState(() => affLink = AffLink.fromJson(res.data));
+          }
         }
       }catch(ex){
         debugPrint("checkIfAffLinkExists Error: $ex");
@@ -96,7 +131,7 @@ class SparkDetailPageState extends State<SparkDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Size screen = MediaQuery.of(context).size;
+    Size screen = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: prudColorTheme.bgC,
       resizeToAvoidBottomInset: false,
@@ -138,6 +173,22 @@ class SparkDetailPageState extends State<SparkDetailPage> {
         child: Column(
           children: [
             spacer.height,
+            SizedBox(
+              height: 150,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.all(10),
+                children: [
+                  PrudDataViewer(field: "Status", value: widget.spark.status),
+                  spacer.width,
+                  PrudDataViewer(field: "Sparks Achieved", value: widget.spark.sparksCount),
+                  spacer.width,
+                  PrudDataViewer(field: "Target", value: "${widget.spark.targetSparks}"),
+                  spacer.height,
+                ],
+              ),
+            ),
+            spacer.height,
             Padding(
               padding: const EdgeInsets.only(left: 10, right: 10),
               child: Flex(
@@ -151,15 +202,20 @@ class SparkDetailPageState extends State<SparkDetailPage> {
                     ) :
                     (
                       linkExist? prudWidgetStyle.getLongButton(
-                        onPressed: showLinkDetails,
+                        onPressed: () => showLinkDetails(screen.height * 0.75),
                         text: "Check Link",
                         shape: 2,
                         makeLight: true
-                      ) : prudWidgetStyle.getLongButton(
-                        onPressed: createAffLink,
-                        text: "Create Affiliate Link",
-                        shape: 2,
-                        makeLight: true
+                      ) : (
+                        creatingLink? SpinKitFadingCircle(
+                          color: prudColorTheme.textHeader,
+                          size: 25
+                        ) : prudWidgetStyle.getLongButton(
+                          onPressed: createAffLink,
+                          text: "Create Affiliate Link",
+                          shape: 2,
+                          makeLight: true
+                        )
                       )
                     ),
                   ),
@@ -228,6 +284,104 @@ class SparkDetailPageState extends State<SparkDetailPage> {
                 ],
               ),
             ),
+            spacer.height,
+            if(widget.spark.targetCountries.isNotEmpty) Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              child: PrudPanel(
+                title: "Targeted Countries",
+                bgColor: prudColorTheme.bgC,
+                child: Column(
+                  children: [
+                    spacer.height,
+                    SizedBox(
+                      child: Translate(
+                        text: widget.spark.targetCountries.join(", "),
+                        align: TextAlign.center,
+                        style: prudWidgetStyle.tabTextStyle.copyWith(
+                          color: prudColorTheme.iconB,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      )
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if(widget.spark.targetCountries.isNotEmpty) spacer.height,
+            if(widget.spark.targetStates.isNotEmpty) Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              child: PrudPanel(
+                title: "Targeted States",
+                bgColor: prudColorTheme.bgC,
+                child: Column(
+                  children: [
+                    spacer.height,
+                    SizedBox(
+                      child: Translate(
+                        text: widget.spark.targetStates.join(", "),
+                        align: TextAlign.center,
+                        style: prudWidgetStyle.tabTextStyle.copyWith(
+                          color: prudColorTheme.iconB,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      )
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if(widget.spark.targetStates.isNotEmpty) spacer.height,
+            if(widget.spark.targetCities.isNotEmpty) Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              child: PrudPanel(
+                title: "Targeted Cities",
+                bgColor: prudColorTheme.bgC,
+                child: Column(
+                  children: [
+                    spacer.height,
+                    SizedBox(
+                      child: Translate(
+                        text: widget.spark.targetCities.join(", "),
+                        align: TextAlign.center,
+                        style: prudWidgetStyle.tabTextStyle.copyWith(
+                          color: prudColorTheme.iconB,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      )
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if(widget.spark.targetCities.isNotEmpty) spacer.height,
+            if(widget.spark.targetTowns.isNotEmpty) Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              child: PrudPanel(
+                title: "Targeted Towns",
+                bgColor: prudColorTheme.bgC,
+                child: Column(
+                  children: [
+                    spacer.height,
+                    SizedBox(
+                      child: Translate(
+                        text: widget.spark.targetTowns.join(", "),
+                        align: TextAlign.center,
+                        style: prudWidgetStyle.tabTextStyle.copyWith(
+                          color: prudColorTheme.iconB,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      )
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if(widget.spark.targetTowns.isNotEmpty) spacer.height,
+            largeSpacer.height,
           ],
         ),
       ),

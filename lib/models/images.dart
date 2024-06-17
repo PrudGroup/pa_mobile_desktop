@@ -11,7 +11,7 @@ class PrudImages {
   String dislike;
   String settings;
   String screen;
-  String plain_screen;
+  String plainScreen;
   String bg;
   String user;
   String err;
@@ -50,6 +50,11 @@ class PrudImages {
   String sparks;
   String newSpark;
   String mySparks;
+  String income;
+  String wallet;
+  String promotions;
+  String points;
+  String links;
 
   PrudImages({
     required this.front1,
@@ -102,7 +107,12 @@ class PrudImages {
     required this.sparks,
     required this.newSpark,
     required this.mySparks,
-    required this.plain_screen,
+    required this.plainScreen,
+    required this.points,
+    required this.links,
+    required this.income,
+    required this.promotions,
+    required this.wallet
   });
 }
 
@@ -134,7 +144,7 @@ PrudImages prudImages = PrudImages(
   logo: 'assets/images/prud_logo.png',
   prudIcon: 'assets/images/prudapp_icon.png',
   screen: 'assets/images/gh.jpg',
-  plain_screen: 'assets/images/plain_gh.jpg',
+  plainScreen: 'assets/images/plain_gh.jpg',
   bg: 'assets/images/gg.jpg',
   settings: 'assets/images/settings.png',
   user: 'assets/images/user.png',
@@ -157,5 +167,10 @@ PrudImages prudImages = PrudImages(
   shortener: 'assets/images/link.png',
   sparks: 'assets/images/subscriber.png',
   newSpark: "assets/images/subscribe.png",
-  mySparks: "assets/images/subscribe1.png"
+  mySparks: "assets/images/subscribe1.png",
+  points: 'assets/images/marketing.png',
+  links: 'assets/images/link1.png',
+  income: "assets/images/passive-income.png",
+  promotions: "assets/images/discount.png",
+  wallet: "assets/images/wallet.png",
 );
