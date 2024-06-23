@@ -7,9 +7,7 @@
 -keep class io.flutter.plugins.**  { *; }
 -keep class fr.skyost.rate_my_app.RateMyAppPlugin.**  { *; }
 -keep class weborb.** {*;}
--keep class com.backendless.** {*;}
 -keep class androidx.lifecycle.DefaultLifecycleObserver
--dontwarn com.backendless.**
 -dontwarn weborb.**
 -dontwarn io.flutter.embedding.**
 -dontwarn okio.**

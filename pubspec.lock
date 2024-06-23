@@ -661,6 +661,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  go_router:
+    dependency: "direct main"
+    description:
+      name: go_router
+      sha256: cdae1b9c8bd7efadcef6112e81c903662ef2ce105cbd220a04bbb7c3425b5554
+      url: "https://pub.dev"
+    source: hosted
+    version: "14.2.0"
   graphs:
     dependency: transitive
     description:
@@ -1178,14 +1186,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
-  tab_container:
-    dependency: "direct main"
-    description:
-      name: tab_container
-      sha256: "15f87032f63fd7f0a59740aa31c5bc7056af3159a37311bca546d343240f3029"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.5.3"
   term_glyph:
     dependency: transitive
     description:

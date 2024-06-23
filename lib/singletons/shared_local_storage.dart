@@ -54,6 +54,78 @@ class MyStorage extends ChangeNotifier {
     return _myStorage;
   }
 
+  saveProductReferral(String productId, String linkId){
+    Future.delayed(Duration.zero, () async {
+      String key = "product_${productId}_referral";
+      await addToStore(key: key, value: linkId);
+    });
+  }
+
+  saveAdsReferral(String adsId, String linkId){
+    Future.delayed(Duration.zero, () async {
+      String key = "ads_${adsId}_referral";
+      await addToStore(key: key, value: linkId);
+    });
+  }
+
+  saveHotelReferral(String hotelId, String linkId){
+    Future.delayed(Duration.zero, () async {
+      String key = "hotel_${hotelId}_referral";
+      await addToStore(key: key, value: linkId);
+    });
+  }
+
+  saveRechargeReferral(String linkId){
+    Future.delayed(Duration.zero, () async {
+      String key = "recharge_referral";
+      await addToStore(key: key, value: linkId);
+    });
+  }
+
+  saveFlightReferral(String linkId){
+    Future.delayed(Duration.zero, () async {
+      String key = "flight_referral";
+      await addToStore(key: key, value: linkId);
+    });
+  }
+
+  saveBusReferral(String linkId){
+    Future.delayed(Duration.zero, () async {
+      String key = "bus_referral";
+      await addToStore(key: key, value: linkId);
+    });
+  }
+
+  saveGiftReferral(String linkId){
+    Future.delayed(Duration.zero, () async {
+      String key = "gift_referral";
+      await addToStore(key: key, value: linkId);
+    });
+  }
+
+  saveHotelsReferral(String linkId){
+    Future.delayed(Duration.zero, () async {
+      String key = "hotels_referral";
+      await addToStore(key: key, value: linkId);
+    });
+  }
+
+  String? getHotelsReferral() => getFromStore(key: "hotels_referral");
+
+  String? getGiftReferral() => getFromStore(key: "gift_referral");
+
+  String? getBusReferral() => getFromStore(key: "bus_referral");
+
+  String? getFlightReferral() => getFromStore(key: "flight_referral");
+
+  String? getRechargeReferral() => getFromStore(key: "recharge_referral");
+
+  String? getAdsReferral(String adsId) => getFromStore(key: "ads_${adsId}_referral");
+
+  String? getProductReferral(String productId) => getFromStore(key: "product_${productId}_referral");
+
+  String? getHotelReferral(String hotelId) => getFromStore(key: "hotel_${hotelId}_referral");
+
   Future<void> initializeValues() async {
     try{
       var storedUser = myStorage.getFromStore(key: 'user');
@@ -144,14 +216,12 @@ ThemeData prudTheme = ThemeData(
     primaryContainer: prudColorTheme.lineA,
     secondary: prudColorTheme.secondary,
     secondaryContainer: Colors.green,
-    background: prudColorTheme.bgB,
     error: prudColorTheme.error,
-    onBackground: Colors.black,
     onError: prudColorTheme.danger,
     onPrimary: prudColorTheme.bgC,
     onSecondary: prudColorTheme.bgA,
     onSurface:prudColorTheme.textA,
-    surface: prudColorTheme.buttonC,
+    surface: prudColorTheme.bgB,
     brightness: Brightness.light,
   ),
   scaffoldBackgroundColor: prudColorTheme.bgA,

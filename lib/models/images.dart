@@ -55,6 +55,22 @@ class PrudImages {
   String promotions;
   String points;
   String links;
+  String utility;
+  String utilities;
+  String travel;
+  String travel1;
+  String transport;
+  String bus;
+  String smartTv;
+  String smartTv1;
+  String resort;
+  String power;
+  String power1;
+  String hotel;
+  String flight;
+  String airtime;
+
+
 
   PrudImages({
     required this.front1,
@@ -112,7 +128,21 @@ class PrudImages {
     required this.links,
     required this.income,
     required this.promotions,
-    required this.wallet
+    required this.wallet,
+    required this.airtime,
+    required this.bus,
+    required this.flight,
+    required this.hotel,
+    required this.power,
+    required this.power1,
+    required this.resort,
+    required this.smartTv,
+    required this.smartTv1,
+    required this.transport,
+    required this.travel,
+    required this.travel1,
+    required this.utilities,
+    required this.utility
   });
 }
 
@@ -173,4 +203,18 @@ PrudImages prudImages = PrudImages(
   income: "assets/images/passive-income.png",
   promotions: "assets/images/discount.png",
   wallet: "assets/images/wallet.png",
+  airtime: "assets/images/airtime.png",
+  flight: "assets/images/flight.png",
+  hotel: "assets/images/hotel.png",
+  power: "assets/images/power.png",
+  power1: "assets/images/power1.png",
+  resort: "assets/images/resort.png",
+  smartTv: "assets/images/smartTv.png",
+  smartTv1: "assets/images/smartTv1.png",
+  bus: "assets/images/tour-bus.png",
+  transport: "assets/images/transport.png",
+  travel: "assets/images/travel.png",
+  travel1: "assets/images/travel1.png",
+  utility: "assets/images/utility.png",
+  utilities: "assets/images/utilities.png",
 );

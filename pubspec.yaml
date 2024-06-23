@@ -74,7 +74,7 @@ dependencies:
   flutter_vector_icons: ^2.0.0
   flutterwave_standard: 1.0.8
   uuid: ^4.4.0
-  tab_container: ^3.5.3
+  go_router: ^14.2.0
 
 
 dev_dependencies:
@@ -195,6 +195,21 @@ flutter:
     - assets/images/pos-terminal.png
     - assets/images/wallet.png
     - assets/images/link1.png
+    - assets/images/airtime.png
+    - assets/images/flight.png
+    - assets/images/hotel.png
+    - assets/images/power.png
+    - assets/images/power1.png
+    - assets/images/resort.png
+    - assets/images/smart-tv.png
+    - assets/images/smart-tv1.png
+    - assets/images/tour-bus.png
+    - assets/images/transport.png
+    - assets/images/travel.png
+    - assets/images/travel1.png
+    - assets/images/utilities.png
+    - assets/images/utility.png
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

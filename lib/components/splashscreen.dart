@@ -18,9 +18,9 @@ class SplashScreenState extends State<SplashScreen> {
   List<ContentConfig> listContentConfig = [];
   Color color = prudTheme.colorScheme.onSurface;
   ButtonStyle buttonStyle = ButtonStyle(
-    foregroundColor: MaterialStateProperty.resolveWith<Color?>(
-        (Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    foregroundColor: WidgetStateProperty.resolveWith<Color?>(
+        (Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return prudTheme.dividerColor;
       }
       return null; // Use the component's default.

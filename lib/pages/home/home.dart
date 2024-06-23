@@ -8,6 +8,7 @@ import 'package:getwidget/getwidget.dart';
 import 'package:prudapp/components/main_menu.dart';
 import 'package:prudapp/components/prud_showroom.dart';
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/pages/giftcards/gift_cards.dart';
 import 'package:prudapp/pages/influencers/influencers.dart';
 import 'package:prudapp/pages/shippers/shippers.dart';
 import 'package:prudapp/pages/shorteners/shortener.dart';
@@ -21,8 +22,10 @@ import '../../models/images.dart';
 import '../../singletons/shared_local_storage.dart';
 import '../account/my_account.dart';
 import '../ads/ads.dart';
+import '../recharge/recharge.dart';
 import '../settings/settings.dart';
 import '../switzstores/switz_stores.dart';
+import '../travels/switz_travels.dart';
 import '../viewsparks/view_spark.dart';
 import 'home_drawer.dart';
 
@@ -85,6 +88,46 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
       title: 'Shippers',
       page: const Shippers(),
       icon: prudImages.shipper
+    ),
+    Menu(
+      title: 'SwitzTravels',
+      page: const SwitzTravels(),
+      icon: prudImages.shortener
+    ),
+    Menu(
+      title: 'Flights',
+      page: const SwitzTravels(tab: 1,),
+      icon: prudImages.shortener
+    ),
+    Menu(
+      title: 'Buses',
+      page: const SwitzTravels(tab: 0,),
+      icon: prudImages.shortener
+    ),
+    Menu(
+      title: 'Hotels',
+      page: const SwitzTravels(tab: 2,),
+      icon: prudImages.shortener
+    ),
+    Menu(
+      title: 'Gift Cards',
+      page: const GiftCards(),
+      icon: prudImages.shortener
+    ),
+    Menu(
+      title: 'Airtime',
+      page: const Recharge(tab: 0,),
+      icon: prudImages.shortener
+    ),
+    Menu(
+      title: 'Data Bundles',
+      page: const Recharge(tab: 1,),
+      icon: prudImages.shortener
+    ),
+    Menu(
+      title: 'Bills & Utilities',
+      page: const Recharge(tab: 2,),
+      icon: prudImages.shortener
     ),
     Menu(
       title: 'Url Shortener',
@@ -329,7 +372,7 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
             textAlign: TextAlign.center,
           ),
           backgroundColor: prudTheme.primaryColor,
-          foregroundColor: prudTheme.colorScheme.background,
+          foregroundColor: prudTheme.colorScheme.surface,
         ),
         body: SizedBox(
           height: height,

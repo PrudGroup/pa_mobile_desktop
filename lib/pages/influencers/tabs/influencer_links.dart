@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:prudapp/pages/influencers/tabs/link_tabs/ads_links.dart';
+import 'package:prudapp/pages/influencers/tabs/link_tabs/spark_links.dart';
+import 'package:prudapp/pages/influencers/tabs/link_tabs/switz_store_links.dart';
 
+import '../../../components/inner_menu.dart';
 import '../../../components/translate.dart';
-import '../../../components/work_in_progress.dart';
 import '../../../models/theme.dart';
 
 class InfluencerLinks extends StatefulWidget {
@@ -13,9 +16,17 @@ class InfluencerLinks extends StatefulWidget {
 }
 
 class InfluencerLinksState extends State<InfluencerLinks> {
+  final List<InnerMenuItem> tabMenus = [
+    InnerMenuItem(title: "Sparks", menu: const SparkLinks()),
+    InnerMenuItem(title: "Ads", menu: const AdsLinks()),
+    InnerMenuItem(title: "Switz Stores", menu: const SwitzStoreLinks()),
+  ];
+
   void gotoTab(index){
     if(widget.goToTab != null) widget.goToTab!(index);
   }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +48,7 @@ class InfluencerLinksState extends State<InfluencerLinks> {
         ),
         actions: const [],
       ),
-      body: const WorkInProgress(),
+      body: InnerMenu(menus: tabMenus, type: 0,),
     );
   }
 }

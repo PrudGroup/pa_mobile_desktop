@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import '../components/page_transitions/scale.dart';
@@ -50,6 +51,7 @@ class ICloud extends ChangeNotifier{
   List<SparkCost> sparkCosts = [];
   List<Spark> mySparks = isProduction? [] : testSparks;
   List<Spark> sparks = isProduction? [] : testSparks;
+  bool showInnerTabsAndMenus = true;
 
 
   factory ICloud() {
@@ -93,6 +95,11 @@ class ICloud extends ChangeNotifier{
 
   void addToSparks(Spark spk){
     sparks.add(spk);
+    notifyListeners();
+  }
+
+  void toggleFooterMenu(){
+    showInnerTabsAndMenus = !showInnerTabsAndMenus;
     notifyListeners();
   }
 
@@ -284,6 +291,19 @@ class ICloud extends ChangeNotifier{
     }
   }
 
+  void go(BuildContext context, String route, Map<String, dynamic>? qParam){
+    GoRouter.of(context).go(Uri(path: route, queryParameters: qParam).toString());
+  }
+
+  void goByName(BuildContext context, String routeName, Map<String, String> pParam, Map<String, dynamic>? qParam){
+    if(qParam != null){
+      context.goNamed(routeName, pathParameters: pParam, queryParameters: qParam);
+    }else{
+      context.goNamed(routeName, pathParameters: pParam);
+    }
+
+  }
+
   void goto( BuildContext context, Widget where) => Navigator.push(context, ScaleRoute(page: where));
 
   ICloud._internal();
@@ -293,6 +313,8 @@ const bool isProduction = Constants.envType=="production";
 const String prudApiUrl = Constants.prudApiUrl;
 const String localApiUrl = Constants.localApiUrl;
 const String prudApiKey = Constants.prudApiKey;
+const String reloadlyKey = Constants.reloadlyClientId;
+const String reloadlySecret = Constants.reloadlySecretKey;
 const String apiEndPoint = isProduction? prudApiUrl : localApiUrl;
 const String waveApiUrl = "https://api.flutterwave.com/v3";
 const double waveVat = 0.07;

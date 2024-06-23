@@ -243,7 +243,7 @@ ColorTheme prudColorTheme = const ColorTheme(
     iconA: Color(0xff38106A),
     iconB: Color(0xffCE1567),
     iconC: Color(0xff82858A),
-    iconD: Color(0xffFFFFFF),
+    iconD: Color(0xfffbd2ce),
     lineA: Color(0xffd0782f),
     lineB: Color(0xffC3C8D2),
     lineC: Color(0xffEAECF0),

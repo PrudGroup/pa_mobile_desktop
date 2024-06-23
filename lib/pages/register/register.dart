@@ -63,6 +63,7 @@ class RegisteredState extends State<Register> {
   TextEditingController phoneTextController = TextEditingController();
   bool loadingStates = false;
   bool loadingCities = false;
+  String? referralCode;
 
   void validateStep1() {
     if (_formKey.currentState!.validate()) {
@@ -254,6 +255,7 @@ class RegisteredState extends State<Register> {
         type: 3
       );
     });
+    if(referralCode != null) await myStorage.addToStore(key: "referral_code", value: referralCode);
     myStorage.addToStore(key: "user", value: jsonEncode(newUser));
   }
 
@@ -357,10 +359,38 @@ class RegisteredState extends State<Register> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           spacer.height,
+                          Translate(
+                            text: "Do you have a referral code? With referral codes, you get 2% discount for everything on Prudapp."
+                                " If you don't have, don't worry! There are many more things you can enjoy on Prudapp.",
+                            style: prudWidgetStyle.tabTextStyle.copyWith(
+                              fontSize: 16,
+                              color: prudColorTheme.textA,
+                              fontWeight: FontWeight.w500
+                            ),
+                            align: TextAlign.center,
+                          ),
+                          FormBuilderTextField(
+                            initialValue: referralCode,
+                            name: 'referral',
+                            autofocus: true,
+                            style: tabData.npStyle,
+                            keyboardType: TextInputType.text,
+                            decoration: getDeco("Referral Code"),
+                            onChanged: (dynamic value){
+                              setState(() {
+                                referralCode = value?.trim();
+                              });
+                            },
+                            valueTransformer: (text) => num.tryParse(text!),
+                            validator: FormBuilderValidators.compose([
+                              FormBuilderValidators.minLength(3),
+                              FormBuilderValidators.maxLength(100)
+                            ]),
+                          ),
+                          spacer.height,
                           FormBuilderTextField(
                             initialValue: newUser.fullName,
                             name: 'fullName',
-                            autofocus: true,
                             style: tabData.npStyle,
                             keyboardType: TextInputType.name,
                             decoration: getDeco("FullName"),

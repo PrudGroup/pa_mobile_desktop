@@ -54,4 +54,15 @@ abstract class Constants {
     'WAVE_SECRET_KEY',
     defaultValue: '',
   );
+
+  static const String reloadlySecretKey = String.fromEnvironment(
+    'RELOADLY_CLIENT_SECRET',
+    defaultValue: '',
+  );
+
+  static const String reloadlyClientId = String.fromEnvironment(
+    'RELOADLY_CLIENT_ID',
+    defaultValue: '',
+  );
+
 }

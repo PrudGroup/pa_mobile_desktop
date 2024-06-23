@@ -7,7 +7,8 @@ import 'package:prudapp/pages/viewsparks/tabs/sparks.dart';
 import '../../models/images.dart';
 
 class ViewSpark extends StatefulWidget {
-  const ViewSpark({super.key});
+  final int? tab;
+  const ViewSpark({super.key, this.tab});
 
   @override
   ViewSparkState createState() => ViewSparkState();
@@ -22,6 +23,7 @@ class ViewSparkState extends State<ViewSpark> with TickerProviderStateMixin {
   @override
   void initState(){
     super.initState();
+    if(widget.tab != null) tabCtrl.animateTo(widget.tab!);
   }
 
   @override

@@ -7,6 +7,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/pages/home/home.dart';
 import 'package:prudapp/pages/register/register.dart';
+import 'package:prudapp/router.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
@@ -135,11 +136,15 @@ class MyApp extends StatelessWidget {
           default:
             {
               bool isNew = snapshot.data?? false;
-              return MaterialApp(
+              return isNew? MaterialApp(
                 title: 'Prudapp',
                 theme: prudTheme,
-                home: isNew?  const Register() :   MyHomePage(title: "Prudapp"),
+                home: const Register(),
                 debugShowCheckedModeBanner: false,
+              ) : MaterialApp.router(
+                debugShowCheckedModeBanner: false,
+                theme: prudTheme,
+                routerConfig: prudRouter,
               );
             }
         }
