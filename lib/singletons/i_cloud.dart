@@ -306,6 +306,27 @@ class ICloud extends ChangeNotifier{
 
   void goto( BuildContext context, Widget where) => Navigator.push(context, ScaleRoute(page: where));
 
+  Future<String?> getReloadlyToken(String audience) async {
+    Dio reloadlyDio = Dio();
+    reloadlyDio.options.headers.addAll({
+      "Accept": "application/json",
+      "Content-Type": "application/json"
+    });
+    String url = "https://auth.reloadly.com/oauth/token";
+    Map<String, dynamic> credentials = {
+      "client_id": reloadlyKey,
+      "client_secret": reloadlySecret,
+      "grant_type": "client_credentials",
+      "audience": audience
+    };
+    Response res = await reloadlyDio.post(url, data: credentials);
+    if(res.data != null){
+      return "${res.data['token_type']} ${res.data['access_token']}";
+    }else {
+      return null;
+    }
+  }
+
   ICloud._internal();
 }
 
@@ -313,8 +334,8 @@ const bool isProduction = Constants.envType=="production";
 const String prudApiUrl = Constants.prudApiUrl;
 const String localApiUrl = Constants.localApiUrl;
 const String prudApiKey = Constants.prudApiKey;
-const String reloadlyKey = Constants.reloadlyClientId;
-const String reloadlySecret = Constants.reloadlySecretKey;
+const String reloadlyKey = Constants.apiStatues == 'production'? Constants.reloadlyLiveClientId : Constants.reloadlyTestClientId;
+const String reloadlySecret = Constants.apiStatues == 'production'? Constants.reloadlyLiveSecretKey : Constants.reloadlyTestSecretKey;
 const String apiEndPoint = isProduction? prudApiUrl : localApiUrl;
 const String waveApiUrl = "https://api.flutterwave.com/v3";
 const double waveVat = 0.07;

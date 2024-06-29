@@ -29,8 +29,8 @@ class PrudPanel extends StatelessWidget {
             constraints: const BoxConstraints(minHeight: 50.0,),
             decoration: BoxDecoration(
               color: bgColor?? prudColorTheme.bgA,
-              border: child != null? Border.all(color: prudColorTheme.lineC,)
-                  : Border(top: BorderSide(color: prudColorTheme.lineC,)),
+              border: child != null? Border.all(color: prudColorTheme.lineB,)
+                  : Border(top: BorderSide(color: prudColorTheme.lineB,)),
               borderRadius: child != null? BorderRadius.circular(10) : BorderRadius.zero
             ),
             child: child?? const SizedBox(),

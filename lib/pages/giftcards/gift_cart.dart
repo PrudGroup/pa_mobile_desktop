@@ -1,24 +1,17 @@
 import 'package:flutter/material.dart';
 
-import '../../../components/Translate.dart';
-import '../../../components/work_in_progress.dart';
-import '../../../models/theme.dart';
+import '../../components/Translate.dart';
+import '../../components/work_in_progress.dart';
+import '../../models/theme.dart';
 
-class Airtime extends StatefulWidget {
-  final String? affLinkId;
-  final Function(int)? goToTab;
-  const Airtime({super.key, this.affLinkId, this.goToTab});
+class GiftCart extends StatefulWidget {
+  const GiftCart({super.key});
 
   @override
-  AirtimeState createState() => AirtimeState();
+  GiftCartState createState() => GiftCartState();
 }
 
-class AirtimeState extends State<Airtime> {
-
-  void gotoTab(index){
-    if(widget.goToTab != null) widget.goToTab!(index);
-  }
-
+class GiftCartState extends State<GiftCart> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +24,7 @@ class AirtimeState extends State<Airtime> {
           splashRadius: 20,
         ),
         title: Translate(
-          text: "Airtime Top-up",
+          text: "Gift Cart",
           style: prudWidgetStyle.tabTextStyle.copyWith(
               fontSize: 16,
               color: prudColorTheme.bgA

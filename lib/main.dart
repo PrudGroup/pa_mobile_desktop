@@ -5,10 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:prudapp/models/theme.dart';
-import 'package:prudapp/pages/home/home.dart';
 import 'package:prudapp/pages/register/register.dart';
 import 'package:prudapp/router.dart';
 import 'package:prudapp/singletons/currency_math.dart';
+import 'package:prudapp/singletons/gift_card_notifier.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:universal_platform/universal_platform.dart';
@@ -45,6 +45,7 @@ void main() async {
   await GetStorage.init();
   await myStorage.initializeValues();
   await currencyMath.init();
+  await giftCardNotifier.initGiftCard();
   // await messenger.setAutoInitEnabled(true);
   myStorage.setWindowSize(size: const Size(400, 700));
 

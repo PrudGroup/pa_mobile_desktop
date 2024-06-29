@@ -55,13 +55,28 @@ abstract class Constants {
     defaultValue: '',
   );
 
-  static const String reloadlySecretKey = String.fromEnvironment(
-    'RELOADLY_CLIENT_SECRET',
+  static const String reloadlyTestSecretKey = String.fromEnvironment(
+    'RELOADLY_TEST_CLIENT_SECRET',
     defaultValue: '',
   );
 
-  static const String reloadlyClientId = String.fromEnvironment(
-    'RELOADLY_CLIENT_ID',
+  static const String reloadlyTestClientId = String.fromEnvironment(
+    'RELOADLY_TEST_CLIENT_ID',
+    defaultValue: '',
+  );
+
+  static const String reloadlyLiveSecretKey = String.fromEnvironment(
+    'RELOADLY_LIVE_CLIENT_SECRET',
+    defaultValue: '',
+  );
+
+  static const String reloadlyLiveClientId = String.fromEnvironment(
+    'RELOADLY_LIVE_CLIENT_ID',
+    defaultValue: '',
+  );
+
+  static const String apiStatues = String.fromEnvironment(
+    'ALL_API_STATUS',
     defaultValue: '',
   );
 

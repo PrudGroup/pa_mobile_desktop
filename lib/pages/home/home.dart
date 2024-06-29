@@ -92,42 +92,42 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
     Menu(
       title: 'SwitzTravels',
       page: const SwitzTravels(),
-      icon: prudImages.shortener
+      icon: prudImages.travel1
     ),
     Menu(
       title: 'Flights',
       page: const SwitzTravels(tab: 1,),
-      icon: prudImages.shortener
+      icon: prudImages.flight
     ),
     Menu(
       title: 'Buses',
       page: const SwitzTravels(tab: 0,),
-      icon: prudImages.shortener
+      icon: prudImages.transport
     ),
     Menu(
       title: 'Hotels',
       page: const SwitzTravels(tab: 2,),
-      icon: prudImages.shortener
+      icon: prudImages.resort
     ),
     Menu(
       title: 'Gift Cards',
       page: const GiftCards(),
-      icon: prudImages.shortener
+      icon: prudImages.gift
     ),
     Menu(
       title: 'Airtime',
       page: const Recharge(tab: 0,),
-      icon: prudImages.shortener
+      icon: prudImages.airtime
     ),
     Menu(
       title: 'Data Bundles',
       page: const Recharge(tab: 1,),
-      icon: prudImages.shortener
+      icon: prudImages.dataBundle
     ),
     Menu(
       title: 'Bills & Utilities',
       page: const Recharge(tab: 2,),
-      icon: prudImages.shortener
+      icon: prudImages.smartTv1
     ),
     Menu(
       title: 'Url Shortener',
@@ -397,12 +397,12 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
                   ),
                   spacer.height,
                   PrudContainer(
-                      hasPadding: true,
-                      child: MainMenu(
-                        menus: menus,
-                        bgColor: prudColorTheme.bgC,
-                        useWrap: true,
-                      )
+                    hasPadding: true,
+                    child: MainMenu(
+                      menus: menus,
+                      bgColor: prudColorTheme.bgC,
+                      useWrap: true,
+                    )
                   ),
                   spacer.height,
                   PrudShowroom(items: showroom),

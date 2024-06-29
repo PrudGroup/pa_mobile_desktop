@@ -229,7 +229,7 @@ Widget getTextButton({required String title, required Function onPressed, Color 
 
 ColorTheme prudColorTheme = const ColorTheme(
     primary: Color(0xffff0000),
-    secondary: Color(0xff127d0c),
+    secondary: Color(0xff000000),
     bgA: Color(0xffFFFFFF),
     bgB: Color(0xffe4e1e6),
     bgC: Color(0xffF2F4F7),
@@ -263,7 +263,7 @@ WidgetStyle prudWidgetStyle = WidgetStyle(
     borderRadius: BorderRadius.circular(10)
   ),
   enabledBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: prudColorTheme.lineC),
+    borderSide: BorderSide(color: prudColorTheme.lineB),
     borderRadius: const BorderRadius.all(Radius.circular(10.0)),
   ),
   focusedBorder: OutlineInputBorder(
@@ -324,6 +324,21 @@ PrudSpacer xLargeSpacer = const PrudSpacer(
   height: SizedBox(height: 200),
   width: SizedBox(width: 200),
 );
+
+List<BoxShadow> prudShadows = [
+  BoxShadow(
+    color: prudColorTheme.secondary.withOpacity(0.3),
+    spreadRadius: -3,
+    blurRadius: 6,
+    offset: const Offset(2, 2),
+  ),
+  BoxShadow(
+    color: prudColorTheme.secondary.withOpacity(0.3),
+    spreadRadius: -3,
+    blurRadius: 10,
+    offset: const Offset(0, 6),
+  ),
+];
 
 InputDecoration getDeco(String label, {
   Widget suffixIcon = const SizedBox(),

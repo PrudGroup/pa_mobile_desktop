@@ -4,21 +4,19 @@ import '../../../components/Translate.dart';
 import '../../../components/work_in_progress.dart';
 import '../../../models/theme.dart';
 
-class Airtime extends StatefulWidget {
-  final String? affLinkId;
+class GiftTransactionHistory extends StatefulWidget {
   final Function(int)? goToTab;
-  const Airtime({super.key, this.affLinkId, this.goToTab});
+  const GiftTransactionHistory({super.key, this.goToTab});
 
   @override
-  AirtimeState createState() => AirtimeState();
+  GiftTransactionHistoryState createState() => GiftTransactionHistoryState();
 }
 
-class AirtimeState extends State<Airtime> {
+class GiftTransactionHistoryState extends State<GiftTransactionHistory> {
 
   void gotoTab(index){
     if(widget.goToTab != null) widget.goToTab!(index);
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +29,7 @@ class AirtimeState extends State<Airtime> {
           splashRadius: 20,
         ),
         title: Translate(
-          text: "Airtime Top-up",
+          text: "Transaction History",
           style: prudWidgetStyle.tabTextStyle.copyWith(
               fontSize: 16,
               color: prudColorTheme.bgA

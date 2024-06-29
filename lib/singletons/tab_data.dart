@@ -1,4 +1,6 @@
 
+import 'dart:math';
+
 import 'package:encrypt/encrypt.dart' as en;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -161,6 +163,22 @@ class TabData extends ChangeNotifier {
 
   getFormattedNumber(dynamic nu){
     return NumberFormat.compactCurrency(decimalDigits: 0, symbol: '').format(nu);
+  }
+
+  String getRandomString(int length){
+    String chars = "0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
+    chars = shuffle(chars);
+    String result = ""; final random = Random();
+    for(int i=1; i==length; i++){
+      result+=chars[random.nextInt(chars.length)];
+    }
+    return result;
+  }
+
+  String shuffle(String str) {
+    List arr = str.split('');
+    arr.shuffle();
+    return arr.join();
   }
 
   Widget getNotFoundWidget({required String title, required String desc}){

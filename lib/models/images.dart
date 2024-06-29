@@ -69,6 +69,11 @@ class PrudImages {
   String hotel;
   String flight;
   String airtime;
+  String gift;
+  String dataBundle;
+  String cart;
+  String history;
+  String giftSearch;
 
 
 
@@ -142,7 +147,12 @@ class PrudImages {
     required this.travel,
     required this.travel1,
     required this.utilities,
-    required this.utility
+    required this.utility,
+    required this.gift,
+    required this.dataBundle,
+    required this.cart,
+    required this.giftSearch,
+    required this.history
   });
 }
 
@@ -209,12 +219,17 @@ PrudImages prudImages = PrudImages(
   power: "assets/images/power.png",
   power1: "assets/images/power1.png",
   resort: "assets/images/resort.png",
-  smartTv: "assets/images/smartTv.png",
-  smartTv1: "assets/images/smartTv1.png",
+  smartTv: "assets/images/smart-tv.png",
+  smartTv1: "assets/images/smart-tv1.png",
   bus: "assets/images/tour-bus.png",
   transport: "assets/images/transport.png",
   travel: "assets/images/travel.png",
   travel1: "assets/images/travel1.png",
   utility: "assets/images/utility.png",
   utilities: "assets/images/utilities.png",
+  gift: "assets/images/gift-card.png",
+  dataBundle: "assets/images/wifi-router.png",
+  cart: "assets/images/cart.png",
+  history: "assets/images/history.png",
+  giftSearch: "assets/images/gift.png",
 );

@@ -32,6 +32,7 @@ class MainMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return useWrap? Wrap(
       direction: Axis.horizontal,
+      runSpacing: 10.0,
       alignment: WrapAlignment.spaceBetween,
       runAlignment: WrapAlignment.start,
       children: menus.map((menu) => MainMenuItem(

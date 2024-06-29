@@ -4,12 +4,14 @@ import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/singletons/currency_math.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:translator/translator.dart';
 import 'package:timeago/timeago.dart' as time_ago;
 import 'package:get_storage/get_storage.dart';
 
+import '../models/reloadly.dart';
 import '../models/user.dart';
 
 
@@ -21,6 +23,7 @@ class MyStorage extends ChangeNotifier {
   GetStorage lStore = GetStorage();
   bool hasInitialized = false;
   User? user;
+  List<String> convertibleCurrencies = [];
   var alertStyle = AlertStyle(
       animationType: AnimationType.fromTop,
       isCloseButton: true,
@@ -52,6 +55,15 @@ class MyStorage extends ChangeNotifier {
 
   factory MyStorage() {
     return _myStorage;
+  }
+
+  Future<void> setConvertibleCurrencies() async {
+    List<String>? curs = getFromStore(key: "convertibleCurrencies");
+    if(curs != null){
+      convertibleCurrencies = curs;
+    }else{
+      convertibleCurrencies = await currencyMath.getAvailableCurrencies();
+    }
   }
 
   saveProductReferral(String productId, String linkId){
@@ -130,6 +142,7 @@ class MyStorage extends ChangeNotifier {
     try{
       var storedUser = myStorage.getFromStore(key: 'user');
       user = storedUser == null? null : User.fromJson(jsonDecode(storedUser));
+      await setConvertibleCurrencies();
       hasInitialized = true;
       notifyListeners();
     }catch (ex) {
@@ -189,9 +202,44 @@ class MyStorage extends ChangeNotifier {
     }
   }
 
+  void getBeneficiariesFromCache(){
+    dynamic benes = myStorage.getFromStore(key: "beneficiaries");
+    if(benes != null){
+      List<Map<String, dynamic>> bens = jsonDecode(benes);
+      if(bens.isNotEmpty){
+        for (var ben in bens) {
+          beneficiaries.add(Beneficiary.fromJson(ben));
+        }
+      }
+    }
+  }
+
+  Future<void> saveBeneficiariesToCache() async {
+    List<Map<String, dynamic>> benes = [];
+    if(beneficiaries.isNotEmpty){
+      for(Beneficiary ben in beneficiaries){
+        benes.add(ben.toJson());
+      }
+      await addToStore(key: "beneficiaries", value: '''$benes''');
+    }
+  }
+
+  Future<void> addBeneficiary(Beneficiary ben) async {
+    beneficiaries.add(ben);
+    await saveBeneficiariesToCache();
+    notifyListeners();
+  }
+
+  Future<void> removeBeneficiary(Beneficiary ben) async {
+    beneficiaries.remove(ben);
+    await saveBeneficiariesToCache();
+    notifyListeners();
+  }
+
   MyStorage._internal();
 }
 
+List<Beneficiary> beneficiaries = [];
 final myStorage = MyStorage();
 
 bool isPhone() => UniversalPlatform.isIOS || UniversalPlatform.isAndroid? true : false;

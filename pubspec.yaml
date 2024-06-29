@@ -59,10 +59,10 @@ dependencies:
   timeago: ^3.6.1
   clip_shadowx: ^0.0.1
   form_builder_validators: ^10.0.1
-  firebase_core: ^3.0.0
-  firebase_messaging: ^15.0.0
-  firebase_analytics: ^11.0.0
-  firebase_remote_config: ^5.0.0
+  firebase_core: ^3.1.1
+  firebase_messaging: ^15.0.2
+  firebase_analytics: ^11.1.0
+  firebase_remote_config: ^5.0.2
   credit_card_validator: ^2.1.0
   get_storage: ^2.1.1
   awesome_snackbar_content: ^0.1.3
@@ -75,6 +75,8 @@ dependencies:
   flutterwave_standard: 1.0.8
   uuid: ^4.4.0
   go_router: ^14.2.0
+  currency_picker: ^2.0.21
+  forex_currency_conversion: ^0.9.1
 
 
 dev_dependencies:
@@ -209,6 +211,11 @@ flutter:
     - assets/images/travel1.png
     - assets/images/utilities.png
     - assets/images/utility.png
+    - assets/images/gift-card.png
+    - assets/images/wifi-router.png
+    - assets/images/gift.png
+    - assets/images/cart.png
+    - assets/images/history.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

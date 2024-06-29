@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:forex_currency_conversion/forex_currency_conversion.dart';
 import '../constants.dart';
 import 'i_cloud.dart';
 
@@ -99,6 +100,20 @@ class CurrencyMath extends ChangeNotifier{
   onError(dynamic ex){
     debugPrint("Error: Transaction: CurrencyMath: $ex");
     return false;
+  }
+
+  Future<List<String>> getAvailableCurrencies() async => await Forex().getAvailableCurrencies();
+
+  Future<double> convert({required double amount, required String quoteCode, required String baseCode}) async {
+    if(quoteCode.toLowerCase() == baseCode.toLowerCase()) return amount;
+    final fx = Forex();
+    double converted = await fx.getCurrencyConverted(
+        sourceCurrency: baseCode,
+        destinationCurrency: quoteCode,
+        sourceAmount: amount,
+        numberOfDecimals: 2
+    );
+    return converted;
   }
 
   CurrencyMath._internal();
