@@ -1,4 +1,39 @@
+import 'package:country_picker/country_picker.dart';
+import 'package:currency_picker/currency_picker.dart';
 import 'package:prudapp/singletons/tab_data.dart';
+
+class GiftSearchCriteria{
+  Country beneficiaryCountry;
+  Currency beneficiaryCurrency;
+  Currency senderCurrency;
+  GiftCategory? category;
+
+  GiftSearchCriteria({
+    required this.beneficiaryCountry,
+    required this.beneficiaryCurrency,
+    required this.senderCurrency,
+    this.category
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      if(category != null) "category": category!.toJson(),
+      "beneficiaryCurrency": beneficiaryCurrency.toJson(),
+      "beneficiaryCountry": beneficiaryCountry.toJson(),
+      "senderCurrency": senderCurrency.toJson(),
+    };
+  }
+
+  factory GiftSearchCriteria.fromJson(Map<String, dynamic> json){
+    return GiftSearchCriteria(
+      beneficiaryCountry: Country.from(json: json["beneficiaryCountry"]),
+      beneficiaryCurrency: Currency.from(json: json["beneficiaryCurrency"]),
+      senderCurrency: Currency.from(json: json["senderCurrency"]),
+      category: json["category"] != null? GiftCategory.fromJson(json["category"]) : null,
+    );
+  }
+
+}
 
 class PhoneDetails{
   String? countryCode;
@@ -409,9 +444,11 @@ class GiftProduct{
   int? productId;
   String? productName;
   String? recipientCurrencyCode;
-  RedeemInstruction? redeemInstructions;
+  RedeemInstruction? redeemInstruction;
   String? senderCurrencyCode;
   double? senderFee;
+  bool? supportsPreOrder;
+  double? senderFeePercentage;
 
 
   GiftProduct({
@@ -434,12 +471,14 @@ class GiftProduct{
     this.minSenderDenomination,
     this.productName,
     this.recipientCurrencyCode,
-    this.redeemInstructions,
+    this.redeemInstruction,
+    this.senderFeePercentage,
+    this.supportsPreOrder
   });
 
   Map<String, dynamic> toJson(){
     return {
-      if(redeemInstructions != null) "redeemInstructions": redeemInstructions!.toJson(),
+      if(redeemInstruction != null) "redeemInstruction": redeemInstruction!.toJson(),
       if(brand != null) "brand": brand!.toJson(),
       if(senderFee != null) "senderFee": senderFee,
       if(country != null) "country": country!.toJson(),
@@ -457,6 +496,8 @@ class GiftProduct{
       if(minRecipientDenomination != null) "minRecipientDenomination": minRecipientDenomination,
       if(minSenderDenomination != null) "minSenderDenomination": minSenderDenomination,
       if(productName != null) "productName": productName,
+      if(senderFeePercentage != null) "senderFeePercentage": senderFeePercentage,
+      if(supportsPreOrder != null) "supportsPreOrder": supportsPreOrder,
       if(recipientCurrencyCode != null) "recipientCurrencyCode": recipientCurrencyCode,
       if(senderCurrencyCode != null) "senderCurrencyCode": senderCurrencyCode,
     };
@@ -464,7 +505,7 @@ class GiftProduct{
 
   factory GiftProduct.fromJson(Map<String, dynamic> json){
     return GiftProduct(
-      redeemInstructions: json["redeemInstructions"] != null? RedeemInstruction.fromJson(json["redeemInstructions"]) : null,
+      redeemInstruction: json["redeemInstruction"] != null? RedeemInstruction.fromJson(json["redeemInstruction"]) : null,
       recipientCurrencyCode: json["recipientCurrencyCode"],
       senderCurrencyCode: json["senderCurrencyCode"],
       brand: json["brand"] != null? GiftBrand.fromJson(json["brand"]) : null,
@@ -484,6 +525,8 @@ class GiftProduct{
       minRecipientDenomination: json["minRecipientDenomination"],
       minSenderDenomination: json["minSenderDenomination"],
       productName: json["productName"],
+      supportsPreOrder: json["supportsPreOrder"],
+      senderFeePercentage: json["senderFeePercentage"],
     );
   }
 }

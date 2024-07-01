@@ -8,6 +8,7 @@ class LoadingComponent extends StatelessWidget {
   final double? size;
   final double? height;
   final int shimmerType;
+  final Color? spinnerColor;
 
   const LoadingComponent({
     super.key,
@@ -15,13 +16,14 @@ class LoadingComponent extends StatelessWidget {
     this.size = 50,
     this.shimmerType = 0,
     this.height,
+    this.spinnerColor
   }) : assert(isShimmer? height != null : size != null);
 
   @override
   Widget build(BuildContext context) {
     Widget spin = SpinKitFadingCircle(
       size: size!,
-      color: prudColorTheme.iconB,
+      color: spinnerColor?? prudColorTheme.iconB,
     );
     return isShimmer? SizedBox(
       height: height,

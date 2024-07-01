@@ -1,6 +1,8 @@
 
 import 'dart:math';
 
+import 'package:country_picker/country_picker.dart';
+import 'package:currency_picker/currency_picker.dart';
 import 'package:encrypt/encrypt.dart' as en;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -159,6 +161,24 @@ class TabData extends ChangeNotifier {
             (Match m) =>
         "${m[0]?[0].toUpperCase()}${m[0]?.substring(1).toLowerCase()}")
         .replaceAll(RegExp(r'(_|-)+'), ' ');
+  }
+
+  dynamic getCountryFlag(String countryCode){
+    Country? cty = CountryService().findByCode(countryCode);
+    if(cty != null){
+      return cty.flagEmoji;
+    }else {
+      return null;
+    }
+  }
+
+  dynamic getCurrencySymbol(String curCode){
+    Currency? cur = CurrencyService().findByCode(curCode);
+    if(cur != null){
+      return cur.symbol;
+    }else {
+      return null;
+    }
   }
 
   getFormattedNumber(dynamic nu){

@@ -41,6 +41,16 @@ class GiftProductComponentState extends State<GiftProductComponent> {
             str,
             width: double.maxFinite,
             fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress){
+              if (loadingProgress == null) return child;
+              return Center(
+                child: LoadingComponent(
+                  isShimmer: false,
+                  size: 40,
+                  spinnerColor: prudColorTheme.lineC,
+                ),
+              );
+            },
             errorBuilder: (context, wid, chunk){
               return const LoadingComponent(
                 isShimmer: false,
@@ -70,30 +80,30 @@ class GiftProductComponentState extends State<GiftProductComponent> {
       child: Stack(
         children: [
           Container(
-            margin: const EdgeInsets.only(top: 30.0),
+            margin: const EdgeInsets.only(top: 20.0),
             constraints: const BoxConstraints(
               minHeight: 100.0,
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(30.0),
               border: Border.all(
-                  color: prudColorTheme.lineC,
-                  width: 2.0
+                color: prudColorTheme.lineC,
+                width: 2.0
               ),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(30.0),
               child: widget.product.logoUrls != null && widget.product.logoUrls!.isNotEmpty?
               GFCarousel(
-                  height: 137.0,
-                  autoPlay: true,
-                  aspectRatio: double.maxFinite,
-                  viewportFraction: 1.0,
-                  enlargeMainPage: true,
-                  enableInfiniteScroll: true,
-                  pauseAutoPlayOnTouch: const Duration(seconds: 10),
-                  autoPlayInterval: const Duration(seconds: 5),
-                  items: carousels
+                height: 137.0,
+                autoPlay: true,
+                aspectRatio: double.maxFinite,
+                viewportFraction: 1.0,
+                enlargeMainPage: true,
+                enableInfiniteScroll: true,
+                pauseAutoPlayOnTouch: const Duration(seconds: 10),
+                autoPlayInterval: const Duration(seconds: 5),
+                items: carousels
               )
                   :
               Image.asset(prudImages.screen, fit: BoxFit.cover,),
@@ -107,7 +117,7 @@ class GiftProductComponentState extends State<GiftProductComponent> {
               children: [
                 Container(
                   width: 60.0,
-                  margin: const EdgeInsets.only(top: 30.0),
+                  margin: const EdgeInsets.only(top: 20.0),
                   padding: const EdgeInsets.all(10.0),
                   decoration: BoxDecoration(
                     color: prudColorTheme.lineB,
@@ -127,9 +137,9 @@ class GiftProductComponentState extends State<GiftProductComponent> {
                             Text(
                               "${widget.product.discountPercentage?? 0}",
                               style: prudWidgetStyle.typedTextStyle.copyWith(
-                                  fontSize: 40.0,
-                                  fontWeight: FontWeight.w700,
-                                  color: prudColorTheme.error
+                                fontSize: 40.0,
+                                fontWeight: FontWeight.w700,
+                                color: prudColorTheme.error
                               ),
                             ),
                             Text(

@@ -341,6 +341,7 @@ const String waveApiUrl = "https://api.flutterwave.com/v3";
 const double waveVat = 0.07;
 const bool paymentIsInTestMode = isProduction? false : true;
 List<PushMessage> pushMessages = [];
+const reloadlySmsFee = 250.0;
 FirebaseMessaging messenger = FirebaseMessaging.instance;
 Dio prudDio = Dio(BaseOptions(validateStatus: (statusCode) {
   if(statusCode != null) {

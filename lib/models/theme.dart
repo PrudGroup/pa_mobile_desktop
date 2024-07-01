@@ -343,6 +343,7 @@ List<BoxShadow> prudShadows = [
 InputDecoration getDeco(String label, {
   Widget suffixIcon = const SizedBox(),
   bool filled = false,
+  double hintSize = 16.0,
   String hintText = '',
 }) => InputDecoration(
   labelText: label,
@@ -350,8 +351,15 @@ InputDecoration getDeco(String label, {
   suffixIcon: suffixIcon,
   fillColor: prudColorTheme.bgC,
   hintText: hintText,
-  labelStyle: tabData.nRStyle,
+  labelStyle: tabData.nRStyle.copyWith(
+    fontSize: hintSize,
+  ),
   enabledBorder: prudWidgetStyle.enabledBorder,
   focusedBorder: prudWidgetStyle.focusedBorder,
   border: prudWidgetStyle.enabledBorder
 );
+BorderRadiusGeometry prudRad = const BorderRadius.only(
+  topLeft: Radius.circular(30),
+  topRight: Radius.circular(30),
+);
+BorderRadiusGeometry prudRadAll = BorderRadius.circular(30);

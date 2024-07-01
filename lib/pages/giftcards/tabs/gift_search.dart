@@ -50,12 +50,19 @@ class GiftSearchState extends State<GiftSearch> {
       if(mounted) setState(() => gettingCountries = true);
       if(reloadlyGiftToken == null) await giftCardNotifier.getGiftCardToken();
       if(reloadlyGiftToken != null && giftibleCountries.isEmpty) await giftCardNotifier.getGiftCountries();
+      if(reloadlyGiftToken != null && giftCategories.isEmpty) await giftCardNotifier.getGiftCategories();
       if(giftibleCountries.isNotEmpty){
         for(ReloadlyCountry cty in giftibleCountries){
           if(cty.isoName != null) countries.add(cty.isoName!);
           if(cty.currencyCode != null) currencies.add(cty.currencyCode!);
         }
         giftCardNotifier.saveGiftibleCountriesToCache();
+        giftCardNotifier.saveGiftCategoriesToCache();
+        if(giftCardNotifier.lastGiftSearch != null){
+          selectedSenderCurrency = giftCardNotifier.lastGiftSearch!.senderCurrency;
+          selectedBenCurrency = giftCardNotifier.lastGiftSearch!.beneficiaryCurrency;
+          selectedBenCountry = giftCardNotifier.lastGiftSearch!.beneficiaryCountry;
+        }
       }
       if(mounted) setState(() => gettingCountries = false);
     }catch(ex){
@@ -77,7 +84,15 @@ class GiftSearchState extends State<GiftSearch> {
           hasSearched = true;
           searching = false;
         });
-        if(giftCardNotifier.products.isNotEmpty) gotoTab(1);
+        if(giftCardNotifier.products.isNotEmpty) {
+          GiftSearchCriteria searchCriteria = GiftSearchCriteria(
+            beneficiaryCountry: selectedBenCountry!,
+            beneficiaryCurrency: selectedBenCurrency!,
+            senderCurrency: selectedSenderCurrency!,
+          );
+          await giftCardNotifier.updateLastGiftSearch(searchCriteria);
+          gotoTab(1);
+        }
       }
     }catch(ex){
       debugPrint("searchNow Error: $ex");

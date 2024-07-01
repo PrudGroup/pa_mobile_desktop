@@ -7,12 +7,16 @@ class PrudPanel extends StatelessWidget {
   final Widget? child;
   final Color? titleColor;
   final Color? bgColor;
+  final double? titleSize;
+  final bool hasPadding;
 
   const PrudPanel({
     super.key,
     required this.title,
+    this.hasPadding = true,
     this.titleColor,
     this.bgColor,
+    this.titleSize,
     this.child
   });
 
@@ -25,7 +29,7 @@ class PrudPanel extends StatelessWidget {
           padding: const EdgeInsets.only(top: 11),
           child: Container(
             width: screen.width,
-            padding: child != null? const EdgeInsets.symmetric(horizontal: 10) : const EdgeInsets.all(0),
+            padding: child != null? EdgeInsets.symmetric(horizontal: hasPadding? 10 : 0) : const EdgeInsets.all(0),
             constraints: const BoxConstraints(minHeight: 50.0,),
             decoration: BoxDecoration(
               color: bgColor?? prudColorTheme.bgA,
@@ -45,7 +49,7 @@ class PrudPanel extends StatelessWidget {
               text: title,
               style: prudWidgetStyle.tabTextStyle.copyWith(
                 color: child != null? titleColor?? prudColorTheme.textB : prudColorTheme.iconB,
-                fontSize: child != null? 16 : 18, 
+                fontSize: titleSize?? (child != null? 16 : 18),
                 fontWeight: child != null? FontWeight.w500 : FontWeight.w600
               ),
             ),

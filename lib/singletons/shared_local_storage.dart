@@ -11,7 +11,6 @@ import 'package:translator/translator.dart';
 import 'package:timeago/timeago.dart' as time_ago;
 import 'package:get_storage/get_storage.dart';
 
-import '../models/reloadly.dart';
 import '../models/user.dart';
 
 
@@ -202,44 +201,9 @@ class MyStorage extends ChangeNotifier {
     }
   }
 
-  void getBeneficiariesFromCache(){
-    dynamic benes = myStorage.getFromStore(key: "beneficiaries");
-    if(benes != null){
-      List<Map<String, dynamic>> bens = jsonDecode(benes);
-      if(bens.isNotEmpty){
-        for (var ben in bens) {
-          beneficiaries.add(Beneficiary.fromJson(ben));
-        }
-      }
-    }
-  }
-
-  Future<void> saveBeneficiariesToCache() async {
-    List<Map<String, dynamic>> benes = [];
-    if(beneficiaries.isNotEmpty){
-      for(Beneficiary ben in beneficiaries){
-        benes.add(ben.toJson());
-      }
-      await addToStore(key: "beneficiaries", value: '''$benes''');
-    }
-  }
-
-  Future<void> addBeneficiary(Beneficiary ben) async {
-    beneficiaries.add(ben);
-    await saveBeneficiariesToCache();
-    notifyListeners();
-  }
-
-  Future<void> removeBeneficiary(Beneficiary ben) async {
-    beneficiaries.remove(ben);
-    await saveBeneficiariesToCache();
-    notifyListeners();
-  }
-
   MyStorage._internal();
 }
 
-List<Beneficiary> beneficiaries = [];
 final myStorage = MyStorage();
 
 bool isPhone() => UniversalPlatform.isIOS || UniversalPlatform.isAndroid? true : false;

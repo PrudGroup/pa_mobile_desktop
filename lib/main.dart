@@ -7,6 +7,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/pages/register/register.dart';
 import 'package:prudapp/router.dart';
+import 'package:prudapp/singletons/beneficiary_notifier.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/gift_card_notifier.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
@@ -46,6 +47,7 @@ void main() async {
   await myStorage.initializeValues();
   await currencyMath.init();
   await giftCardNotifier.initGiftCard();
+  await beneficiaryNotifier.initBens();
   // await messenger.setAutoInitEnabled(true);
   myStorage.setWindowSize(size: const Size(400, 700));
 

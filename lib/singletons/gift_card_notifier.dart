@@ -1,8 +1,7 @@
 
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:prudapp/components/gift_denomination.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
@@ -21,10 +20,31 @@ class GiftCardNotifier extends ChangeNotifier {
   List<CartItem> cartItems = [];
   List<GiftProduct> products = [];
   int presentSelectedProductId = 0;
+  GiftSearchCriteria? lastGiftSearch;
+  Denomination? selectedDenMap;
+
+
+  void updateSelectedDenMap(Denomination den){
+    selectedDenMap = den;
+    notifyListeners();
+  }
 
   void changeSelectedProduct(int id){
     presentSelectedProductId = id;
     notifyListeners();
+  }
+
+  Future<void> updateLastGiftSearch(GiftSearchCriteria search) async {
+    lastGiftSearch = search;
+    await saveSearchCriteriaToCache();
+    notifyListeners();
+  }
+
+  Future<void> saveSearchCriteriaToCache() async {
+    if(lastGiftSearch != null){
+      Map<String, dynamic> criteria = lastGiftSearch!.toJson();
+      await myStorage.addToStore(key: "lastGiftSearch", value: criteria);
+    }
   }
 
   Future<void> saveCartToCache() async {
@@ -44,6 +64,16 @@ class GiftCardNotifier extends ChangeNotifier {
         items.add(item.toJson());
       }
       await myStorage.addToStore(key: "giftibleCountries", value: items);
+    }
+  }
+
+  Future<void> saveGiftCategoriesToCache() async {
+    List<Map<String, dynamic>> items = [];
+    if(giftCategories.isNotEmpty){
+      for(GiftCategory item in giftCategories){
+        items.add(item.toJson());
+      }
+      await myStorage.addToStore(key: "giftCategories", value: items);
     }
   }
 
@@ -127,6 +157,16 @@ class GiftCardNotifier extends ChangeNotifier {
       }
       await saveProductsToCache();
       notifyListeners();
+    }
+  }
+
+  List<GiftProduct> getGiftsByCategory(int id) {
+    if(products.isNotEmpty){
+      List<GiftProduct> gifts = products.where((GiftProduct pro) => pro.category != null &&
+          pro.category!.id != null && pro.category!.id == id).toList();
+      return gifts;
+    }else{
+      return [];
     }
   }
 
@@ -234,10 +274,17 @@ class GiftCardNotifier extends ChangeNotifier {
     }
   }
 
+  void getLastGiftSearchFromCache(){
+    dynamic criteria = myStorage.getFromStore(key: "lastGiftSearch");
+    if(criteria != null){
+      lastGiftSearch = GiftSearchCriteria.fromJson(criteria);
+    }
+  }
+
   void getCategoriesFromCache(){
     dynamic giftCats = myStorage.getFromStore(key: "giftCategories");
     if(giftCats != null){
-      List<dynamic> cats = jsonDecode(giftCats);
+      List<dynamic> cats = giftCats;
       if(cats.isNotEmpty){
         for (dynamic cat in cats) {
           giftCategories.add(GiftCategory.fromJson(cat));
@@ -252,6 +299,7 @@ class GiftCardNotifier extends ChangeNotifier {
       getProductsFromCache();
       getCategoriesFromCache();
       getCartFromCache();
+      getLastGiftSearchFromCache();
       notifyListeners();
     }catch(ex){
       debugPrint("GiftCardNotifier_initGiftCard Error: $ex");
