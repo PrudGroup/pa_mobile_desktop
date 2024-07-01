@@ -288,6 +288,8 @@ class Beneficiary{
   String currencyCode;
   String gender;
   String email;
+  String avatar;
+  bool isAvatar;
 
   Beneficiary({
     required this.currencyCode,
@@ -295,7 +297,9 @@ class Beneficiary{
     required this.fullName,
     required this.gender,
     required this.phoneNo,
-    required this.email
+    required this.email,
+    required this.avatar,
+    this.isAvatar = true,
   });
 
   Map<String, dynamic> toJson(){
@@ -305,7 +309,9 @@ class Beneficiary{
       "fullName": fullName,
       "email": email,
       "phoneNo": phoneNo,
-      "gender": gender
+      "gender": gender,
+      "avatar": avatar,
+      "isAvatar": isAvatar,
     };
   }
 
@@ -316,7 +322,9 @@ class Beneficiary{
       fullName: json["fullName"],
       gender: json["gender"],
       phoneNo: json["phoneNo"],
-      email: json["email"]
+      email: json["email"],
+      avatar: json["avatar"],
+      isAvatar: json["isAvatar"],
     );
   }
 }

@@ -42,8 +42,8 @@ class InfluencerLinksState extends State<InfluencerLinks> {
         title: Translate(
           text: "Influencer Links",
           style: prudWidgetStyle.tabTextStyle.copyWith(
-              fontSize: 16,
-              color: prudColorTheme.bgA
+            fontSize: 16,
+            color: prudColorTheme.bgA
           ),
         ),
         actions: const [],
