@@ -78,6 +78,7 @@ dependencies:
   currency_picker: ^2.0.21
   forex_currency_conversion: ^0.9.1
   avatar_stack: ^1.2.0
+  image_picker: ^1.1.2
 
 
 dev_dependencies:
@@ -217,6 +218,10 @@ flutter:
     - assets/images/gift.png
     - assets/images/cart.png
     - assets/images/history.png
+    - assets/images/boy.png
+    - assets/images/man.png
+    - assets/images/woman.png
+    - assets/images/woman1.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

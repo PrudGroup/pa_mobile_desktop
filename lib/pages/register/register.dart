@@ -255,7 +255,7 @@ class RegisteredState extends State<Register> {
         type: 3
       );
     });
-    if(referralCode != null) await myStorage.addToStore(key: "referral_code", value: referralCode);
+    if(referralCode != null) await myStorage.addToStore(key: "install_referral_code", value: referralCode);
     myStorage.addToStore(key: "user", value: jsonEncode(newUser));
   }
 

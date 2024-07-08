@@ -1208,7 +1208,6 @@ class NewSparkState extends State<NewSpark> {
                                               PayIn(
                                                   amount: sumTotal!,
                                                   onPaymentMade:(bool verified, String transID) {
-                                                    debugPrint("verify: $verified");
                                                     if (mounted) setState(() => loading = true);
                                                     if (verified) {
                                                       Future.delayed(Duration.zero, () async {

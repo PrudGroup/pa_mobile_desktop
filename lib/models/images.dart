@@ -74,6 +74,10 @@ class PrudImages {
   String cart;
   String history;
   String giftSearch;
+  String avatar_1;
+  String avatar_2;
+  String avatar_3;
+  String avatar_4;
 
 
 
@@ -152,7 +156,11 @@ class PrudImages {
     required this.dataBundle,
     required this.cart,
     required this.giftSearch,
-    required this.history
+    required this.history,
+    required this.avatar_1,
+    required this.avatar_2,
+    required this.avatar_3,
+    required this.avatar_4
   });
 }
 
@@ -232,4 +240,8 @@ PrudImages prudImages = PrudImages(
   cart: "assets/images/cart.png",
   history: "assets/images/history.png",
   giftSearch: "assets/images/gift.png",
+  avatar_1: "assets/images/woman1.png",
+  avatar_2: "assets/images/woman.png",
+  avatar_3: "assets/images/boy.png",
+  avatar_4: "assets/images/man.png",
 );

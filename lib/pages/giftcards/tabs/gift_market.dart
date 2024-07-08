@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:prudapp/components/gift_product_component.dart';
 import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/components/modals/gift_card_category_modal_sheet.dart';
@@ -41,7 +42,29 @@ class GiftMarketState extends State<GiftMarket> {
   List<GiftProduct> foundProducts = giftCardNotifier.products;
   GiftCategory? selectedCategory;
   ScrollController scrollCtrl = ScrollController();
+  bool showCatSearch = false;
+  bool showBrandSearch = false;
+  bool showAll = true;
 
+  void showCategorySearch(){
+    if(mounted){
+      setState(() {
+        showCatSearch = !showCatSearch;
+        showBrandSearch = false;
+        showAll = showCatSearch? false : true;
+      });
+    }
+  }
+
+  void showSearch(){
+    if(mounted){
+      setState(() {
+        showCatSearch = false;
+        showBrandSearch = !showBrandSearch;
+        showAll = showBrandSearch? false : true;
+      });
+    }
+  }
 
   void gotoTab(index){
     if(widget.goToTab != null) widget.goToTab!(index);
@@ -105,6 +128,9 @@ class GiftMarketState extends State<GiftMarket> {
         searchText = null;
         txtCtrl.text = "";
         foundProducts = giftCardNotifier.products;
+        showCatSearch = false;
+        showBrandSearch = false;
+        showAll = true;
       });
     }
   }
@@ -148,153 +174,150 @@ class GiftMarketState extends State<GiftMarket> {
       backgroundColor: prudColorTheme.bgC,
       resizeToAvoidBottomInset: false,
       appBar:  AppBar(
-        leading: IconButton(
+        leading: showAll? IconButton(
           icon: Icon(Icons.arrow_back_ios, color: prudColorTheme.bgA,),
           onPressed: () => Navigator.pop(context),
           splashRadius: 20,
-        ),
-        title: Translate(
+        ) : const SizedBox(),
+        title: showAll? Translate(
           text: "Gift Mall",
           style: prudWidgetStyle.tabTextStyle.copyWith(
             fontSize: 16,
             color: prudColorTheme.bgA
           ),
-        ),
+        ) : const SizedBox(),
         actions: [
-          const GiftCartIcon(),
-          IconButton(
+          if(showAll) const GiftCartIcon(),
+          if(showAll) IconButton(
             onPressed: refresh,
             icon: const Icon(Icons.refresh),
             color: prudColorTheme.bgA,
             splashColor: prudColorTheme.bgD,
             splashRadius: 10.0,
           ),
-          IconButton(
-            onPressed: showPreviousPage,
-            icon: const Icon(Icons.arrow_back),
+          if(productLength >= 10 && showBrandSearch) Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: FormBuilderTextField(
+                controller: txtCtrl,
+                name: "search",
+                style: tabData.npStyle.copyWith(
+                  fontSize: 13,
+                  color: prudColorTheme.bgA
+                ),
+                keyboardType: TextInputType.text,
+                decoration: getDeco("Brand/Product",
+                  labelStyle: prudWidgetStyle.tabTextStyle.copyWith(
+                    color: prudColorTheme.bgA,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500
+                  ),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.refresh),
+                    color: prudColorTheme.bgD,
+                    onPressed: refreshSearch,
+                  ),
+                  hintSize: 13
+                ),
+                onChanged: (String? value){
+                  try{
+                    setState(() {
+                      searchText = value?.trim();
+                      search();
+                    });
+                  }catch(ex){
+                    debugPrint("Search changed Error: $ex");
+                  }
+                },
+              ),
+            ),
+          ),
+          if(productLength >= 10 && showCatSearch) Expanded(
+            child: InkWell(
+              onTap: () => showCategory(screen.height),
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: PrudPanel(
+                  bgColor: prudColorTheme.primary,
+                  title: "Category",
+                  titleSize: 12,
+                  titleColor: prudColorTheme.bgA,
+                  child: Flex(
+                    direction: Axis.horizontal,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      FittedBox(
+                        child: Text(
+                          selectedCategory != null? tabData.shortenStringWithPeriod(selectedCategory!.name!, length: 15) : 'Select Category',
+                          style: prudWidgetStyle.tabTextStyle.copyWith(
+                            fontSize: 13,
+                            color: prudColorTheme.textC
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.keyboard_arrow_down,
+                        size: 25,
+                        color: prudColorTheme.bgA,
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            )
+          ),
+          if(showBrandSearch || showAll) IconButton(
+            onPressed: showSearch,
+            icon: const Icon(Icons.search),
             color: prudColorTheme.bgA,
             splashColor: prudColorTheme.bgD,
             splashRadius: 10.0,
           ),
-          Text(
-            "$presentPage",
-            style: prudWidgetStyle.btnTextStyle.copyWith(
-              color: prudColorTheme.textB,
-              fontSize: 10,
-              fontWeight: FontWeight.w500
-            ),
-            textAlign: TextAlign.center,
-          ),
-          IconButton(
-            onPressed: refresh,
-            icon: const Icon(Icons.arrow_forward),
+          if(showCatSearch || showAll) IconButton(
+            onPressed: showCategorySearch,
+            icon: const Icon(FontAwesome.angellist),
             color: prudColorTheme.bgA,
             splashColor: prudColorTheme.bgD,
             splashRadius: 10.0,
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(10.0),
-        controller: scrollCtrl,
-        child: Column(
-          children: [
-            spacer.height,
-            if(loading) FittedBox(
-              child: LoadingComponent(
-                isShimmer: true,
-                height: screen.height - 100,
-                shimmerType: 3,
+      body: SizedBox(
+        height: screen.height - 60,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.only(left:10.0, right: 10.0),
+          controller: scrollCtrl,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if(loading) FittedBox(
+                child: LoadingComponent(
+                  isShimmer: true,
+                  height: screen.height - 100,
+                  shimmerType: 3,
+                ),
               ),
-            ),
-            if(hasLoaded && productLength < 1) noProductFound,
-            if(hasLoaded && productLength > 0) Column(
-              children: [
-                if(productLength >= 10) PrudPanel(
-                  title: "Search Criteria",
-                  bgColor: prudColorTheme.bgC,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 20, bottom: 5),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 9.0),
-                            child: FormBuilderTextField(
-                              controller: txtCtrl,
-                              name: "search",
-                              style: tabData.npStyle.copyWith(
-                                fontSize: 13,
-                              ),
-                              keyboardType: TextInputType.text,
-                              decoration: getDeco("Brand/Product",
-                                  suffixIcon: IconButton(
-                                    icon: const Icon(Icons.refresh),
-                                    color: Colors.black26,
-                                    onPressed: refreshSearch,
-                                  ),
-                                  hintSize: 13
-                              ),
-                              onChanged: (String? value){
-                                try{
-                                  setState(() {
-                                    searchText = value?.trim();
-                                    search();
-                                  });
-                                }catch(ex){
-                                  debugPrint("Search changed Error: $ex");
-                                }
-                              },
-                            ),
-                          ),
-                        ),
-                        if(giftCategories.isNotEmpty) spacer.width,
-                        if(giftCategories.isNotEmpty) Expanded(
-                            child: InkWell(
-                              onTap: () => showCategory(screen.height),
-                              child: PrudPanel(
-                                bgColor: prudColorTheme.bgC,
-                                title: "Category",
-                                titleSize: 12,
-                                titleColor: prudColorTheme.textB,
-                                child: Flex(
-                                  direction: Axis.horizontal,
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    FittedBox(
-                                      child: Text(
-                                        selectedCategory != null? tabData.shortenStringWithPeriod(selectedCategory!.name!, length: 15) : 'Select Category',
-                                        style: prudWidgetStyle.tabTextStyle.copyWith(
-                                          fontSize: 13,
-                                          color: prudColorTheme.textA
-                                        ),
-                                      ),
-                                    ),
-                                    const Icon(Icons.keyboard_arrow_down, size: 25,)
-                                  ],
-                                ),
-                              ),
-                            )
-                        ),
-                      ],
-                    ),
+              if(hasLoaded && productLength < 1) noProductFound,
+              if(hasLoaded && productLength > 0) Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if(foundProducts.isNotEmpty) Wrap(
+                    direction: Axis.horizontal,
+                    runSpacing: 10.0,
+                    spacing: 10.0,
+                    alignment: WrapAlignment.spaceBetween,
+                    runAlignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: foundProducts.map((pro) => GiftProductComponent(product: pro)).toList(),
                   ),
-                ),
-                if(foundProducts.isNotEmpty) SizedBox(
-                  height: screen.height + 50,
-                  child: ListView.builder(
-                    scrollDirection: Axis.vertical,
-                    itemCount: foundProducts.length,
-                    itemBuilder: (context, index) => GiftProductComponent(product: foundProducts[index]),
-                  ),
-                ),
-                if(foundProducts.isEmpty) noSearchResultFound,
-                xLargeSpacer.height,
-              ],
-            ),
-          ],
+                  if(foundProducts.isEmpty) noSearchResultFound,
+                  largeSpacer.height,
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

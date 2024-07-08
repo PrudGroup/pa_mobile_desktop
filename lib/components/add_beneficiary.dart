@@ -1,16 +1,14 @@
-import 'dart:io';
 
 import 'package:avatar_stack/avatar_stack.dart';
 import 'package:avatar_stack/positions.dart';
 import 'package:flutter/material.dart';
-import 'package:getwidget/components/avatar/gf_avatar.dart';
-import 'package:getwidget/shape/gf_avatar_shape.dart';
 import 'package:prudapp/components/prud_panel.dart';
 import 'package:prudapp/models/reloadly.dart';
 import 'package:prudapp/pages/beneficiaries/my_beneficiaries.dart';
 import 'package:prudapp/singletons/beneficiary_notifier.dart';
 
 import '../models/theme.dart';
+import 'Translate.dart';
 
 class AddBeneficiary extends StatefulWidget {
   const AddBeneficiary({super.key});
@@ -24,8 +22,8 @@ class AddBeneficiaryState extends State<AddBeneficiary> {
 
   final RestrictedPositions settings = RestrictedPositions(
     maxCoverage: 0.3,
-    minCoverage: 0.1,
-    align: StackAlign.right,
+    minCoverage: 0.2,
+    align: StackAlign.left,
     infoIndent: 15,
   );
 
@@ -49,47 +47,33 @@ class AddBeneficiaryState extends State<AddBeneficiary> {
     super.initState();
     beneficiaryNotifier.addListener((){
       if(mounted){
-        selectedBeneficiaries = beneficiaryNotifier.selectedBeneficiaries;
+        setState(() {
+          selectedBeneficiaries = beneficiaryNotifier.selectedBeneficiaries;
+        });
       }
     });
   }
 
   @override
   void dispose() {
-    beneficiaryNotifier.removeListener((){
-      selectedBeneficiaries = [];
-    });
+    beneficiaryNotifier.removeListener((){});
     super.dispose();
   }
 
-  Widget getAvatarWidget(Beneficiary ben) {
-    dynamic avatar = ben.isAvatar? AssetImage(ben.avatar) : File(ben.avatar);
-    return InkWell(
-      onDoubleTap: () => beneficiaryNotifier.removeBeneficiary(ben),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GFAvatar(
-            backgroundImage: avatar,
-            shape: GFAvatarShape.circle,
-            size: 60.0,
-          ),
-          spacer.height,
-          SizedBox(
-            width: 80,
-            child: FittedBox(
-              child: Text(
-                ben.fullName,
-                style: prudWidgetStyle.tabTextStyle.copyWith(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: prudColorTheme.textB,
-                ),
-              ),
-            ),
-          )
-        ],
+  ImageProvider<Object> getAvatar(Beneficiary ben) {
+    dynamic avatar = ben.isAvatar? AssetImage(ben.avatar) : MemoryImage(ben.photo);
+    return avatar;
+  }
+
+  Widget _infoWidget(int surplus, BuildContext context) {
+    return FittedBox(
+      fit: BoxFit.contain,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          '+$surplus',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
       ),
     );
   }
@@ -105,17 +89,18 @@ class AddBeneficiaryState extends State<AddBeneficiary> {
         child: Column(
           children: [
             spacer.height,
-            if(selectedBeneficiaries.isNotEmpty) WidgetStack(
-              positions: settings,
-              stackedWidgets: [for (var n = 0; n < selectedBeneficiaries.length; n++) getAvatarWidget(selectedBeneficiaries[n])],
-              buildInfoWidget: (surplus) {
-                return Center(
-                  child: Text(
-                    '+$surplus',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  )
-                );
-              },
+            if(selectedBeneficiaries.isNotEmpty) AvatarStack(
+              height: 50,
+              settings: settings,
+              infoWidgetBuilder: (surplus) => _infoWidget(surplus, context),
+              avatars: [for (var n = 0; n < selectedBeneficiaries.length; n++) getAvatar(selectedBeneficiaries[n])],
+            ),
+            if(selectedBeneficiaries.isEmpty) Translate(
+              text: "Beneficiaries you intend to send this gift card will appear you. start adding beneficiaries.",
+              align: TextAlign.center,
+              style: prudWidgetStyle.tabTextStyle.copyWith(
+                fontSize: 12
+              )
             ),
             Divider(
               height: 15,

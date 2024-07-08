@@ -22,7 +22,72 @@ class GiftCardNotifier extends ChangeNotifier {
   int presentSelectedProductId = 0;
   GiftSearchCriteria? lastGiftSearch;
   Denomination? selectedDenMap;
+  List<CartItem> selectedItems = [];
 
+  void selectAllItems(){
+    selectedItems = [...cartItems];
+    notifyListeners();
+  }
+
+  void unselectAllItems(){
+    selectedItems = [];
+    notifyListeners();
+  }
+
+  Future<void> changeCartItem(int quantity, int itemIndex) async {
+    CartItem item = cartItems[itemIndex];
+    int presentQuant = item.quantity;
+    item.grandTotal = (item.grandTotal/presentQuant) * quantity;
+    item.quantity = quantity;
+    item.totalDiscount = (item.totalDiscount/presentQuant) * quantity;
+    item.amount = (item.amount/presentQuant) * quantity;
+    item.charges = (item.charges/presentQuant) * quantity;
+    cartItems[itemIndex] = item;
+    changeItemInSelectedItems(item);
+    await saveCartToCache();
+  }
+
+  void changeItemInSelectedItems(CartItem newItem){
+    int index = selectedItems.indexOf(newItem);
+    if(index >= 0){
+      selectedItems[index] = newItem;
+      notifyListeners();
+    }
+  }
+
+  void addToSelectedItems(CartItem item){
+    int found = selectedItems.indexWhere((CartItem ite) => ite.beneficiary?.fullName == item.beneficiary?.fullName
+        && ite.beneficiary?.email == item.beneficiary?.email &&
+        ite.product.productId == item.product.productId);
+    if(found == -1) {
+      selectedItems.add(item);
+      notifyListeners();
+    }
+  }
+
+  void addItemToCart(CartItem item) async {
+    debugPrint("Cart: ${item.product.productId} | ${item.beneficiary?.email} | ${item.beneficiary?.fullName}");
+    List<CartItem> found = cartItems.where((CartItem ite) => ite.beneficiary!.fullName == item.beneficiary!.fullName &&
+        ite.beneficiary!.email == item.beneficiary!.email &&
+        ite.product.productId == item.product.productId).toList();
+    if(found.isNotEmpty) debugPrint("Found: ${found[0].product.productId} | ${found[0].beneficiary?.email} | ${found[0].beneficiary?.fullName}");
+    if(found.isEmpty) {
+      cartItems.add(item);
+      await saveCartToCache();
+      notifyListeners();
+    }
+  }
+
+  void removeItemFromCart(CartItem item) async {
+    cartItems.remove(item);
+    await saveCartToCache();
+    notifyListeners();
+  }
+
+  void removeItemFromSelectedItems(CartItem item) async {
+    selectedItems.remove(item);
+    notifyListeners();
+  }
 
   void updateSelectedDenMap(Denomination den){
     selectedDenMap = den;
@@ -134,6 +199,40 @@ class GiftCardNotifier extends ChangeNotifier {
       return GiftTransaction.fromJson(result);
     }else{
       return null;
+    }
+  }
+
+  Future<void> addTransToCloud(GiftTransaction tran, CartItem gift) async {
+    try{
+      double income = gift.grandTotal - tran.amount!;
+      double appReferralCommission = income > 0? (income * installReferralCommission) : 0;
+      double referComm = income > 0? (income * referralCommission) : 0;
+      double profit = income - (referComm + appReferralCommission);
+      if(myStorage.installReferralCode != null){
+        // add commission to referral account
+      }else{
+        appReferralCommission = 0;
+      }
+      if(myStorage.giftReferral != null){
+        // add commission to gift referral
+      }else{
+        referComm = 0;
+      }
+      GiftTransactionDetails details = GiftTransactionDetails(
+        income: income,
+        installReferralCommission: appReferralCommission,
+        installReferralId: myStorage.installReferralCode,
+        profit: profit,
+        referralCommission: referComm,
+        transCurrency: tran.currencyCode,
+        referralId: myStorage.giftReferral,
+        transDate: DateTime.parse(tran.transactionCreatedTime!),
+        affId: myStorage.user?.id,
+        transId: tran.transactionId,
+      );
+      //add to cloud
+    }catch(ex){
+      debugPrint("addTransToCloud Error: $ex");
     }
   }
 

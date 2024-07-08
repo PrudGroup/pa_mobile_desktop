@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:prudapp/models/theme.dart';
 
+import '../singletons/tab_data.dart';
+
 enum PrudSize{
   small,
   medium,
@@ -12,6 +14,7 @@ class PrudDataViewer extends StatelessWidget {
   final dynamic value;
   final bool inverseColor;
   final PrudSize size;
+  final bool valueIsMoney;
 
   const PrudDataViewer({
     super.key,
@@ -19,6 +22,7 @@ class PrudDataViewer extends StatelessWidget {
     required this.value,
     this.size = PrudSize.small,
     this.inverseColor = false,
+    this.valueIsMoney = false,
   });
 
   double getSize(){
@@ -50,7 +54,10 @@ class PrudDataViewer extends StatelessWidget {
           children: [
             Text(
               "$value",
-              style: prudWidgetStyle.typedTextStyle.copyWith(
+              style: valueIsMoney? tabData.tBStyle.copyWith(
+                color: inverseColor? prudColorTheme.bgA : prudColorTheme.primary,
+                fontSize: 25,
+              ) : prudWidgetStyle.typedTextStyle.copyWith(
                 color: inverseColor? prudColorTheme.bgA : prudColorTheme.primary,
                 fontSize: 25,
               ),

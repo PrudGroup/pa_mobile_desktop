@@ -181,6 +181,8 @@ class TabData extends ChangeNotifier {
     }
   }
 
+  dynamic getCurrency(String curCode) => CurrencyService().findByCode(curCode);
+
   getFormattedNumber(dynamic nu){
     return NumberFormat.compactCurrency(decimalDigits: 0, symbol: '').format(nu);
   }

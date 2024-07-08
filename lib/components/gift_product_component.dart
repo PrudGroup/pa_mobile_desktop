@@ -79,116 +79,102 @@ class GiftProductComponentState extends State<GiftProductComponent> {
       onTap: openDetails,
       child: Stack(
         children: [
-          Container(
-            margin: const EdgeInsets.only(top: 20.0),
-            constraints: const BoxConstraints(
-              minHeight: 100.0,
-            ),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30.0),
-              border: Border.all(
-                color: prudColorTheme.lineC,
-                width: 2.0
+          Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 20.0),
+                width: 150.0,
+                height: 120.0,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20.0),
+                  border: Border.all(
+                    color: selected? prudColorTheme.bgC : prudColorTheme.lineC,
+                    width: 2.0
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20.0),
+                  child: widget.product.logoUrls != null && widget.product.logoUrls!.isNotEmpty?
+                  GFCarousel(
+                      height: 137.0,
+                      autoPlay: true,
+                      aspectRatio: double.maxFinite,
+                      viewportFraction: 1.0,
+                      enlargeMainPage: true,
+                      enableInfiniteScroll: true,
+                      pauseAutoPlayOnTouch: const Duration(seconds: 10),
+                      autoPlayInterval: const Duration(seconds: 5),
+                      items: carousels
+                  )
+                      :
+                  Image.asset(prudImages.screen, fit: BoxFit.cover,),
+                ),
               ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(30.0),
-              child: widget.product.logoUrls != null && widget.product.logoUrls!.isNotEmpty?
-              GFCarousel(
-                height: 137.0,
-                autoPlay: true,
-                aspectRatio: double.maxFinite,
-                viewportFraction: 1.0,
-                enlargeMainPage: true,
-                enableInfiniteScroll: true,
-                pauseAutoPlayOnTouch: const Duration(seconds: 10),
-                autoPlayInterval: const Duration(seconds: 5),
-                items: carousels
-              )
-                  :
-              Image.asset(prudImages.screen, fit: BoxFit.cover,),
-            ),
+              SizedBox(
+                width: 140,
+                child: Text(
+                  "${widget.product.productName}",
+                  textAlign: TextAlign.center,
+                  style: prudWidgetStyle.tabTextStyle.copyWith(
+                    color: selected? prudColorTheme.bgC : prudColorTheme.textB,
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.w600
+                  ),
+                ),
+              ),
+            ],
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 30, right: 20),
-            child: Flex(
-              direction: Axis.horizontal,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  width: 60.0,
-                  margin: const EdgeInsets.only(top: 20.0),
-                  padding: const EdgeInsets.all(10.0),
-                  decoration: BoxDecoration(
-                    color: prudColorTheme.lineB,
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(30),
-                      bottomRight: Radius.circular(30),
-                    ),
-                    boxShadow: prudShadows,
-                  ),
-                  child: FittedBox(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+            padding: const EdgeInsets.only(left: 20, right: 20),
+            child: Container(
+              width: 60.0,
+              margin: const EdgeInsets.only(top: 20.0),
+              padding: const EdgeInsets.all(10.0),
+              decoration: BoxDecoration(
+                color: prudColorTheme.lineB,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(30),
+                ),
+                boxShadow: prudShadows,
+              ),
+              child: FittedBox(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            Text(
-                              "${widget.product.discountPercentage?? 0}",
-                              style: prudWidgetStyle.typedTextStyle.copyWith(
-                                fontSize: 40.0,
-                                fontWeight: FontWeight.w700,
-                                color: prudColorTheme.error
-                              ),
-                            ),
-                            Text(
-                              "%",
-                              style: prudWidgetStyle.tabTextStyle.copyWith(
-                                  fontSize: 25.0,
-                                  fontWeight: FontWeight.w700,
-                                  color: prudColorTheme.buttonA
-                              ),
-                            ),
-                          ],
-                        ),
-                        Translate(
-                          text: "DISCOUNT",
-                          align: TextAlign.center,
+                        Text(
+                          "${widget.product.discountPercentage?? 0}",
                           style: prudWidgetStyle.typedTextStyle.copyWith(
-                              color: prudColorTheme.textA,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600
+                              fontSize: 40.0,
+                              fontWeight: FontWeight.w700,
+                              color: prudColorTheme.error
                           ),
-                        )
+                        ),
+                        Text(
+                          "%",
+                          style: prudWidgetStyle.tabTextStyle.copyWith(
+                              fontSize: 25.0,
+                              fontWeight: FontWeight.w700,
+                              color: prudColorTheme.buttonA
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                ),
-                Container(
-                  constraints: const BoxConstraints(
-                    minWidth: 120.0,
-                    maxWidth: 180.0,
-                  ),
-                  padding: const EdgeInsets.all(10.0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    border: Border.all(width: 5.0, color: prudColorTheme.bgC),
-                    color: selected? prudColorTheme.error : prudColorTheme.bgA,
-                  ),
-                  child: FittedBox(
-                    child: Text(
-                      "${widget.product.productName}",
-                      textAlign: TextAlign.center,
-                      style: prudWidgetStyle.tabTextStyle.copyWith(
-                        color: selected? prudColorTheme.bgC : prudColorTheme.textB,
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w600
+                    Translate(
+                      text: "DISCOUNT",
+                      align: TextAlign.center,
+                      style: prudWidgetStyle.typedTextStyle.copyWith(
+                          color: prudColorTheme.textA,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600
                       ),
-                    ),
-                  ),
+                    )
+                  ],
                 ),
-              ],
+              ),
             ),
           )
         ],

@@ -5,6 +5,7 @@ import 'package:prudapp/components/gift_cart_icon.dart';
 import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/components/prud_panel.dart';
 import 'package:prudapp/models/reloadly.dart';
+import 'package:prudapp/singletons/beneficiary_notifier.dart';
 import 'package:prudapp/singletons/gift_card_notifier.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
@@ -90,6 +91,7 @@ class GiftSearchState extends State<GiftSearch> {
             beneficiaryCurrency: selectedBenCurrency!,
             senderCurrency: selectedSenderCurrency!,
           );
+          beneficiaryNotifier.removeAll();
           await giftCardNotifier.updateLastGiftSearch(searchCriteria);
           gotoTab(1);
         }

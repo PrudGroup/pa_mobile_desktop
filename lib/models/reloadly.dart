@@ -1,5 +1,6 @@
 import 'package:country_picker/country_picker.dart';
 import 'package:currency_picker/currency_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
 class GiftSearchCriteria{
@@ -244,7 +245,8 @@ class GiftTransactionDetails{
     this.referralCommission,
     this.referralId,
     this.transCurrency,
-    this.transDate
+    this.transDate,
+    this.refunded,
   });
 
   Map<String, dynamic> toJson(){
@@ -289,7 +291,9 @@ class Beneficiary{
   String gender;
   String email;
   String avatar;
+  dynamic photo;
   bool isAvatar;
+  String parseablePhoneNo;
 
   Beneficiary({
     required this.currencyCode,
@@ -299,6 +303,8 @@ class Beneficiary{
     required this.phoneNo,
     required this.email,
     required this.avatar,
+    required this.photo,
+    required this.parseablePhoneNo,
     this.isAvatar = true,
   });
 
@@ -312,6 +318,8 @@ class Beneficiary{
       "gender": gender,
       "avatar": avatar,
       "isAvatar": isAvatar,
+      "photo": photo,
+      "parseablePhoneNo": parseablePhoneNo,
     };
   }
 
@@ -325,19 +333,25 @@ class Beneficiary{
       email: json["email"],
       avatar: json["avatar"],
       isAvatar: json["isAvatar"],
+      parseablePhoneNo: json["parseablePhoneNo"],
+      photo: json["photo"] != null? Uint8List.fromList(json["photo"].cast<int>().toList()) : null,
     );
   }
 }
 
 class CartItem{
   GiftProduct product;
+  double benSelectedDeno;
+  String benCur;
   int quantity;
   double charges;
   double amount;
   double totalDiscount;
   double grandTotal;
+  String senderCur;
   DateTime createdOn;
   DateTime lastUpdated;
+  Beneficiary? beneficiary;
 
   CartItem({
     required this.amount,
@@ -348,18 +362,26 @@ class CartItem{
     required this.product,
     required this.quantity,
     required this.totalDiscount,
+    required this.senderCur,
+    required this.benCur,
+    required this.benSelectedDeno,
+    this.beneficiary
   });
 
   Map<String, dynamic> toJson(){
     return {
       "amount": amount,
       "charges": charges,
-      "createdOn": createdOn,
+      "createdOn": createdOn.toIso8601String(),
       "grandTotal": grandTotal,
-      "lastUpdated": lastUpdated,
-      "product": product,
+      "lastUpdated": lastUpdated.toIso8601String(),
+      "product": product.toJson(),
       "quantity": quantity,
       "totalDiscount": totalDiscount,
+      "senderCur": senderCur,
+      "benSelectedDeno": benSelectedDeno,
+      "benCur": benCur,
+      if(beneficiary != null) "beneficiary": beneficiary!.toJson(),
     };
   }
 
@@ -367,12 +389,16 @@ class CartItem{
     return CartItem(
       amount: json["amount"],
       charges: json["charges"],
-      createdOn: json["createdOn"],
+      createdOn: DateTime.parse(json["createdOn"]),
       grandTotal: json["grandTotal"],
-      lastUpdated: json["lastUpdated"],
-      product: json["product"],
+      lastUpdated: DateTime.parse(json["lastUpdated"]),
+      product: GiftProduct.fromJson(json["product"]),
       quantity: json["quantity"],
-      totalDiscount: json["totalDiscount"]
+      totalDiscount: json["totalDiscount"],
+      senderCur: json["senderCur"],
+      benCur: json["benCur"],
+      benSelectedDeno: json["benSelectedDeno"],
+      beneficiary: json["beneficiary"] != null? Beneficiary.fromJson(json["beneficiary"]) : null,
     );
   }
 }

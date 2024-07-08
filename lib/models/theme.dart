@@ -191,14 +191,14 @@ class WidgetStyle{
     );
   }
 
-  Widget getShortButton({required Function onPressed, required String text, bool makeLight = false}){
+  Widget getShortButton({required Function onPressed, required String text, bool makeLight = false, bool isPill = true, bool isSmall = false}){
     Color btnColor = makeLight? prudColorTheme.buttonD : prudColorTheme.primary;
     Color lightColor = btnColor.withOpacity(0.7);
     Color textColor = makeLight? prudColorTheme.error : prudColorTheme.textC;
     return GFButton(
       onPressed: () => onPressed(),
-      shape: GFButtonShape.pills,
-      size: btnSize,
+      shape: isPill? GFButtonShape.pills : GFButtonShape.square,
+      size: isSmall? GFSize.SMALL : btnSize,
       padding: const EdgeInsets.only(left: 25, right: 25),
       color: btnColor,
       splashColor: lightColor,
@@ -345,13 +345,14 @@ InputDecoration getDeco(String label, {
   bool filled = false,
   double hintSize = 16.0,
   String hintText = '',
+  TextStyle? labelStyle,
 }) => InputDecoration(
   labelText: label,
   filled: filled,
   suffixIcon: suffixIcon,
   fillColor: prudColorTheme.bgC,
   hintText: hintText,
-  labelStyle: tabData.nRStyle.copyWith(
+  labelStyle: labelStyle?? tabData.nRStyle.copyWith(
     fontSize: hintSize,
   ),
   enabledBorder: prudWidgetStyle.enabledBorder,

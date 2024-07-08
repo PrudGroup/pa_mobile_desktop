@@ -14,10 +14,16 @@ class BeneficiaryNotifier extends ChangeNotifier {
 
   List<Beneficiary> selectedBeneficiaries = [];
   List<Beneficiary> myBeneficiaries = [];
+  int selectedTab = 0;
+
+  void changeTab(int tab){
+    selectedTab = tab;
+    notifyListeners();
+  }
 
   void getAllFromCache(){
     dynamic bensCache = myStorage.getFromStore(key: "myBeneficiaries");
-    dynamic selectedBensCache = myStorage.getFromStore(key: "selectedBeneficiaries");
+    // dynamic selectedBensCache = myStorage.getFromStore(key: "selectedBeneficiaries");
     myBeneficiaries.clear();
     selectedBeneficiaries.clear();
     if(bensCache != null && bensCache.isNotEmpty){
@@ -25,11 +31,11 @@ class BeneficiaryNotifier extends ChangeNotifier {
         myBeneficiaries.add(Beneficiary.fromJson(ben));
       }
     }
-    if(selectedBensCache != null && selectedBensCache.isNotEmpty){
+    /*if(selectedBensCache != null && selectedBensCache.isNotEmpty){
       for (dynamic ben in selectedBensCache) {
         selectedBeneficiaries.add(Beneficiary.fromJson(ben));
       }
-    }
+    }*/
   }
 
   Future<void> saveToCache({bool isSelected = true}) async {

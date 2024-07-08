@@ -26,7 +26,13 @@
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
-	<key>UIMainStoryboardFile</key>
+	<key>NSPhotoLibraryUsageDescription</key>
+    <string>This will be used to identify your beneficiary</string>
+	<key>NSCameraUsageDescription</key>
+    <string>This will be used to identify your beneficiary</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Microphone is needed in conjunction with the camera to identify your beneficiary</string>
+    <key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>

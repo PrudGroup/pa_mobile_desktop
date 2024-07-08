@@ -11,8 +11,9 @@ class InnerMenu extends StatefulWidget {
   final List<InnerMenuItem> menus;
   final int type; //0 => Inner, 1 => deep
   final bool hasIcon;
+  final int activeTab;
 
-  const InnerMenu({super.key, required this.menus, this.type = 0, this.hasIcon= false});
+  const InnerMenu({super.key, required this.menus, this.type = 0, this.hasIcon= false, this.activeTab = 0});
 
   @override
   InnerMenuState createState() => InnerMenuState();
@@ -45,7 +46,7 @@ class InnerMenuState extends State<InnerMenu> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    changeWidget(widget.menus[0].menu, 0);
+    changeWidget(widget.menus[widget.activeTab].menu, widget.activeTab);
     iCloud.addListener(() {
       try{
         if(showMenu != iCloud.showInnerTabsAndMenus && mounted) {

@@ -9,6 +9,7 @@ import 'package:prudapp/components/prud_container.dart';
 import 'package:prudapp/components/prud_data_viewer.dart';
 import 'package:prudapp/components/prud_panel.dart';
 import 'package:prudapp/models/reloadly.dart';
+import 'package:prudapp/singletons/beneficiary_notifier.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/gift_card_notifier.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
@@ -36,9 +37,99 @@ class GiftDetailsState extends State<GiftDetails> {
   double selectedDenoCost = 0;
   double selectedDenoCostWithDiscount = 0;
   bool gettingDenoCost = false;
+  double totalDiscount = 0;
+  bool hasSelectedBen = beneficiaryNotifier.selectedBeneficiaries.isNotEmpty;
+  ScrollController scrollCtrl = ScrollController();
 
-  void refresh(){
+  void refresh() async {
+    await beneficiaryNotifier.removeAll();
+    if(mounted) {
+      setState(() {
+        smsFeeInSenderCur = 0;
+        denSelected = null;
+        senderFeeInSenderCur = 0;
+        selectedDeno = 0;
+        selectedDenoCost = 0;
+        selectedDenoCostWithDiscount = 0;
+        denSelected = null;
+        totalDiscount = 0;
+      });
+    }
 
+  }
+
+  double getTotalCharges() => senderFeeInSenderCur + smsFeeInSenderCur;
+
+  Future<double> convertSenderCostToSenderCur(double cost) async {
+    return await currencyMath.convert(
+      amount: cost,
+      quoteCode: giftCardNotifier.lastGiftSearch!.senderCurrency.code,
+      baseCode: "NGN"
+    );
+  }
+
+  double getTotalDiscount(double senderCost){
+    if(gift.denominationType!.toLowerCase() == "fixed"){
+      return currencyMath.roundDouble(senderCost * ((gift.discountPercentage?? 0)/100),2);
+    }else{
+      return totalDiscount;
+    }
+  }
+
+  double getSelectedDeno(){
+    if(gift.denominationType!.toLowerCase() == "fixed"){
+      return double.parse(denSelected!.recipient);
+    }else{
+      return selectedDeno;
+    }
+  }
+
+  double getDiscountedAmount(double cost){
+    if(gift.denominationType!.toLowerCase() == "fixed"){
+      return currencyMath.roundDouble(cost - getTotalDiscount(cost), 2);
+    }else{
+      return selectedDenoCostWithDiscount;
+    }
+  }
+
+  double getGrandTotal(double cost){
+    if(gift.denominationType!.toLowerCase() == "fixed"){
+      return currencyMath.roundDouble(getDiscountedAmount(cost) + getTotalCharges(), 2);
+    }else{
+      return selectedDenoCostWithDiscount;
+    }
+  }
+
+  void addToCart() async {
+    List<Beneficiary> benes = beneficiaryNotifier.selectedBeneficiaries;
+    if(benes.isNotEmpty){
+      double senderCost = 0;
+      if(gift.denominationType!.toLowerCase() == "fixed"){
+        senderCost = await convertSenderCostToSenderCur(denSelected!.sender);
+      }else{
+        senderCost = selectedDenoCost;
+      }
+      CartItem newCartItem = CartItem(
+        amount: getDiscountedAmount(senderCost),
+        charges: getTotalCharges(),
+        createdOn: DateTime.now(),
+        grandTotal: getGrandTotal(senderCost),
+        lastUpdated: DateTime.now(),
+        product: gift,
+        quantity: 1,
+        totalDiscount: getTotalDiscount(senderCost),
+        senderCur: giftCardNotifier.lastGiftSearch!.senderCurrency.code,
+        benCur: gift.recipientCurrencyCode!,
+        benSelectedDeno: getSelectedDeno()
+      );
+      for(Beneficiary bene in benes){
+        newCartItem.beneficiary = bene;
+        giftCardNotifier.addItemToCart(newCartItem);
+      }
+      refresh();
+      if(mounted) iCloud.showSnackBar("Items Added to Cart!", context, title: "Cool");
+      iCloud.scrollTop(scrollCtrl);
+    }
   }
 
   Future<void> checkSelectedDeno() async {
@@ -58,20 +149,18 @@ class GiftDetailsState extends State<GiftDetails> {
     if (mounted) setState(() => gettingDenoCost = true);
     if (selectedDeno >= gift.minRecipientDenomination! &&
         selectedDeno <= gift.maxRecipientDenomination! &&
+        gift.recipientCurrencyCode != null &&
         giftCardNotifier.lastGiftSearch != null) {
       FxRate? senderCost = await giftCardNotifier.getFxRate(
-          giftCardNotifier.lastGiftSearch!.beneficiaryCurrency.code,
+          gift.recipientCurrencyCode!,
           selectedDeno
       );
       if (mounted && senderCost != null) {
-        double inSenderCur = await currencyMath.convert(
-          amount: senderCost.senderAmount!,
-          quoteCode: giftCardNotifier.lastGiftSearch!.senderCurrency.code,
-          baseCode: "NGN"
-        );
-        double discount = inSenderCur * (gift.discountPercentage!/100);
+        double inSenderCur = await convertSenderCostToSenderCur(senderCost.senderAmount!);
+        double discount = inSenderCur * ((gift.discountPercentage?? 0)/100);
         setState(() {
           gettingDenoCost = false;
+          totalDiscount = currencyMath.roundDouble(discount, 2);
           selectedDenoCost = currencyMath.roundDouble(inSenderCur, 2);
           selectedDenoCostWithDiscount = currencyMath.roundDouble(inSenderCur - discount, 2);
         });
@@ -120,11 +209,19 @@ class GiftDetailsState extends State<GiftDetails> {
         if(mounted) setState(() => denSelected = giftCardNotifier.selectedDenMap);
       }
     });
+    beneficiaryNotifier.addListener((){
+      if(mounted){
+        setState(() {
+          hasSelectedBen = beneficiaryNotifier.selectedBeneficiaries.isNotEmpty;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
     giftCardNotifier.removeListener((){});
+    beneficiaryNotifier.removeListener((){});
     super.dispose();
   }
 
@@ -135,6 +232,7 @@ class GiftDetailsState extends State<GiftDetails> {
       backgroundColor: prudColorTheme.bgC,
       resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
+        controller: scrollCtrl,
         child: Column(
           children: [
             Container(
@@ -268,9 +366,9 @@ class GiftDetailsState extends State<GiftDetails> {
                     direction: Axis.horizontal,
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      PrudDataViewer(field: "Sender Fee", value: "${giftCardNotifier.lastGiftSearch?.senderCurrency.symbol}$senderFeeInSenderCur"),
+                      PrudDataViewer(valueIsMoney: true, field: "Sender Fee", value: "${giftCardNotifier.lastGiftSearch?.senderCurrency.symbol}$senderFeeInSenderCur"),
                       spacer.width,
-                      PrudDataViewer(field: "SMS Fee", value: "${giftCardNotifier.lastGiftSearch?.senderCurrency.symbol}$smsFeeInSenderCur"),
+                      PrudDataViewer(valueIsMoney: true, field: "SMS Fee", value: "${giftCardNotifier.lastGiftSearch?.senderCurrency.symbol}$smsFeeInSenderCur"),
                     ],
                   ),
                 ),
@@ -305,6 +403,7 @@ class GiftDetailsState extends State<GiftDetails> {
                             selected: selected,
                             discountInPercentage: gift.discountPercentage?? 0,
                             senderFee: gift.senderFee?? 0,
+                            recipientCur: gift.recipientCurrencyCode!
                           );
                         }
                       ),
@@ -332,53 +431,53 @@ class GiftDetailsState extends State<GiftDetails> {
                             children: [
                               SizedBox(
                                 width: 60,
-                                child: FittedBox(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Translate(
-                                        text: "Minimum",
-                                        style: prudWidgetStyle.typedTextStyle.copyWith(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w600,
-                                          color: prudColorTheme.secondary,
-                                        ),
-                                        align: TextAlign.center,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Translate(
+                                      text: "Minimum",
+                                      style: prudWidgetStyle.typedTextStyle.copyWith(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: prudColorTheme.secondary,
                                       ),
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: prudColorTheme.bgA,
-                                          border: Border.all(
+                                      align: TextAlign.center,
+                                    ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: prudColorTheme.bgA,
+                                        border: Border.all(
                                             color: prudColorTheme.bgD,
                                             width: 3.0
-                                          ),
                                         ),
-                                        padding: const EdgeInsets.all(5),
-                                        child: Center(
+                                      ),
+                                      padding: const EdgeInsets.all(5),
+                                      child: Center(
+                                        child: FittedBox(
                                           child: Row(
                                             children: [
                                               Text(
-                                                "${giftCardNotifier.lastGiftSearch?.beneficiaryCurrency.symbol}",
-                                                style: prudWidgetStyle.btnTextStyle.copyWith(
-                                                  fontSize: 15.0,
-                                                  color: prudColorTheme.textA
+                                                "${(tabData.getCurrency(gift.recipientCurrencyCode!))?.symbol}",
+                                                style: tabData.tBStyle.copyWith(
+                                                    fontSize: 15.0,
+                                                    color: prudColorTheme.textA
                                                 ),
                                               ),
                                               Text(
                                                 "${gift.minRecipientDenomination}",
                                                 style: prudWidgetStyle.btnTextStyle.copyWith(
-                                                  fontSize: 20.0,
-                                                  color: prudColorTheme.primary,
-                                                  fontWeight: FontWeight.w600
+                                                    fontSize: 20.0,
+                                                    color: prudColorTheme.primary,
+                                                    fontWeight: FontWeight.w600
                                                 ),
                                               )
                                             ],
                                           ),
                                         ),
-                                      )
-                                    ],
-                                  ),
+                                      ),
+                                    )
+                                  ],
                                 ),
                               ),
                               spacer.width,
@@ -409,37 +508,37 @@ class GiftDetailsState extends State<GiftDetails> {
                               spacer.width,
                               SizedBox(
                                 width: 60,
-                                child: FittedBox(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Translate(
-                                        text: "Maximum",
-                                        style: prudWidgetStyle.typedTextStyle.copyWith(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w600,
-                                          color: prudColorTheme.secondary,
-                                        ),
-                                        align: TextAlign.center,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Translate(
+                                      text: "Maximum",
+                                      style: prudWidgetStyle.typedTextStyle.copyWith(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: prudColorTheme.secondary,
                                       ),
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: prudColorTheme.bgA,
-                                          border: Border.all(
+                                      align: TextAlign.center,
+                                    ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: prudColorTheme.bgA,
+                                        border: Border.all(
                                             color: prudColorTheme.bgD,
                                             width: 3.0
-                                          ),
                                         ),
-                                        padding: const EdgeInsets.all(5),
-                                        child: Center(
+                                      ),
+                                      padding: const EdgeInsets.all(5),
+                                      child: Center(
+                                        child: FittedBox(
                                           child: Row(
                                             children: [
                                               Text(
-                                                "${giftCardNotifier.lastGiftSearch?.beneficiaryCurrency.symbol}",
-                                                style: prudWidgetStyle.btnTextStyle.copyWith(
-                                                    fontSize: 15.0,
-                                                    color: prudColorTheme.textA
+                                                "${(tabData.getCurrency(gift.recipientCurrencyCode!))?.symbol}",
+                                                style: tabData.tBStyle.copyWith(
+                                                  fontSize: 15.0,
+                                                  color: prudColorTheme.textA
                                                 ),
                                               ),
                                               Text(
@@ -453,9 +552,9 @@ class GiftDetailsState extends State<GiftDetails> {
                                             ],
                                           ),
                                         ),
-                                      )
-                                    ],
-                                  ),
+                                      ),
+                                    )
+                                  ],
                                 ),
                               ),
                               spacer.width,
@@ -491,8 +590,8 @@ class GiftDetailsState extends State<GiftDetails> {
                                         Row(
                                           children: [
                                             Text(
-                                              "${giftCardNotifier.lastGiftSearch?.senderCurrency.symbol}",
-                                              style: prudWidgetStyle.btnTextStyle.copyWith(
+                                        "${(tabData.getCurrency(gift.recipientCurrencyCode!))?.symbol}",
+                                              style: tabData.tBStyle.copyWith(
                                                 fontSize: 18.0,
                                                 color: prudColorTheme.textA
                                               ),
@@ -523,17 +622,17 @@ class GiftDetailsState extends State<GiftDetails> {
                                           children: [
                                             Text(
                                               "${giftCardNotifier.lastGiftSearch?.senderCurrency.symbol}",
-                                              style: prudWidgetStyle.btnTextStyle.copyWith(
-                                                  fontSize: 18.0,
-                                                  color: prudColorTheme.textA
+                                              style: tabData.tBStyle.copyWith(
+                                                fontSize: 18.0,
+                                                color: prudColorTheme.textA
                                               ),
                                             ),
                                             Text(
                                               "$selectedDenoCost",
                                               style: prudWidgetStyle.btnTextStyle.copyWith(
-                                                  fontSize: 25.0,
-                                                  color: prudColorTheme.primary,
-                                                  fontWeight: FontWeight.w600
+                                                fontSize: 25.0,
+                                                color: prudColorTheme.primary,
+                                                fontWeight: FontWeight.w600
                                               ),
                                             )
                                           ],
@@ -569,7 +668,7 @@ class GiftDetailsState extends State<GiftDetails> {
                                           children: [
                                             Text(
                                               "${giftCardNotifier.lastGiftSearch?.senderCurrency.symbol}",
-                                              style: prudWidgetStyle.btnTextStyle.copyWith(
+                                              style: tabData.tBStyle.copyWith(
                                                   fontSize: 18.0,
                                                   color: prudColorTheme.textA
                                               ),
@@ -665,6 +764,11 @@ class GiftDetailsState extends State<GiftDetails> {
                         ],
                       ),
                     ),
+                  ),
+                  spacer.height,
+                  if(hasSelectedBen && (selectedDeno > 0 || denSelected != null)) prudWidgetStyle.getLongButton(
+                    onPressed: addToCart,
+                    text:"Add To Cart"
                   ),
                   spacer.height,
                 ],

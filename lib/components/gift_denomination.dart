@@ -23,12 +23,14 @@ class GiftDenomination extends StatelessWidget {
   final double senderFee;
   final double discountInPercentage;
   final bool selected;
+  final String recipientCur;
 
   const GiftDenomination({
     super.key,
     required this.denMap,
     required this.senderFee,
     required this.discountInPercentage,
+    required this.recipientCur,
     this.selected = false
   });
 
@@ -64,7 +66,7 @@ class GiftDenomination extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     GiftSearchCriteria? cri = giftCardNotifier.lastGiftSearch;
-    Currency? benCur = cri?.beneficiaryCurrency;
+    Currency? benCur = tabData.getCurrency(recipientCur);
     Currency? senderCur = cri?.senderCurrency;
     return benCur != null && senderCur != null?
     InkWell(
@@ -78,15 +80,15 @@ class GiftDenomination extends StatelessWidget {
         margin: const EdgeInsets.only(left: 5.0, right: 5.0),
         padding: const EdgeInsets.all(10.0),
         decoration: BoxDecoration(
-            color: prudColorTheme.primary,
-            boxShadow: prudShadows,
-            borderRadius: prudRadAll,
-            border: Border.symmetric(
-              vertical: BorderSide(
-                color: selected? prudColorTheme.buttonC : prudColorTheme.primary.withOpacity(0.6),
-                width: 4.0
-              )
+          color: prudColorTheme.primary,
+          boxShadow: prudShadows,
+          borderRadius: prudRadAll,
+          border: Border.symmetric(
+            vertical: BorderSide(
+              color: selected? prudColorTheme.buttonC : prudColorTheme.primary.withOpacity(0.6),
+              width: 4.0
             )
+          )
         ),
         child: Center(
           child: FutureBuilder(
@@ -115,7 +117,7 @@ class GiftDenomination extends StatelessWidget {
                                   children: [
                                     Text(
                                       benCur.symbol,
-                                      style: TextStyle(
+                                      style: tabData.tBStyle.copyWith(
                                         fontSize: 16.0,
                                         color: prudColorTheme.bgC,
                                       ),
@@ -149,9 +151,9 @@ class GiftDenomination extends StatelessWidget {
                                   children: [
                                     Text(
                                       "${fxRate != null? senderCur.symbol : tabData.getCurrencySymbol("NGN")}",
-                                      style: TextStyle(
-                                        fontSize: 16.0,
-                                        color: prudColorTheme.bgC,
+                                      style: tabData.tBStyle.copyWith(
+                                        fontSize: 16,
+                                        color: prudColorTheme.bgC
                                       ),
                                     ),
                                     Text(

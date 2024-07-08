@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -22,6 +23,7 @@ class MyStorage extends ChangeNotifier {
   GetStorage lStore = GetStorage();
   bool hasInitialized = false;
   User? user;
+  List<XFile> lostImageData = [];
   List<String> convertibleCurrencies = [];
   var alertStyle = AlertStyle(
       animationType: AnimationType.fromTop,
@@ -46,14 +48,35 @@ class MyStorage extends ChangeNotifier {
         color: Colors.black,
         fontSize: 16.0
       ),
-      alertAlignment: Alignment.topCenter,
+      alertAlignment: Alignment.center,
       backgroundColor: Colors.white,
       overlayColor: Colors.black45,
       alertElevation: 0.0
   );
+  String? installReferralCode;
+  String? giftReferral;
+  String? busReferral;
+  String? flightReferral;
+  String? rechargeReferral;
+  String? hotelsReferral;
+
 
   factory MyStorage() {
     return _myStorage;
+  }
+
+  Future<void> getLostImageData() async {
+    final ImagePicker picker = ImagePicker();
+    final LostDataResponse response = await picker.retrieveLostData();
+    if (response.isEmpty) {
+      return;
+    }
+    final List<XFile>? files = response.files;
+    if (files != null) {
+      lostImageData = files;
+    } else {
+      debugPrint("LostImageData Error: ${response.exception}");
+    }
   }
 
   Future<void> setConvertibleCurrencies() async {
@@ -137,12 +160,21 @@ class MyStorage extends ChangeNotifier {
 
   String? getHotelReferral(String hotelId) => getFromStore(key: "hotel_${hotelId}_referral");
 
+  String? getAppInstallReferralCode() => getFromStore(key: "install_referral_code");
+
   Future<void> initializeValues() async {
     try{
       var storedUser = myStorage.getFromStore(key: 'user');
       user = storedUser == null? null : User.fromJson(jsonDecode(storedUser));
       await setConvertibleCurrencies();
+      await getLostImageData();
       hasInitialized = true;
+      hotelsReferral = getHotelsReferral();
+      installReferralCode = getAppInstallReferralCode();
+      giftReferral = getGiftReferral();
+      busReferral = getBusReferral();
+      flightReferral = getFlightReferral();
+      rechargeReferral = getRechargeReferral();
       notifyListeners();
     }catch (ex) {
       debugPrint("ErrorHandler: SharedLocalStorage: initializeValues(): $ex");
