@@ -101,6 +101,8 @@ class CityModalSheetState extends State<CityModalSheet> {
               spacer.height,
               Expanded(
                   child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: const BouncingScrollPhysics(),
                       itemCount: foundCities.length,
                       itemBuilder: (context, index){
                         City dCity = foundCities[index];

@@ -35,6 +35,8 @@ class PrudShowroomState extends State<PrudShowroom> {
         :
     ListView.builder(
       scrollDirection: Axis.horizontal,
+      shrinkWrap: true,
+      physics: const BouncingScrollPhysics(),
       itemCount: widget.items.length,
       itemBuilder: (context, index){
         Widget item = widget.items[index];

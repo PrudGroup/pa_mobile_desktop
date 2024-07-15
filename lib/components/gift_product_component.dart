@@ -5,6 +5,7 @@ import 'package:prudapp/models/images.dart';
 import 'package:prudapp/models/reloadly.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/pages/giftcards/gift_details.dart';
+import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/gift_card_notifier.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 
@@ -30,6 +31,12 @@ class GiftProductComponentState extends State<GiftProductComponent> {
   void openDetails(){
     giftCardNotifier.changeSelectedProduct(widget.product.productId!);
     iCloud.goto(context, GiftDetails(gift: widget.product,));
+  }
+
+  double getDiscountInPercentage(){
+    double discount = widget.product.discountPercentage?? 0;
+    if(discount > 0) discount = discount * giftCustomerDiscountInPercentage;
+    return discount > 0? currencyMath.roundDouble(discount, 1) : 0;
   }
 
   @override
@@ -83,7 +90,7 @@ class GiftProductComponentState extends State<GiftProductComponent> {
             children: [
               Container(
                 margin: const EdgeInsets.only(top: 20.0),
-                width: 150.0,
+                width: 160.0,
                 height: 120.0,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20.0),
@@ -111,7 +118,7 @@ class GiftProductComponentState extends State<GiftProductComponent> {
                 ),
               ),
               SizedBox(
-                width: 140,
+                width: 150,
                 child: Text(
                   "${widget.product.productName}",
                   textAlign: TextAlign.center,
@@ -146,19 +153,19 @@ class GiftProductComponentState extends State<GiftProductComponent> {
                     Row(
                       children: [
                         Text(
-                          "${widget.product.discountPercentage?? 0}",
+                          "${getDiscountInPercentage()}",
                           style: prudWidgetStyle.typedTextStyle.copyWith(
-                              fontSize: 40.0,
-                              fontWeight: FontWeight.w700,
-                              color: prudColorTheme.error
+                            fontSize: 40.0,
+                            fontWeight: FontWeight.w700,
+                            color: prudColorTheme.error
                           ),
                         ),
                         Text(
                           "%",
                           style: prudWidgetStyle.tabTextStyle.copyWith(
-                              fontSize: 25.0,
-                              fontWeight: FontWeight.w700,
-                              color: prudColorTheme.buttonA
+                            fontSize: 25.0,
+                            fontWeight: FontWeight.w700,
+                            color: prudColorTheme.buttonA
                           ),
                         ),
                       ],
@@ -167,9 +174,9 @@ class GiftProductComponentState extends State<GiftProductComponent> {
                       text: "DISCOUNT",
                       align: TextAlign.center,
                       style: prudWidgetStyle.typedTextStyle.copyWith(
-                          color: prudColorTheme.textA,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600
+                        color: prudColorTheme.textA,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600
                       ),
                     )
                   ],

@@ -220,13 +220,13 @@ class NewSparkState extends State<NewSpark> {
       });
     }
     return newSpark.locationTarget != null &&
-        newSpark.sparkCategory != null &&
-        newSpark.sparkType != null &&
-        newSpark.targetSparks != null &&
-        newSpark.targetLink != null &&
-        newSpark.title != null &&
-        newSpark.description != null &&
-        newSpark.duration != null;
+      newSpark.sparkCategory != null &&
+      newSpark.sparkType != null &&
+      newSpark.targetSparks != null &&
+      newSpark.targetLink != null &&
+      newSpark.title != null &&
+      newSpark.description != null &&
+      newSpark.duration != null;
   }
 
   void gotoTab(index) {
@@ -462,6 +462,7 @@ class NewSparkState extends State<NewSpark> {
       body: SizedBox(
         height: screen.height,
         child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 10),
           controller: scrollCtrl,
           child: presentPhase == SparkCreationPhase.info

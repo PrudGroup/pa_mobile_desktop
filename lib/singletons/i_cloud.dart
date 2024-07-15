@@ -11,11 +11,17 @@ import 'package:go_router/go_router.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import '../components/page_transitions/scale.dart';
+import '../components/prud_container.dart';
 import '../constants.dart';
+import '../models/images.dart';
 import '../models/shared_classes.dart';
 import '../models/spark.dart';
 import '../models/spark_cost.dart';
 import '../models/user.dart';
+import '../pages/ads/ads.dart';
+import '../pages/shippers/shippers.dart';
+import '../pages/switzstores/switz_stores.dart';
+import '../pages/viewsparks/view_spark.dart';
 
 
 enum RegisterState{
@@ -202,6 +208,149 @@ class ICloud extends ChangeNotifier{
     return loggedIn;
   }
 
+  List<Widget> getShowroom(BuildContext context, {int? showroomItems}){
+    List<Widget> showroom = [
+      InkWell(
+        onTap: () => iCloud.goto(context, const ViewSpark()),
+        child: PrudContainer(
+            hasPadding: false,
+            child: Image.asset(
+                prudImages.front7
+            )
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const ViewSpark()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          title: "Get Views/Sparks",
+          child: Image.asset(
+              prudImages.front4
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const Ads()),
+        child: PrudContainer(
+            hasPadding: false,
+            child: Image.asset(
+                prudImages.front1
+            )
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const Ads()),
+        child: PrudContainer(
+          hasPadding: false,
+          child: Image.asset(
+              prudImages.front6
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const SwitzStores()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          title: "Best Marketplace",
+          child: Image.asset(
+              prudImages.front13
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const SwitzStores()),
+        child: PrudContainer(
+          hasPadding: false,
+          child: Image.asset(
+              prudImages.front12
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const Shippers()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          title: "Shippers",
+          child: Image.asset(
+              prudImages.front15
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const SwitzStores()),
+        child: PrudContainer(
+          hasPadding: false,
+          child: Image.asset(
+              prudImages.front10
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const SwitzStores()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          title: "Switz Stores",
+          child: Image.asset(
+              prudImages.front2
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const SwitzStores()),
+        child: PrudContainer(
+          hasPadding: false,
+          child: Image.asset(
+              prudImages.front11
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const Shippers()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          titleAlignment: MainAxisAlignment.end,
+          title: "Shipping Easily",
+          child: Image.asset(
+              prudImages.front14
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const SwitzStores()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          title: "Shopping",
+          child: Image.asset(
+              prudImages.front9
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const SwitzStores()),
+        child: PrudContainer(
+          hasPadding: false,
+          child: Image.asset(
+              prudImages.front8
+          ),
+        ),
+      ),
+    ];
+    List<Widget> results = [];
+    showroom.shuffle();
+    if(showroomItems != null){
+      for(int i=0; i < showroomItems; i++){
+        results.add(showroom[i]);
+      }
+    }
+    return showroomItems != null? results : showroom;
+  }
+
   Future<Response> addAffiliate(String url, User newUser) async => await prudDio.post(url, data: newUser.toJson());
 
   Future<Response> verifyAffiliateEmail(String url) async => await prudDio.get(url);
@@ -291,6 +440,49 @@ class ICloud extends ChangeNotifier{
     }
   }
 
+  Future<bool> addReferralMetric(String referralId, double increaseBy) async {
+    bool hasAdded = false;
+    try{
+      if(affAuthToken != null && myStorage.installReferralCode != null){
+        String metricUrl = "$apiEndPoint/link_metric/";
+        Map<String, dynamic> metricDetails = {
+          "metric_id": referralId,
+          "increase_amount_by": increaseBy,
+        };
+        Response res = await prudDio.post(metricUrl, data: metricDetails);
+        debugPrint("Gift Link Metric Result: $res : updated_data: ${res.data}");
+        if (res.data != null) {
+          hasAdded = true;
+        }
+      }
+    }catch(ex){
+      debugPrint("addMetricForAppInstallReferral: $ex");
+    }
+    return hasAdded;
+  }
+
+  Future<bool> addMetricForAppInstallReferral(double increaseBy, String fieldName) async {
+    bool hasAdded = false;
+    try{
+      if(affAuthToken != null && myStorage.installReferralCode != null){
+        String metricUrl = "$apiEndPoint/airm_metric/";
+        Map<String, dynamic> metricDetails = {
+          "referral_id": myStorage.installReferralCode,
+          "field_name": fieldName,
+          "increase_by": increaseBy
+        };
+        Response res = await prudDio.post(metricUrl, data: metricDetails);
+        debugPrint("Install Metric Result: $res : updated_data: ${res.data}");
+        if (res.data != null) {
+          hasAdded = true;
+        }
+      }
+    }catch(ex){
+      debugPrint("addMetricForAppInstallReferral: $ex");
+    }
+    return hasAdded;
+  }
+
   void go(BuildContext context, String route, Map<String, dynamic>? qParam){
     GoRouter.of(context).go(Uri(path: route, queryParameters: qParam).toString());
   }
@@ -341,24 +533,29 @@ const String waveApiUrl = "https://api.flutterwave.com/v3";
 const double waveVat = 0.07;
 const bool paymentIsInTestMode = isProduction? false : true;
 List<PushMessage> pushMessages = [];
-const reloadlySmsFee = 250.0;
+const reloadlySmsFee = 300.0;
 const installReferralCommission = 0.25;
 const referralCommission = 0.25;
 const merchantReferralCommission = 0.25;
 FirebaseMessaging messenger = FirebaseMessaging.instance;
-Dio prudDio = Dio(BaseOptions(validateStatus: (statusCode) {
-  if(statusCode != null) {
-    if (statusCode == 422) {
-      return true;
+Dio prudDio = Dio(BaseOptions(
+  receiveDataWhenStatusError: true,
+  connectTimeout: const Duration(seconds: 60), // 60 seconds
+  receiveTimeout: const Duration(seconds: 60),
+  validateStatus: (statusCode) {
+    if(statusCode != null) {
+      if (statusCode == 422) {
+        return true;
+      }
+      if (statusCode >= 200 && statusCode <= 300) {
+        return true;
+      }
+      return false;
+    } else {
+      return false;
     }
-    if (statusCode >= 200 && statusCode <= 300) {
-      return true;
-    }
-    return false;
-  } else {
-    return false;
   }
-}));
+));
 
 List<Spark> testSparks = [
   Spark(

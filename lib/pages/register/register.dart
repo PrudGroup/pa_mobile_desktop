@@ -287,6 +287,7 @@ class RegisteredState extends State<Register> {
                   :
               SingleChildScrollView(
                 controller: scrollCtrl,
+                physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: presentState == RegisterState.first?
                 Column(

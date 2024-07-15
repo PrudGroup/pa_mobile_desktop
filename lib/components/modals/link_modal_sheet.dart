@@ -51,6 +51,7 @@ class LinkModalSheetState extends State<LinkModalSheet> {
         ),
         padding: const EdgeInsets.only(left: 5, right: 5, top: 10),
         child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           child: Column(
             children: [
               spacer.height,

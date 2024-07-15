@@ -199,6 +199,7 @@ class LoginState extends State<Login> {
                 child: ClipRRect(
                   borderRadius: rad,
                   child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: [

@@ -82,6 +82,7 @@ class GiftCartState extends State<GiftCart> {
       backgroundColor: prudColorTheme.bgA,
       elevation: 5,
       isScrollControlled: true,
+      isDismissible: false,
       shape: RoundedRectangleBorder(
         borderRadius: prudRad,
       ),
@@ -91,20 +92,27 @@ class GiftCartState extends State<GiftCart> {
           currencyCode: selectedCurrency!.code,
         );
       }
-    );
+    ).whenComplete(() async {
+      if(giftCardNotifier.selectedItems.isNotEmpty && giftCardNotifier.selectedItemsPaid) {
+        await makePayment();
+      } else{
+        await giftCardNotifier.clearAllSavePaymentDetails();
+        if(mounted) Navigator.pop(context);
+      }
+    });
   }
 
-  void selectCurrency(){
+  void selectCurrency() {
     showCurrencyPicker(
       context: context,
       favorite: ["NGN", "GBP", "USD", "EUR", "CAD"],
-      onSelect: (Currency cur){
+      onSelect: (Currency cur) async {
         try{
           if(mounted){
             setState(() {
               selectedCurrency = cur;
             });
-            calculateTotals();
+            await calculateTotals();
           }
         }catch(ex){
           debugPrint("Gift Cart selectCurrency Error: $ex");
@@ -115,10 +123,12 @@ class GiftCartState extends State<GiftCart> {
 
   Future<void> refresh() async {
     if(mounted){
-      selectedItems = giftCardNotifier.selectedItems;
-      cartItems = giftCardNotifier.cartItems;
-      allSelected = cartItems.length == selectedItems.length;
-      if(selectedItems.isNotEmpty) selectedCurrency = tabData.getCurrency(selectedItems[0].senderCur);
+      setState(() {
+        selectedItems = giftCardNotifier.failedItems.isNotEmpty? giftCardNotifier.failedItems : giftCardNotifier.selectedItems;
+        cartItems = giftCardNotifier.cartItems;
+        allSelected = cartItems.length == selectedItems.length;
+        if(selectedItems.isNotEmpty) selectedCurrency = tabData.getCurrency(selectedItems[0].senderCur);
+      });
     }
     await calculateTotals();
   }
@@ -173,7 +183,7 @@ class GiftCartState extends State<GiftCart> {
           ),
         ),
         actions: [
-          SizedBox(
+          if(cartItems.isNotEmpty) SizedBox(
             width: 100,
             child: Padding(
               padding: const EdgeInsets.only(bottom: 20),
@@ -195,7 +205,7 @@ class GiftCartState extends State<GiftCart> {
               ),
             ),
           ),
-          IconButton(
+          if(selectedItems.isNotEmpty) IconButton(
             onPressed: selectCurrency,
             icon: const Icon(Icons.currency_exchange),
             color: prudColorTheme.bgA,
@@ -208,6 +218,8 @@ class GiftCartState extends State<GiftCart> {
           Expanded(
             child: cartItems.isNotEmpty?
             ListView.builder(
+              shrinkWrap: true,
+              physics: const BouncingScrollPhysics(),
               itemCount: cartItems.length,
               itemBuilder: (context, index){
                 return GiftCartItemComponent(item: cartItems[index], index: index,);

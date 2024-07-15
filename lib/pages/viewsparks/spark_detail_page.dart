@@ -170,6 +170,7 @@ class SparkDetailPageState extends State<SparkDetailPage> {
         ),
       ),
       body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
             spacer.height,

@@ -224,15 +224,24 @@ class GiftTransactionDetails{
   String? id;
   String? affId;
   int? transId;
+  double? commissionFromReloadly;
+  double? customerGot;
+  double? referralsGot;
   double? income;
   DateTime? transDate;
   String? referralId;
   double? referralCommission;
   String? installReferralId;
   double? installReferralCommission;
-  double? profit;
+  double? profitForPrudapp;
   String? transCurrency;
   bool? refunded;
+  Beneficiary? beneficiary;
+  double? transactionCost;
+  double? transactionCostInSelected;
+  double? transactionPaid;
+  double? transactionPaidInSelected;
+  String? selectedCurrencyCode;
 
   GiftTransactionDetails({
     this.transId,
@@ -241,27 +250,46 @@ class GiftTransactionDetails{
     this.income,
     this.installReferralCommission,
     this.installReferralId,
-    this.profit,
+    this.profitForPrudapp,
     this.referralCommission,
     this.referralId,
     this.transCurrency,
     this.transDate,
     this.refunded,
+    this.beneficiary,
+    this.transactionCost,
+    this.transactionPaid,
+    this.selectedCurrencyCode,
+    this.transactionCostInSelected,
+    this.transactionPaidInSelected,
+    this.commissionFromReloadly,
+    this.customerGot,
+    this.referralsGot
   });
 
   Map<String, dynamic> toJson(){
     return {
       if(id != null) "id": id,
-      if(affId != null) "affId": affId,
+      if(affId != null) "aff_id": affId,
       if(transDate != null) "transDate": transDate!.toIso8601String(),
       if(transCurrency != null) "transCurrency": transCurrency,
       if(referralId != null) "referralId": referralId,
       if(referralCommission != null) "referralCommission": referralCommission,
-      if(profit != null) "profit": profit,
+      if(profitForPrudapp != null) "profitForPrudapp": profitForPrudapp,
       if(installReferralId != null) "installReferralId": installReferralId,
       if(installReferralCommission != null) "installReferralCommission": installReferralCommission,
       if(income != null) "income": income,
+      if(referralsGot != null) "referralsGot": referralsGot,
+      if(commissionFromReloadly != null) "commissionFromReloadly": commissionFromReloadly,
+      if(customerGot != null) "customerGot": customerGot,
       if(transId != null) "transId": transId,
+      if(refunded != null) "refunded": refunded,
+      if(beneficiary != null) "beneficiary": beneficiary!.toJson(),
+      if(transactionPaid != null) "transactionPaid": transactionPaid,
+      if(transactionCost != null) "transactionCost": transactionCost,
+      if(transactionCostInSelected != null) "transactionCostInSelected": transactionCostInSelected,
+      if(transactionPaidInSelected != null) "transactionPaidInSelected": transactionPaidInSelected,
+      if(selectedCurrencyCode != null) "selectedCurrencyCode": selectedCurrencyCode,
     };
   }
 
@@ -271,16 +299,25 @@ class GiftTransactionDetails{
       income: json["income"],
       installReferralCommission: json["installReferralCommission"],
       installReferralId: json["installReferralId"],
-      profit: json["profit"],
+      profitForPrudapp: json["profitForPrudapp"],
+      referralsGot: json["referralsGot"],
+      commissionFromReloadly: json["commissionFromReloadly"],
+      customerGot: json["customerGot"],
       referralCommission: json["referralCommission"],
       transCurrency: json["transCurrency"],
       referralId: json["referralId"],
       transDate: json["transDate"] != null? DateTime.tryParse(json["transDate"]) : null,
       affId: json["affId"],
       transId: json["transId"],
+      beneficiary: json["beneficiary"] != null? Beneficiary.fromJson(json["beneficiary"]) : null,
+      transactionCost: json["transactionCost"],
+      transactionPaid: json["transactionPaid"],
+      transactionCostInSelected: json["transactionCostInSelected"],
+      transactionPaidInSelected: json["transactionPaidInSelected"],
+      selectedCurrencyCode: json["selectedCurrencyCode"],
+      refunded: json["refunded"],
     );
   }
-
 }
 
 class Beneficiary{

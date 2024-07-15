@@ -76,6 +76,7 @@ class InnerMenuState extends State<InnerMenu> {
           color: widget.type == 0? highLev : lowLev,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
             itemCount: widget.menus.length,
             itemBuilder: (context, int index) => GFButton(
               onPressed: () => changeWidget(widget.menus[index].menu, index),

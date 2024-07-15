@@ -135,9 +135,9 @@ class GiftDenomination extends StatelessWidget {
                               Translate(
                                 text: "Beneficiary Gets",
                                 style: prudWidgetStyle.tabTextStyle.copyWith(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: prudColorTheme.lineD
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: prudColorTheme.lineD
                                 ),
                               )
                             ],
@@ -166,10 +166,8 @@ class GiftDenomination extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              Wrap(
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                direction: Axis.vertical,
-                                spacing: -5.0,
+                              Stack(
+                                alignment: AlignmentDirectional.center,
                                 children: [
                                   Translate(
                                     text: "You Pay",
@@ -179,12 +177,15 @@ class GiftDenomination extends StatelessWidget {
                                         color: prudColorTheme.lineD
                                     ),
                                   ),
-                                  Translate(
-                                    text: "(Charges Included)",
-                                    style: prudWidgetStyle.tabTextStyle.copyWith(
-                                        fontSize: 8,
-                                        fontWeight: FontWeight.w600,
-                                        color: prudColorTheme.textHeader
+                                  Padding(
+                                    padding: const EdgeInsets.only(top:15),
+                                    child: Translate(
+                                      text: "(Charges Included)",
+                                      style: prudWidgetStyle.tabTextStyle.copyWith(
+                                          fontSize: 8,
+                                          fontWeight: FontWeight.w600,
+                                          color: prudColorTheme.textHeader
+                                      ),
                                     ),
                                   )
                                 ],

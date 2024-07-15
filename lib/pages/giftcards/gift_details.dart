@@ -40,22 +40,22 @@ class GiftDetailsState extends State<GiftDetails> {
   double totalDiscount = 0;
   bool hasSelectedBen = beneficiaryNotifier.selectedBeneficiaries.isNotEmpty;
   ScrollController scrollCtrl = ScrollController();
+  bool adding = false;
 
   void refresh() async {
     await beneficiaryNotifier.removeAll();
     if(mounted) {
       setState(() {
-        smsFeeInSenderCur = 0;
         denSelected = null;
-        senderFeeInSenderCur = 0;
         selectedDeno = 0;
         selectedDenoCost = 0;
         selectedDenoCostWithDiscount = 0;
         denSelected = null;
         totalDiscount = 0;
+        adding = false;
+        giftCardNotifier.selectedDenMap = null;
       });
     }
-
   }
 
   double getTotalCharges() => senderFeeInSenderCur + smsFeeInSenderCur;
@@ -70,7 +70,8 @@ class GiftDetailsState extends State<GiftDetails> {
 
   double getTotalDiscount(double senderCost){
     if(gift.denominationType!.toLowerCase() == "fixed"){
-      return currencyMath.roundDouble(senderCost * ((gift.discountPercentage?? 0)/100),2);
+      double discount = gift.discountPercentage != null && gift.discountPercentage! > 0? ((gift.discountPercentage! * giftCustomerDiscountInPercentage)/100) : 0;
+      return currencyMath.roundDouble(senderCost * discount,2);
     }else{
       return totalDiscount;
     }
@@ -101,34 +102,50 @@ class GiftDetailsState extends State<GiftDetails> {
   }
 
   void addToCart() async {
-    List<Beneficiary> benes = beneficiaryNotifier.selectedBeneficiaries;
-    if(benes.isNotEmpty){
-      double senderCost = 0;
-      if(gift.denominationType!.toLowerCase() == "fixed"){
-        senderCost = await convertSenderCostToSenderCur(denSelected!.sender);
-      }else{
-        senderCost = selectedDenoCost;
+    try{
+      List<CartItem> items = [];
+      if(mounted) setState(() => adding = true);
+      List<Beneficiary> benes = beneficiaryNotifier.selectedBeneficiaries;
+      if(benes.isNotEmpty){
+        double senderCost = 0;
+        if(gift.denominationType!.toLowerCase() == "fixed"){
+          senderCost = await convertSenderCostToSenderCur(denSelected!.sender);
+        }else{
+          senderCost = selectedDenoCost;
+        }
+        double discountedAmount = getDiscountedAmount(senderCost);
+        double totalFees = getTotalCharges();
+        double grandAmt = getGrandTotal(senderCost);
+        double totalDis = getTotalDiscount(senderCost);
+        double selectedDen = getSelectedDeno();
+        for(Beneficiary bene in benes){
+          CartItem newCartItem = CartItem(
+            amount: discountedAmount,
+            charges: totalFees,
+            createdOn: DateTime.now(),
+            grandTotal: grandAmt,
+            lastUpdated: DateTime.now(),
+            product: gift,
+            quantity: 1,
+            totalDiscount: totalDis,
+            senderCur: giftCardNotifier.lastGiftSearch!.senderCurrency.code,
+            benCur: gift.recipientCurrencyCode!,
+            benSelectedDeno: selectedDen,
+            beneficiary: bene,
+          );
+          items.add(newCartItem);
+          // await giftCardNotifier.addItemToCart(newCartItem);
+        }
+        if(items.isNotEmpty) {
+          await giftCardNotifier.addItemsToCart(items);
+        }
+        refresh();
+        if(mounted) iCloud.showSnackBar("Items Added to Cart!", context, title: "Cool");
+        iCloud.scrollTop(scrollCtrl);
       }
-      CartItem newCartItem = CartItem(
-        amount: getDiscountedAmount(senderCost),
-        charges: getTotalCharges(),
-        createdOn: DateTime.now(),
-        grandTotal: getGrandTotal(senderCost),
-        lastUpdated: DateTime.now(),
-        product: gift,
-        quantity: 1,
-        totalDiscount: getTotalDiscount(senderCost),
-        senderCur: giftCardNotifier.lastGiftSearch!.senderCurrency.code,
-        benCur: gift.recipientCurrencyCode!,
-        benSelectedDeno: getSelectedDeno()
-      );
-      for(Beneficiary bene in benes){
-        newCartItem.beneficiary = bene;
-        giftCardNotifier.addItemToCart(newCartItem);
-      }
-      refresh();
-      if(mounted) iCloud.showSnackBar("Items Added to Cart!", context, title: "Cool");
-      iCloud.scrollTop(scrollCtrl);
+    }catch(ex){
+      if(mounted) setState(() => adding = false);
+      debugPrint("addToCart Error: $ex");
     }
   }
 
@@ -157,7 +174,8 @@ class GiftDetailsState extends State<GiftDetails> {
       );
       if (mounted && senderCost != null) {
         double inSenderCur = await convertSenderCostToSenderCur(senderCost.senderAmount!);
-        double discount = inSenderCur * ((gift.discountPercentage?? 0)/100);
+        double discot = gift.discountPercentage != null && gift.discountPercentage! > 0? ((gift.discountPercentage! * giftCustomerDiscountInPercentage)/100) : 0;
+        double discount = inSenderCur * discot;
         setState(() {
           gettingDenoCost = false;
           totalDiscount = currencyMath.roundDouble(discount, 2);
@@ -222,6 +240,7 @@ class GiftDetailsState extends State<GiftDetails> {
   void dispose() {
     giftCardNotifier.removeListener((){});
     beneficiaryNotifier.removeListener((){});
+    scrollCtrl.dispose();
     super.dispose();
   }
 
@@ -233,6 +252,7 @@ class GiftDetailsState extends State<GiftDetails> {
       resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
         controller: scrollCtrl,
+        physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
             Container(
@@ -245,6 +265,9 @@ class GiftDetailsState extends State<GiftDetails> {
                 ),
                 image: DecorationImage(
                   fit: BoxFit.cover,
+                  onError: (obj, stack){
+                    debugPrint("NetworkImage Error: $obj : $stack");
+                  },
                   image: NetworkImage(
                     brandLogo,
                   )
@@ -316,7 +339,7 @@ class GiftDetailsState extends State<GiftDetails> {
                         Row(
                           children: [
                             Text(
-                              "${gift.discountPercentage?? 0}",
+                              "${(gift.discountPercentage?? 0)*giftCustomerDiscountInPercentage}",
                               style: prudWidgetStyle.typedTextStyle.copyWith(
                                   fontSize: 20.0,
                                   fontWeight: FontWeight.w700,
@@ -388,6 +411,8 @@ class GiftDetailsState extends State<GiftDetails> {
                       height: 240,
                       child: ListView.builder(
                         padding: const EdgeInsets.only(top: 20, bottom: 10),
+                        shrinkWrap: true,
+                        physics: const BouncingScrollPhysics(),
                         scrollDirection: Axis.horizontal,
                         itemCount: gift.fixedRecipientToSenderDenominationsMap!.keys.length,
                         itemBuilder: (context, index){
@@ -401,7 +426,7 @@ class GiftDetailsState extends State<GiftDetails> {
                           return GiftDenomination(
                             denMap: denMap,
                             selected: selected,
-                            discountInPercentage: gift.discountPercentage?? 0,
+                            discountInPercentage: (gift.discountPercentage?? 0)*giftCustomerDiscountInPercentage,
                             senderFee: gift.senderFee?? 0,
                             recipientCur: gift.recipientCurrencyCode!
                           );
@@ -525,8 +550,8 @@ class GiftDetailsState extends State<GiftDetails> {
                                       decoration: BoxDecoration(
                                         color: prudColorTheme.bgA,
                                         border: Border.all(
-                                            color: prudColorTheme.bgD,
-                                            width: 3.0
+                                          color: prudColorTheme.bgD,
+                                          width: 3.0
                                         ),
                                       ),
                                       padding: const EdgeInsets.all(5),
@@ -609,9 +634,9 @@ class GiftDetailsState extends State<GiftDetails> {
                                         Translate(
                                           text: "Beneficiary Gets",
                                           style: prudWidgetStyle.tabTextStyle.copyWith(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w600,
-                                              color: prudColorTheme.textB
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            color: prudColorTheme.textB
                                           ),
                                         ),
                                       ],
@@ -637,10 +662,8 @@ class GiftDetailsState extends State<GiftDetails> {
                                             )
                                           ],
                                         ),
-                                        Wrap(
-                                          crossAxisAlignment: WrapCrossAlignment.center,
-                                          direction: Axis.vertical,
-                                          spacing: -5.0,
+                                        Stack(
+                                          alignment: AlignmentDirectional.center,
                                           children: [
                                             Translate(
                                               text: "Sender Pays",
@@ -650,16 +673,19 @@ class GiftDetailsState extends State<GiftDetails> {
                                                   color: prudColorTheme.textB
                                               ),
                                             ),
-                                            Translate(
-                                              text: "(Discount & Charges Excluded)",
-                                              style: prudWidgetStyle.tabTextStyle.copyWith(
-                                                fontSize: 8,
-                                                fontWeight: FontWeight.w600,
-                                                color: prudColorTheme.danger
+                                            Padding(
+                                              padding: const EdgeInsets.only(top: 15),
+                                              child: Translate(
+                                                text: "(Discount & Charges Excluded)",
+                                                style: prudWidgetStyle.tabTextStyle.copyWith(
+                                                    fontSize: 8,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: prudColorTheme.danger
+                                                ),
                                               ),
-                                            )
+                                            ),
                                           ],
-                                        )
+                                        ),
                                       ],
                                     ),
                                     if(selectedDenoCostWithDiscount > 0) Column(
@@ -676,17 +702,15 @@ class GiftDetailsState extends State<GiftDetails> {
                                             Text(
                                               "$selectedDenoCostWithDiscount",
                                               style: prudWidgetStyle.btnTextStyle.copyWith(
-                                                  fontSize: 25.0,
-                                                  color: prudColorTheme.primary,
-                                                  fontWeight: FontWeight.w600
+                                                fontSize: 25.0,
+                                                color: prudColorTheme.primary,
+                                                fontWeight: FontWeight.w600
                                               ),
                                             )
                                           ],
                                         ),
-                                        Wrap(
-                                          crossAxisAlignment: WrapCrossAlignment.center,
-                                          direction: Axis.vertical,
-                                          spacing: -5.0,
+                                        Stack(
+                                          alignment: AlignmentDirectional.center,
                                           children: [
                                             Translate(
                                               text: "Sender Pays",
@@ -696,16 +720,19 @@ class GiftDetailsState extends State<GiftDetails> {
                                                   color: prudColorTheme.textB
                                               ),
                                             ),
-                                            Translate(
-                                              text: "(Charges Excluded)",
-                                              style: prudWidgetStyle.tabTextStyle.copyWith(
-                                                  fontSize: 8,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: prudColorTheme.danger
+                                            Padding(
+                                              padding: const EdgeInsets.only(top: 15),
+                                              child: Translate(
+                                                text: "(Charges Excluded)",
+                                                style: prudWidgetStyle.tabTextStyle.copyWith(
+                                                    fontSize: 8,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: prudColorTheme.danger
+                                                ),
                                               ),
-                                            )
+                                            ),
                                           ],
-                                        )
+                                        ),
                                       ],
                                     )
                                   ]
@@ -766,9 +793,14 @@ class GiftDetailsState extends State<GiftDetails> {
                     ),
                   ),
                   spacer.height,
-                  if(hasSelectedBen && (selectedDeno > 0 || denSelected != null)) prudWidgetStyle.getLongButton(
+                  if(hasSelectedBen && (selectedDeno > 0 || denSelected != null) && !adding) prudWidgetStyle.getLongButton(
                     onPressed: addToCart,
                     text:"Add To Cart"
+                  ),
+                  if(adding) LoadingComponent(
+                    isShimmer: false,
+                    size: 40,
+                    spinnerColor: prudColorTheme.primary,
                   ),
                   spacer.height,
                 ],

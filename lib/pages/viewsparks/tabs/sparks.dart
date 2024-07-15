@@ -220,6 +220,8 @@ class SparksState extends State<Sparks> {
                       :
                   ListView.builder(
                     padding: const EdgeInsets.all(10),
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(),
                     itemCount: searchText != null? foundSparks.length : sparks.length,
                     itemBuilder: (BuildContext context, int index) {
                       Spark dSpk = searchText != null? foundSparks[index] : sparks[index];

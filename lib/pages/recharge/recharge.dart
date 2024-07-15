@@ -45,6 +45,7 @@ class RechargeState extends State<Recharge> with TickerProviderStateMixin {
       ),
       bottomNavigationBar: TabBar(
         controller: tabCtrl,
+        splashFactory: NoSplash.splashFactory,
         tabs: [
           Tab(
             icon: Image.asset(prudImages.airtime, width: 30,),

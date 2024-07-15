@@ -76,6 +76,8 @@ class MiddleMenuViewState extends State<MiddleMenuView> {
           color: widget.type == 0? prudTheme.cardColor : prudTheme.colorScheme.onSurface,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
+            shrinkWrap: true,
+            physics: const BouncingScrollPhysics(),
             itemCount: widget.topMenus.length,
             itemBuilder: (context, int index) => GFButton(
               onPressed: () => changeTopWidget(widget.topMenus[index].menu, index),
@@ -116,6 +118,8 @@ class MiddleMenuViewState extends State<MiddleMenuView> {
           color: widget.type == 0? prudTheme.cardColor : prudTheme.colorScheme.onSurface,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
+            shrinkWrap: true,
+            physics: const BouncingScrollPhysics(),
             itemCount: widget.bottomMenus.length,
             itemBuilder: (context, int index) => GFButton(
               onPressed: () => changeBottomWidget(widget.bottomMenus[index].menu, index),

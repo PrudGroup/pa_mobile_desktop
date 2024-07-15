@@ -9,6 +9,7 @@ class LoadingComponent extends StatelessWidget {
   final double? height;
   final int shimmerType;
   final Color? spinnerColor;
+  final bool defaultSpinnerType;
 
   const LoadingComponent({
     super.key,
@@ -16,12 +17,16 @@ class LoadingComponent extends StatelessWidget {
     this.size = 50,
     this.shimmerType = 0,
     this.height,
-    this.spinnerColor
+    this.spinnerColor,
+    this.defaultSpinnerType = true,
   }) : assert(isShimmer? height != null : size != null);
 
   @override
   Widget build(BuildContext context) {
-    Widget spin = SpinKitFadingCircle(
+    Widget spin = defaultSpinnerType? SpinKitFadingCircle(
+      size: size!,
+      color: spinnerColor?? prudColorTheme.iconB,
+    ) : SpinKitThreeInOut(
       size: size!,
       color: spinnerColor?? prudColorTheme.iconB,
     );

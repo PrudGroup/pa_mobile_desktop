@@ -48,6 +48,7 @@ class NewBeneficiaryState extends State<NewBeneficiary> {
   bool picking = false;
   bool adding = false;
   String? msg;
+  FocusNode focus = FocusNode();
   ScrollController scrollCtrl = ScrollController();
   TextEditingController nameCtrl = TextEditingController();
   TextEditingController emailCtrl = TextEditingController();
@@ -84,10 +85,8 @@ class NewBeneficiaryState extends State<NewBeneficiary> {
       });
       nameCtrl.text = "";
       emailCtrl.text = "";
+      focus.requestFocus();
       phoneTextController.text = "";
-      iCloud.showSnackBar(
-        "Added Beneficiary Successfully", context
-      );
       Alert(
         context: context,
         style: myStorage.alertStyle,
@@ -97,10 +96,10 @@ class NewBeneficiaryState extends State<NewBeneficiary> {
         buttons: [
           DialogButton(
             onPressed: () => Navigator.pop(context),
-            color: prudColorTheme.buttonD,
+            color: prudColorTheme.primary,
             radius: BorderRadius.zero,
             child: const Text(
-              "COOL",
+              "Okay",
               style: TextStyle(color: Colors.white, fontSize: 20),
             ),
           ),
@@ -138,6 +137,7 @@ class NewBeneficiaryState extends State<NewBeneficiary> {
       if(mounted) setState(() => msg = "Photo/Avatar Is Missing!");
     }
     if(mounted && msg != null) {
+      setState(() => adding = false);
       iCloud.showSnackBar(
           msg!, context
       );
@@ -164,9 +164,9 @@ class NewBeneficiaryState extends State<NewBeneficiary> {
         });
       }
     }catch(ex){
+      if(mounted) setState(() => picking = false);
       debugPrint("Picker Error: $ex");
     }
-
   }
 
   void getCountry(){
@@ -211,6 +211,7 @@ class NewBeneficiaryState extends State<NewBeneficiary> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       controller: scrollCtrl,
+      physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.all(10),
       child: Column(
         children: [
@@ -236,6 +237,7 @@ class NewBeneficiaryState extends State<NewBeneficiary> {
                     name: 'fullName',
                     controller: nameCtrl,
                     autofocus: true,
+                    focusNode: focus,
                     style: tabData.npStyle,
                     keyboardType: TextInputType.name,
                     decoration: getDeco("FullName"),
@@ -438,6 +440,7 @@ class NewBeneficiaryState extends State<NewBeneficiary> {
                     child: FormBuilderChoiceChip(
                       decoration: getDeco("Face"),
                       backgroundColor: prudColorTheme.bgA,
+                      disabledColor: prudColorTheme.bgD,
                       spacing: spacer.width.width!,
                       shape: prudWidgetStyle.choiceChipShape,
                       selectedColor: prudColorTheme.primary,

@@ -25,11 +25,18 @@ class GiftCardsState extends State<GiftCards> with TickerProviderStateMixin {
   }
 
   @override
+  void dispose() {
+    tabCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: prudColorTheme.bgC,
       resizeToAvoidBottomInset: false,
       body: TabBarView(
+        physics: const BouncingScrollPhysics(),
         controller: tabCtrl,
         children: [
           GiftSearch(goToTab: (int index) => tabCtrl.animateTo(index)),
@@ -39,7 +46,8 @@ class GiftCardsState extends State<GiftCards> with TickerProviderStateMixin {
       ),
       bottomNavigationBar: TabBar(
         controller: tabCtrl,
-        // isScrollable: true,
+        physics: const BouncingScrollPhysics(),
+        splashFactory: NoSplash.splashFactory,
         tabs: [
           Tab(
             icon: Image.asset(prudImages.giftSearch, width: 30,),

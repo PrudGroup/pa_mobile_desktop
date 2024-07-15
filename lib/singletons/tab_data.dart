@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:prudapp/components/translate.dart';
 import 'package:prudapp/models/images.dart';
+import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 
 class TabData extends ChangeNotifier {
@@ -262,6 +263,16 @@ class TabData extends ChangeNotifier {
       multiLine: false,
     );
     return regExp.hasMatch(str);
+  }
+
+  Color getTransactionStatusColor(String status){
+    switch(status.toUpperCase()){
+      case "SUCCESSFUL": return prudColorTheme.success;
+      case "PENDING": return prudColorTheme.lineA;
+      case "PROCESSING": return prudColorTheme.iconB;
+      case "REFUNDED": return prudColorTheme.iconA;
+      default: return prudColorTheme.primary;
+    }
   }
 
   TabData._internal();

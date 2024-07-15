@@ -80,6 +80,8 @@ class GiftCardCategoryModalSheetState extends State<GiftCardCategoryModalSheet> 
             spacer.height,
             Expanded(
               child: ListView.builder(
+                shrinkWrap: true,
+                physics: const BouncingScrollPhysics(),
                 itemCount: foundCats.length,
                 itemBuilder: (context, index){
                   GiftCategory dCat = foundCats[index];

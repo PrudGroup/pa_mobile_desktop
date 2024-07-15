@@ -101,6 +101,8 @@ class StateModalSheetState extends State<StateModalSheet> {
               spacer.height,
               Expanded(
                   child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: const BouncingScrollPhysics(),
                       itemCount: foundStates.length,
                       itemBuilder: (context, index){
                         ms.State dState = foundStates[index];

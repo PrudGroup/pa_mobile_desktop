@@ -211,6 +211,8 @@ class MySparksState extends State<MySparks> {
                     :
                 ListView.builder(
                   padding: const EdgeInsets.all(10),
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
                   itemCount: searchText != null? foundSparks.length : mySparks.length,
                   itemBuilder: (BuildContext context, int index) {
                     Spark mySpk = searchText != null? foundSparks[index] : mySparks[index];

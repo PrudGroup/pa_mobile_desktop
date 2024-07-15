@@ -176,6 +176,7 @@ class GiftSearchState extends State<GiftSearch> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(10.0),
+        physics: const BouncingScrollPhysics(),
         child: giftibleCountries.isNotEmpty?
         Column(
           mainAxisAlignment: MainAxisAlignment.center,

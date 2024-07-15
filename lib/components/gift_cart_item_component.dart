@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:getwidget/components/avatar/gf_avatar.dart';
 import 'package:getwidget/size/gf_size.dart';
 import 'package:prudapp/models/reloadly.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/gift_card_notifier.dart';
+import 'package:prudapp/singletons/shared_local_storage.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 import '../models/theme.dart';
 import '../singletons/tab_data.dart';
@@ -27,6 +30,40 @@ class GiftCartItemComponentState extends State<GiftCartItemComponent> {
   void dispose() {
     giftCardNotifier.removeListener((){});
     super.dispose();
+  }
+
+  void delete(){
+    Alert(
+      context: context,
+      type: AlertType.warning,
+      style: myStorage.alertStyle,
+      title: "Delete Cart Item",
+      desc: "You are about to delete an item. Delete?",
+      buttons: [
+        DialogButton(
+          onPressed: () async {
+            await giftCardNotifier.removeItemFromCart(widget.item);
+            giftCardNotifier.removeItemFromSelectedItems(widget.item);
+            if(mounted) Navigator.pop(context);
+          },
+          color: prudColorTheme.primary,
+          radius: BorderRadius.zero,
+          child: const Text(
+            "Delete",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        ),
+        DialogButton(
+          onPressed: () => Navigator.pop(context),
+          color: prudColorTheme.primary,
+          radius: BorderRadius.zero,
+          child: const Text(
+            "No",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        ),
+      ],
+    ).show();
   }
 
   void checkboxClicked(){
@@ -58,7 +95,7 @@ class GiftCartItemComponentState extends State<GiftCartItemComponent> {
 
   Future<void> reduce() async {
     try{
-      if(mounted) {
+      if(mounted && quantity > 1) {
         setState(() => quantity-=1);
         await giftCardNotifier.changeCartItem(quantity, widget.index);
       }
@@ -112,33 +149,37 @@ class GiftCartItemComponentState extends State<GiftCartItemComponent> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          InkWell(
-            onTap: checkboxClicked,
-            child: Row(
-              children: [
-                Checkbox(
-                  value: selected,
-                  onChanged: (bool? value) async {
-                    try{
-                      if(mounted && value != null){
-                        if(value == true){
-                          if(!containsItem()) giftCardNotifier.addToSelectedItems(widget.item);
-                        }else{
-                          giftCardNotifier.removeItemFromSelectedItems(widget.item);
-                        }
-                      }
-                    }catch(ex){
-                      debugPrint("Select Cart Item: $ex");
-                    }
-                  },
-                  activeColor: prudColorTheme.primary,
-                  focusColor: prudColorTheme.buttonB,
-                  checkColor: prudColorTheme.bgA,
-                ),
-                spacer.width,
-                Column(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              InkWell(
+                onTap: checkboxClicked,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
+                    Checkbox(
+                      value: selected,
+                      onChanged: (bool? value) async {
+                        try{
+                          if(mounted && value != null){
+                            if(value == true){
+                              if(!containsItem()) giftCardNotifier.addToSelectedItems(widget.item);
+                            }else{
+                              giftCardNotifier.removeItemFromSelectedItems(widget.item);
+                            }
+                          }
+                        }catch(ex){
+                          debugPrint("Select Cart Item: $ex");
+                        }
+                      },
+                      activeColor: prudColorTheme.primary,
+                      focusColor: prudColorTheme.buttonB,
+                      checkColor: prudColorTheme.bgA,
+                    ),
+                    spacer.width,
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         widget.item.beneficiary!.isAvatar? GFAvatar(
                           backgroundImage: AssetImage(widget.item.beneficiary!.avatar),
@@ -185,42 +226,89 @@ class GiftCartItemComponentState extends State<GiftCartItemComponent> {
                         ),
                       ],
                     ),
-                    Divider(
-                      indent: 10,
-                      endIndent: 10,
-                      height: 15,
-                      color: prudColorTheme.textB,
-                      thickness: 2,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Wrap(
-                          direction:  Axis.vertical,
-                          spacing: -5.0,
-                          runAlignment: WrapAlignment.center,
-                          alignment: WrapAlignment.center,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  "${tabData.getCurrencySymbol(widget.item.benCur)}",
-                                  style: tabData.tBStyle.copyWith(
-                                      fontSize: 12,
-                                      color: prudColorTheme.textB
-                                  ),
+                  ],
+                ),
+              ),
+              Divider(
+                indent: 5,
+                endIndent: 5,
+                height: 10,
+                color: prudColorTheme.textB,
+                thickness: 1,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  IconButton(
+                    onPressed: delete,
+                    iconSize: 20,
+                    color: prudColorTheme.primary,
+                    icon: const Icon(FontAwesomeIcons.trashCan),
+                  ),
+                  spacer.width,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Stack(
+                        alignment: AlignmentDirectional.center,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                "${tabData.getCurrencySymbol(widget.item.benCur)}",
+                                style: tabData.tBStyle.copyWith(
+                                    fontSize: 12,
+                                    color: prudColorTheme.textB
                                 ),
-                                Text(
-                                  "${currencyMath.roundDouble(widget.item.benSelectedDeno * quantity, 2)}",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: prudColorTheme.buttonA,
-                                  ),
+                              ),
+                              Text(
+                                "${currencyMath.roundDouble(widget.item.benSelectedDeno * quantity, 2)}",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: prudColorTheme.secondary,
                                 ),
-                              ],
+                              ),
+                            ],
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 15),
+                            child: Translate(
+                              text: "Beneficiary",
+                              style: prudWidgetStyle.tabTextStyle.copyWith(
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w600,
+                                  color: prudColorTheme.primary
+                              ),
+                              align: TextAlign.center,
                             ),
-                            Translate(
+                          ),
+                        ],
+                      ),
+                      spacer.width,
+                      Stack(
+                        alignment: AlignmentDirectional.center,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                "${tabData.getCurrencySymbol(widget.item.senderCur)}",
+                                style: tabData.tBStyle.copyWith(
+                                    fontSize: 12,
+                                    color: prudColorTheme.textB
+                                ),
+                              ),
+                              Text(
+                                "${currencyMath.roundDouble(widget.item.totalDiscount, 2)}",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: prudColorTheme.secondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 15),
+                            child: Translate(
                               text: "Discount",
                               style: prudWidgetStyle.tabTextStyle.copyWith(
                                   fontSize: 8,
@@ -229,89 +317,50 @@ class GiftCartItemComponentState extends State<GiftCartItemComponent> {
                               ),
                               align: TextAlign.center,
                             ),
-                          ],
-                        ),
-                        spacer.width,
-                        Wrap(
-                          direction:  Axis.vertical,
-                          spacing: -5.0,
-                          runAlignment: WrapAlignment.center,
-                          alignment: WrapAlignment.center,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  "${tabData.getCurrencySymbol(widget.item.senderCur)}",
-                                  style: tabData.tBStyle.copyWith(
-                                      fontSize: 12,
-                                      color: prudColorTheme.textB
-                                  ),
+                          ),
+                        ],
+                      ),
+                      spacer.width,
+                      Stack(
+                        alignment: AlignmentDirectional.center,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                "${tabData.getCurrencySymbol(widget.item.senderCur)}",
+                                style: tabData.tBStyle.copyWith(
+                                    fontSize: 12,
+                                    color: prudColorTheme.textB
                                 ),
-                                Text(
-                                  "${currencyMath.roundDouble(widget.item.totalDiscount, 2)}",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: prudColorTheme.buttonA,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Translate(
-                              text: "Discount",
-                              style: prudWidgetStyle.tabTextStyle.copyWith(
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.w600,
-                                  color: prudColorTheme.primary
                               ),
-                              align: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                        spacer.width,
-                        Wrap(
-                          direction:  Axis.vertical,
-                          spacing: -5.0,
-                          runAlignment: WrapAlignment.center,
-                          alignment: WrapAlignment.center,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  "${tabData.getCurrencySymbol(widget.item.senderCur)}",
-                                  style: tabData.tBStyle.copyWith(
-                                      fontSize: 12,
-                                      color: prudColorTheme.textB
-                                  ),
+                              Text(
+                                "${widget.item.charges}",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: prudColorTheme.secondary,
                                 ),
-                                Text(
-                                  "${widget.item.charges}",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: prudColorTheme.buttonA,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Translate(
+                              ),
+                            ],
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 15),
+                            child: Translate(
                               text: "Total Charges",
                               style: prudWidgetStyle.tabTextStyle.copyWith(
-                                fontSize: 6,
-                                fontWeight: FontWeight.w600,
-                                color: prudColorTheme.primary
+                                  fontSize: 6,
+                                  fontWeight: FontWeight.w600,
+                                  color: prudColorTheme.primary
                               ),
                               align: TextAlign.center,
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                )
-
-              ],
-            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ],
           ),
           SizedBox(
             child: Center(
@@ -323,20 +372,16 @@ class GiftCartItemComponentState extends State<GiftCartItemComponent> {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   FittedBox(
-                    child: Wrap(
-                      direction:  Axis.vertical,
-                      spacing: -5.0,
-                      runAlignment: WrapAlignment.center,
-                      alignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
+                    child: Stack(
+                      alignment: AlignmentDirectional.center,
                       children: [
                         Row(
                           children: [
                             Text(
                               "${tabData.getCurrencySymbol(widget.item.benCur)}",
                               style: tabData.tBStyle.copyWith(
-                                fontSize: 13,
-                                color: prudColorTheme.textB
+                                  fontSize: 13,
+                                  color: prudColorTheme.textB
                               ),
                             ),
                             Text(
@@ -348,14 +393,17 @@ class GiftCartItemComponentState extends State<GiftCartItemComponent> {
                             ),
                           ],
                         ),
-                        Translate(
-                          text: "Beneficiary",
-                          style: prudWidgetStyle.tabTextStyle.copyWith(
-                            fontSize: 8,
-                            fontWeight: FontWeight.w600,
-                            color: prudColorTheme.primary
+                        Padding(
+                          padding: const EdgeInsets.only(top: 15),
+                          child: Translate(
+                            text: "Beneficiary",
+                            style: prudWidgetStyle.tabTextStyle.copyWith(
+                                fontSize: 8,
+                                fontWeight: FontWeight.w600,
+                                color: prudColorTheme.primary
+                            ),
+                            align: TextAlign.center,
                           ),
-                          align: TextAlign.center,
                         ),
                       ],
                     ),
@@ -389,20 +437,16 @@ class GiftCartItemComponentState extends State<GiftCartItemComponent> {
                     ),
                   ),
                   FittedBox(
-                    child: Wrap(
-                      direction:  Axis.vertical,
-                      spacing: -5.0,
-                      runAlignment: WrapAlignment.center,
-                      alignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
+                    child: Stack(
+                      alignment: AlignmentDirectional.center,
                       children: [
                         Row(
                           children: [
                             Text(
                               "${tabData.getCurrencySymbol(widget.item.senderCur)}",
                               style: tabData.tBStyle.copyWith(
-                                fontSize: 14,
-                                color: prudColorTheme.success
+                                  fontSize: 14,
+                                  color: prudColorTheme.success
                               ),
                             ),
                             FittedBox(
@@ -416,14 +460,17 @@ class GiftCartItemComponentState extends State<GiftCartItemComponent> {
                             )
                           ],
                         ),
-                        Translate(
-                          text: "You Pay",
-                          style: prudWidgetStyle.tabTextStyle.copyWith(
-                            fontSize: 8,
-                            fontWeight: FontWeight.w600,
-                            color: prudColorTheme.success
+                        Padding(
+                          padding: const EdgeInsets.only(top: 15),
+                          child: Translate(
+                            text: "You Pay",
+                            style: prudWidgetStyle.tabTextStyle.copyWith(
+                                fontSize: 8,
+                                fontWeight: FontWeight.w600,
+                                color: prudColorTheme.success
+                            ),
+                            align: TextAlign.center,
                           ),
-                          align: TextAlign.center,
                         ),
                       ],
                     ),

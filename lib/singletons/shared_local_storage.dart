@@ -273,6 +273,9 @@ ThemeData prudTheme = ThemeData(
     backgroundColor: prudColorTheme.primary,
     elevation: 0.0,
   ),
+  tabBarTheme: const TabBarTheme(
+    splashFactory: NoSplash.splashFactory,
+  ),
   bottomNavigationBarTheme: BottomNavigationBarThemeData(
     backgroundColor: prudColorTheme.primary,
   ),

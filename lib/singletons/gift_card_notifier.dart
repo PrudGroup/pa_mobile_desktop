@@ -23,9 +23,31 @@ class GiftCardNotifier extends ChangeNotifier {
   GiftSearchCriteria? lastGiftSearch;
   Denomination? selectedDenMap;
   List<CartItem> selectedItems = [];
+  List<GiftTransactionDetails> transactions = [];
+  GiftTransactionDetails? selectedTransDetail;
+  bool selectedItemsPaid = false;
+  String? selectedItemPaymentId;
+  List<CartItem> failedItems = [];
+  List<CartItem> unsavedGifts = [];
+  List<GiftTransaction> unsavedTrans = [];
 
   void selectAllItems(){
     selectedItems = [...cartItems];
+    notifyListeners();
+  }
+
+  void selectTransactionDetail(GiftTransactionDetails detail){
+    selectedTransDetail = detail;
+    notifyListeners();
+  }
+
+  void updateTransactions(List<GiftTransactionDetails> trans){
+    transactions = trans;
+    notifyListeners();
+  }
+
+  void addToTransactions(GiftTransactionDetails tran){
+    transactions.add(tran);
     notifyListeners();
   }
 
@@ -47,6 +69,19 @@ class GiftCardNotifier extends ChangeNotifier {
     await saveCartToCache();
   }
 
+  Future<void> clearAllSavePaymentDetails() async {
+    unsavedTrans = [];
+    unsavedGifts = [];
+    failedItems = [];
+    selectedItemPaymentId = null;
+    selectedItemsPaid = false;
+    myStorage.lStore.remove("unsavedGifts");
+    myStorage.lStore.remove("unsavedTrans");
+    myStorage.lStore.remove("failedItems");
+    myStorage.lStore.remove("selectedItemPaymentId");
+    myStorage.lStore.remove("selectedItemsPaid");
+  }
+
   void changeItemInSelectedItems(CartItem newItem){
     int index = selectedItems.indexOf(newItem);
     if(index >= 0){
@@ -65,26 +100,82 @@ class GiftCardNotifier extends ChangeNotifier {
     }
   }
 
-  void addItemToCart(CartItem item) async {
+  Future<bool> checkIfItemExist(CartItem item) async{
+    List<CartItem> found = cartItems.where((CartItem ite) => (ite.beneficiary!.fullName.toLowerCase() == item.beneficiary!.fullName.toLowerCase()) &&
+        (ite.product.productId == item.product.productId)).toList();
+    return found.isNotEmpty;
+  }
+
+  Future<void> addItemToCart(CartItem item) async {
     debugPrint("Cart: ${item.product.productId} | ${item.beneficiary?.email} | ${item.beneficiary?.fullName}");
-    List<CartItem> found = cartItems.where((CartItem ite) => ite.beneficiary!.fullName == item.beneficiary!.fullName &&
-        ite.beneficiary!.email == item.beneficiary!.email &&
-        ite.product.productId == item.product.productId).toList();
-    if(found.isNotEmpty) debugPrint("Found: ${found[0].product.productId} | ${found[0].beneficiary?.email} | ${found[0].beneficiary?.fullName}");
-    if(found.isEmpty) {
-      cartItems.add(item);
+    await checkIfItemExist(item).then((bool found) async {
+      if(found) debugPrint("Found: $found");
+      if(!found) {
+        cartItems.add(item);
+        await saveCartToCache();
+        notifyListeners();
+      }
+    });
+  }
+
+  Future<void> addItemsToCart(List<CartItem> items) async {
+    if(items.isNotEmpty){
+      cartItems.addAll(items);
       await saveCartToCache();
       notifyListeners();
     }
   }
 
-  void removeItemFromCart(CartItem item) async {
+  Future<void> removeItemFromFailedItems(CartItem item) async {
+    failedItems.remove(item);
+    await saveFailedItemToCache();
+    notifyListeners();
+  }
+
+  Future<void> removeItemFromUnsavedTrans(GiftTransaction item) async {
+    unsavedTrans.remove(item);
+    await saveUnsavedTransToCache();
+    notifyListeners();
+  }
+
+  Future<void> addItemsToFailedItems(List<CartItem> items) async {
+    if(items.isNotEmpty){
+      failedItems.addAll(items);
+      await saveFailedItemToCache();
+      notifyListeners();
+    }
+  }
+
+  Future<void> addItemsToUnsavedTrans(List<GiftTransaction> items) async {
+    if(items.isNotEmpty){
+      unsavedTrans.addAll(items);
+      await saveUnsavedTransToCache();
+      notifyListeners();
+    }
+  }
+
+  Future<void> addItemsToUnsavedGifts(List<CartItem> items) async {
+    if(items.isNotEmpty){
+      unsavedGifts.addAll(items);
+      await saveUnsavedGiftsToCache();
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateItemsArePaidFor(bool paid, String payId) async {
+    selectedItemsPaid = paid;
+    selectedItemPaymentId = payId;
+    await saveUnsavedTransToCache();
+    notifyListeners();
+  }
+
+  Future<void> removeItemFromCart(CartItem item) async {
     cartItems.remove(item);
     await saveCartToCache();
     notifyListeners();
   }
 
-  void removeItemFromSelectedItems(CartItem item) async {
+  void removeItemFromSelectedItems(CartItem item) {
     selectedItems.remove(item);
     notifyListeners();
   }
@@ -120,6 +211,41 @@ class GiftCardNotifier extends ChangeNotifier {
       }
       await myStorage.addToStore(key: "cartItems", value: items);
     }
+  }
+
+  Future<void> saveFailedItemToCache() async {
+    List<Map<String, dynamic>> items = [];
+    if(failedItems.isNotEmpty){
+      for(CartItem item in failedItems){
+        items.add(item.toJson());
+      }
+      await myStorage.addToStore(key: "failedItems", value: items);
+    }
+  }
+
+  Future<void> saveUnsavedTransToCache() async {
+    List<Map<String, dynamic>> items = [];
+    if(unsavedTrans.isNotEmpty){
+      for(GiftTransaction item in unsavedTrans){
+        items.add(item.toJson());
+      }
+      await myStorage.addToStore(key: "unsavedTrans", value: items);
+    }
+  }
+
+  Future<void> saveUnsavedGiftsToCache() async {
+    List<Map<String, dynamic>> items = [];
+    if(unsavedGifts.isNotEmpty){
+      for(CartItem item in unsavedGifts){
+        items.add(item.toJson());
+      }
+      await myStorage.addToStore(key: "unsavedGifts", value: items);
+    }
+  }
+
+  Future<void> saveSelectedItemsPaidToCache() async {
+    await myStorage.addToStore(key: "selectedItemsPaid", value: selectedItemsPaid);
+    await myStorage.addToStore(key: "selectedItemPaymentId", value: selectedItemPaymentId);
   }
 
   Future<void> saveGiftibleCountriesToCache() async {
@@ -164,6 +290,51 @@ class GiftCardNotifier extends ChangeNotifier {
     }
   }
 
+  void getFailedItemsFromCache(){
+    dynamic failedGiftItems = myStorage.getFromStore(key: "failedItems");
+    if(failedGiftItems != null){
+      List<dynamic> items = failedGiftItems;
+      if(items.isNotEmpty){
+        for (dynamic item in items) {
+          failedItems.add(CartItem.fromJson(item));
+        }
+      }
+    }
+  }
+
+  void getUnsavedTransFromCache(){
+    dynamic unsavedGiftItems = myStorage.getFromStore(key: "unsavedTrans");
+    if(unsavedGiftItems != null){
+      List<dynamic> items = unsavedGiftItems;
+      if(items.isNotEmpty){
+        for (dynamic item in items) {
+          unsavedTrans.add(GiftTransaction.fromJson(item));
+        }
+      }
+    }
+  }
+
+  void getUnsavedGiftsFromCache(){
+    dynamic unsavedGiftItems = myStorage.getFromStore(key: "unsavedGifts");
+    if(unsavedGiftItems != null){
+      List<dynamic> items = unsavedGiftItems;
+      if(items.isNotEmpty){
+        for (dynamic item in items) {
+          unsavedGifts.add(CartItem.fromJson(item));
+        }
+      }
+    }
+  }
+
+  void getSelectedItemsPaidFromCache(){
+    bool? paid = myStorage.getFromStore(key: "selectedItemsPaid");
+    String? payId = myStorage.getFromStore(key: "selectedItemPaymentId");
+    if(paid != null){
+      selectedItemsPaid = paid;
+      if(payId != null) selectedItemPaymentId = payId;
+    }
+  }
+
   Future<FxRate?> getFxRate(String cur, double amount) async {
     String path = "fx-rate?currencyCode=$cur&amount=$amount";
     dynamic result = await makeRequest(path: path);
@@ -202,38 +373,109 @@ class GiftCardNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> addTransToCloud(GiftTransaction tran, CartItem gift) async {
+  Future<void> getTransactionsFromCloud(DateTime startDate, DateTime endDate) async {
     try{
-      double income = gift.grandTotal - tran.amount!;
+      await currencyMath.loginAutomatically();
+      if(iCloud.affAuthToken != null && myStorage.user != null && myStorage.user!.id != null){
+        String transUrl = "$apiEndPoint/gifts/${myStorage.user!.id}/$startDate/$endDate";
+        Response res = await prudDio.get(transUrl);
+        if (res.data != null  && res.data.length > 0) {
+          List<GiftTransactionDetails> newTrans = [];
+          for(dynamic trans in res.data){
+            newTrans.add(GiftTransactionDetails.fromJson(trans));
+          }
+          if(newTrans.isNotEmpty) updateTransactions(newTrans);
+        }
+        debugPrint("GetTransResults: $res : ${res.data}");
+      }
+    }catch(ex){
+      debugPrint("giftCardNotifier.getTransactionsFromCloud Error: $ex");
+    }
+  }
+
+  Future<bool> saveTransactionToCloud(GiftTransactionDetails details) async {
+    bool saved = false;
+    try{
+      await currencyMath.loginAutomatically();
+      if(iCloud.affAuthToken != null){
+        String transUrl = "$apiEndPoint/gifts/";
+        Response res = await prudDio.post(transUrl, data: details.toJson());
+        if (res.data != null  && res.data["gift_transaction_id"] != null) {
+          saved = true;
+        }else{
+          saved = false;
+        }
+        debugPrint("TransSaveResults: $res : ${res.data}");
+      }
+    }catch(ex){
+      debugPrint("giftCardNotifier.saveTransactionToCloud Error: $ex");
+      return saved;
+    }
+    return saved;
+  }
+
+  Future<bool> addTransToCloud(GiftTransaction tran, CartItem gift) async {
+    bool saved = false;
+    // try{
+      double giftGrandTotalInNaira = await currencyMath.convert(
+        amount: gift.grandTotal,
+        quoteCode: "NGN",
+        baseCode: gift.senderCur
+      );
+      double discountInNaira = await currencyMath.convert(
+        amount: gift.totalDiscount,
+        quoteCode: "NGN",
+        baseCode: gift.senderCur
+      );
+      double transCostInSenderCur = await currencyMath.convert(
+        amount: tran.amount!,
+        quoteCode: gift.senderCur,
+        baseCode: "NGN"
+      );
+      double income = (giftGrandTotalInNaira - tran.amount!) + discountInNaira;
       double appReferralCommission = income > 0? (income * installReferralCommission) : 0;
       double referComm = income > 0? (income * referralCommission) : 0;
       double profit = income - (referComm + appReferralCommission);
+      bool addedInstallMetric = false;
+      bool addedReferralMetric = false;
       if(myStorage.installReferralCode != null){
-        // add commission to referral account
+        addedInstallMetric = await iCloud.addMetricForAppInstallReferral(appReferralCommission, "fromGifts");
       }else{
         appReferralCommission = 0;
       }
       if(myStorage.giftReferral != null){
-        // add commission to gift referral
+        addedReferralMetric = await iCloud.addReferralMetric(myStorage.giftReferral!, referComm);
       }else{
         referComm = 0;
       }
       GiftTransactionDetails details = GiftTransactionDetails(
         income: income,
-        installReferralCommission: appReferralCommission,
-        installReferralId: myStorage.installReferralCode,
-        profit: profit,
-        referralCommission: referComm,
+        installReferralCommission: addedInstallMetric? appReferralCommission : null,
+        installReferralId: addedInstallMetric? myStorage.installReferralCode : null,
+        profitForPrudapp: profit,
+        customerGot: discountInNaira,
+        commissionFromReloadly: discountInNaira,
+        referralsGot: appReferralCommission + referComm,
+        referralCommission: addedReferralMetric? referComm : 0,
         transCurrency: tran.currencyCode,
-        referralId: myStorage.giftReferral,
+        referralId: addedReferralMetric? myStorage.giftReferral : null,
         transDate: DateTime.parse(tran.transactionCreatedTime!),
         affId: myStorage.user?.id,
         transId: tran.transactionId,
+        beneficiary: gift.beneficiary,
+        transactionPaid: giftGrandTotalInNaira,
+        transactionPaidInSelected: gift.grandTotal,
+        selectedCurrencyCode: gift.senderCur,
+        transactionCost: tran.amount,
+        transactionCostInSelected: transCostInSenderCur,
+        refunded: false,
       );
-      //add to cloud
-    }catch(ex){
-      debugPrint("addTransToCloud Error: $ex");
-    }
+      saved = await saveTransactionToCloud(details);
+      if(saved == true) addToTransactions(details);
+    // }catch(ex){
+    //   debugPrint("addTransToCloud Error: $ex");
+    // }
+    return saved;
   }
 
   Future<GiftRedeemCode?> getRedeemCode(int transId) async {
@@ -399,6 +641,13 @@ class GiftCardNotifier extends ChangeNotifier {
       getCategoriesFromCache();
       getCartFromCache();
       getLastGiftSearchFromCache();
+      getUnsavedTransFromCache();
+      getFailedItemsFromCache();
+      getSelectedItemsPaidFromCache();
+      getUnsavedGiftsFromCache();
+      if(cartItems.isEmpty && failedItems.isNotEmpty){
+        cartItems = failedItems;
+      }
       notifyListeners();
     }catch(ex){
       debugPrint("GiftCardNotifier_initGiftCard Error: $ex");
@@ -408,21 +657,27 @@ class GiftCardNotifier extends ChangeNotifier {
   GiftCardNotifier._internal();
 }
 
-Dio giftDio = Dio(BaseOptions(validateStatus: (statusCode) {
-  if(statusCode != null) {
-    if (statusCode == 422) {
-      return true;
+Dio giftDio = Dio(BaseOptions(
+  receiveDataWhenStatusError: true,
+  connectTimeout: const Duration(seconds: 60), // 60 seconds
+  receiveTimeout: const Duration(seconds: 60),
+  validateStatus: (statusCode) {
+    if(statusCode != null) {
+      if (statusCode == 422) {
+        return true;
+      }
+      if (statusCode >= 200 && statusCode <= 300) {
+        return true;
+      }
+      return false;
+    } else {
+      return false;
     }
-    if (statusCode >= 200 && statusCode <= 300) {
-      return true;
-    }
-    return false;
-  } else {
-    return false;
   }
-}));
+));
 final giftCardNotifier = GiftCardNotifier();
 List<ReloadlyCountry> giftibleCountries = [];
 List<GiftCategory> giftCategories = [];
+double giftCustomerDiscountInPercentage = 0.5;
 String giftApiUrl = Constants.apiStatues == 'production'? "https://giftcards.reloadly.com" : "https://giftcards-sandbox.reloadly.com";
 String? reloadlyGiftToken;

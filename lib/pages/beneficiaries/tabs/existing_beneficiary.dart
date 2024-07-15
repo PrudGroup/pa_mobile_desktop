@@ -174,6 +174,8 @@ class ExistingBeneficiaryState extends State<ExistingBeneficiary> {
         ),
         if(foundBenes.isNotEmpty) Expanded(
           child: ListView.builder(
+            shrinkWrap: true,
+            physics: const BouncingScrollPhysics(),
             itemCount: foundBenes.length,
             itemBuilder: (context, index){
               return BeneficiaryComponent(

@@ -334,7 +334,6 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
       animationDuration: const Duration(milliseconds: 300),
       animateChildDecoration: true,
       rtlOpening: false,
-      // openScale: 1.0,
       disabledGestures: false,
       childDecoration: const BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(16)),
@@ -348,22 +347,22 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
           elevation: 0,
           leading: Center(
             child: IconButton(
-                icon: ValueListenableBuilder<AdvancedDrawerValue>(
-                  valueListenable: _advDrawerController,
-                  builder: (_, value, __){
-                    return AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 250),
-                      child: Icon(
-                        value.visible? Icons.clear : Icons.notes,
-                        key: ValueKey<bool>(value.visible),
-                        color: Colors.white,
-                      ),
-                    );
-                  },
-                ),
-                color: prudTheme.cardColor,
-                splashRadius: 20,
-                onPressed: _handleDrawer
+              icon: ValueListenableBuilder<AdvancedDrawerValue>(
+                valueListenable: _advDrawerController,
+                builder: (_, value, __){
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    child: Icon(
+                      value.visible? Icons.clear : Icons.notes,
+                      key: ValueKey<bool>(value.visible),
+                      color: Colors.white,
+                    ),
+                  );
+                },
+              ),
+              color: prudTheme.cardColor,
+              splashRadius: 20,
+              onPressed: _handleDrawer
             ),
           ),
           title: Text(
@@ -378,21 +377,22 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
           height: height,
           width: width,
           child: SingleChildScrollView(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
                 children: [
                   PrudContainer(
                     hasPadding: false,
                     child: GFCarousel(
-                        height: 137.0,
-                        autoPlay: true,
-                        aspectRatio: double.maxFinite,
-                        viewportFraction: 1.0,
-                        enlargeMainPage: true,
-                        enableInfiniteScroll: true,
-                        pauseAutoPlayOnTouch: const Duration(seconds: 10),
-                        autoPlayInterval: const Duration(seconds: 5),
-                        items: carousels
+                      height: 137.0,
+                      autoPlay: true,
+                      aspectRatio: double.maxFinite,
+                      viewportFraction: 1.0,
+                      enlargeMainPage: true,
+                      enableInfiniteScroll: true,
+                      pauseAutoPlayOnTouch: const Duration(seconds: 10),
+                      autoPlayInterval: const Duration(seconds: 5),
+                      items: carousels
                     ),
                   ),
                   spacer.height,
@@ -405,7 +405,7 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
                     )
                   ),
                   spacer.height,
-                  PrudShowroom(items: showroom),
+                  PrudShowroom(items: iCloud.getShowroom(context)),
                   largeSpacer.height,
                 ],
               )

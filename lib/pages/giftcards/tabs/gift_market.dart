@@ -45,6 +45,7 @@ class GiftMarketState extends State<GiftMarket> {
   bool showCatSearch = false;
   bool showBrandSearch = false;
   bool showAll = true;
+  bool showWidgets = false;
 
   void showCategorySearch(){
     if(mounted){
@@ -153,6 +154,11 @@ class GiftMarketState extends State<GiftMarket> {
 
   @override
   void initState(){
+    Future.delayed(kTabScrollDuration).then((value) {
+      if (mounted) {
+        setState(() => showWidgets = true);
+      }
+    });
     Future.delayed(Duration.zero, () async {
       if(giftCardNotifier.products.isEmpty) await giftCardNotifier.getGiftsByCountry("NG");
       if(mounted){
@@ -164,6 +170,13 @@ class GiftMarketState extends State<GiftMarket> {
       iCloud.scrollTop(scrollCtrl);
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    txtCtrl.dispose();
+    scrollCtrl.dispose();
+    super.dispose();
   }
 
 
@@ -188,14 +201,15 @@ class GiftMarketState extends State<GiftMarket> {
         ) : const SizedBox(),
         actions: [
           if(showAll) const GiftCartIcon(),
-          if(showAll) IconButton(
+          if(showAll && !showWidgets) spacer.width,
+          if(showAll && showWidgets) IconButton(
             onPressed: refresh,
             icon: const Icon(Icons.refresh),
             color: prudColorTheme.bgA,
             splashColor: prudColorTheme.bgD,
             splashRadius: 10.0,
           ),
-          if(productLength >= 10 && showBrandSearch) Expanded(
+          if(productLength >= 10 && showBrandSearch && showWidgets) Expanded(
             child: Padding(
               padding: const EdgeInsets.all(5.0),
               child: FormBuilderTextField(
@@ -232,7 +246,7 @@ class GiftMarketState extends State<GiftMarket> {
               ),
             ),
           ),
-          if(productLength >= 10 && showCatSearch) Expanded(
+          if(productLength >= 10 && showCatSearch && showWidgets) Expanded(
             child: InkWell(
               onTap: () => showCategory(screen.height),
               child: Padding(
@@ -266,14 +280,14 @@ class GiftMarketState extends State<GiftMarket> {
               ),
             )
           ),
-          if(showBrandSearch || showAll) IconButton(
+          if((showBrandSearch || showAll) && showWidgets) IconButton(
             onPressed: showSearch,
             icon: const Icon(Icons.search),
             color: prudColorTheme.bgA,
             splashColor: prudColorTheme.bgD,
             splashRadius: 10.0,
           ),
-          if(showCatSearch || showAll) IconButton(
+          if((showCatSearch || showAll) && showWidgets) IconButton(
             onPressed: showCategorySearch,
             icon: const Icon(FontAwesome.angellist),
             color: prudColorTheme.bgA,
@@ -284,14 +298,32 @@ class GiftMarketState extends State<GiftMarket> {
       ),
       body: SizedBox(
         height: screen.height - 60,
-        child: SingleChildScrollView(
+        child: foundProducts.isNotEmpty?
+        GridView.builder(
+          controller: scrollCtrl,
+          itemCount: foundProducts.length,
+          padding: const EdgeInsets.only(left:10.0, right: 10.0, bottom: 60),
+          physics: const BouncingScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 10.0,
+            mainAxisSpacing: 10.0,
+            mainAxisExtent: 180
+          ),
+          itemBuilder: (context, index){
+            return GiftProductComponent(product: foundProducts[index]);
+          }
+        )
+            :
+        SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.only(left:10.0, right: 10.0),
           controller: scrollCtrl,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if(loading) FittedBox(
+              if(loading || !showWidgets) FittedBox(
                 child: LoadingComponent(
                   isShimmer: true,
                   height: screen.height - 100,
@@ -299,19 +331,19 @@ class GiftMarketState extends State<GiftMarket> {
                 ),
               ),
               if(hasLoaded && productLength < 1) noProductFound,
-              if(hasLoaded && productLength > 0) Column(
+              if(hasLoaded && productLength > 0 && showWidgets) Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if(foundProducts.isNotEmpty) Wrap(
-                    direction: Axis.horizontal,
-                    runSpacing: 10.0,
-                    spacing: 10.0,
-                    alignment: WrapAlignment.spaceBetween,
-                    runAlignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: foundProducts.map((pro) => GiftProductComponent(product: pro)).toList(),
-                  ),
+                  // if(foundProducts.isNotEmpty) Wrap(
+                  //   direction: Axis.horizontal,
+                  //   runSpacing: 10.0,
+                  //   spacing: 10.0,
+                  //   alignment: WrapAlignment.spaceBetween,
+                  //   runAlignment: WrapAlignment.center,
+                  //   crossAxisAlignment: WrapCrossAlignment.center,
+                  //   children: foundProducts.map((pro) => GiftProductComponent(product: pro)).toList(),
+                  // ),
                   if(foundProducts.isEmpty) noSearchResultFound,
                   largeSpacer.height,
                 ],
