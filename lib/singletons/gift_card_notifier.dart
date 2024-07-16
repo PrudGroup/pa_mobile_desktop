@@ -343,7 +343,7 @@ class GiftCardNotifier extends ChangeNotifier {
     }else{ return null; }
   }
 
-  Future<RedeemInstruction?> getRedeemInstructions(String brandId) async {
+  Future<RedeemInstruction?> getRedeemInstructions(int brandId) async {
     String path = "brands/$brandId/redeem-instructions";
     dynamic result = await makeRequest(path: path);
     if(result != null){
@@ -469,6 +469,7 @@ class GiftCardNotifier extends ChangeNotifier {
         transactionCost: tran.amount,
         transactionCostInSelected: transCostInSenderCur,
         refunded: false,
+        productPhoto: gift.productPhoto,
       );
       saved = await saveTransactionToCloud(details);
       if(saved == true) addToTransactions(details);

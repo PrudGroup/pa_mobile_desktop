@@ -242,6 +242,7 @@ class GiftTransactionDetails{
   double? transactionPaid;
   double? transactionPaidInSelected;
   String? selectedCurrencyCode;
+  String? productPhoto;
 
   GiftTransactionDetails({
     this.transId,
@@ -264,7 +265,8 @@ class GiftTransactionDetails{
     this.transactionPaidInSelected,
     this.commissionFromReloadly,
     this.customerGot,
-    this.referralsGot
+    this.referralsGot,
+    this.productPhoto,
   });
 
   Map<String, dynamic> toJson(){
@@ -290,6 +292,7 @@ class GiftTransactionDetails{
       if(transactionCostInSelected != null) "transactionCostInSelected": transactionCostInSelected,
       if(transactionPaidInSelected != null) "transactionPaidInSelected": transactionPaidInSelected,
       if(selectedCurrencyCode != null) "selectedCurrencyCode": selectedCurrencyCode,
+      if(productPhoto != null) "productPhoto": productPhoto,
     };
   }
 
@@ -316,6 +319,7 @@ class GiftTransactionDetails{
       transactionPaidInSelected: json["transactionPaidInSelected"],
       selectedCurrencyCode: json["selectedCurrencyCode"],
       refunded: json["refunded"],
+      productPhoto: json["productPhoto"]
     );
   }
 }
@@ -389,6 +393,7 @@ class CartItem{
   DateTime createdOn;
   DateTime lastUpdated;
   Beneficiary? beneficiary;
+  String? productPhoto;
 
   CartItem({
     required this.amount,
@@ -402,7 +407,8 @@ class CartItem{
     required this.senderCur,
     required this.benCur,
     required this.benSelectedDeno,
-    this.beneficiary
+    this.beneficiary,
+    this.productPhoto,
   });
 
   Map<String, dynamic> toJson(){
@@ -419,6 +425,7 @@ class CartItem{
       "benSelectedDeno": benSelectedDeno,
       "benCur": benCur,
       if(beneficiary != null) "beneficiary": beneficiary!.toJson(),
+      if(productPhoto != null) "productPhoto": productPhoto,
     };
   }
 
@@ -435,10 +442,12 @@ class CartItem{
       senderCur: json["senderCur"],
       benCur: json["benCur"],
       benSelectedDeno: json["benSelectedDeno"],
+      productPhoto: json["productPhoto"],
       beneficiary: json["beneficiary"] != null? Beneficiary.fromJson(json["beneficiary"]) : null,
     );
   }
 }
+
 class GiftBrand{
   int? brandId;
   String? brandName;
@@ -625,6 +634,7 @@ class FxRate{
   }
 
 }
+
 class PrudBalance{
   double amount;
   String currency;

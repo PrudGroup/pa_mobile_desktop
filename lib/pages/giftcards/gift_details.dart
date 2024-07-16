@@ -127,6 +127,7 @@ class GiftDetailsState extends State<GiftDetails> {
             lastUpdated: DateTime.now(),
             product: gift,
             quantity: 1,
+            productPhoto: gift.logoUrls != null && gift.logoUrls!.isNotEmpty? gift.logoUrls![0]: null,
             totalDiscount: totalDis,
             senderCur: giftCardNotifier.lastGiftSearch!.senderCurrency.code,
             benCur: gift.recipientCurrencyCode!,

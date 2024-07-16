@@ -182,6 +182,26 @@ class TabData extends ChangeNotifier {
     }
   }
 
+  String? getCurrencyName(String curCode){
+    Currency? cur = CurrencyService().findByCode(curCode);
+    if(cur != null){
+      return cur.name;
+    }else {
+      return null;
+    }
+  }
+
+  Country? getCountry(String curCode) => CountryService().findByCode(curCode);
+
+  String? getCountryName(String curCode){
+    Country? cur = CountryService().findByCode(curCode);
+    if(cur != null){
+      return cur.name;
+    }else {
+      return null;
+    }
+  }
+
   dynamic getCurrency(String curCode) => CurrencyService().findByCode(curCode);
 
   getFormattedNumber(dynamic nu){
