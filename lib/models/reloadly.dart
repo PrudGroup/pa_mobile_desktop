@@ -1,6 +1,7 @@
 import 'package:country_picker/country_picker.dart';
 import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:prudapp/singletons/beneficiary_notifier.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
 class GiftSearchCriteria{
@@ -54,8 +55,8 @@ class PhoneDetails{
 }
 
 class GiftRedeemCode{
-  int? cardNumber;
-  int? pinCode;
+  String? cardNumber;
+  String? pinCode;
 
   GiftRedeemCode({this.cardNumber, this.pinCode});
 
@@ -85,9 +86,7 @@ class GiftOrder{
     this.preOrder,
     this.recipientEmail,
     this.recipientPhoneDetails,
-  }){
-    customIdentifier = tabData.getRandomString(18);
-  }
+  });
 
   Map<String, dynamic> toJson(){
     return {
@@ -95,7 +94,7 @@ class GiftOrder{
       "quantity": quantity,
       "senderName": senderName,
       "unitPrice": unitPrice,
-      if(customIdentifier != null) "customIdentifier": customIdentifier,
+      "customIdentifier": tabData.getRandomString(18),
       if(preOrder != null) "preOrder": preOrder,
       if(recipientEmail != null) "recipientEmail": recipientEmail,
       if(recipientPhoneDetails != null) "recipientPhoneDetails": recipientPhoneDetails!.toJson(),
@@ -273,53 +272,62 @@ class GiftTransactionDetails{
     return {
       if(id != null) "id": id,
       if(affId != null) "aff_id": affId,
-      if(transDate != null) "transDate": transDate!.toIso8601String(),
-      if(transCurrency != null) "transCurrency": transCurrency,
-      if(referralId != null) "referralId": referralId,
-      if(referralCommission != null) "referralCommission": referralCommission,
-      if(profitForPrudapp != null) "profitForPrudapp": profitForPrudapp,
-      if(installReferralId != null) "installReferralId": installReferralId,
-      if(installReferralCommission != null) "installReferralCommission": installReferralCommission,
+      if(transDate != null) "trans_date": transDate!.toIso8601String(),
+      if(transCurrency != null) "trans_currency": transCurrency,
+      if(referralId != null) "referral_id": referralId,
+      if(referralCommission != null) "referral_commission": referralCommission,
+      if(profitForPrudapp != null) "profit_for_prudapp": profitForPrudapp,
+      if(installReferralId != null) "install_referral_id": installReferralId,
+      if(installReferralCommission != null) "install_referral_commission": installReferralCommission,
       if(income != null) "income": income,
-      if(referralsGot != null) "referralsGot": referralsGot,
-      if(commissionFromReloadly != null) "commissionFromReloadly": commissionFromReloadly,
-      if(customerGot != null) "customerGot": customerGot,
-      if(transId != null) "transId": transId,
+      if(referralsGot != null) "referrals_got": referralsGot,
+      if(commissionFromReloadly != null) "commission_from_reloadly": commissionFromReloadly,
+      if(customerGot != null) "customer_got": customerGot,
+      if(transId != null) "trans_id": transId,
       if(refunded != null) "refunded": refunded,
-      if(beneficiary != null) "beneficiary": beneficiary!.toJson(),
-      if(transactionPaid != null) "transactionPaid": transactionPaid,
-      if(transactionCost != null) "transactionCost": transactionCost,
-      if(transactionCostInSelected != null) "transactionCostInSelected": transactionCostInSelected,
-      if(transactionPaidInSelected != null) "transactionPaidInSelected": transactionPaidInSelected,
-      if(selectedCurrencyCode != null) "selectedCurrencyCode": selectedCurrencyCode,
-      if(productPhoto != null) "productPhoto": productPhoto,
+      if(beneficiary != null) "beneficiary": beneficiary!.fullName,
+      if(transactionPaid != null) "transaction_paid": transactionPaid,
+      if(transactionCost != null) "transaction_cost": transactionCost,
+      if(transactionCostInSelected != null) "transaction_cost_in_selected": transactionCostInSelected,
+      if(transactionPaidInSelected != null) "transaction_paid_in_selected": transactionPaidInSelected,
+      if(selectedCurrencyCode != null) "selected_currency_code": selectedCurrencyCode,
+      if(productPhoto != null) "product_photo": productPhoto,
     };
   }
 
+  Beneficiary? getBeneficiary(String fullname){
+    if(beneficiaryNotifier.myBeneficiaries.isNotEmpty){
+      return beneficiaryNotifier.myBeneficiaries.firstWhere((ben) => ben.fullName == fullname);
+    } else{
+      return null;
+    }
+  }
+
   factory GiftTransactionDetails.fromJson(Map<String, dynamic> json){
+    Beneficiary? ben = GiftTransactionDetails().getBeneficiary(json["beneficiary"]);
     return GiftTransactionDetails(
       id: json["id"],
       income: json["income"],
-      installReferralCommission: json["installReferralCommission"],
-      installReferralId: json["installReferralId"],
-      profitForPrudapp: json["profitForPrudapp"],
-      referralsGot: json["referralsGot"],
-      commissionFromReloadly: json["commissionFromReloadly"],
-      customerGot: json["customerGot"],
-      referralCommission: json["referralCommission"],
-      transCurrency: json["transCurrency"],
-      referralId: json["referralId"],
-      transDate: json["transDate"] != null? DateTime.tryParse(json["transDate"]) : null,
-      affId: json["affId"],
-      transId: json["transId"],
-      beneficiary: json["beneficiary"] != null? Beneficiary.fromJson(json["beneficiary"]) : null,
-      transactionCost: json["transactionCost"],
-      transactionPaid: json["transactionPaid"],
-      transactionCostInSelected: json["transactionCostInSelected"],
-      transactionPaidInSelected: json["transactionPaidInSelected"],
-      selectedCurrencyCode: json["selectedCurrencyCode"],
+      installReferralCommission: json["install_referral_commission"],
+      installReferralId: json["install_referral_id"],
+      profitForPrudapp: json["profit_for_prudapp"],
+      referralsGot: json["referrals_got"],
+      commissionFromReloadly: json["commission_from_reloadly"],
+      customerGot: json["customer_got"],
+      referralCommission: json["referral_commission"],
+      transCurrency: json["trans_currency"],
+      referralId: json["referral_id"],
+      transDate: json["trans_date"] != null? DateTime.tryParse(json["trans_date"]) : null,
+      affId: json["aff_id"],
+      transId: json["trans_id"],
+      beneficiary: ben,
+      transactionCost: json["transaction_cost"],
+      transactionPaid: json["transaction_paid"],
+      transactionCostInSelected: json["transaction_cost_in_selected"],
+      transactionPaidInSelected: json["transaction_paid_in_selected"],
+      selectedCurrencyCode: json["selected_currency_code"],
       refunded: json["refunded"],
-      productPhoto: json["productPhoto"]
+      productPhoto: json["product_photo"]
     );
   }
 }
@@ -476,7 +484,7 @@ class GiftBrand{
 class RedeemInstruction{
   String? concise;
   String? verbose;
-  String? brandId;
+  int? brandId;
   String? brandName;
 
 

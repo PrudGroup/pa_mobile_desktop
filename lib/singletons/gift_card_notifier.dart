@@ -30,9 +30,16 @@ class GiftCardNotifier extends ChangeNotifier {
   List<CartItem> failedItems = [];
   List<CartItem> unsavedGifts = [];
   List<GiftTransaction> unsavedTrans = [];
+  bool cartCanListen = true;
 
   void selectAllItems(){
     selectedItems = [...cartItems];
+    cartCanListen = true;
+    notifyListeners();
+  }
+
+  void updateCartListener(bool status){
+    cartCanListen = status;
     notifyListeners();
   }
 
@@ -53,6 +60,7 @@ class GiftCardNotifier extends ChangeNotifier {
 
   void unselectAllItems(){
     selectedItems = [];
+    cartCanListen = true;
     notifyListeners();
   }
 
@@ -75,6 +83,7 @@ class GiftCardNotifier extends ChangeNotifier {
     failedItems = [];
     selectedItemPaymentId = null;
     selectedItemsPaid = false;
+    cartCanListen = true;
     myStorage.lStore.remove("unsavedGifts");
     myStorage.lStore.remove("unsavedTrans");
     myStorage.lStore.remove("failedItems");
@@ -86,6 +95,7 @@ class GiftCardNotifier extends ChangeNotifier {
     int index = selectedItems.indexOf(newItem);
     if(index >= 0){
       selectedItems[index] = newItem;
+      cartCanListen = true;
       notifyListeners();
     }
   }
@@ -96,6 +106,7 @@ class GiftCardNotifier extends ChangeNotifier {
         ite.product.productId == item.product.productId);
     if(found == -1) {
       selectedItems.add(item);
+      cartCanListen = true;
       notifyListeners();
     }
   }
@@ -165,7 +176,7 @@ class GiftCardNotifier extends ChangeNotifier {
   Future<void> updateItemsArePaidFor(bool paid, String payId) async {
     selectedItemsPaid = paid;
     selectedItemPaymentId = payId;
-    await saveUnsavedTransToCache();
+    await saveSelectedItemsPaidToCache();
     notifyListeners();
   }
 
@@ -200,6 +211,8 @@ class GiftCardNotifier extends ChangeNotifier {
     if(lastGiftSearch != null){
       Map<String, dynamic> criteria = lastGiftSearch!.toJson();
       await myStorage.addToStore(key: "lastGiftSearch", value: criteria);
+    }else{
+      myStorage.lStore.remove("lastGiftSearch");
     }
   }
 
@@ -210,6 +223,8 @@ class GiftCardNotifier extends ChangeNotifier {
         items.add(item.toJson());
       }
       await myStorage.addToStore(key: "cartItems", value: items);
+    }else{
+      myStorage.lStore.remove("cartItems");
     }
   }
 
@@ -220,6 +235,8 @@ class GiftCardNotifier extends ChangeNotifier {
         items.add(item.toJson());
       }
       await myStorage.addToStore(key: "failedItems", value: items);
+    }else{
+      myStorage.lStore.remove("failedItems");
     }
   }
 
@@ -230,6 +247,8 @@ class GiftCardNotifier extends ChangeNotifier {
         items.add(item.toJson());
       }
       await myStorage.addToStore(key: "unsavedTrans", value: items);
+    }else{
+      myStorage.lStore.remove("unsavedTrans");
     }
   }
 
@@ -240,6 +259,8 @@ class GiftCardNotifier extends ChangeNotifier {
         items.add(item.toJson());
       }
       await myStorage.addToStore(key: "unsavedGifts", value: items);
+    }else{
+      myStorage.lStore.remove("unsavedGifts");
     }
   }
 
@@ -255,6 +276,8 @@ class GiftCardNotifier extends ChangeNotifier {
         items.add(item.toJson());
       }
       await myStorage.addToStore(key: "giftibleCountries", value: items);
+    }else{
+      myStorage.lStore.remove("giftibleCountries");
     }
   }
 
@@ -265,6 +288,8 @@ class GiftCardNotifier extends ChangeNotifier {
         items.add(item.toJson());
       }
       await myStorage.addToStore(key: "giftCategories", value: items);
+    }else{
+      myStorage.lStore.remove("giftCategories");
     }
   }
 
@@ -275,6 +300,8 @@ class GiftCardNotifier extends ChangeNotifier {
         items.add(item.toJson());
       }
       await myStorage.addToStore(key: "giftProducts", value: items);
+    }else{
+      myStorage.lStore.remove("giftProducts");
     }
   }
 
@@ -377,8 +404,14 @@ class GiftCardNotifier extends ChangeNotifier {
     try{
       await currencyMath.loginAutomatically();
       if(iCloud.affAuthToken != null && myStorage.user != null && myStorage.user!.id != null){
-        String transUrl = "$apiEndPoint/gifts/${myStorage.user!.id}/$startDate/$endDate";
-        Response res = await prudDio.get(transUrl);
+        String transUrl = "$apiEndPoint/gifts/aff/${myStorage.user!.id}/dates";
+        Response res = await prudDio.get(
+          transUrl,
+          queryParameters: {
+            "start_date": startDate.toIso8601String(),
+            "end_date": endDate.toIso8601String(),
+          }
+        );
         if (res.data != null  && res.data.length > 0) {
           List<GiftTransactionDetails> newTrans = [];
           for(dynamic trans in res.data){
@@ -416,7 +449,7 @@ class GiftCardNotifier extends ChangeNotifier {
 
   Future<bool> addTransToCloud(GiftTransaction tran, CartItem gift) async {
     bool saved = false;
-    // try{
+    try{
       double giftGrandTotalInNaira = await currencyMath.convert(
         amount: gift.grandTotal,
         quoteCode: "NGN",
@@ -471,19 +504,28 @@ class GiftCardNotifier extends ChangeNotifier {
         refunded: false,
         productPhoto: gift.productPhoto,
       );
+      debugPrint("Trans Amount: ${details.transactionCost} | Profit: ${details.profitForPrudapp}");
       saved = await saveTransactionToCloud(details);
       if(saved == true) addToTransactions(details);
-    // }catch(ex){
-    //   debugPrint("addTransToCloud Error: $ex");
-    // }
+    }catch(ex){
+      debugPrint("addTransToCloud Error: $ex");
+    }
     return saved;
   }
 
-  Future<GiftRedeemCode?> getRedeemCode(int transId) async {
+  Future<List<GiftRedeemCode>?> getRedeemCode(int transId) async {
     String path = "orders/transactions/$transId/cards";
-    dynamic result = await makeRequest(path: path);
+    List<GiftRedeemCode> items = [];
+    List<dynamic>? result = await makeRequest(path: path);
     if(result != null){
-      return GiftRedeemCode.fromJson(result);
+      if(result.isNotEmpty){
+        for(dynamic item in result){
+          items.add(GiftRedeemCode.fromJson(item));
+        }
+        return items;
+      }else{
+        return [];
+      }
     }else{
       return null;
     }
@@ -679,6 +721,6 @@ Dio giftDio = Dio(BaseOptions(
 final giftCardNotifier = GiftCardNotifier();
 List<ReloadlyCountry> giftibleCountries = [];
 List<GiftCategory> giftCategories = [];
-double giftCustomerDiscountInPercentage = 0.5;
+double giftCustomerDiscountInPercentage = 1/3;
 String giftApiUrl = Constants.apiStatues == 'production'? "https://giftcards.reloadly.com" : "https://giftcards-sandbox.reloadly.com";
 String? reloadlyGiftToken;

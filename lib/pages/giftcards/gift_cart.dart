@@ -34,6 +34,7 @@ class GiftCartState extends State<GiftCart> {
   Currency? selectedCurrency;
   bool loading = false;
   bool paying = false;
+  bool cartCanListen = giftCardNotifier.cartCanListen;
 
   Future<void> calculateTotals() async {
     try{
@@ -135,22 +136,32 @@ class GiftCartState extends State<GiftCart> {
 
   @override
   void initState() {
-    Future.delayed(Duration.zero, () async {
-      await refresh();
-    });
+    try{
+      Future.delayed(Duration.zero, () async {
+        if(cartCanListen) await refresh();
+      });
+    }catch(ex){
+      debugPrint("Error: $ex");
+    }
     giftCardNotifier.addListener(() async {
-      await refresh();
+      try{
+        if(mounted) setState(() => cartCanListen = giftCardNotifier.cartCanListen);
+        if(cartCanListen) await refresh();
+      }catch(ex){
+        debugPrint("Error: $ex");
+      }
     });
     super.initState();
   }
 
-  Future<void> selectAllCheckboxClicked() async {
+  Future<void> selectAllCheckboxClicked(bool status) async {
     try{
-      if(allSelected == true){
-        giftCardNotifier.unselectAllItems();
-      }else{
+      if(status == true){
         giftCardNotifier.selectAllItems();
+      }else{
+        giftCardNotifier.unselectAllItems();
       }
+      if(mounted) setState(() => allSelected = status);
       await refresh();
     }catch(ex){
       debugPrint("CheckboxClicked Error: $ex");
@@ -183,26 +194,26 @@ class GiftCartState extends State<GiftCart> {
           ),
         ),
         actions: [
-          if(cartItems.isNotEmpty) SizedBox(
+          if(cartItems.isNotEmpty) Container(
             width: 100,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: InkWell(
-                onTap: selectAllCheckboxClicked,
-                child: FormBuilderCheckbox(
-                  enabled: false,
-                  initialValue: allSelected,
-                  name: "select_all",
-                  title: Translate(
-                    text: "All",
-                    style: prudWidgetStyle.tabTextStyle.copyWith(
-                      fontSize: 14,
-                      color: prudColorTheme.bgA,
-                    ),
-                  ),
-                  onChanged: (bool? value) {},
+            margin: const EdgeInsets.only(bottom: 0),
+            child: FormBuilderCheckbox(
+              enabled: true,
+              initialValue: allSelected,
+              selected: allSelected,
+              activeColor: prudColorTheme.bgA,
+              checkColor: prudColorTheme.secondary,
+              name: "select_all",
+              title: Translate(
+                text: "All",
+                style: prudWidgetStyle.tabTextStyle.copyWith(
+                  fontSize: 14,
+                  color: prudColorTheme.bgA,
                 ),
               ),
+              onChanged: (bool? value) {
+                if(value != null) selectAllCheckboxClicked(value);
+              },
             ),
           ),
           if(selectedItems.isNotEmpty) IconButton(

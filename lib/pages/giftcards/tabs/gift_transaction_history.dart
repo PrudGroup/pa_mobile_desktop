@@ -28,6 +28,7 @@ class GiftTransactionHistoryState extends State<GiftTransactionHistory> {
   DateTime? endDate;
   String? errorMsg;
   bool loading = false;
+  bool hasSearched = false;
   Widget noSearchFound = tabData.getNotFoundWidget(
     title: "No Transaction",
     desc: "There is no transaction between the searched dates. change dates and search again."
@@ -54,7 +55,13 @@ class GiftTransactionHistoryState extends State<GiftTransactionHistory> {
       if(startDate != null && endDate != null){
         if(mounted) setState(() => loading = true);
         await giftCardNotifier.getTransactionsFromCloud(startDate!, endDate!);
-        if(mounted) setState(() => loading = false);
+        if(mounted) {
+          setState(() {
+            loading = false;
+            hasSearched = true;
+            if(giftCardNotifier.transactions.isNotEmpty) showSearch = false;
+          });
+        }
       }else{
         if(mounted) iCloud.showSnackBar("StartDate/EndDate Missing", context);
       }
@@ -82,6 +89,8 @@ class GiftTransactionHistoryState extends State<GiftTransactionHistory> {
   void initState() {
     if(mounted){
       setState(() {
+        foundTransactions = giftCardNotifier.transactions;
+        if(foundTransactions.isNotEmpty) showSearch = false;
         endDate = DateTime.now();
         startDate = endDate!.subtract(const Duration(days: 7));
       });
@@ -145,6 +154,7 @@ class GiftTransactionHistoryState extends State<GiftTransactionHistory> {
             if(startDate != null && endDate != null) FormBuilderDateRangePicker(
               name: "dateRange",
               firstDate: startDate!,
+              decoration: getDeco("Select Dates"),
               lastDate: endDate!,
               onChanged: (DateTimeRange? dateRange){
                 try{
@@ -169,7 +179,7 @@ class GiftTransactionHistoryState extends State<GiftTransactionHistory> {
               text: "Search For Transactions"
             ),
             spacer.height,
-            if(giftCardNotifier.transactions.isEmpty && !loading) noSearchFound,
+            if(giftCardNotifier.transactions.isEmpty && !loading && hasSearched) noSearchFound,
             spacer.height,
             if(errorMsg != null) Translate(
               text: "$errorMsg",

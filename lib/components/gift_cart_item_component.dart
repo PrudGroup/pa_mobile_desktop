@@ -68,6 +68,7 @@ class GiftCartItemComponentState extends State<GiftCartItemComponent> {
 
   void checkboxClicked(){
     try{
+      giftCardNotifier.updateCartListener(true);
       if(selected){
         //check value is deselected [remove]
         //if(mounted) setState(() => selected = false);
@@ -334,7 +335,7 @@ class GiftCartItemComponentState extends State<GiftCartItemComponent> {
                                 ),
                               ),
                               Text(
-                                "${widget.item.charges}",
+                                "${currencyMath.roundDouble(widget.item.charges, 2)}",
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: prudColorTheme.secondary,

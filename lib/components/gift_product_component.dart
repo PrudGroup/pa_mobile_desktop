@@ -9,6 +9,7 @@ import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/gift_card_notifier.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 
+import '../singletons/tab_data.dart';
 import 'Translate.dart';
 
 class GiftProductComponent extends StatefulWidget {
@@ -71,7 +72,7 @@ class GiftProductComponentState extends State<GiftProductComponent> {
     super.initState();
     giftCardNotifier.addListener(() async {
       if(mounted){
-        if(giftCardNotifier.presentSelectedProductId == widget.product.productId){
+        if(giftCardNotifier.presentSelectedProductId == widget.product.productId && giftCardNotifier.cartCanListen){
           setState(() => selected = true);
         }else{
           setState(() => selected = false);
@@ -117,10 +118,10 @@ class GiftProductComponentState extends State<GiftProductComponent> {
                   Image.asset(prudImages.screen, fit: BoxFit.cover,),
                 ),
               ),
-              SizedBox(
+              if(widget.product.productName != null) SizedBox(
                 width: 150,
                 child: Text(
-                  "${widget.product.productName}",
+                  tabData.shortenStringWithPeriod(widget.product.productName!, length: 40),
                   textAlign: TextAlign.center,
                   style: prudWidgetStyle.tabTextStyle.copyWith(
                     color: selected? prudColorTheme.bgC : prudColorTheme.textB,

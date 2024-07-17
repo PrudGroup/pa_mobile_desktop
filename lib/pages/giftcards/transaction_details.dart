@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:prudapp/components/beneficiary_component.dart';
 import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/components/prud_panel.dart';
-import 'package:prudapp/models/images.dart';
 import 'package:prudapp/singletons/gift_card_notifier.dart';
 import 'package:prudapp/singletons/tab_data.dart';
-import 'package:u_credit_card/u_credit_card.dart';
 
 import '../../components/Translate.dart';
 import '../../components/prud_container.dart';
+import '../../components/redeem_card.dart';
 import '../../models/reloadly.dart';
 import '../../models/theme.dart';
 
@@ -32,16 +31,19 @@ class TransactionDetailsState extends State<TransactionDetails> {
   double rTxtSize = 15;
   FontWeight lTxtWeight = FontWeight.w500;
   FontWeight rTxtWeight = FontWeight.w600;
-  double smallSize = 8;
+  double smallSize = 10;
   Color smallSizeColor = prudColorTheme.success;
   bool loading = false;
-  GiftRedeemCode? giftCard;
+  List<GiftRedeemCode>? giftCard;
   RedeemInstruction? redeemInstruction;
 
 
 
   @override
   void initState() {
+    Future.delayed(Duration.zero, () async {
+      await getRedeemDetails();
+    });
     super.initState();
   }
 
@@ -49,8 +51,8 @@ class TransactionDetailsState extends State<TransactionDetails> {
     try{
       if(mounted) setState(() => loading = true);
       if(widget.trans.transactionId != null){
-        GiftRedeemCode? redCode = await giftCardNotifier.getRedeemCode(widget.trans.transactionId!);
-        if(mounted) setState(() => giftCard = redCode);
+        List<GiftRedeemCode>? redCodes = await giftCardNotifier.getRedeemCode(widget.trans.transactionId!);
+        if(mounted) setState(() => giftCard = redCodes);
       }
       if(widget.trans.product != null &&
           widget.trans.product!.brand != null &&
@@ -78,9 +80,10 @@ class TransactionDetailsState extends State<TransactionDetails> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            spacer.height,
+            mediumSpacer.height,
             PrudPanel(
               title: "Transaction Details",
+              bgColor: prudColorTheme.bgC,
               child: Padding(
                 padding: const EdgeInsets.all(5),
                 child: Column(
@@ -88,7 +91,7 @@ class TransactionDetailsState extends State<TransactionDetails> {
                     spacer.height,
                     Container(
                       width: double.maxFinite,
-                      height: 50,
+                      height: 20,
                       color: tabData.getTransactionStatusColor(widget.trans.status!),
                     ),
                     spacer.height,
@@ -132,14 +135,12 @@ class TransactionDetailsState extends State<TransactionDetails> {
                             ),
                           ),
                         ),
-                        FittedBox(
-                          child: Text(
-                            "${widget.trans.customIdentifier}",
-                            style: prudWidgetStyle.typedTextStyle.copyWith(
-                              fontSize: rTxtSize,
-                              color: rTxtColor,
-                              fontWeight: rTxtWeight
-                            ),
+                        Text(
+                          "${widget.trans.customIdentifier}",
+                          style: prudWidgetStyle.typedTextStyle.copyWith(
+                            fontSize: rTxtSize,
+                            color: rTxtColor,
+                            fontWeight: rTxtWeight
                           ),
                         ),
                       ],
@@ -165,32 +166,6 @@ class TransactionDetailsState extends State<TransactionDetails> {
                               fontSize: rTxtSize,
                               color: rTxtColor,
                               fontWeight: rTxtWeight
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Flex(
-                      direction: Axis.horizontal,
-                      mainAxisAlignment:  MainAxisAlignment.spaceBetween,
-                      children: [
-                        FittedBox(
-                          child: Translate(
-                            text: "Reference:",
-                            style: prudWidgetStyle.tabTextStyle.copyWith(
-                                fontSize: lTxtSize,
-                                color: lTxtColor,
-                                fontWeight: lTxtWeight
-                            ),
-                          ),
-                        ),
-                        FittedBox(
-                          child: Text(
-                            "${widget.trans.customIdentifier}",
-                            style: prudWidgetStyle.typedTextStyle.copyWith(
-                                fontSize: rTxtSize,
-                                color: rTxtColor,
-                                fontWeight: rTxtWeight
                             ),
                           ),
                         ),
@@ -304,6 +279,7 @@ class TransactionDetailsState extends State<TransactionDetails> {
             spacer.height,
             PrudPanel(
               title: "Gift Card Details",
+              bgColor: prudColorTheme.bgC,
               child: Padding(
                 padding: const EdgeInsets.all(5),
                 child: Column(
@@ -323,14 +299,12 @@ class TransactionDetailsState extends State<TransactionDetails> {
                             ),
                           ),
                         ),
-                        FittedBox(
-                          child: Text(
-                            widget.trans.product!.productName!,
-                            style: prudWidgetStyle.typedTextStyle.copyWith(
+                        Text(
+                          widget.trans.product!.productName!,
+                          style: prudWidgetStyle.typedTextStyle.copyWith(
                               fontSize: rTxtSize,
                               color: tabData.getTransactionStatusColor(widget.trans.status!),
                               fontWeight: rTxtWeight
-                            ),
                           ),
                         ),
                       ],
@@ -349,14 +323,12 @@ class TransactionDetailsState extends State<TransactionDetails> {
                             ),
                           ),
                         ),
-                        FittedBox(
-                          child: Text(
-                            "${widget.trans.product!.brand!.brandName}",
-                            style: prudWidgetStyle.typedTextStyle.copyWith(
-                                fontSize: rTxtSize,
-                                color: rTxtColor,
-                                fontWeight: rTxtWeight
-                            ),
+                        Text(
+                          "${widget.trans.product!.brand!.brandName}",
+                          style: prudWidgetStyle.typedTextStyle.copyWith(
+                              fontSize: rTxtSize,
+                              color: rTxtColor,
+                              fontWeight: rTxtWeight
                           ),
                         ),
                       ],
@@ -375,14 +347,12 @@ class TransactionDetailsState extends State<TransactionDetails> {
                             ),
                           ),
                         ),
-                        FittedBox(
-                          child: Text(
-                            "${tabData.getCountryName(widget.trans.product!.countryCode!)}",
-                            style: prudWidgetStyle.typedTextStyle.copyWith(
+                        Text(
+                          "${tabData.getCountryName(widget.trans.product!.countryCode!)}",
+                          style: prudWidgetStyle.typedTextStyle.copyWith(
                               fontSize: rTxtSize,
                               color: rTxtColor,
                               fontWeight: rTxtWeight
-                            ),
                           ),
                         ),
                       ],
@@ -439,14 +409,12 @@ class TransactionDetailsState extends State<TransactionDetails> {
                             ),
                           ),
                         ),
-                        FittedBox(
-                          child: Text(
-                            "${widget.trans.product!.quantity}",
-                            style: prudWidgetStyle.typedTextStyle.copyWith(
-                                fontSize: rTxtSize,
-                                color: rTxtColor,
-                                fontWeight: rTxtWeight
-                            ),
+                        Text(
+                          "${widget.trans.product!.quantity}",
+                          style: prudWidgetStyle.typedTextStyle.copyWith(
+                              fontSize: rTxtSize,
+                              color: rTxtColor,
+                              fontWeight: rTxtWeight
                           ),
                         ),
                       ],
@@ -532,12 +500,16 @@ class TransactionDetailsState extends State<TransactionDetails> {
             if(widget.tranDetails.beneficiary != null) spacer.height,
             if(widget.tranDetails.beneficiary != null) PrudPanel(
               title: "Beneficiary Details",
+              bgColor: prudColorTheme.bgC,
               child: Padding(
                 padding: const EdgeInsets.all(5),
                 child: Column(
                   children: [
                     spacer.height,
-                    BeneficiaryComponent(ben: widget.tranDetails.beneficiary!),
+                    BeneficiaryComponent(
+                      ben: widget.tranDetails.beneficiary!,
+                      forSelection: false,
+                    ),
                   ],
                 ),
               ),
@@ -545,102 +517,50 @@ class TransactionDetailsState extends State<TransactionDetails> {
             spacer.height,
             PrudPanel(
               title: "GiftCard",
-              child: Padding(
-                padding: const EdgeInsets.all(5),
-                child: Column(
-                  children: [
-                    spacer.height,
-                    if(loading) const LoadingComponent(
+              bgColor: prudColorTheme.bgC,
+              child: Column(
+                children: [
+                  mediumSpacer.height,
+                  if(!loading && giftCard != null && giftCard!.length > 1) Translate(
+                    text: "Swipe right to see more cards.",
+                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: prudColorTheme.success,
+                      fontSize: 16
+                    ),
+                    align: TextAlign.center,
+                  ),
+                  if(!loading && giftCard != null && giftCard!.length > 1) spacer.height,
+                  if(loading) Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: LoadingComponent(
                       size: 30,
                       isShimmer: false,
                       defaultSpinnerType: false,
+                      spinnerColor: tabData.getTransactionStatusColor(widget.trans.status!),
                     ),
-                    if(!loading && giftCard != null) Column(
-                      children: [
-                        CreditCardUi(
-                          cardHolderFullName: widget.tranDetails.beneficiary!.fullName,
-                          cardNumber: '${giftCard!.cardNumber}',
-                          validThru: '10/24',
-                          cardProviderLogo: Image.asset(prudImages.logo, width: 40,),
-                          showValidThru: false,
-                          showBalance: true,
-                          showValidFrom: false,
-                          currencySymbol: tabData.getCurrencySymbol(widget.trans.product!.currencyCode!),
-                          balance: widget.trans.product!.totalPrice,
-                          enableFlipping: true,
-                          backgroundDecorationImage: DecorationImage(
-                            fit: BoxFit.cover,
-                            onError: (obj, stack){
-                              debugPrint("NetworkImage Error: $obj : $stack");
-                            },
-                            image: NetworkImage(
-                              widget.tranDetails.productPhoto!,
-                            )
-                          ),
-                        ),
-                        spacer.height,
-                        Flex(
-                          direction: Axis.horizontal,
-                          mainAxisAlignment:  MainAxisAlignment.spaceBetween,
-                          children: [
-                            FittedBox(
-                              child: Translate(
-                                text: "Card Number:",
-                                style: prudWidgetStyle.tabTextStyle.copyWith(
-                                  fontSize: 20,
-                                  color: lTxtColor,
-                                  fontWeight: lTxtWeight
-                                ),
-                              ),
-                            ),
-                            FittedBox(
-                              child: Text(
-                                "${giftCard!.cardNumber}",
-                                style: prudWidgetStyle.typedTextStyle.copyWith(
-                                  fontSize: 22,
-                                  color: prudColorTheme.secondary,
-                                  fontWeight: rTxtWeight
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        spacer.height,
-                        Flex(
-                          direction: Axis.horizontal,
-                          mainAxisAlignment:  MainAxisAlignment.spaceBetween,
-                          children: [
-                            FittedBox(
-                              child: Translate(
-                                text: "Card PIN:",
-                                style: prudWidgetStyle.tabTextStyle.copyWith(
-                                    fontSize: 20,
-                                    color: lTxtColor,
-                                    fontWeight: lTxtWeight
-                                ),
-                              ),
-                            ),
-                            FittedBox(
-                              child: Text(
-                                "${giftCard!.pinCode}",
-                                style: prudWidgetStyle.typedTextStyle.copyWith(
-                                  fontSize: 25,
-                                  color: prudColorTheme.primary,
-                                  fontWeight: rTxtWeight
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        spacer.height,
-                      ],
+                  ),
+                  if(!loading && giftCard != null) SizedBox(
+                    height: 300,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: giftCard!.length,
+                      itemBuilder: (context, index){
+                        return RedeemCard(
+                          tranDetails: widget.tranDetails,
+                          trans: widget.trans,
+                          giftCard: giftCard![index],
+                        );
+                      },
                     ),
-                  ],
-                ),
+                  )
+                ],
               ),
             ),
             spacer.height,
             PrudPanel(
+              bgColor: prudColorTheme.bgC,
               title: "GiftCard Redeem Instructions",
               child: Padding(
                 padding: const EdgeInsets.all(5),

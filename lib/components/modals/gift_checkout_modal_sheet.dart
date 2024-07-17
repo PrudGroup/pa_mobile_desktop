@@ -77,6 +77,7 @@ class GiftCheckoutModalSheetState extends State<GiftCheckoutModalSheet> {
         }
       }
       if(mounted) setState(() => savingTrans = false);
+      giftCardNotifier.updateCartListener(true);
     }catch(ex){
       if(mounted) setState(() => savingTrans = false);
       debugPrint("saveTrans: $ex");
@@ -157,6 +158,7 @@ class GiftCheckoutModalSheetState extends State<GiftCheckoutModalSheet> {
                 itSucceeded = true;
                 showPay = false;
               });
+              giftCardNotifier.updateCartListener(true);
             }
           }else{
             await setUnfinishedData();
@@ -262,6 +264,7 @@ class GiftCheckoutModalSheetState extends State<GiftCheckoutModalSheet> {
 
   @override
   void initState() {
+    giftCardNotifier.updateCartListener(false);
     Future.delayed(Duration.zero, () async {
       if(mounted) {
         debugPrint("paid: ${giftCardNotifier.selectedItemsPaid}");
@@ -347,6 +350,15 @@ class GiftCheckoutModalSheetState extends State<GiftCheckoutModalSheet> {
                       }
                     }
                 ),
+              ),
+              if((!loading && !purchasing && !savingTrans) && paymentWasMade && itemsWasBought && giftTransactions.isNotEmpty && transWereSaved && unsavedTransactions.isEmpty && errorMsg == null) Column(
+                children: [
+                  prudWidgetStyle.getLongButton(
+                    onPressed: () => Navigator.pop(context),
+                    text: "Finished"
+                  ),
+                  spacer.height,
+                ],
               ),
               if((!loading && !purchasing && !savingTrans) && paymentWasMade && itemsWasBought && giftTransactions.isNotEmpty && transWereSaved && unsavedTransactions.isEmpty && errorMsg == null) Expanded(
                 child: ListView.builder(

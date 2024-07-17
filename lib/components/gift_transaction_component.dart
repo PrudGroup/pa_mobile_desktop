@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/avatar/gf_avatar.dart';
 import 'package:getwidget/size/gf_size.dart';
+import 'package:intl/intl.dart';
 import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/models/images.dart';
 import 'package:prudapp/models/reloadly.dart';
@@ -8,10 +9,10 @@ import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/pages/giftcards/transaction_details.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/gift_card_notifier.dart';
+import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
 import '../singletons/i_cloud.dart';
-import 'Translate.dart';
 
 class GiftTransactionComponent extends StatefulWidget{
   final GiftTransactionDetails tranDetails;
@@ -45,10 +46,10 @@ class GiftTransactionComponentState extends State<GiftTransactionComponent> {
   Future<void> getTransaction() async {
     try{
       if(mounted) setState(() => loading = true);
-      if(widget.tran != null){
+      if(tran != null){
         if(mounted){
           setState(() {
-            tran = widget.tran;
+            tran = tran;
             loading = false;
           });
         }
@@ -110,38 +111,85 @@ class GiftTransactionComponentState extends State<GiftTransactionComponent> {
             ),
             child: tran != null?
             Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                GFAvatar(
-                  backgroundColor: prudColorTheme.primary,
-                  child: ImageIcon(
-                      AssetImage(prudImages.gift),
-                    size: 30,
-                    color: prudColorTheme.bgD,
-                  ),
-                ),
-                spacer.width,
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text(
-                      tabData.shortenStringWithPeriod(tran!.product?.productName?? tran!.product!.brand!.brandName!, length: 30),
-                      style: prudWidgetStyle.hintStyle.copyWith(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: prudColorTheme.textA,
+                    GFAvatar(
+                      size: GFSize.SMALL,
+                      backgroundColor: prudColorTheme.primary,
+                      child: ImageIcon(
+                        AssetImage(prudImages.gift),
+                        size: 25,
+                        color: prudColorTheme.bgD,
                       ),
                     ),
+                    spacer.width,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if(tran!.product != null && tran!.product!.brand != null && tran!.product!.brand!.brandName != null) Text(
+                          tabData.shortenStringWithPeriod(tran!.product?.productName?? tran!.product!.brand!.brandName!, length: 22),
+                          style: prudWidgetStyle.hintStyle.copyWith(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: prudColorTheme.textA,
+                          ),
+                        ),
+                        Text(
+                          "${tran?.product?.brand?.brandName} | ${widget.tranDetails.selectedCurrencyCode}",
+                          style: prudWidgetStyle.hintStyle.copyWith(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            color: prudColorTheme.textB,
+                          ),
+                        ),
+                        Text(
+                          "${widget.tranDetails.beneficiary?.fullName}",
+                          style: prudWidgetStyle.hintStyle.copyWith(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: prudColorTheme.primary,
+                          ),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+                if(tran!.transactionCreatedTime != null) Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
                     Text(
-                      "${tran?.product?.brand?.brandName} | ${tran?.currencyCode}",
-                      style: prudWidgetStyle.hintStyle.copyWith(
+                      myStorage.ago(dDate: DateTime.parse(tran!.transactionCreatedTime!), isShort: false),
+                      style: prudWidgetStyle.tabTextStyle.copyWith(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
-                        color: prudColorTheme.textB,
+                        color: prudColorTheme.iconC,
                       ),
-                    )
+                      textAlign: TextAlign.end,
+                    ),
+                    Text(
+                      DateFormat('dd-MM-yyyy hh:mm a').format(DateTime.parse(tran!.transactionCreatedTime!)),
+                      style: prudWidgetStyle.tabTextStyle.copyWith(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: prudColorTheme.iconC,
+                      ),
+                      textAlign: TextAlign.end,
+                    ),
+                    if(tran!.status != null) Text(
+                      "${tran?.status}",
+                      style: prudWidgetStyle.tabTextStyle.copyWith(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: tabData.getTransactionStatusColor(tran!.status!),
+                      ),
+                      textAlign: TextAlign.end,
+                    ),
                   ],
                 )
               ],
@@ -179,14 +227,23 @@ class GiftTransactionComponentState extends State<GiftTransactionComponent> {
                     borderRadius: BorderRadius.circular(20.0),
                     child: Padding(
                       padding: const EdgeInsets.all(5),
-                      child: Translate(
-                        text: tabData.toTitleCase(tran!.status!),
-                        style: prudWidgetStyle.tabTextStyle.copyWith(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: prudColorTheme.secondary
-                        ),
-                        align: TextAlign.center,
+                      child: Row(
+                        children: [
+                          Text(
+                            "${tabData.getCurrencySymbol(widget.tranDetails.selectedCurrencyCode!)}",
+                            style: tabData.tBStyle.copyWith(
+                              fontSize: 16,
+                              color: prudColorTheme.bgC
+                            ),
+                          ),
+                          Text(
+                            "${widget.tranDetails.transactionPaidInSelected}",
+                            style: TextStyle(
+                              fontSize: 20.0,
+                              color: prudColorTheme.bgA,
+                            ),
+                          )
+                        ],
                       ),
                     ),
                   ),
@@ -195,7 +252,7 @@ class GiftTransactionComponentState extends State<GiftTransactionComponent> {
                   children: [
                     if(widget.tranDetails.selectedCurrencyCode != null) Container(
                       width: 120,
-                      margin: const EdgeInsets.only(top: 20),
+                      margin: const EdgeInsets.only(top: 10),
                       decoration: BoxDecoration(
                         color: prudColorTheme.bgA,
                         borderRadius: BorderRadius.circular(20),
@@ -210,26 +267,27 @@ class GiftTransactionComponentState extends State<GiftTransactionComponent> {
                           padding: const EdgeInsets.fromLTRB(5, 5, 25, 5),
                           child: FittedBox(
                             child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Text(
-                                  "${tabData.getCurrencySymbol(widget.tranDetails.selectedCurrencyCode!)}",
+                                  "${tabData.getCurrencySymbol(tran!.product!.currencyCode!)}",
                                   style: tabData.tBStyle.copyWith(
                                     fontSize: 14,
-                                    color: prudColorTheme.bgC
+                                    color: prudColorTheme.primary
                                   ),
                                 ),
                                 Text(
-                                  "${currencyMath.roundDouble(widget.tranDetails.transactionPaidInSelected!, 2)}",
+                                  "${currencyMath.roundDouble(tran!.product!.totalPrice!, 2)}",
                                   style: TextStyle(
                                     fontSize: 18.0,
-                                    color: prudColorTheme.bgA,
+                                    color: prudColorTheme.secondary,
                                   ),
                                 ),
                                 Text(
-                                  widget.tranDetails.selectedCurrencyCode!,
+                                  "${tran?.product?.currencyCode}",
                                   style: tabData.tBStyle.copyWith(
                                     fontSize: 12,
-                                    color: prudColorTheme.bgC
+                                    color: prudColorTheme.primary
                                   ),
                                 ),
                               ],
@@ -239,7 +297,7 @@ class GiftTransactionComponentState extends State<GiftTransactionComponent> {
                       ),
                     ),
                     if(widget.tranDetails.beneficiary != null) Padding(
-                      padding: const EdgeInsets.only(left: 100),
+                      padding: const EdgeInsets.only(left: 100, top: 10),
                       child: Container(
                         decoration: BoxDecoration(
                           color: prudColorTheme.bgA,

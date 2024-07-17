@@ -11,8 +11,6 @@ class RechargeNotifier extends ChangeNotifier {
     return _rechargeNotifier;
   }
 
-
-
   RechargeNotifier._internal();
 }
 

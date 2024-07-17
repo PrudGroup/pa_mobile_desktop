@@ -340,7 +340,7 @@ class GiftDetailsState extends State<GiftDetails> {
                         Row(
                           children: [
                             Text(
-                              "${(gift.discountPercentage?? 0)*giftCustomerDiscountInPercentage}",
+                              "${currencyMath.roundDouble(((gift.discountPercentage?? 0)*giftCustomerDiscountInPercentage), 2)}",
                               style: prudWidgetStyle.typedTextStyle.copyWith(
                                   fontSize: 20.0,
                                   fontWeight: FontWeight.w700,
