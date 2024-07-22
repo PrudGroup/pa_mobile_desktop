@@ -5,7 +5,7 @@ import '../models/images.dart';
 import '../models/reloadly.dart';
 import '../models/theme.dart';
 import '../singletons/tab_data.dart';
-import 'Translate.dart';
+import 'translate.dart';
 
 class RedeemCard extends StatelessWidget {
   final GiftTransaction trans;

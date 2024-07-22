@@ -80,4 +80,19 @@ abstract class Constants {
     defaultValue: '',
   );
 
+  static const String opayId = String.fromEnvironment(
+    'OPAY_MERCHANT_ID',
+    defaultValue: '',
+  );
+
+  static const String opaySecret = String.fromEnvironment(
+    'OPAY_SECRET_KEY',
+    defaultValue: '',
+  );
+
+  static const String opayPublic = String.fromEnvironment(
+    'OPAY_PUBLIC_KEY',
+    defaultValue: '',
+  );
+
 }

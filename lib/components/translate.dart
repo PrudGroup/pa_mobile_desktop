@@ -12,7 +12,6 @@ class Translate extends StatelessWidget {
   ), this.align = TextAlign.start});
 
 
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(

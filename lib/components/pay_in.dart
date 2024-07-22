@@ -10,20 +10,25 @@ import 'package:flutterwave_standard/models/requests/customer.dart';
 import 'package:flutterwave_standard/models/requests/customizations.dart';
 import '../constants.dart';
 import '../singletons/i_cloud.dart';
-import 'Translate.dart';
+import 'translate.dart';
+import 'package:opay_online_flutter_sdk/opay_online_flutter_sdk.dart';
 
 class PayIn extends StatefulWidget {
   final double amount;
   final String? currencyCode;
   final Function(bool, String) onPaymentMade;
   final Function onCancel;
+  final String? countryCode;
+  final bool useOpay;
 
   const PayIn({
     super.key,
     required this.amount,
     required this.onPaymentMade,
     required this.onCancel,
-    this.currencyCode
+    this.useOpay = false,
+    this.currencyCode,
+    this.countryCode
   });
 
   @override
@@ -32,11 +37,14 @@ class PayIn extends StatefulWidget {
 
 class PayInState extends State<PayIn> {
   Flutterwave? flutterwave;
+  PayParams? opayPayParams;
   bool loading = false;
   List<Widget> showroom = [];
   String? paymentId;
   bool paymentMade = false;
   String? transRef;
+  dynamic getCashierStatusResult;
+
 
   handlePaymentInitialization() async {
     const uuid = Uuid();
@@ -67,6 +75,66 @@ class PayInState extends State<PayIn> {
     }
   }
 
+  initiateOpayPayment() async {
+    const uuid = Uuid();
+    String ranRef = uuid.v1();
+    var payInput = PayParams(
+      publicKey : opayPublic,// your public key
+      merchantId : opayID,// your merchant id
+      merchantName : "PrudApp",
+      reference : ranRef,// reference unique, must be updated on each request
+      countryCode : widget.countryCode!, // uppercase
+      currency : widget.currencyCode!, // uppercase
+      payAmount : widget.amount.round(),
+      productName : "PrudApp",
+      productDescription :"Transactions on your favorite PrudApp",
+      callbackUrl :"$apiEndPoint/payments/pay/opay_in/",
+      userClientIP :"110.246.160.183",
+      expireAt: 60
+    );
+    if(mounted) setState(() => opayPayParams = payInput);
+  }
+
+  Future<void> verifyOpayPayment() async {
+    CashierStatusParam statusParam = CashierStatusParam(
+      privateKey:opaySecret,
+      merchantId: opayID,
+      reference:transRef!,
+      countryCode: widget.countryCode!,
+    );
+    if (mounted) setState(() => loading = true);
+    await OPayTask().getCashierStatus(statusParam).then((response){
+      OrderInfo? data = response.payHttpResponse.data;//get result data
+      switch(data?.status){
+        case PayResultStatus.initial:
+          break;
+        case PayResultStatus.pending:
+          break;
+        case PayResultStatus.success:
+          break;
+        case PayResultStatus.fail:
+          break;
+        case PayResultStatus.close:
+          break;
+      }
+      if(mounted) {
+        setState(() {
+          getCashierStatusResult=response.payHttpResponse.toJson((value){
+            if(value!=null){
+              return value.toJson();
+            }else {
+              return null;
+            }
+          }).toString();
+          loading = false;
+        });
+      }
+    }).catchError((ex){
+      debugPrint("Error: $ex");
+      if (mounted) setState(() => loading = false);
+    });
+  }
+
   Future<void> verifyPayment() async {
     try{
       if(mounted) setState(() => loading = true);
@@ -92,6 +160,60 @@ class PayInState extends State<PayIn> {
     }
   }
 
+  Future<void> processOpayPayment() async {
+    if(opayPayParams != null){
+      await OPayTask().createOrder(
+        context,opayPayParams!,
+        httpFinishedMethod:(){}
+      ).then((response){
+        //httpResponse （Just check the reason for the failure of the network request）
+        String createOrderResult=response.payHttpResponse.toJson((value){
+          if(value!=null){
+            return value.toJson();
+          }
+          return null;
+        }).toString();
+        debugPrint("httpResult=$createOrderResult");
+        // h5 Response （Payment result check ）
+        if(response.webJsResponse!=null){
+          var status = response.webJsResponse?.orderStatus;
+          debugPrint("webJsResponse.status=$status");
+          switch(status){
+            case PayResultStatus.initial:
+              break;
+            case PayResultStatus.pending:
+              if (mounted) {
+                setState(() {
+                  paymentId = response.webJsResponse?.orderNo;
+                  transRef = response.webJsResponse?.merchantOrderNo;
+                  paymentMade = false;
+                });
+              }
+              break;
+            case PayResultStatus.success: {
+              if (mounted) {
+                setState(() {
+                  paymentId = response.webJsResponse?.orderNo;
+                  transRef = response.webJsResponse?.merchantOrderNo;
+                  paymentMade = true;
+                });
+              }
+              break;
+            }
+            case PayResultStatus.fail:{
+              widget.onCancel();
+              break;
+            }
+            case PayResultStatus.close: {
+              widget.onCancel();
+              break;
+            }
+          }
+        }
+      });
+    }
+  }
+
   @override
   void initState(){
     if(mounted) {
@@ -102,20 +224,27 @@ class PayInState extends State<PayIn> {
     super.initState();
     Future.delayed(Duration.zero, () async {
       try{
-        handlePaymentInitialization();
-        if(mounted) setState(() => loading = true);
-        final ChargeResponse? response = await flutterwave?.charge();
-        if(response != null && response.transactionId != null && response.txRef != null){
-          if(mounted){
-            setState(() {
-              paymentId = response.transactionId;
-              transRef = response.txRef;
-              paymentMade = response.status!.toLowerCase() == "successful";
-            });
+        if(widget.useOpay){
+          initiateOpayPayment();
+          if (mounted) setState(() => loading = true);
+          await processOpayPayment();
+        }else {
+          handlePaymentInitialization();
+          if (mounted) setState(() => loading = true);
+          final ChargeResponse? response = await flutterwave?.charge();
+          if (response != null && response.transactionId != null &&
+              response.txRef != null) {
+            if (mounted) {
+              setState(() {
+                paymentId = response.transactionId;
+                transRef = response.txRef;
+                paymentMade = response.status!.toLowerCase() == "successful";
+              });
+            }
+            await verifyPayment();
           }
-          await verifyPayment();
+          if (mounted) setState(() => loading = false);
         }
-        if(mounted) setState(() => loading = false);
       }catch(ex){
         if(mounted) setState(() => loading = false);
         widget.onCancel();

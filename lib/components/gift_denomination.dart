@@ -172,9 +172,9 @@ class GiftDenomination extends StatelessWidget {
                                   Translate(
                                     text: "You Pay",
                                     style: prudWidgetStyle.tabTextStyle.copyWith(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: prudColorTheme.lineD
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: prudColorTheme.lineD
                                     ),
                                   ),
                                   Padding(

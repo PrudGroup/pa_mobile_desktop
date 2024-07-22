@@ -8,7 +8,7 @@ import 'package:prudapp/pages/beneficiaries/my_beneficiaries.dart';
 import 'package:prudapp/singletons/beneficiary_notifier.dart';
 
 import '../models/theme.dart';
-import 'Translate.dart';
+import 'translate.dart';
 
 class AddBeneficiary extends StatefulWidget {
   const AddBeneficiary({super.key});

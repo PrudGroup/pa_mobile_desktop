@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/pages/register/register.dart';
@@ -36,6 +37,7 @@ void main() async {
   }
 
   WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: WidgetsBinding.instance);
   await iCloud.setFirebase(
       Constants.fireApiKey,
       Platform.isAndroid? Constants.fireAndroidAppID :
@@ -87,7 +89,7 @@ class MyApp extends StatelessWidget {
     await precacheImage( AssetImage(prudImages.screen), context);
     await precacheImage( AssetImage(prudImages.user), context);
     await precacheImage( AssetImage(prudImages.err), context);
-
+    FlutterNativeSplash.remove();
     final lStore = myStorage.lStore;
     bool isNew = true;
     var res = await lStore.read('isNew');
@@ -125,7 +127,7 @@ class MyApp extends StatelessWidget {
                         fit: BoxFit.cover,
                       )),
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 400.0),
+                      padding: const EdgeInsets.only(top: 500.0),
                       child: SpinKitFadingCircle(
                         size: 40.0,
                         color: prudColorTheme.bgA,

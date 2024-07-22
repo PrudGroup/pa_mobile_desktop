@@ -10,7 +10,7 @@ import 'package:prudapp/singletons/gift_card_notifier.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 
 import '../singletons/tab_data.dart';
-import 'Translate.dart';
+import 'translate.dart';
 
 class GiftProductComponent extends StatefulWidget {
   final GiftProduct product;

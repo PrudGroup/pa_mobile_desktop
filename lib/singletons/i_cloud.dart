@@ -22,6 +22,7 @@ import '../pages/ads/ads.dart';
 import '../pages/shippers/shippers.dart';
 import '../pages/switzstores/switz_stores.dart';
 import '../pages/viewsparks/view_spark.dart';
+import 'package:opay_online_flutter_sdk/opay_online_flutter_sdk.dart';
 
 
 enum RegisterState{
@@ -389,6 +390,7 @@ class ICloud extends ChangeNotifier{
 
   Future<FirebaseApp> setFirebase(String apiKey, String appId, String msgID) async {
     FirebaseApp? fireApp;
+    OPayTask.setSandBox(Constants.apiStatues == 'production'? false : true);
     if (Platform.isAndroid || Platform.isIOS) {
       fireApp = await Firebase.initializeApp(
         options: FirebaseOptions(
@@ -531,6 +533,9 @@ const String reloadlySecret = Constants.apiStatues == 'production'? Constants.re
 const String apiEndPoint = isProduction? prudApiUrl : localApiUrl;
 const String waveApiUrl = "https://api.flutterwave.com/v3";
 const double waveVat = 0.07;
+const String opayID = Constants.opayId;
+const String opayPublic = Constants.opayPublic;
+const String opaySecret = Constants.opaySecret;
 const bool paymentIsInTestMode = isProduction? false : true;
 List<PushMessage> pushMessages = [];
 const reloadlySmsFee = 300.0;
