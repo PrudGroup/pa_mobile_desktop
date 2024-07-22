@@ -1000,7 +1000,7 @@ class RechargeOperator{
   double? mostPopularAmount;
   int? operatorId;
   bool? pin;
-  List<OperatorPromotion>? promotions;
+  List<dynamic>? promotions;
   String? senderCurrencyCode;
   String? senderCurrencySymbol;
   List<dynamic>? suggestedAmounts;
@@ -1054,7 +1054,7 @@ class RechargeOperator{
       if(suggestedAmounts != null) "suggestedAmounts": suggestedAmounts,
       if(senderCurrencySymbol != null) "senderCurrencySymbol": senderCurrencySymbol,
       if(senderCurrencyCode != null) "senderCurrencyCode": senderCurrencyCode,
-      if(promotions != null) "promotions": promotions!.map((promo) => promo.toJson()).toList(),
+      if(promotions != null) "promotions": promotions,
       if(pin != null) "pin": pin,
       if(operatorId != null) "operatorId": operatorId,
       if(mostPopularAmount != null) "mostPopularAmount": mostPopularAmount,
@@ -1084,6 +1084,7 @@ class RechargeOperator{
   }
 
   factory RechargeOperator.fromJson(Map<String, dynamic> json){
+    debugPrint("Promo: ${json["promotions"]}");
     return RechargeOperator(
       name: json["name"],
       id: json["id"],
@@ -1092,9 +1093,10 @@ class RechargeOperator{
       suggestedAmounts: json["suggestedAmounts"],
       senderCurrencySymbol: json["senderCurrencySymbol"],
       senderCurrencyCode: json["senderCurrencyCode"],
-      promotions: json["promotions"] != null && json["promotions"].isNotEmpty? json["promotions"].map(
-        (promo) => OperatorPromotion.fromJson(promo)
-      ).toList() : [],
+      /*promotions: json["promotions"] != null && json["promotions"].isNotEmpty? json["promotions"].map(
+        (dynamic promo) => OperatorPromotion.fromJson(promo)
+      ).toList() : [],*/
+      promotions: json['promotions'],
       pin: json["pin"],
       operatorId: json["operatorId"],
       mostPopularAmount: json["mostPopularAmount"] is int? json["mostPopularAmount"].toDouble() : json["mostPopularAmount"],

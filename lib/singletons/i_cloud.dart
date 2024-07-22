@@ -489,6 +489,8 @@ class ICloud extends ChangeNotifier{
     GoRouter.of(context).go(Uri(path: route, queryParameters: qParam).toString());
   }
 
+  bool checkIfLocal(String cur) => cur == "NGN";
+
   void goByName(BuildContext context, String routeName, Map<String, String> pParam, Map<String, dynamic>? qParam){
     if(qParam != null){
       context.goNamed(routeName, pathParameters: pParam, queryParameters: qParam);

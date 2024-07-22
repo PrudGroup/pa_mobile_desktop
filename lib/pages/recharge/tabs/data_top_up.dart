@@ -8,9 +8,12 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 import '../../../components/Translate.dart';
 import '../../../components/loading_component.dart';
+import '../../../components/modals/recharge_order_modal_sheet.dart';
+import '../../../components/network_provider.dart';
 import '../../../components/prud_panel.dart';
 import '../../../components/recharge_denomination.dart';
 import '../../../components/recharge_operator_promos.dart';
+import '../../../components/save_phone_numbers.dart';
 import '../../../models/images.dart';
 import '../../../models/reloadly.dart';
 import '../../../models/theme.dart';
@@ -42,17 +45,92 @@ class DataTopUpState extends State<DataTopUp> {
   bool phoneIsValid = false;
   Country? selectedCountry;
   RechargeOperator? detectedOperator;
+  List<RechargeOperator> networkProviders = rechargeNotifier.dataProviders;
   double selectedAmount = 0;
   FocusNode focusN = FocusNode();
   List<Widget> carousels = [];
+  int selectedIndex = 0;
+  bool showNumberEntry = true;
 
+  void setPhoneNo(){
+    if(mounted && rechargeNotifier.selectedPhoneNumber != null) {
+      setState(() {
+        phoneNo = rechargeNotifier.selectedPhoneNumber;
+        showNumberEntry = false;
+      });
+    }
+    if(phoneNo != null && phoneNo!.phoneNumber != null) phoneTextController.text = phoneNo!.phoneNumber!;
+  }
+
+  void showEntry(){
+    if(mounted){
+      setState(() {
+        phoneNo = null;
+        showNumberEntry = true;
+      });
+    }
+  }
 
   void gotoTab(index){
     if(widget.goToTab != null) widget.goToTab!(index);
   }
 
   Future<void> startTransaction() async {
-    // remember to check operators' status
+    try{
+      if(detectedOperator!= null && detectedOperator!.status != null && detectedOperator!.status!.toLowerCase() == "active"){
+        showModalBottomSheet(
+            context: context,
+            backgroundColor: prudColorTheme.bgA,
+            elevation: 5,
+            isScrollControlled: true,
+            isDismissible: false,
+            shape: RoundedRectangleBorder(
+              borderRadius: prudRad,
+            ),
+            builder: (context){
+              return RechargeOrderModalSheet(
+                operator: detectedOperator!,
+                selectedAmount: selectedAmount,
+                selectedPhone: phoneNo!,
+                isAirtime: false,
+              );
+            }
+        ).whenComplete(() async {
+          if(rechargeNotifier.continueTransaction) {
+            await startTransaction();
+          } else{
+            rechargeNotifier.clearAllSavePaymentDetails();
+            if(mounted) Navigator.pop(context);
+          }
+        });
+      }else{
+        iCloud.showSnackBar("Operator Inactive.", context);
+      }
+    }catch(ex){
+      debugPrint("startTransaction: $ex");
+    }
+  }
+
+  void selectOperator(RechargeOperator opt, int index){
+    if(mounted){
+      setState(() {
+        selectedIndex = index;
+        detectedOperator = opt;
+      });
+    }
+  }
+
+  void showNumbers(){
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: prudColorTheme.bgA,
+      elevation: 10,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: prudRad,
+      ),
+      builder: (BuildContext context) => const SavePhoneNumbers(),
+    );
   }
 
   Future<void> selectAmount(double amt) async {
@@ -62,21 +140,21 @@ class DataTopUpState extends State<DataTopUp> {
 
   void getCountry(){
     showCountryPicker(
-        context: context,
-        countryFilter: countries,
-        favorite: ["NG", "UK", "SA", "US"],
-        onSelect: (Country country) async {
-          try{
-            if(mounted){
-              setState(() {
-                selectedCountry = country;
-              });
-              if(selectedCountry != null) await detectProvider();
-            }
-          }catch(ex){
-            debugPrint("getCurrency Error: $ex");
+      context: context,
+      countryFilter: countries,
+      favorite: ["NG", "UK", "SA", "US"],
+      onSelect: (Country country) async {
+        try{
+          if(mounted){
+            setState(() {
+              selectedCountry = country;
+            });
+            if(selectedCountry != null) await detectProvider();
           }
+        }catch(ex){
+          debugPrint("getCurrency Error: $ex");
         }
+      }
     );
   }
 
@@ -94,7 +172,7 @@ class DataTopUpState extends State<DataTopUp> {
       }
       if(mounted) setState(() => gettingCountries = false);
     }catch(ex){
-      debugPrint("Airtime initSettings Error: $ex");
+      debugPrint("Data initSettings Error: $ex");
       if(mounted) setState(() => gettingCountries = false);
     }
   }
@@ -108,8 +186,7 @@ class DataTopUpState extends State<DataTopUp> {
         if(country != null || selectedCountry != null){
           String ctyCode = country ?? selectedCountry!.countryCode;
           RechargeOperator? operator = await rechargeNotifier.detectOperator(ctyCode, justNum!, isAirtime: false);
-          debugPrint("Operator: $operator");
-          if(mounted){
+          if(mounted && operator != null){
             setState(() {
               detectedOperator = operator;
               carousels = detectedOperator!.logoUrls!.map((dynamic str){
@@ -164,6 +241,8 @@ class DataTopUpState extends State<DataTopUp> {
               debugPrint("Operator: ${detectedOperator?.toJson()}");
               getting = false;
             });
+          }else{
+            await rechargeNotifier.getOperators(ctyCode, isAirtime: false);
           }
         }else{
           getCountry();
@@ -183,7 +262,12 @@ class DataTopUpState extends State<DataTopUp> {
     });
     super.initState();
     rechargeNotifier.addListener((){
-
+      if(mounted){
+        setState(() {
+          networkProviders = rechargeNotifier.dataProviders;
+        });
+      }
+      setPhoneNo();
     });
   }
 
@@ -214,9 +298,17 @@ class DataTopUpState extends State<DataTopUp> {
           ),
         ),
         actions: [
+          if(rechargeNotifier.phoneNumbers.isNotEmpty) IconButton(
+            onPressed: showNumbers,
+            icon: const Icon(FontAwesome5Solid.phone),
+            color: prudColorTheme.bgA,
+            iconSize: 18,
+          ),
           IconButton(
-              onPressed: () => iCloud.goto(context, const RechargeHistory()),
-              icon: const Icon(FontAwesome5Solid.history)
+            onPressed: () => iCloud.goto(context, const RechargeHistory()),
+            icon: const Icon(FontAwesome5Solid.history),
+            color: prudColorTheme.bgA,
+            iconSize: 18,
           )
         ],
       ),
@@ -242,13 +334,14 @@ class DataTopUpState extends State<DataTopUp> {
                   ),
                   child: Row(
                     children:  [
-                      Expanded(
+                      if(phoneNo == null && showNumberEntry) Expanded(
                         child: InternationalPhoneNumberInput(
                           autoValidateMode: AutovalidateMode.onUserInteraction,
                           textFieldController: phoneTextController,
                           selectorConfig: const SelectorConfig(
                             selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
                           ),
+                          countries: countries,
                           textStyle: prudWidgetStyle.typedTextStyle,
                           inputDecoration: prudWidgetStyle.inputDeco.copyWith(hintText: "Phone Number"),
                           maxLength: 20,
@@ -265,6 +358,39 @@ class DataTopUpState extends State<DataTopUp> {
                             }
                           },
                         ),
+                      ),
+                      if(phoneNo != null && !showNumberEntry) Row(
+                        children: [
+                          Expanded(
+                              child: FittedBox(
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      "${tabData.getCountryFlag(phoneNo!.isoCode!)}",
+                                      style: prudWidgetStyle.tabTextStyle.copyWith(
+                                          fontSize: 15
+                                      ),
+                                    ),
+                                    spacer.width,
+                                    Text(
+                                      "${tabData.getCountryFlag(phoneNo!.phoneNumber!)}",
+                                      style: prudWidgetStyle.tabTextStyle.copyWith(
+                                          fontSize: 16,
+                                          color: prudColorTheme.secondary
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                          ),
+                          spacer.width,
+                          prudWidgetStyle.getIconButton(
+                            onPressed: showEntry,
+                            icon: Icons.close,
+                            isIcon: true,
+                            makeLight: true,
+                          ),
+                        ],
                       ),
                       spacer.width,
                       getting || gettingCountries? LoadingComponent(
@@ -284,6 +410,38 @@ class DataTopUpState extends State<DataTopUp> {
               ),
             ),
             spacer.height,
+            if(networkProviders.isNotEmpty) Column(
+              children: [
+                PrudPanel(
+                  title: "Network Providers",
+                  titleColor: prudColorTheme.textB,
+                  hasPadding: false,
+                  bgColor: prudColorTheme.bgC,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 20.0, bottom: 10.0),
+                    child: SizedBox(
+                      height: 150,
+                      child: ListView.builder(
+                          physics: const BouncingScrollPhysics(),
+                          scrollDirection: Axis.horizontal,
+                          itemCount: networkProviders.length,
+                          itemBuilder: (context, index){
+                            RechargeOperator opt = networkProviders[index];
+                            return InkWell(
+                              onTap: () => selectOperator(opt, index),
+                              child: NetworkProvider(
+                                operator: opt,
+                                selected: index == selectedIndex,
+                              ),
+                            );
+                          }
+                      ),
+                    ),
+                  ),
+                ),
+                spacer.height,
+              ],
+            ),
             if(detectedOperator != null) Column(
               children: [
                 detectedOperator!.name != null && detectedOperator!.promotions != null && detectedOperator!.promotions!.isNotEmpty?
@@ -327,6 +485,8 @@ class DataTopUpState extends State<DataTopUp> {
                     ),
                     spacer.width,
                     Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text(
                           "${detectedOperator!.name}",
@@ -695,17 +855,19 @@ class DataTopUpState extends State<DataTopUp> {
                 if(detectedOperator!.denominationType != null && detectedOperator!.denominationType!.toLowerCase() == "fixed" && detectedOperator!.fixedAmounts!.isNotEmpty) PrudPanel(
                   title: "Fixed Amount",
                   titleColor: prudColorTheme.textB,
+                  hasPadding: false,
                   bgColor: prudColorTheme.bgC,
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                    padding: const EdgeInsets.only(top: 20.0, bottom: 10.0),
                     child: SizedBox(
                       height: 150,
                       child: ListView.builder(
                           physics: const BouncingScrollPhysics(),
+                          scrollDirection: Axis.horizontal,
                           itemCount: detectedOperator!.fixedAmounts!.length,
                           itemBuilder: (context, index){
                             double amt = detectedOperator!.fixedAmounts![index];
-                            String desc = detectedOperator!.fixedAmountsDescriptions![index];
+                            String desc = detectedOperator!.fixedAmountsDescriptions!.values.toList()[index];
                             return InkWell(
                               onTap: () => selectAmount(amt),
                               child: RechargeDenomination(
@@ -723,15 +885,18 @@ class DataTopUpState extends State<DataTopUp> {
                 if(detectedOperator!.suggestedAmounts != null && detectedOperator!.suggestedAmounts!.isNotEmpty) PrudPanel(
                   title: "Suggested Amounts",
                   titleColor: prudColorTheme.textB,
+                  hasPadding: false,
                   bgColor: prudColorTheme.bgC,
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                    padding: const EdgeInsets.only(top: 20.0, bottom: 10.0),
                     child: SizedBox(
                       height: 150,
                       child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
                           itemCount: detectedOperator!.suggestedAmounts!.length,
                           itemBuilder: (context, index){
-                            double amt = detectedOperator!.suggestedAmounts![index];
+                            double amt = detectedOperator!.suggestedAmounts![index].toDouble();
                             return InkWell(
                               onTap: () => selectAmount(amt),
                               child: RechargeDenomination(
@@ -748,12 +913,15 @@ class DataTopUpState extends State<DataTopUp> {
                 if(detectedOperator!.mostPopularAmount != null) PrudPanel(
                   title: "Most Popular Amounts",
                   titleColor: prudColorTheme.textB,
+                  hasPadding: false,
                   bgColor: prudColorTheme.bgC,
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                    padding: const EdgeInsets.only(top: 20.0, bottom: 10.0),
                     child: SizedBox(
                       height: 150,
                       child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
                         children: [
                           spacer.width,
                           RechargeDenomination(
@@ -770,16 +938,18 @@ class DataTopUpState extends State<DataTopUp> {
                   title: "Local Fixed Amounts",
                   titleColor: prudColorTheme.textB,
                   bgColor: prudColorTheme.bgC,
+                  hasPadding: false,
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                    padding: const EdgeInsets.only(top: 20.0, bottom: 10.0),
                     child: SizedBox(
                       height: 150,
                       child: ListView.builder(
                           physics: const BouncingScrollPhysics(),
+                          scrollDirection: Axis.horizontal,
                           itemCount: detectedOperator!.localFixedAmounts!.length,
                           itemBuilder: (context, index){
                             double amt = detectedOperator!.localFixedAmounts![index];
-                            String desc = detectedOperator!.localFixedAmountsDescriptions![index];
+                            String desc = detectedOperator!.localFixedAmountsDescriptions!.values.toList()[index];
                             return InkWell(
                               onTap: () => selectAmount(amt),
                               child: RechargeDenomination(

@@ -1,6 +1,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 
 import '../constants.dart';
@@ -18,6 +19,112 @@ class RechargeNotifier extends ChangeNotifier {
 
   List<RechargeTransactionDetails> transactions = [];
   RechargeTransactionDetails? selectedTransDetail;
+  List<RechargeOperator> airtimeProviders = [];
+  List<RechargeOperator> dataProviders = [];
+  List<PhoneNumber> phoneNumbers = [];
+  PhoneNumber? selectedPhoneNumber;
+  bool continueTransaction = false;
+  bool airPaymentMade = false;
+  bool dataPaymentMade = false;
+  String? airPaymentId;
+  String? dataPaymentId;
+  TopUpTransaction? unsavedAirtimeTrans;
+  TopUpTransaction? unsavedDataTrans;
+  TopUpOrder? airUnBoughtOrder;
+  TopUpOrder? dataUnBoughtOrder;
+
+  Future<void> updateUnsavedTrans(TopUpTransaction item, {bool isAirtime = true}) async {
+    isAirtime? unsavedAirtimeTrans = item : unsavedDataTrans = item;
+    await saveUnsavedTransToCache(isAirtime);
+    notifyListeners();
+  }
+
+  Future<void> updateUnBoughtOrder(TopUpOrder item, {bool isAirtime = true}) async {
+    isAirtime? airUnBoughtOrder = item : dataUnBoughtOrder = item;
+    await saveUnBoughtOrderToCache(isAirtime);
+    notifyListeners();
+  }
+
+  Future<void> saveUnBoughtOrderToCache(bool isAirtime) async {
+    String key = isAirtime? "airUnBoughtOrder" : "dataUnBoughtOrder";
+    if(airUnBoughtOrder != null || dataUnBoughtOrder != null){
+      Map<String, dynamic> item = isAirtime? airUnBoughtOrder!.toJson() : dataUnBoughtOrder!.toJson();
+      await myStorage.addToStore(key: key, value: item);
+    }else{
+      myStorage.lStore.remove(key);
+    }
+  }
+
+  Future<void> saveUnsavedTransToCache(bool isAirtime) async {
+    String key = isAirtime? "unsavedAirtimeTrans" : "unsavedDataTrans";
+    if(unsavedAirtimeTrans != null || unsavedDataTrans != null){
+      Map<String, dynamic> item = isAirtime? unsavedAirtimeTrans!.toJson() : unsavedDataTrans!.toJson();
+      await myStorage.addToStore(key: key, value: item);
+    }else{
+      myStorage.lStore.remove(key);
+    }
+  }
+
+  void getUnsavedTransFromCache(){
+    dynamic unsavedAir = myStorage.getFromStore(key: "unsavedAirtimeTrans");
+    dynamic unsavedData = myStorage.getFromStore(key: "unsavedDataTrans");
+    if(unsavedAir != null){
+      unsavedAirtimeTrans = TopUpTransaction.fromJson(unsavedAir);
+    }
+    if(unsavedData != null){
+      unsavedAirtimeTrans = TopUpTransaction.fromJson(unsavedData);
+    }
+  }
+
+  void getUnBoughtOrderFromCache(){
+    dynamic unboughtAir = myStorage.getFromStore(key: "airUnBoughtOrder");
+    dynamic unboughtData = myStorage.getFromStore(key: "dataUnBoughtOrder");
+    if(unboughtAir != null){
+      airUnBoughtOrder = TopUpOrder.fromJson(unboughtAir);
+    }
+    if(unboughtData != null){
+      dataUnBoughtOrder = TopUpOrder.fromJson(unboughtData);
+    }
+  }
+
+  void updateSelectedPhone(PhoneNumber num){
+    selectedPhoneNumber = num;
+    notifyListeners();
+  }
+
+  Future<void> updatePaymentStatus(bool status, String id, bool isAirtime) async {
+    isAirtime? airPaymentMade = status : dataPaymentMade = status;
+    isAirtime? airPaymentId = id : dataPaymentId = id;
+    savePaymentStatus();
+    notifyListeners();
+  }
+
+  Future<void> savePaymentStatus() async {
+    await myStorage.addToStore(key: "airPaymentMade", value: airPaymentMade);
+    await myStorage.addToStore(key: "airPaymentId", value: airPaymentId);
+    await myStorage.addToStore(key: "dataPaymentMade", value: airPaymentMade);
+    await myStorage.addToStore(key: "dataPaymentId", value: airPaymentId);
+  }
+
+  void getPaymentStatusFromCache(){
+    bool? airPaid = myStorage.getFromStore(key: "airPaymentMade");
+    String? airPayId = myStorage.getFromStore(key: "airPaymentId");
+    bool? dataPaid = myStorage.getFromStore(key: "dataPaymentMade");
+    String? dataPayId = myStorage.getFromStore(key: "dataPaymentId");
+    if(airPaid != null ){
+      airPaymentMade = airPaid;
+      if(airPayId != null) airPaymentId = airPayId;
+    }
+    if(dataPaid != null ){
+      dataPaymentMade = dataPaid;
+      if(dataPayId != null) dataPaymentId = dataPayId;
+    }
+  }
+
+  void updateContinuedStatus(bool status){
+    continueTransaction = status;
+    notifyListeners();
+  }
 
   void selectTransactionDetail(RechargeTransactionDetails detail){
     selectedTransDetail = detail;
@@ -77,12 +184,10 @@ class RechargeNotifier extends ChangeNotifier {
     return saved;
   }
 
-  Future<bool> addTransToCloud(GiftTransaction tran, CartItem gift) async {
+  Future<bool> addTransToCloud(TopUpTransaction tran, bool isAirtime) async {
 
     return false;
   }
-
-
 
   Future<void> saveRechargeableCountriesToCache() async {
     List<Map<String, dynamic>> items = [];
@@ -169,16 +274,17 @@ class RechargeNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> getOperators(ReloadlyCountry country, {bool isAirtime = true}) async {
-    String path = "operators/countries/${country.currencyCode}?suggestedAmountsMap=true&suggestedAmounts=true&includeData=${isAirtime? false : true}&includeBundles=true&includeCombo=true";
+  Future<void> getOperators(String countryCode, {bool isAirtime = true}) async {
+    String path = "operators/countries/$countryCode?suggestedAmountsMap=true&suggestedAmounts=true&includeData=${isAirtime? false : true}&includeBundles=true&includeCombo=true";
     dynamic result = await makeRequest(path: path);
     List<RechargeOperator> operators = [];
     if(result != null && result.isNotEmpty){
       for(Map<String, dynamic> res in result["content"]){
         operators.add(RechargeOperator.fromJson(res));
       }
-      isAirtime? airtimeProviders = operators : dataProviders = operators;
+      isAirtime? (airtimeProviders = operators) : (dataProviders = operators);
     }
+    notifyListeners();
   }
 
   Future<OperatorFx?> getFxRate(int operatorId, double amount) async {
@@ -282,9 +388,73 @@ class RechargeNotifier extends ChangeNotifier {
     }
   }
 
+  Future<void> savePhoneNoToCache() async {
+    List<Map<String, dynamic>> items = [];
+    if(phoneNumbers.isNotEmpty){
+      for(PhoneNumber item in phoneNumbers){
+        items.add({
+          "isoCode": item.isoCode,
+          "phoneNumber": item.parseNumber(),
+          "dialCode": item.dialCode
+        });
+      }
+      await myStorage.addToStore(key: "phoneNumbers", value: items);
+    }else{
+      myStorage.lStore.remove("phoneNumbers");
+    }
+  }
+
+
+  void getPhoneNumbersFromCache(){
+    dynamic phones = myStorage.getFromStore(key: "phoneNumbers");
+    if(phones != null){
+      List<dynamic> phoneNos = phones;
+      if(phoneNos.isNotEmpty){
+        for (dynamic phone in phoneNos) {
+          phoneNumbers.add(PhoneNumber(
+            phoneNumber: phone["phoneNumber"],
+            dialCode: phone["dialCode"],
+            isoCode: phone["isoCode"]
+          ));
+        }
+      }
+    }
+  }
+
+  Future<void> addItemToPhoneNumber(PhoneNumber num) async {
+    phoneNumbers.add(num);
+    await savePhoneNoToCache();
+    notifyListeners();
+  }
+
+  Future<void> clearAllSavePaymentDetails() async {
+    unsavedDataTrans = null;
+    unsavedAirtimeTrans = null;
+    airUnBoughtOrder = null;
+    dataUnBoughtOrder = null;
+    airPaymentId = null;
+    airPaymentMade = false;
+    dataPaymentMade = false;
+    dataPaymentId = null;
+    continueTransaction = false;
+    myStorage.lStore.remove("unsavedDataTrans");
+    myStorage.lStore.remove("unsavedAirtimeTrans");
+    myStorage.lStore.remove("airUnBoughtOrder");
+    myStorage.lStore.remove("dataUnBoughtOrder");
+    myStorage.lStore.remove("airPaymentId");
+    myStorage.lStore.remove("airPaymentMade");
+    myStorage.lStore.remove("dataPaymentMade");
+    myStorage.lStore.remove("dataPaymentId");
+  }
+
+
   Future<void> initRecharge() async {
     try{
       getCountriesFromCache();
+      getPhoneNumbersFromCache();
+      getUnsavedTransFromCache();
+      getUnBoughtOrderFromCache();
+      getPaymentStatusFromCache();
       notifyListeners();
     }catch(ex){
       debugPrint("RechargeNotifier_initRecharge Error: $ex");

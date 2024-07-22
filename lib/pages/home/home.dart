@@ -65,6 +65,46 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
   ];
   List<Menu> menus = [
     Menu(
+        title: 'Gift Cards',
+        page: const GiftCards(),
+        icon: prudImages.gift
+    ),
+    Menu(
+      title: 'Airtime',
+      page: const Recharge(tab: 0,),
+      icon: prudImages.airtime
+    ),
+    Menu(
+      title: 'Data Bundles',
+      page: const Recharge(tab: 1,),
+      icon: prudImages.dataBundle
+    ),
+    Menu(
+      title: 'Bills & Utilities',
+      page: const Recharge(tab: 2,),
+      icon: prudImages.smartTv1
+    ),
+    Menu(
+      title: 'SwitzTravels',
+      page: const SwitzTravels(),
+      icon: prudImages.travel1
+    ),
+    Menu(
+      title: 'Flights',
+      page: const SwitzTravels(tab: 1,),
+      icon: prudImages.flight
+    ),
+    Menu(
+      title: 'Buses',
+      page: const SwitzTravels(tab: 0,),
+      icon: prudImages.transport
+    ),
+    Menu(
+      title: 'Hotels',
+      page: const SwitzTravels(tab: 2,),
+      icon: prudImages.resort
+    ),
+    Menu(
       title: 'Switz Stores',
       page: const SwitzStores(),
       icon: prudImages.stores
@@ -88,46 +128,6 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
       title: 'Shippers',
       page: const Shippers(),
       icon: prudImages.shipper
-    ),
-    Menu(
-      title: 'SwitzTravels',
-      page: const SwitzTravels(),
-      icon: prudImages.travel1
-    ),
-    Menu(
-      title: 'Flights',
-      page: const SwitzTravels(tab: 1,),
-      icon: prudImages.flight
-    ),
-    Menu(
-      title: 'Buses',
-      page: const SwitzTravels(tab: 0,),
-      icon: prudImages.transport
-    ),
-    Menu(
-      title: 'Hotels',
-      page: const SwitzTravels(tab: 2,),
-      icon: prudImages.resort
-    ),
-    Menu(
-      title: 'Gift Cards',
-      page: const GiftCards(),
-      icon: prudImages.gift
-    ),
-    Menu(
-      title: 'Airtime',
-      page: const Recharge(tab: 0,),
-      icon: prudImages.airtime
-    ),
-    Menu(
-      title: 'Data Bundles',
-      page: const Recharge(tab: 1,),
-      icon: prudImages.dataBundle
-    ),
-    Menu(
-      title: 'Bills & Utilities',
-      page: const Recharge(tab: 2,),
-      icon: prudImages.smartTv1
     ),
     Menu(
       title: 'Url Shortener',

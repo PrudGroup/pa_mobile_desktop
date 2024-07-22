@@ -8,7 +8,7 @@ import '../models/images.dart';
 import '../models/reloadly.dart';
 
 class RechargeOperatorPromos extends StatelessWidget {
-  final List<OperatorPromotion> promos;
+  final List<dynamic> promos;
   final String operatorName;
   final List<Widget> carousels;
 
@@ -20,79 +20,85 @@ class RechargeOperatorPromos extends StatelessWidget {
   });
 
   List<Widget> getPromoWidgets(){
-    return promos.map((promo) => SizedBox(
-      width: double.maxFinite,
-      child: Column(
-        children: [
-          if(promo.title1 != null) Translate(
-          text: "${promo.title1}",
-           style: prudWidgetStyle.tabTextStyle.copyWith(
-             fontSize: 13,
-             fontWeight: FontWeight.w600,
-             color: prudColorTheme.secondary
-           ),
-           align: TextAlign.left,
-          ),
-          if(promo.title2 != null) Translate(
-            text: "${promo.title2}",
-            style: prudWidgetStyle.tabTextStyle.copyWith(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: prudColorTheme.secondary
-            ),
-            align: TextAlign.left,
-          ),
-          if(promo.description != null) Translate(
-            text: "${promo.description}",
-            style: prudWidgetStyle.tabTextStyle.copyWith(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: prudColorTheme.primary
-            ),
-            align: TextAlign.left,
-          ),
-          if(promo.denominations != null) Translate(
-            text: "${promo.denominations}",
-            style: prudWidgetStyle.tabTextStyle.copyWith(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: prudColorTheme.iconA
-            ),
-            align: TextAlign.left,
-          ),
-          if(promo.localDenominations != null) Translate(
-            text: "${promo.localDenominations}",
-            style: prudWidgetStyle.tabTextStyle.copyWith(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: prudColorTheme.iconA
-            ),
-            align: TextAlign.left,
-          ),
-          if(promo.startDate != null || promo.endDate != null) Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return promos.map((dynamic promo) {
+      OperatorPromotion pro = OperatorPromotion.fromJson(promo);
+      return SizedBox(
+        width: double.maxFinite,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(30, 10, 5, 5),
+          child: Column(
             children: [
-              if(promo.startDate != null) Text(
-                "Starts: ${promo.startDate}",
-                style: prudWidgetStyle.typedTextStyle.copyWith(
-                  fontSize: 8,
-                  fontWeight: FontWeight.w500,
-                  color: prudColorTheme.lineC
+              if(pro.title1 != null) Translate(
+                text: "${pro.title1}",
+                style: prudWidgetStyle.tabTextStyle.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: prudColorTheme.secondary
                 ),
+                align: TextAlign.left,
               ),
-              if(promo.endDate != null) Text(
-                "Ends: ${promo.endDate}",
-                style: prudWidgetStyle.typedTextStyle.copyWith(
-                  fontSize: 8,
+              /*if(pro.title2 != null) Translate(
+                text: "${pro.title2}",
+                style: prudWidgetStyle.tabTextStyle.copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: prudColorTheme.secondary
+                ),
+                align: TextAlign.left,
+              ),*/
+              if(pro.description != null) Translate(
+                text: "${pro.description}",
+                style: prudWidgetStyle.tabTextStyle.copyWith(
+                  fontSize: 18,
                   fontWeight: FontWeight.w500,
                   color: prudColorTheme.primary
                 ),
+                align: TextAlign.left,
               ),
+             /* if(pro.denominations != null) Translate(
+                text: "${pro.denominations}",
+                style: prudWidgetStyle.tabTextStyle.copyWith(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: prudColorTheme.iconA
+                ),
+                align: TextAlign.left,
+              ),
+              if(pro.localDenominations != null) Translate(
+                text: "${pro.localDenominations}",
+                style: prudWidgetStyle.tabTextStyle.copyWith(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: prudColorTheme.iconA
+                ),
+                align: TextAlign.left,
+              ),*/
+              if(pro.startDate != null || pro.endDate != null) Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if(pro.startDate != null) Text(
+                    "Starts: ${pro.startDate}",
+                    style: prudWidgetStyle.typedTextStyle.copyWith(
+                        fontSize: 8,
+                        fontWeight: FontWeight.w500,
+                        color: prudColorTheme.lineC
+                    ),
+                  ),
+                  if(pro.endDate != null) Text(
+                    "Ends: ${pro.endDate}",
+                    style: prudWidgetStyle.typedTextStyle.copyWith(
+                        fontSize: 8,
+                        fontWeight: FontWeight.w500,
+                        color: prudColorTheme.primary
+                    ),
+                  ),
+                ],
+              )
             ],
-          )
-        ],
-      ),
-    )).toList();
+          ),
+        ),
+      );
+    }).toList();
   }
 
   @override
@@ -100,7 +106,7 @@ class RechargeOperatorPromos extends StatelessWidget {
     return Stack(
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 30),
+          padding: const EdgeInsets.only(left: 25),
           child: PrudContainer(
             title: operatorName,
             titleBorderColor: prudColorTheme.bgC,
@@ -123,21 +129,21 @@ class RechargeOperatorPromos extends StatelessWidget {
           ),
         ),
         Container(
-          width: 100.0,
-          height: 100.0,
-          margin: const EdgeInsets.only(top: 50),
+          width: 50.0,
+          height: 50.0,
+          margin: const EdgeInsets.only(top: 20),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30.0),
+            borderRadius: BorderRadius.circular(20.0),
             border: Border.all(
               color: prudColorTheme.bgC,
-              width: 2.0
+              width: 5.0
             ),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(30.0),
+            borderRadius: BorderRadius.circular(20.0),
             child: carousels.isNotEmpty?
             GFCarousel(
-              height: 100.0,
+              height: 50.0,
               autoPlay: true,
               aspectRatio: double.maxFinite,
               viewportFraction: 1.0,

@@ -6,8 +6,11 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:getwidget/components/carousel/gf_carousel.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:prudapp/components/loading_component.dart';
+import 'package:prudapp/components/modals/recharge_order_modal_sheet.dart';
+import 'package:prudapp/components/network_provider.dart';
 import 'package:prudapp/components/recharge_denomination.dart';
 import 'package:prudapp/components/recharge_operator_promos.dart';
+import 'package:prudapp/components/save_phone_numbers.dart';
 import 'package:prudapp/models/images.dart';
 import 'package:prudapp/pages/recharge/recharge_history.dart';
 import 'package:prudapp/singletons/recharge_notifier.dart';
@@ -41,9 +44,32 @@ class AirtimeState extends State<Airtime> {
   bool phoneIsValid = false;
   Country? selectedCountry;
   RechargeOperator? detectedOperator;
+  List<RechargeOperator> networkProviders = rechargeNotifier.airtimeProviders;
   double selectedAmount = 0;
   FocusNode focusN = FocusNode();
   List<Widget> carousels = [];
+  int selectedIndex = 0;
+  bool showNumberEntry = true;
+
+  void setPhoneNo(){
+    if(mounted && rechargeNotifier.selectedPhoneNumber != null) {
+      setState(() {
+        phoneNo = rechargeNotifier.selectedPhoneNumber;
+        showNumberEntry = false;
+      });
+    }
+    if(phoneNo != null && phoneNo!.phoneNumber != null) phoneTextController.text = phoneNo!.phoneNumber!;
+  }
+
+
+  void showEntry(){
+    if(mounted){
+      setState(() {
+        phoneNo = null;
+        showNumberEntry = true;
+      });
+    }
+  }
 
 
   void gotoTab(index){
@@ -51,7 +77,60 @@ class AirtimeState extends State<Airtime> {
   }
 
   Future<void> startTransaction() async {
-    // remember to check operators' status
+    try{
+      if(detectedOperator!= null && detectedOperator!.status != null && detectedOperator!.status!.toLowerCase() == "active"){
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: prudColorTheme.bgA,
+          elevation: 5,
+          isScrollControlled: true,
+          isDismissible: false,
+          shape: RoundedRectangleBorder(
+            borderRadius: prudRad,
+          ),
+          builder: (context){
+            return RechargeOrderModalSheet(
+              operator: detectedOperator!,
+              selectedAmount: selectedAmount,
+              selectedPhone: phoneNo!,
+            );
+          }
+        ).whenComplete(() async {
+          if(rechargeNotifier.continueTransaction) {
+            await startTransaction();
+          } else{
+            rechargeNotifier.clearAllSavePaymentDetails();
+            if(mounted) Navigator.pop(context);
+          }
+        });
+      }else{
+        iCloud.showSnackBar("Operator Inactive.", context);
+      }
+    }catch(ex){
+      debugPrint("startTransaction: $ex");
+    }
+  }
+
+  void selectOperator(RechargeOperator opt, int index){
+    if(mounted){
+      setState(() {
+        selectedIndex = index;
+        detectedOperator = opt;
+      });
+    }
+  }
+
+  void showNumbers(){
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: prudColorTheme.bgA,
+      elevation: 10,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: prudRad,
+      ),
+      builder: (BuildContext context) => const SavePhoneNumbers(),
+    );
   }
 
   Future<void> selectAmount(double amt) async {
@@ -99,7 +178,7 @@ class AirtimeState extends State<Airtime> {
   }
 
   Future<void> detectProvider() async {
-    // try{
+    try{
       focusN.unfocus();
       if(mounted) setState(() => getting = true);
       if(phoneNo != null && justNum != null && phoneIsValid){
@@ -108,7 +187,7 @@ class AirtimeState extends State<Airtime> {
           String ctyCode = country ?? selectedCountry!.countryCode;
           RechargeOperator? operator = await rechargeNotifier.detectOperator(ctyCode, justNum!);
           debugPrint("Operator: $operator");
-          if(mounted){
+          if(mounted && operator != null){
             setState(() {
               detectedOperator = operator;
               carousels = detectedOperator!.logoUrls!.map((dynamic str){
@@ -163,15 +242,17 @@ class AirtimeState extends State<Airtime> {
               debugPrint("Operator: ${detectedOperator?.toJson()}");
               getting = false;
             });
+          }else{
+            await rechargeNotifier.getOperators(ctyCode);
           }
         }else{
           getCountry();
         }
       }
       if(mounted) setState(() => getting = false);
-    /*}catch(ex){
+    }catch(ex){
       if(mounted) setState(() => getting = false);
-    }*/
+    }
   }
 
   @override
@@ -182,7 +263,12 @@ class AirtimeState extends State<Airtime> {
     });
     super.initState();
     rechargeNotifier.addListener((){
-
+      if(mounted){
+        setState(() {
+          networkProviders = rechargeNotifier.airtimeProviders;
+        });
+      }
+      setPhoneNo();
     });
   }
 
@@ -213,9 +299,17 @@ class AirtimeState extends State<Airtime> {
           ),
         ),
         actions: [
+          if(rechargeNotifier.phoneNumbers.isNotEmpty) IconButton(
+            onPressed: showNumbers,
+            icon: const Icon(FontAwesome5Solid.phone),
+            color: prudColorTheme.bgA,
+            iconSize: 18,
+          ),
           IconButton(
             onPressed: () => iCloud.goto(context, const RechargeHistory()),
-            icon: const Icon(FontAwesome5Solid.history)
+            icon: const Icon(FontAwesome5Solid.history),
+            color: prudColorTheme.bgA,
+            iconSize: 18,
           )
         ],
       ),
@@ -241,13 +335,14 @@ class AirtimeState extends State<Airtime> {
                   ),
                   child: Row(
                     children:  [
-                      Expanded(
+                      if(phoneNo == null && showNumberEntry) Expanded(
                         child: InternationalPhoneNumberInput(
                           autoValidateMode: AutovalidateMode.onUserInteraction,
                           textFieldController: phoneTextController,
                           selectorConfig: const SelectorConfig(
                             selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
                           ),
+                          countries: countries,
                           textStyle: prudWidgetStyle.typedTextStyle,
                           inputDecoration: prudWidgetStyle.inputDeco.copyWith(hintText: "Phone Number"),
                           maxLength: 20,
@@ -264,6 +359,39 @@ class AirtimeState extends State<Airtime> {
                             }
                           },
                         ),
+                      ),
+                      if(phoneNo != null && !showNumberEntry) Row(
+                        children: [
+                          Expanded(
+                            child: FittedBox(
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "${tabData.getCountryFlag(phoneNo!.isoCode!)}",
+                                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                                        fontSize: 15
+                                    ),
+                                  ),
+                                  spacer.width,
+                                  Text(
+                                    "${tabData.getCountryFlag(phoneNo!.phoneNumber!)}",
+                                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                                        fontSize: 16,
+                                        color: prudColorTheme.secondary
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          ),
+                          spacer.width,
+                          prudWidgetStyle.getIconButton(
+                            onPressed: showEntry,
+                            icon: Icons.close,
+                            isIcon: true,
+                            makeLight: true,
+                          ),
+                        ],
                       ),
                       spacer.width,
                       getting || gettingCountries? LoadingComponent(
@@ -283,6 +411,38 @@ class AirtimeState extends State<Airtime> {
               ),
             ),
             spacer.height,
+            if(networkProviders.isNotEmpty) Column(
+              children: [
+                PrudPanel(
+                  title: "Network Providers",
+                  titleColor: prudColorTheme.textB,
+                  hasPadding: false,
+                  bgColor: prudColorTheme.bgC,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 20.0, bottom: 10.0),
+                    child: SizedBox(
+                      height: 150,
+                      child: ListView.builder(
+                        physics: const BouncingScrollPhysics(),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: networkProviders.length,
+                        itemBuilder: (context, index){
+                          RechargeOperator opt = networkProviders[index];
+                          return InkWell(
+                            onTap: () => selectOperator(opt, index),
+                            child: NetworkProvider(
+                              operator: opt,
+                              selected: index == selectedIndex,
+                            ),
+                          );
+                        }
+                      ),
+                    ),
+                  ),
+                ),
+                spacer.height,
+              ],
+            ),
             if(detectedOperator != null) Column(
               children: [
                 detectedOperator!.name != null && detectedOperator!.promotions != null && detectedOperator!.promotions!.isNotEmpty?
@@ -708,7 +868,7 @@ class AirtimeState extends State<Airtime> {
                         itemCount: detectedOperator!.fixedAmounts!.length,
                         itemBuilder: (context, index){
                           double amt = detectedOperator!.fixedAmounts![index];
-                          String desc = detectedOperator!.fixedAmountsDescriptions![index];
+                          String desc = detectedOperator!.fixedAmountsDescriptions!.values.toList()[index];
                           return InkWell(
                             onTap: () => selectAmount(amt),
                             child: RechargeDenomination(
@@ -790,7 +950,7 @@ class AirtimeState extends State<Airtime> {
                         itemCount: detectedOperator!.localFixedAmounts!.length,
                         itemBuilder: (context, index){
                           double amt = detectedOperator!.localFixedAmounts![index];
-                          String desc = detectedOperator!.localFixedAmountsDescriptions![index];
+                          String desc = detectedOperator!.localFixedAmountsDescriptions!.values.toList()[index];
                           return InkWell(
                             onTap: () => selectAmount(amt),
                             child: RechargeDenomination(
