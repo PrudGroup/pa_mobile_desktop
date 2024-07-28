@@ -19,14 +19,17 @@ class RechargeDenomination extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 140.0,
+      constraints: const BoxConstraints(
+        minHeight: 50,
+        maxHeight: 140.0,
+      ),
       padding: const EdgeInsets.all(10),
       margin: const EdgeInsets.only(left: 6, right: 6),
       decoration: BoxDecoration(
         borderRadius: prudRadAll,
         color: prudColorTheme.primary,
         border: Border.all(
-          color: prudColorTheme.lineC,
+          color: prudColorTheme.bgA,
           width: 3,
         )
       ),
@@ -54,30 +57,15 @@ class RechargeDenomination extends StatelessWidget {
           ),
           if(desc != null) SizedBox(
             width: 100,
-            child: Stack(
-              alignment: AlignmentDirectional.center,
-              children: [
-                Translate(
-                  text: "Description",
-                  style: prudWidgetStyle.tabTextStyle.copyWith(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: prudColorTheme.lineD
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top:15),
-                  child: Translate(
-                    text: "(Charges Included)",
-                    style: prudWidgetStyle.tabTextStyle.copyWith(
-                        fontSize: 8,
-                        fontWeight: FontWeight.w600,
-                        color: prudColorTheme.textHeader
-                    ),
-                  ),
-                )
-              ],
-            ),
+            child: Translate(
+              text: "$desc",
+              style: prudWidgetStyle.tabTextStyle.copyWith(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: prudColorTheme.lineD
+              ),
+              align: TextAlign.center,
+            )
           ),
         ],
       ),

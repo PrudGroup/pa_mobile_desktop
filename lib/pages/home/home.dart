@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:connection_notifier/connection_notifier.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:prudapp/components/main_menu.dart';
+import 'package:prudapp/components/network_issue_component.dart';
 import 'package:prudapp/components/prud_showroom.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/pages/giftcards/gift_cards.dart';
@@ -53,6 +55,7 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
     remindDays: 7,
     remindLaunches: 10,
   );
+  StreamSubscription? connectSub;
   StreamSubscription? subscription;
   StreamSubscription? messageStream;
   double imageHeight = 0;
@@ -146,10 +149,19 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
     ),
   ];
   List<Widget> showroom = [];
+  bool prudServiceIsAvailable = true;
+
+  Future<void> changeConnectionStatus() async{
+    bool ok = await iCloud.prudServiceIsAvailable();
+    if(mounted) setState(() => prudServiceIsAvailable = ok);
+  }
 
 
   @override
   void initState(){
+    Future.delayed(Duration.zero, () async {
+      await changeConnectionStatus();
+    });
     carousels.shuffle();
     showroom = [
       InkWell(
@@ -285,6 +297,9 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
     ];
     super.initState();
     _rateMyApp.init();
+    connectSub = ConnectionNotifierTools.onStatusChange.listen((_) async {
+      await changeConnectionStatus();
+    });
     subscription = FGBGEvents.stream.listen((event) {
       if(event == FGBGType.background) {
 
@@ -307,6 +322,7 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
   void dispose(){
     subscription?.cancel();
     messageStream?.cancel();
+    connectSub?.cancel();
     super.dispose();
   }
 
@@ -396,6 +412,12 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
                     ),
                   ),
                   spacer.height,
+                  if(!prudServiceIsAvailable) Column(
+                    children: [
+                      const NetworkIssueComponent(),
+                      spacer.height,
+                    ],
+                  ),
                   PrudContainer(
                     hasPadding: true,
                     child: MainMenu(

@@ -1,3 +1,4 @@
+import 'package:fast_cached_network_image/fast_cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:u_credit_card/u_credit_card.dart';
 
@@ -48,7 +49,7 @@ class RedeemCard extends StatelessWidget {
               onError: (obj, stack){
                 debugPrint("NetworkImage Error: $obj : $stack");
               },
-              image: NetworkImage(
+              image: FastCachedImageProvider(
                 tranDetails.productPhoto!,
               )
             ),

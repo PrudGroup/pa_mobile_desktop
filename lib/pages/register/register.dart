@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:country_state_city/models/city.dart';
 import 'package:country_state_city/models/country.dart' as mc;
 import 'package:country_state_city/models/state.dart' as ms;
+import 'package:currency_picker/currency_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -65,6 +66,17 @@ class RegisteredState extends State<Register> {
   bool loadingCities = false;
   String? referralCode;
 
+  Future<void> pickCurrency(mc.Country country) async {
+    showCurrencyPicker(
+      context: context,
+      onSelect: (Currency cur){
+        if(mounted){
+          newUser.currencyCode = cur.code;
+        }
+      }
+    );
+  }
+
   void validateStep1() {
     if (_formKey.currentState!.validate()) {
       iCloud.changeRegisterState(state: RegisterState.third);
@@ -114,6 +126,7 @@ class RegisteredState extends State<Register> {
             newUser.state = user?.state;
             newUser.city = user?.city;
             newUser.town = user?.town;
+            newUser.currencyCode = user?.currencyCode?? "NGN";
             if(phe != null) {
               pNumber = phe;
               // phoneTextController.text = newUser.phoneNo!;
@@ -380,6 +393,7 @@ class RegisteredState extends State<Register> {
                             onChanged: (dynamic value){
                               setState(() {
                                 referralCode = value?.trim();
+                                newUser.referralCode = referralCode;
                               });
                             },
                             valueTransformer: (text) => num.tryParse(text!),
@@ -598,6 +612,7 @@ class RegisteredState extends State<Register> {
                                       cities = dCities;
                                     });
                                   }
+                                  await pickCurrency(ctry);
                                 },
                               ),
                               spacer.height,

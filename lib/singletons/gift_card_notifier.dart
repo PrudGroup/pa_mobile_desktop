@@ -469,29 +469,19 @@ class GiftCardNotifier extends ChangeNotifier {
       double appReferralCommission = income > 0? (income * installReferralCommission) : 0;
       double referComm = income > 0? (income * referralCommission) : 0;
       double profit = income - (referComm + appReferralCommission);
-      bool addedInstallMetric = false;
-      bool addedReferralMetric = false;
-      if(myStorage.installReferralCode != null){
-        addedInstallMetric = await iCloud.addMetricForAppInstallReferral(appReferralCommission, "fromGifts");
-      }else{
-        appReferralCommission = 0;
-      }
-      if(myStorage.giftReferral != null){
-        addedReferralMetric = await iCloud.addReferralMetric(myStorage.giftReferral!, referComm);
-      }else{
-        referComm = 0;
-      }
+      if(myStorage.installReferralCode == null) appReferralCommission = 0;
+      if(myStorage.giftReferral == null) referComm = 0;
       GiftTransactionDetails details = GiftTransactionDetails(
         income: income,
-        installReferralCommission: addedInstallMetric? appReferralCommission : null,
-        installReferralId: addedInstallMetric? myStorage.installReferralCode : null,
+        installReferralCommission: appReferralCommission,
+        installReferralId: appReferralCommission > 0? myStorage.installReferralCode : null,
         profitForPrudapp: profit,
         customerGot: discountInNaira,
         commissionFromReloadly: discountInNaira,
         referralsGot: appReferralCommission + referComm,
-        referralCommission: addedReferralMetric? referComm : 0,
+        referralCommission: referComm,
         transCurrency: tran.currencyCode,
-        referralId: addedReferralMetric? myStorage.giftReferral : null,
+        referralId: referComm > 0? myStorage.giftReferral : null,
         transDate: DateTime.parse(tran.transactionCreatedTime!),
         affId: myStorage.user?.id,
         transId: tran.transactionId,

@@ -173,6 +173,8 @@ class TabData extends ChangeNotifier {
     }
   }
 
+  bool checkIfLocal(String currencyCode) => currencyCode == myStorage.user!.currencyCode;
+
   dynamic getCurrencySymbol(String curCode){
     Currency? cur = CurrencyService().findByCode(curCode);
     if(cur != null){

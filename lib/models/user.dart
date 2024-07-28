@@ -15,6 +15,8 @@ class User {
   String? city;
   String? town;
   String? status;
+  String? currencyCode;
+  String? referralCode;
 
   User({
     this.id,
@@ -31,6 +33,8 @@ class User {
     this.town,
     this.emailVerified,
     this.status,
+    this.currencyCode,
+    this.referralCode,
   });
 
   Map<String, dynamic> toJson() => {
@@ -42,7 +46,9 @@ class User {
     if(country != null) 'country': country,
     if(state != null) 'state': state,
     if(city != null) 'city': city,
+    if(currencyCode != null) 'currencyCode': currencyCode,
     if(town != null) 'town': town,
+    if(referralCode != null) 'referralCode': referralCode,
     if(phoneNo != null) 'phone_no': phoneNo,
     if(createdAt != null) 'created_at': createdAt?.toIso8601String(),
     if(updatedAt != null) 'updated_at': updatedAt?.toIso8601String()
@@ -59,7 +65,9 @@ class User {
       city: json['city'] as String?,
       phoneNo: json['phone_no'] as String?,
       email: json['email'] as String?,
+      currencyCode: json['currencyCode'] as String?,
       fullName: json['fullname'] as String?,
+      referralCode: json['fullname'] as String?,
       createdAt: json['created_at'] != null? DateTime.parse(json['created_at']) : null,
       updatedAt: json['updated_at'] != null? DateTime.parse(json['updated_at']) : null,
     );

@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:desktop_window/desktop_window.dart';
+import 'package:fast_cached_network_image/fast_cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -21,6 +23,7 @@ class MyStorage extends ChangeNotifier {
   static get myStorage => _myStorage;
 
   GetStorage lStore = GetStorage();
+  String networkImageLocation = "";
   bool hasInitialized = false;
   User? user;
   List<XFile> lostImageData = [];
@@ -164,6 +167,8 @@ class MyStorage extends ChangeNotifier {
 
   Future<void> initializeValues() async {
     try{
+      networkImageLocation = (await getApplicationDocumentsDirectory()).path;
+      await FastCachedImageConfig.init(subDir: networkImageLocation, clearCacheAfter: const Duration(days: 10));
       var storedUser = myStorage.getFromStore(key: 'user');
       user = storedUser == null? null : User.fromJson(jsonDecode(storedUser));
       await setConvertibleCurrencies();

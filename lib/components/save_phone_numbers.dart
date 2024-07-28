@@ -9,13 +9,19 @@ class SavePhoneNumbers extends StatelessWidget {
 
   const SavePhoneNumbers({super.key});
 
+  void choose(PhoneNumber phone, BuildContext context){
+    rechargeNotifier.updateSelectedPhone(phone);
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     return Container(
-      height: height * 0.75,
+      height: height * 0.35,
       decoration: BoxDecoration(
         borderRadius: prudRad,
+        color: prudColorTheme.bgC,
       ),
       child: ClipRRect(
         borderRadius: prudRad,
@@ -26,14 +32,16 @@ class SavePhoneNumbers extends StatelessWidget {
             List<PhoneNumber> phones = rechargeNotifier.phoneNumbers.reversed.toList();
             PhoneNumber phone = phones[index];
             return InkWell(
-              onTap: () => rechargeNotifier.updateSelectedPhone(phone),
+              onTap: () => choose(phone, context),
               child: Container(
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                    border: Border(
-                        bottom: BorderSide(
-                            color: prudColorTheme.primary, width: 5
-                        )
+                  color: prudColorTheme.bgA,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: prudColorTheme.bgC, width: 5
                     )
+                  )
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -44,16 +52,16 @@ class SavePhoneNumbers extends StatelessWidget {
                           "${phone.dialCode}",
                           style: prudWidgetStyle.typedTextStyle.copyWith(
                               fontWeight: FontWeight.w500,
-                              fontSize: 13,
+                              fontSize: 14,
                               color: prudColorTheme.textB
                           ),
                         ),
                         Text(
                           "${phone.phoneNumber}",
                           style: prudWidgetStyle.tabTextStyle.copyWith(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                              color: prudColorTheme.secondary
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                            color: prudColorTheme.textA
                           ),
                         ),
                       ],
@@ -71,7 +79,7 @@ class SavePhoneNumbers extends StatelessWidget {
                             "${tabData.getCountry(phone.isoCode!)?.displayName}",
                             style: prudWidgetStyle.tabTextStyle.copyWith(
                                 fontWeight: FontWeight.w500,
-                                fontSize: 9,
+                                fontSize: 12,
                                 color: prudColorTheme.primary
                             ),
                           ),

@@ -66,7 +66,6 @@ class ICloud extends ChangeNotifier{
   }
 
   Future<bool> checkNetwork() async{
-    await ConnectionNotifierTools.initialize();
     if(ConnectionNotifierTools.isConnected) {
       return true;
     } else {
@@ -391,6 +390,7 @@ class ICloud extends ChangeNotifier{
   Future<FirebaseApp> setFirebase(String apiKey, String appId, String msgID) async {
     FirebaseApp? fireApp;
     OPayTask.setSandBox(Constants.apiStatues == 'production'? false : true);
+    await ConnectionNotifierTools.initialize();
     if (Platform.isAndroid || Platform.isIOS) {
       fireApp = await Firebase.initializeApp(
         options: FirebaseOptions(
@@ -489,8 +489,6 @@ class ICloud extends ChangeNotifier{
     GoRouter.of(context).go(Uri(path: route, queryParameters: qParam).toString());
   }
 
-  bool checkIfLocal(String cur) => cur == "NGN";
-
   void goByName(BuildContext context, String routeName, Map<String, String> pParam, Map<String, dynamic>? qParam){
     if(qParam != null){
       context.goNamed(routeName, pathParameters: pParam, queryParameters: qParam);
@@ -521,6 +519,12 @@ class ICloud extends ChangeNotifier{
     }else {
       return null;
     }
+  }
+
+  Future<bool> prudServiceIsAvailable() async {
+    bool isConnected = await checkNetwork();
+    bool loggedIn = affAuthToken != null;
+    return isConnected && loggedIn;
   }
 
   ICloud._internal();
@@ -563,6 +567,7 @@ Dio prudDio = Dio(BaseOptions(
     }
   }
 ));
+
 
 List<Spark> testSparks = [
   Spark(

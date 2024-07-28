@@ -3,6 +3,7 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:prudapp/components/recharge_transaction_component.dart';
 import 'package:prudapp/models/reloadly.dart';
 import 'package:prudapp/singletons/recharge_notifier.dart';
+import 'package:prudapp/singletons/tab_data.dart';
 
 import '../../models/theme.dart';
 import '../../singletons/currency_math.dart';
@@ -17,13 +18,15 @@ class RechargeOrderModalSheet extends StatefulWidget {
   final double selectedAmount;
   final PhoneNumber selectedPhone;
   final bool isAirtime;
+  final bool isLocal;
 
   const RechargeOrderModalSheet({
     super.key,
     required this.operator,
     required this.selectedAmount,
     required this.selectedPhone,
-    this.isAirtime = true
+    this.isAirtime = true,
+    this.isLocal = false,
   });
 
   @override
@@ -50,7 +53,6 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
   TopUpOrder? unboughtOrder;
   List<RechargeTransactionDetails> details = rechargeNotifier.transactions;
   bool hasPaid = false;
-
 
   // remember to add phoneNumberToCache
   // remember commissions even referral's decides what to give
@@ -98,15 +100,16 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
         });
       }
       await setUnfinishedData();
-      if(totalAmountToPay > 0){
+      if(totalAmountToPay > 0 && widget.operator.supportsLocalAmounts != null){
         if(mounted) setState(() => purchasing = true);
         TopUpOrder newOrder = TopUpOrder(
           operatorId: widget.operator.operatorId,
+          useLocalAmount: widget.isLocal,
           recipientPhone: PhoneNo(
             countryCode: widget.selectedPhone.isoCode,
             number: int.parse(widget.selectedPhone.parseNumber()),
           ),
-          amount: widget.selectedAmount,
+          amount: widget.isLocal? widget.selectedAmount : (widget.selectedAmount/widget.operator.fx!.rate!),
         );
         TopUpTransaction? trans = await rechargeNotifier.makeTopUpOrder(newOrder);
         if(trans != null && trans.status != "REFUNDED" && trans.status != "FAILED"){
@@ -140,6 +143,7 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
                 itSucceeded = true;
                 showPay = false;
               });
+              rechargeNotifier.addItemToPhoneNumber(widget.selectedPhone);
               rechargeNotifier.updateContinuedStatus(false);
             }
           }else{
@@ -198,12 +202,13 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
           }
         }
       }else{
-        bool isLocal = iCloud.checkIfLocal(widget.operator.destinationCurrencyCode?? "NGN");
+        bool isLocal = widget.isLocal;
+        bool isInternallyForeign = tabData.checkIfLocal(widget.operator.destinationCurrencyCode!);
         double charges = isLocal? widget.operator.fees!.local! : widget.operator.fees!.international!;
-        if(charges > 0) charges+=50;
+        if(isInternallyForeign) charges+=(widget.selectedAmount * rechargeForeignCharge);
         double amount = 0;
         if(widget.operator.fx != null && widget.operator.fx!.rate != null){
-          amount = widget.operator.fx!.rate! * (widget.selectedAmount + charges);
+          amount = (widget.selectedAmount + charges)/widget.operator.fx!.rate!;
         }else{
           amount = await currencyMath.convert(
             amount: widget.selectedAmount + charges,
@@ -249,7 +254,7 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
     }catch(ex){
       if(mounted){
         setState(() {
-          errorMsg = "Network Issues! Check your internet and t again.";
+          errorMsg = "Network Issues! Check your internet and try again.";
           loading = false;
         });
       }
@@ -301,9 +306,10 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
                 ),
                 if((!loading && !purchasing && !savingTrans) && totalAmountToPay > 0 && weHaveEnoughBalance && !paymentWasMade && !hasAttempted && showPay) Expanded(
                   child:  PayIn(
-                      useOpay: true,
                       amount: totalAmountToPay,
                       currencyCode: 'NGN',
+                      countryCode: "NG",
+                      useOpay: false,
                       onPaymentMade:(bool verified, String transID) {
                         if (mounted) setState(() => loading = true);
                         if (verified) {

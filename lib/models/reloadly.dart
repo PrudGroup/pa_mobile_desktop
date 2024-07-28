@@ -917,7 +917,7 @@ class OperatorFx{
   factory OperatorFx.fromJson(Map<String, dynamic> json){
     return OperatorFx(
       currencyCode: json["currencyCode"],
-      fxRate: json["fxRate"],
+      fxRate: json["fxRate"] is int? json["fxRate"].toDouble() : json["fxRate"],
       id: json["id"],
       name: json["name"],
     );
@@ -944,7 +944,7 @@ class RechargeFx{
   factory RechargeFx.fromJson(Map<String, dynamic> json){
     return RechargeFx(
       currencyCode: json["currencyCode"],
-      rate: json["rate"],
+      rate: json["rate"] is int? json["rate"].toDouble() : json["rate"],
     );
   }
 }
@@ -1007,6 +1007,7 @@ class RechargeOperator{
   Map<String, dynamic>? suggestedAmountsMap;
   bool? supportsLocalAmounts;
   String? status;
+  double? mostPopularLocalAmount;
 
 
   RechargeOperator({
@@ -1042,7 +1043,8 @@ class RechargeOperator{
     this.suggestedAmounts,
     this.suggestedAmountsMap,
     this.supportsLocalAmounts,
-    this.status
+    this.status,
+    this.mostPopularLocalAmount
   });
 
   Map<String, dynamic> toJson(){
@@ -1066,6 +1068,7 @@ class RechargeOperator{
       if(localFixedAmountsDescriptions != null) "localFixedAmountsDescriptions": localFixedAmountsDescriptions,
       if(localFixedAmounts != null) "localFixedAmounts": localFixedAmounts,
       if(localDiscount != null) "localDiscount": localDiscount,
+      if(mostPopularLocalAmount != null) "mostPopularLocalAmount": mostPopularLocalAmount,
       if(internationalDiscount != null) "internationalDiscount": internationalDiscount,
       if(fx != null) "fx": fx!.toJson(),
       if(fixedAmountsDescriptions != null) "fixedAmountsDescriptions": fixedAmountsDescriptions,
@@ -1100,6 +1103,7 @@ class RechargeOperator{
       pin: json["pin"],
       operatorId: json["operatorId"],
       mostPopularAmount: json["mostPopularAmount"] is int? json["mostPopularAmount"].toDouble() : json["mostPopularAmount"],
+      mostPopularLocalAmount: json["mostPopularLocalAmount"] is int? json["mostPopularLocalAmount"].toDouble() : json["mostPopularLocalAmount"],
       minAmount: json["minAmount"] is int? json["minAmount"].toDouble() : json["minAmount"],
       maxAmount: json["maxAmount"] is int? json["maxAmount"].toDouble() : json["maxAmount"],
       logoUrls: json["logoUrls"],
@@ -1109,7 +1113,7 @@ class RechargeOperator{
       localFixedAmounts: json["localFixedAmounts"],
       localDiscount: json["localDiscount"],
       internationalDiscount: json["internationalDiscount"],
-      fx: json["fx"] != null? RechargeFx.fromJson(json["fees"]) : null,
+      fx: json["fx"] != null? RechargeFx.fromJson(json["fx"]) : null,
       fixedAmountsDescriptions: json["fixedAmountsDescriptions"],
       fixedAmounts: json["fixedAmounts"],
       status: json["status"],
@@ -1231,7 +1235,9 @@ class TopUpOrder {
     this.useLocalAmount,
     this.amount,
     this.customIdentifier,
-  });
+  }){
+    customIdentifier ??= tabData.getRandomString(25);
+  }
 
   Map<String, dynamic> toJson(){
     return {
@@ -1240,8 +1246,8 @@ class TopUpOrder {
       if(recipientPhone != null) "recipientPhone": recipientPhone!.toJson(),
       if(senderPhone != null) "senderPhone": senderPhone!.toJson(),
       if(useLocalAmount != null) "useLocalAmount": useLocalAmount,
-      if(amount != null) "amount": amount,
-      "customIdentifier": tabData.getRandomString(18),
+      if(amount != null) "amount": amount.toString(),
+      "customIdentifier": customIdentifier ??= tabData.getRandomString(25),
     };
   }
 
@@ -1310,7 +1316,7 @@ class TopUpTransaction {
   double? fee;
   String? operatorName;
   String? operatorTransactionId;
-  int? recipientPhone;
+  String? recipientPhone;
   double? requestedAmount;
   String? requestedAmountCurrencyCode;
   String? senderPhone;
@@ -1367,18 +1373,18 @@ class TopUpTransaction {
     return TopUpTransaction(
       operatorId: json["operatorId"] ,
       countryCode: json["countryCode"],
-      deliveredAmount: json["deliveredAmount"],
+      deliveredAmount: json["deliveredAmount"] != null && json["deliveredAmount"] is int? json["deliveredAmount"].toDouble() : json["deliveredAmount"],
       deliveredAmountCurrencyCode: json["deliveredAmountCurrencyCode"],
       discountCurrencyCode: json["discountCurrencyCode"],
-      discount: json["discount"],
-      fee: json["fee"],
+      discount: json["discount"] != null && json["discount"] is int? json["discount"].toDouble() : json["discount"],
+      fee: json["fee"] != null && json["fee"] is int? json["fee"].toDouble() : json["fee"],
       operatorName: json["operatorName"],
       customIdentifier: json["customIdentifier"],
       status: json["status"] ,
       transactionId: json["transactionId"],
       operatorTransactionId: json["operatorTransactionId"],
       recipientPhone: json["recipientPhone"],
-      requestedAmount: json["requestedAmount"],
+      requestedAmount: json["requestedAmount"] != null && json["requestedAmount"] is int? json["requestedAmount"].toDouble() : json["requestedAmount"],
       requestedAmountCurrencyCode: json["requestedAmountCurrencyCode"],
       senderPhone: json["senderPhone"],
       transactionDate: json["transactionDate"],

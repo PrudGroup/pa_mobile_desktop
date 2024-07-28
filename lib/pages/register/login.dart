@@ -60,6 +60,7 @@ class LoginState extends State<Login> {
                 if(user.id != null) {
                   await myStorage.addToStore(key: 'isNew', value: false);
                   await myStorage.addToStore(key: "user", value: jsonEncode(user));
+                  await myStorage.addToStore(key: "referralCode", value: user.referralCode);
                   myStorage.user = user;
                   if(mounted) {
                     iCloud.showSnackBar(

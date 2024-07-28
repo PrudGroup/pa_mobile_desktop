@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/carousel/gf_carousel.dart';
 import 'package:prudapp/components/loading_component.dart';
+import 'package:prudapp/components/prud_network_image.dart';
 import 'package:prudapp/models/images.dart';
 import 'package:prudapp/models/reloadly.dart';
 import 'package:prudapp/models/theme.dart';
@@ -45,26 +46,9 @@ class GiftProductComponentState extends State<GiftProductComponent> {
     if(mounted && widget.product.logoUrls != null && widget.product.logoUrls!.isNotEmpty) {
       setState(() {
         carousels = widget.product.logoUrls!.map((dynamic str){
-          return Image.network(
-            str,
+          return PrudNetworkImage(
+            url: str,
             width: double.maxFinite,
-            fit: BoxFit.cover,
-            loadingBuilder: (context, child, loadingProgress){
-              if (loadingProgress == null) return child;
-              return Center(
-                child: LoadingComponent(
-                  isShimmer: false,
-                  size: 40,
-                  spinnerColor: prudColorTheme.lineC,
-                ),
-              );
-            },
-            errorBuilder: (context, wid, chunk){
-              return const LoadingComponent(
-                isShimmer: false,
-                size: 20,
-              );
-            },
           );
         }).toList();
       });

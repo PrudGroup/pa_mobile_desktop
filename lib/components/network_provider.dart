@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/carousel/gf_carousel.dart';
+import 'package:prudapp/components/prud_network_image.dart';
 import 'package:prudapp/models/reloadly.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
 import '../models/images.dart';
 import '../models/theme.dart';
-import 'loading_component.dart';
 
 class NetworkProvider extends StatelessWidget {
   final bool selected;
@@ -16,26 +16,10 @@ class NetworkProvider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> carousels = operator.logoUrls == null? [] : operator.logoUrls!.map((dynamic str){
-      return Image.network(
-        str,
+      return PrudNetworkImage(
+        url: str,
         width: double.maxFinite,
         fit: BoxFit.cover,
-        loadingBuilder: (context, child, loadingProgress){
-          if (loadingProgress == null) return child;
-          return Center(
-            child: LoadingComponent(
-              isShimmer: false,
-              size: 40,
-              spinnerColor: prudColorTheme.lineC,
-            ),
-          );
-        },
-        errorBuilder: (context, wid, chunk){
-          return const LoadingComponent(
-            isShimmer: false,
-            size: 20,
-          );
-        },
       );
     }).toList();
     return Column(
