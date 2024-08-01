@@ -9,7 +9,7 @@ import 'package:prudapp/singletons/beneficiary_notifier.dart';
 import 'package:prudapp/singletons/gift_card_notifier.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
-import '../../../components/Translate.dart';
+import '../../../components/translate_text.dart';
 import '../../../models/theme.dart';
 
 class GiftSearch extends StatefulWidget {

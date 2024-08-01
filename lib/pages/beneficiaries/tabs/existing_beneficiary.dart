@@ -3,7 +3,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:prudapp/components/beneficiary_component.dart';
 import 'package:prudapp/singletons/beneficiary_notifier.dart';
 
-import '../../../components/Translate.dart';
+import '../../../components/translate_text.dart';
 import '../../../models/reloadly.dart';
 import '../../../models/theme.dart';
 import '../../../singletons/tab_data.dart';

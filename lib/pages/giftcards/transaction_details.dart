@@ -5,7 +5,7 @@ import 'package:prudapp/components/prud_panel.dart';
 import 'package:prudapp/singletons/gift_card_notifier.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
-import '../../components/Translate.dart';
+import '../../components/translate_text.dart';
 import '../../components/prud_container.dart';
 import '../../components/redeem_card.dart';
 import '../../models/reloadly.dart';

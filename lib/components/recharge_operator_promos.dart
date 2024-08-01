@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/carousel/gf_carousel.dart';
-import 'package:prudapp/components/Translate.dart';
+import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/components/prud_panel.dart';
 import 'package:prudapp/models/theme.dart';
 

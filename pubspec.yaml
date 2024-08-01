@@ -230,6 +230,10 @@ flutter:
     - assets/images/woman1.png
     - assets/images/prudapp_logo_white.png
     - assets/images/icon_1152.png
+    - assets/images/prepaid.png
+    - assets/images/postpaid.png
+    - assets/images/drop.png
+    - assets/images/networks.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

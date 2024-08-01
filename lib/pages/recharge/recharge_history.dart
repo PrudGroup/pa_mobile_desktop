@@ -3,7 +3,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:prudapp/models/reloadly.dart';
 import 'package:prudapp/singletons/recharge_notifier.dart';
 
-import '../../components/Translate.dart';
+import '../../components/translate_text.dart';
 import '../../components/loading_component.dart';
 import '../../components/recharge_transaction_component.dart';
 import '../../models/theme.dart';

@@ -25,12 +25,18 @@ class InfluencerNotifier extends ChangeNotifier {
     });
   }
 
-  Future<void> getReferralPercentage() async{
+  Future<double?> getLinkReferralPercentage(String linkId) async {
     try{
-      String path = "/";
+      String path = "/aff_links/$linkId";
       dynamic res = await makeRequest(path: path);
+      if(res != null){
+        return res.toDouble();
+      }else{
+        return null;
+      }
     }catch(ex){
       debugPrint("InfluencerNotifier_getReferralPercentage Error: $ex");
+      return null;
     }
   }
 

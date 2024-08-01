@@ -7,7 +7,7 @@ import 'package:prudapp/models/reloadly.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/gift_card_notifier.dart';
 
-import '../../components/Translate.dart';
+import '../../components/translate_text.dart';
 import '../../components/modals/gift_checkout_modal_sheet.dart';
 import '../../models/theme.dart';
 import '../../singletons/tab_data.dart';

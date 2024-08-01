@@ -348,7 +348,7 @@ class RechargeTransactionDetails{
   double? profitForPrudapp;
   String? transCurrency;
   bool? refunded;
-  Beneficiary? beneficiaryNo;
+  String? beneficiaryNo;
   double? transactionCost;
   double? transactionCostInSelected;
   double? transactionPaid;
@@ -973,6 +973,159 @@ class PhoneNo{
   }
 }
 
+class BillerFixedAmount{
+  int? id;
+  String? description;
+  double? amount;
+
+  BillerFixedAmount({
+    this.id,
+    this.amount,
+    this.description,
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      if(id != null) "id": id,
+      if(amount != null) "amount": amount!.toInt(),
+      if(description != null) "description": description,
+    };
+  }
+
+  factory BillerFixedAmount.fromJson(Map<String, dynamic> json){
+    return BillerFixedAmount(
+      id: json["id"],
+      description: json["description"],
+      amount: json["amount"] is int? json["amount"].toDouble() : json["amount"]
+    );
+  }
+}
+
+class Biller{
+  String? countryCode;
+  String? countryName;
+  String? denominationType;
+  RechargeFx? fx;
+  bool? internationalAmountSupported;
+  int? id;
+  double? internationalDiscountPercentage;
+  List<BillerFixedAmount>? internationalFixedAmounts;
+  String? internationalTransactionCurrencyCode;
+  double? internationalTransactionFee;
+  String? internationalTransactionFeeCurrencyCode;
+  double? internationalTransactionFeePercentage;
+  bool? localAmountSupported;
+  double? localDiscountPercentage;
+  List<BillerFixedAmount>? localFixedAmounts;
+  String? localTransactionCurrencyCode;
+  double? localTransactionFee;
+  double? localTransactionFeePercentage;
+  String? localTransactionFeeCurrencyCode;
+  double? maxInternationalTransactionAmount;
+  double? maxLocalTransactionAmount;
+  double? minInternationalTransactionAmount;
+  double? minLocalTransactionAmount;
+  String? name;
+  String? serviceType;
+  String? type;
+
+
+  Biller({
+    this.id,
+    this.name,
+    this.denominationType,
+    this.fx,
+    this.localFixedAmounts,
+    this.countryCode,
+    this.type,
+    this.countryName,
+    this.internationalAmountSupported,
+    this.internationalDiscountPercentage,
+    this.internationalFixedAmounts,
+    this.internationalTransactionCurrencyCode,
+    this.internationalTransactionFee,
+    this.internationalTransactionFeeCurrencyCode,
+    this.internationalTransactionFeePercentage,
+    this.localAmountSupported,
+    this.localDiscountPercentage,
+    this.localTransactionCurrencyCode,
+    this.localTransactionFee,
+    this.localTransactionFeeCurrencyCode,
+    this.localTransactionFeePercentage,
+    this.maxInternationalTransactionAmount,
+    this.maxLocalTransactionAmount,
+    this.minInternationalTransactionAmount,
+    this.minLocalTransactionAmount,
+    this.serviceType
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      if(name != null) "name": name,
+      if(id != null) "id": id,
+      if(denominationType != null) "denominationType": denominationType,
+      if(localFixedAmounts != null) "localFixedAmounts": localFixedAmounts!.map((item) => item.toJson()).toList(),
+      if(countryCode != null) "countryCode": countryCode,
+      if(type != null) "type": type,
+      if(countryName != null) "countryName": countryName,
+      if(internationalAmountSupported != null) "internationalAmountSupported": internationalAmountSupported,
+      if(internationalDiscountPercentage != null) "internationalDiscountPercentage": internationalDiscountPercentage,
+      if(internationalFixedAmounts != null) "internationalFixedAmounts": internationalFixedAmounts!.map((item) => item.toJson()).toList(),
+      if(internationalTransactionCurrencyCode != null) "internationalTransactionCurrencyCode": internationalTransactionCurrencyCode,
+      if(internationalTransactionFee != null) "internationalTransactionFee": internationalTransactionFee,
+      if(internationalTransactionFeeCurrencyCode != null) "internationalTransactionFeeCurrencyCode": internationalTransactionFeeCurrencyCode,
+      if(internationalTransactionFeePercentage != null) "internationalTransactionFeePercentage": internationalTransactionFeePercentage,
+      if(localAmountSupported != null) "localAmountSupported": localAmountSupported,
+      if(localDiscountPercentage != null) "localDiscountPercentage": localDiscountPercentage,
+      if(localTransactionCurrencyCode != null) "localTransactionCurrencyCode": localTransactionCurrencyCode,
+      if(localTransactionFee != null) "localTransactionFee": localTransactionFee,
+      if(localTransactionFeeCurrencyCode != null) "localTransactionFeeCurrencyCode": localTransactionFeeCurrencyCode,
+      if(localTransactionFeePercentage != null) "localTransactionFeePercentage": localTransactionFeePercentage,
+      if(maxInternationalTransactionAmount != null) "maxInternationalTransactionAmount": maxInternationalTransactionAmount,
+      if(fx != null) "fx": fx!.toJson(),
+      if(maxLocalTransactionAmount != null) "maxLocalTransactionAmount": maxLocalTransactionAmount,
+      if(minInternationalTransactionAmount != null) "minInternationalTransactionAmount": minInternationalTransactionAmount,
+      if(minLocalTransactionAmount != null) "minLocalTransactionAmount": minLocalTransactionAmount,
+      if(serviceType != null) "serviceType": serviceType,
+    };
+  }
+
+  factory Biller.fromJson(Map<String, dynamic> json){
+    return Biller(
+      name: json["name"],
+      id: json["id"],
+      countryCode: json["countryCode"],
+      countryName: json["countryName"],
+      denominationType: json["denominationType"],
+      internationalAmountSupported: json["internationalAmountSupported"],
+      internationalDiscountPercentage: json["internationalDiscountPercentage"],
+      internationalFixedAmounts: json["internationalFixedAmounts"] != null && json["internationalFixedAmounts"].isNotEmpty? json["internationalFixedAmounts"].map(
+        (dynamic promo) => BillerFixedAmount.fromJson(promo)
+      ).toList() : [],
+      localFixedAmounts: json["localFixedAmounts"] != null && json["localFixedAmounts"].isNotEmpty? json["localFixedAmounts"].map(
+        (dynamic promo) => BillerFixedAmount.fromJson(promo)
+      ).toList() : [],
+      internationalTransactionCurrencyCode: json["internationalTransactionCurrencyCode"],
+      internationalTransactionFee: json["internationalTransactionFee"],
+      minLocalTransactionAmount: json["minLocalTransactionAmount"] is int? json["minLocalTransactionAmount"].toDouble() : json["minLocalTransactionAmount"],
+      minInternationalTransactionAmount: json["minInternationalTransactionAmount"] is int? json["minInternationalTransactionAmount"].toDouble() : json["minInternationalTransactionAmount"],
+      maxLocalTransactionAmount: json["maxLocalTransactionAmount"] is int? json["maxLocalTransactionAmount"].toDouble() : json["maxLocalTransactionAmount"],
+      maxInternationalTransactionAmount: json["maxInternationalTransactionAmount"] is int? json["maxInternationalTransactionAmount"].toDouble() : json["maxInternationalTransactionAmount"],
+      internationalTransactionFeeCurrencyCode: json["internationalTransactionFeeCurrencyCode"],
+      localTransactionFeePercentage: json["localTransactionFeePercentage"] is int? json["localTransactionFeePercentage"].toDouble() : json["localTransactionFeePercentage"],
+      localTransactionFee: json["localTransactionFee"] is int? json["localTransactionFee"].toDouble() : json["localTransactionFee"],
+      serviceType: json["serviceType"],
+      internationalTransactionFeePercentage: json["internationalTransactionFeePercentage"],
+      localAmountSupported: json["localAmountSupported"],
+      localDiscountPercentage: json["localDiscountPercentage"],
+      fx: json["fx"] != null? RechargeFx.fromJson(json["fx"]) : null,
+      localTransactionCurrencyCode: json["localTransactionCurrencyCode"],
+      localTransactionFeeCurrencyCode: json["localTransactionFeeCurrencyCode"],
+      type: json["type"],
+    );
+  }
+}
+
 class RechargeOperator{
   int? id;
   String? name;
@@ -1087,7 +1240,6 @@ class RechargeOperator{
   }
 
   factory RechargeOperator.fromJson(Map<String, dynamic> json){
-    debugPrint("Promo: ${json["promotions"]}");
     return RechargeOperator(
       name: json["name"],
       id: json["id"],
@@ -1418,6 +1570,473 @@ class TransactionStatus{
       message: json["message"] ,
       status: json["status"],
       code: json["code"],
+    );
+  }
+}
+
+class Bill{
+  String? info1;
+  String? info2;
+  String? info3;
+  String? token;
+
+  Bill({
+    this.info1,
+    this.info2,
+    this.info3,
+    this.token,
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      if(info1 != null) "info1": info1,
+      if(info2 != null) "info2": info2,
+      if(info3 != null) "info3": info3,
+      if(token != null) "token": token,
+    };
+  }
+
+  factory Bill.fromJson(Map<String, dynamic> json){
+    return Bill(
+      info1: json["info1"],
+      info2: json["info2"],
+      info3: json["info3"],
+      token: json["token"] is int? json["token"].toString() : json["token"],
+    );
+  }
+}
+
+class BillDetail{
+  String? billerCountryCode;
+  int? billerId;
+  String? billerName;
+  String? completedAt;
+  Bill? pinDetails;
+  String? serviceType;
+  String? subscriberNumber;
+  String? type;
+  String? invoiceId;
+
+  BillDetail({
+    this.billerCountryCode,
+    this.billerId,
+    this.billerName,
+    this.completedAt,
+    this.serviceType,
+    this.type,
+    this.pinDetails,
+    this.subscriberNumber,
+    this.invoiceId,
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      if(billerCountryCode != null) "billerCountryCode": billerCountryCode,
+      if(billerId != null) "billerId": billerId,
+      if(billerName != null) "billerName": billerName,
+      if(completedAt != null) "completedAt": completedAt,
+      if(serviceType != null) "serviceType": serviceType,
+      if(invoiceId != null) "invoiceId": invoiceId,
+      if(type != null) "type": type,
+      if(pinDetails != null) "pinDetails": pinDetails!.toJson(),
+      if(subscriberNumber != null) "subscriberNumber": subscriberNumber,
+    };
+  }
+
+  factory BillDetail.fromJson(Map<String, dynamic> json){
+    return BillDetail(
+      billerName: json["billerName"],
+      billerId: json["billerId"],
+      billerCountryCode: json["billerCountryCode"],
+      completedAt: json["completedAt"],
+      serviceType: json["serviceType"],
+      type: json["type"],
+      pinDetails: json["pinDetails"] != null? Bill.fromJson(json["pinDetails"]) : null,
+      subscriberNumber: json["subscriberDetails"] != null &&
+          json["subscriberDetails"]["accountNumber"] != null? json["subscriberDetails"]["accountNumber"] : null,
+      invoiceId: json["subscriberDetails"] != null &&
+          json["subscriberDetails"]["invoiceId"] != null? (json["subscriberDetails"]["invoiceId"] is int? json["subscriberDetails"]["invoiceId"].toString() : json["subscriberDetails"]["invoiceId"]) : null,
+    );
+  }
+}
+
+class Utility {
+  double? amount;
+  String? amountCurrencyCode;
+  dynamic balanceInfo;
+  BillDetail? billDetails;
+  double? deliveryAmount;
+  String? deliveryAmountCurrencyCode;
+  double? discount;
+  double? discountCurrencyCode;
+  double? fee;
+  String? feeCurrencyCode;
+  int? id;
+  String? referenceId;
+  String? status;
+  String? submittedAt;
+
+
+  Utility({
+    this.amount,
+    this.amountCurrencyCode,
+    this.balanceInfo,
+    this.discount,
+    this.status,
+    this.id,
+    this.billDetails,
+    this.deliveryAmount,
+    this.deliveryAmountCurrencyCode,
+    this.discountCurrencyCode,
+    this.fee, this.feeCurrencyCode,
+    this.referenceId, this.submittedAt
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      if(amount != null) "amount": amount,
+      if(amountCurrencyCode != null) "amountCurrencyCode": amountCurrencyCode,
+      if(balanceInfo != null) "balanceInfo": balanceInfo,
+      if(discountCurrencyCode != null) "discountCurrencyCode": discountCurrencyCode,
+      if(discount != null) "discount": discount,
+      if(status != null) "status": status,
+      if(id != null) "id": id,
+      if(billDetails != null) "billDetails": billDetails!.toJson(),
+      if(deliveryAmount != null) "deliveryAmount": deliveryAmount,
+      if(deliveryAmountCurrencyCode != null) "deliveryAmountCurrencyCode": deliveryAmountCurrencyCode,
+      if(fee != null) "fee": fee,
+      if(feeCurrencyCode != null) "feeCurrencyCode": feeCurrencyCode,
+      if(referenceId != null) "referenceId": referenceId,
+      if(submittedAt != null) "submittedAt": submittedAt
+    };
+  }
+
+  factory Utility.fromJson(Map<String, dynamic> json){
+    return Utility(
+      submittedAt: json["submittedAt"],
+      status: json["status"],
+      referenceId: json["referenceId"],
+      feeCurrencyCode: json["feeCurrencyCode"],
+      fee: json["fee"],
+      deliveryAmountCurrencyCode: json["deliveryAmountCurrencyCode"],
+      deliveryAmount: json["deliveryAmount"],
+      billDetails: json["billDetails"] != null? BillDetail.fromJson(json["billDetails"]) : null,
+      id: json["id"],
+      discount: json["discount"] is int? json['discount'].toDouble() : null,
+      discountCurrencyCode: json["discountCurrencyCode"],
+      balanceInfo: json["balanceInfo"],
+      amountCurrencyCode: json["amountCurrencyCode"],
+      amount: json["amount"],
+    );
+  }
+}
+
+class UtilityTransaction {
+  String? code;
+  String? message;
+  Utility? transaction;
+
+
+  UtilityTransaction({
+    this.transaction,
+    this.message,
+    this.code,
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      if(message != null) "message": message,
+      if(transaction != null) "transaction": transaction!.toJson(),
+      if(code != null) "code": code,
+    };
+  }
+
+  factory UtilityTransaction.fromJson(Map<String, dynamic> json){
+    return UtilityTransaction(
+      message: json["message"] ,
+      transaction: json["transaction"] != null? Utility.fromJson(json["transaction"]) : json["transaction"],
+      code: json["code"],
+    );
+  }
+}
+
+class UtilityTransactionDetails{
+  String? id;
+  String? affId;
+  int? transId;
+  double? commissionFromReloadly;
+  double? customerGot;
+  double? referralsGot;
+  double? income;
+  DateTime? transDate;
+  String? referralId;
+  double? referralCommission;
+  String? installReferralId;
+  double? installReferralCommission;
+  double? profitForPrudapp;
+  String? transCurrency;
+  bool? refunded;
+  double? transactionCost;
+  double? transactionCostInSelected;
+  double? transactionPaid;
+  double? transactionPaidInSelected;
+  String? selectedCurrencyCode;
+
+  UtilityTransactionDetails({
+    this.transId,
+    this.id,
+    this.affId,
+    this.income,
+    this.installReferralCommission,
+    this.installReferralId,
+    this.profitForPrudapp,
+    this.referralCommission,
+    this.referralId,
+    this.transCurrency,
+    this.transDate,
+    this.refunded,
+    this.transactionCost,
+    this.transactionPaid,
+    this.selectedCurrencyCode,
+    this.transactionCostInSelected,
+    this.transactionPaidInSelected,
+    this.commissionFromReloadly,
+    this.customerGot,
+    this.referralsGot,
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      if(id != null) "id": id,
+      if(affId != null) "aff_id": affId,
+      if(transDate != null) "trans_date": transDate!.toIso8601String(),
+      if(transCurrency != null) "trans_currency": transCurrency,
+      if(referralId != null) "referral_id": referralId,
+      if(referralCommission != null) "referral_commission": referralCommission,
+      if(profitForPrudapp != null) "profit_for_prudapp": profitForPrudapp,
+      if(installReferralId != null) "install_referral_id": installReferralId,
+      if(installReferralCommission != null) "install_referral_commission": installReferralCommission,
+      if(income != null) "income": income,
+      if(referralsGot != null) "referrals_got": referralsGot,
+      if(commissionFromReloadly != null) "commission_from_reloadly": commissionFromReloadly,
+      if(customerGot != null) "customer_got": customerGot,
+      if(transId != null) "trans_id": transId,
+      if(refunded != null) "refunded": refunded,
+      if(transactionPaid != null) "transaction_paid": transactionPaid,
+      if(transactionCost != null) "transaction_cost": transactionCost,
+      if(transactionCostInSelected != null) "transaction_cost_in_selected": transactionCostInSelected,
+      if(transactionPaidInSelected != null) "transaction_paid_in_selected": transactionPaidInSelected,
+      if(selectedCurrencyCode != null) "selected_currency_code": selectedCurrencyCode,
+    };
+  }
+
+  factory UtilityTransactionDetails.fromJson(Map<String, dynamic> json){
+    return UtilityTransactionDetails(
+        id: json["id"],
+        income: json["income"],
+        installReferralCommission: json["install_referral_commission"],
+        installReferralId: json["install_referral_id"],
+        profitForPrudapp: json["profit_for_prudapp"],
+        referralsGot: json["referrals_got"],
+        commissionFromReloadly: json["commission_from_reloadly"],
+        customerGot: json["customer_got"],
+        referralCommission: json["referral_commission"],
+        transCurrency: json["trans_currency"],
+        referralId: json["referral_id"],
+        transDate: json["trans_date"] != null? DateTime.tryParse(json["trans_date"]) : null,
+        affId: json["aff_id"],
+        transId: json["trans_id"],
+        transactionCost: json["transaction_cost"],
+        transactionPaid: json["transaction_paid"],
+        transactionCostInSelected: json["transaction_cost_in_selected"],
+        transactionPaidInSelected: json["transaction_paid_in_selected"],
+        selectedCurrencyCode: json["selected_currency_code"],
+        refunded: json["refunded"],
+    );
+  }
+}
+
+class UtilityAdditionalInfo{
+  String? invoiceId;
+
+  UtilityAdditionalInfo({this.invoiceId});
+
+  Map<String, dynamic> toJson(){
+    return {if(invoiceId != null) "invoiceId": invoiceId};
+  }
+
+  factory UtilityAdditionalInfo.fromJson(Map<String, dynamic> json){
+    return UtilityAdditionalInfo(invoiceId: json["invoiceId"]);
+  }
+}
+
+class UtilityOrder{
+  UtilityAdditionalInfo? additionalInfo;
+  double amount;
+  int? amountId;
+  int billerId;
+  String? referenceId;
+  String subscriberAccountNumber;
+  bool useLocalAmount;
+
+  UtilityOrder({
+    required this.amount,
+    required this.billerId,
+    required this.subscriberAccountNumber,
+    required this.useLocalAmount,
+    this.additionalInfo,
+    this.amountId,
+    this.referenceId
+  }){ referenceId ??= tabData.getRandomString(16);}
+
+
+  Map<String, dynamic> toJson(){
+    return {
+      "amount": amount,
+      "billerId": billerId,
+      "subscriberAccountNumber": subscriberAccountNumber,
+      "useLocalAmount": useLocalAmount,
+      if(amountId != null) "amountId": amountId,
+      if(additionalInfo != null) "additionalInfo": additionalInfo!.toJson(),
+      if(referenceId != null) "referenceId": referenceId
+    };
+  }
+
+  factory UtilityOrder.fromJson(Map<String, dynamic> json){
+    return UtilityOrder(
+      amount: json["amount"],
+      billerId: json["billerId"],
+      subscriberAccountNumber: json["subscriberAccountNumber"],
+      useLocalAmount: json["useLocalAmount"],
+      amountId: json["amountId"],
+      referenceId: json["referenceId"],
+      additionalInfo: json["additionalInfo"] != null? UtilityAdditionalInfo.fromJson(json["additionalInfo"]) : null,
+    );
+  }
+
+}
+
+class UtilitySearch{
+  String type;
+  String countryISOCode;
+  String serviceType;
+
+  UtilitySearch({
+    required this.type,
+    required this.serviceType,
+    required this.countryISOCode,
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      "type": type,
+      "countryISOCode": countryISOCode,
+      "serviceType": serviceType
+    };
+  }
+
+  factory UtilitySearch.fromJson(Map<String, dynamic> json){
+    return UtilitySearch(
+      type: json["type"],
+      serviceType: json["serviceType"],
+      countryISOCode: json["countryISOCode"]
+    );
+  }
+
+}
+
+class LastBillersUsed{
+  Biller? water;
+  String? lastDeviceUsedOnWater;
+  Biller? electricity;
+  String? lastDeviceUsedOnElectricity;
+  Biller? tv;
+  String? lastDeviceUsedOnTv;
+  Biller? internet;
+  String? lastDeviceUsedOnInternet;
+
+  LastBillersUsed({
+    this.water,
+    this.electricity,
+    this.internet,
+    this.tv,
+    this.lastDeviceUsedOnElectricity,
+    this.lastDeviceUsedOnInternet,
+    this.lastDeviceUsedOnTv,
+    this.lastDeviceUsedOnWater
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      if(water != null) "water": water!.toJson(),
+      if(electricity != null) "electricity": electricity!.toJson(),
+      if(internet != null) "internet": internet!.toJson(),
+      if(tv != null) "tv": tv!.toJson(),
+      if(lastDeviceUsedOnElectricity != null) "lastDeviceUsedOnElectricity": lastDeviceUsedOnElectricity,
+      if(lastDeviceUsedOnInternet != null) "lastDeviceUsedOnInternet": lastDeviceUsedOnInternet,
+      if(lastDeviceUsedOnTv != null) "lastDeviceUsedOnTv": lastDeviceUsedOnTv,
+      if(lastDeviceUsedOnWater != null) "lastDeviceUsedOnWater": lastDeviceUsedOnWater,
+    };
+  }
+
+  factory LastBillersUsed.fromJson(Map<String, dynamic> json){
+    return LastBillersUsed(
+      water: json["water"] != null? Biller.fromJson(json["water"]) : null,
+      electricity: json["electricity"] != null? Biller.fromJson(json["electricity"]) : null,
+      internet: json["internet"] != null? Biller.fromJson(json["internet"]) : null,
+      tv: json["tv"] != null? Biller.fromJson(json["tv"]) : null,
+      lastDeviceUsedOnElectricity: json["lastDeviceUsedOnElectricity"],
+      lastDeviceUsedOnInternet: json["lastDeviceUsedOnInternet"],
+      lastDeviceUsedOnTv: json["lastDeviceUsedOnTv"],
+      lastDeviceUsedOnWater: json["lastDeviceUsedOnWater"]
+    );
+  }
+}
+
+enum BillerType {
+  electricity,
+  water,
+  tv,
+  internet
+}
+
+enum BillerServiceType {
+  prepaid,
+  postpaid
+}
+
+class UtilityDevice{
+  String? no;
+  String? serviceType;
+  String? type;
+  String? countryIsoCode;
+  int? billerId;
+
+  UtilityDevice({
+    this.serviceType,
+    this.type,
+    this.countryIsoCode,
+    this.no,
+    this.billerId,
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      if(serviceType != null) "serviceType": serviceType,
+      if(type != null) "type": type,
+      if(countryIsoCode != null) "countryIsoCode": countryIsoCode,
+      if(no != null) "no": no,
+      if(billerId != null) "billerId": billerId,
+    };
+  }
+
+  factory UtilityDevice.fromJson(Map<String, dynamic> json){
+    return UtilityDevice(
+      no: json["no"],
+      countryIsoCode: json["countryIsoCode"],
+      type: json["type"],
+      serviceType: json["serviceType"],
+      billerId: json["billerId"]
     );
   }
 }

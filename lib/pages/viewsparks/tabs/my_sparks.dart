@@ -6,7 +6,7 @@ import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
 import '../../../components/spark_container.dart';
-import '../../../components/translate.dart';
+import '../../../components/translate_text.dart';
 import '../../../models/spark.dart';
 import '../../../models/theme.dart';
 import '../../../singletons/currency_math.dart';

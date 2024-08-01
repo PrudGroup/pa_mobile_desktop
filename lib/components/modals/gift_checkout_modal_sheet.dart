@@ -9,7 +9,7 @@ import 'package:prudapp/singletons/shared_local_storage.dart';
 
 import '../../models/theme.dart';
 import '../../singletons/i_cloud.dart';
-import '../Translate.dart';
+import '../translate_text.dart';
 import '../pay_in.dart';
 
 class GiftCheckoutModalSheet extends StatefulWidget {

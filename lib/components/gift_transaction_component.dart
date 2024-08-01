@@ -216,34 +216,40 @@ class GiftTransactionComponentState extends State<GiftTransactionComponent> {
                 if(tran!.status != null) Container(
                   margin: const EdgeInsets.only(left: 10),
                   decoration: BoxDecoration(
-                    color: tabData.getTransactionStatusColor(tran!.status!),
+                    color: prudColorTheme.bgE,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: prudColorTheme.bgC,
                       width: 5
                     )
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20.0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(5),
-                      child: Row(
-                        children: [
-                          Text(
-                            "${tabData.getCurrencySymbol(widget.tranDetails.selectedCurrencyCode!)}",
-                            style: tabData.tBStyle.copyWith(
-                              fontSize: 16,
-                              color: prudColorTheme.bgC
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: tabData.getTransactionStatusColor(tran!.status!),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16.0),
+                      child: Padding(
+                        padding: const EdgeInsets.all(5),
+                        child: Row(
+                          children: [
+                            Text(
+                              "${tabData.getCurrencySymbol(widget.tranDetails.selectedCurrencyCode!)}",
+                              style: tabData.tBStyle.copyWith(
+                                  fontSize: 16,
+                                  color: prudColorTheme.bgC
+                              ),
                             ),
-                          ),
-                          Text(
-                            "${widget.tranDetails.transactionPaidInSelected}",
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              color: prudColorTheme.bgA,
-                            ),
-                          )
-                        ],
+                            Text(
+                              "${widget.tranDetails.transactionPaidInSelected}",
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                color: prudColorTheme.bgA,
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   ),

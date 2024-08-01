@@ -18,7 +18,7 @@ import '../../../components/figure_display.dart';
 import '../../../components/loading_component.dart';
 import '../../../components/pay_in.dart';
 import '../../../components/prud_data_viewer.dart';
-import '../../../components/translate.dart';
+import '../../../components/translate_text.dart';
 import '../../../models/spark_cost.dart';
 import '../../../models/theme.dart';
 import '../../../singletons/currency_math.dart';

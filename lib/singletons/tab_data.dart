@@ -1,4 +1,5 @@
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:country_picker/country_picker.dart';
@@ -6,7 +7,7 @@ import 'package:currency_picker/currency_picker.dart';
 import 'package:encrypt/encrypt.dart' as en;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:prudapp/components/translate.dart';
+import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/models/images.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
@@ -173,7 +174,7 @@ class TabData extends ChangeNotifier {
     }
   }
 
-  bool checkIfLocal(String currencyCode) => currencyCode == myStorage.user!.currencyCode;
+  bool checkIfForeign(String currencyCode) => currencyCode != myStorage.user!.currencyCode;
 
   dynamic getCurrencySymbol(String curCode){
     Currency? cur = CurrencyService().findByCode(curCode);
@@ -304,3 +305,25 @@ final enKey = en.Key.fromLength(32);
 final enIV = en.IV.fromLength(8);
 final encrypter = en.Encrypter(en.Salsa20(enKey));
 final tabData = TabData();
+
+Future<dynamic> tryAsync(String name, FutureOr<dynamic> Function() body, {Function()? error, Function()? done}) async {
+  try {
+    return await body();
+  } catch (ex) {
+    if(error != null) error();
+    debugPrint("$name Error: $ex");
+  } finally {
+    if(done != null) done();
+  }
+}
+
+dynamic tryOnly(String name, dynamic Function() body, {Function()? error, Function()? done}) async {
+  try {
+    return body();
+  } catch (ex) {
+    if(error != null) error();
+    debugPrint("$name Error: $ex");
+  } finally {
+    if(done != null) done();
+  }
+}

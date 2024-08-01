@@ -468,9 +468,9 @@ class GiftCardNotifier extends ChangeNotifier {
       double income = (giftGrandTotalInNaira - tran.amount!) + discountInNaira;
       double appReferralCommission = income > 0? (income * installReferralCommission) : 0;
       double referComm = income > 0? (income * referralCommission) : 0;
-      double profit = income - (referComm + appReferralCommission);
       if(myStorage.installReferralCode == null) appReferralCommission = 0;
       if(myStorage.giftReferral == null) referComm = 0;
+      double profit = income - (referComm + appReferralCommission);
       GiftTransactionDetails details = GiftTransactionDetails(
         income: income,
         installReferralCommission: appReferralCommission,

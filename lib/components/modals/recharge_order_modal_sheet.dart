@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:prudapp/components/recharge_transaction_component.dart';
 import 'package:prudapp/models/reloadly.dart';
+import 'package:prudapp/singletons/influencer_notifier.dart';
 import 'package:prudapp/singletons/recharge_notifier.dart';
+import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
 import '../../models/theme.dart';
 import '../../singletons/currency_math.dart';
 import '../../singletons/i_cloud.dart';
-import '../Translate.dart';
+import '../translate_text.dart';
 import '../loading_component.dart';
 import '../pay_in.dart';
 import '../prud_showroom.dart';
@@ -53,6 +55,9 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
   TopUpOrder? unboughtOrder;
   List<RechargeTransactionDetails> details = rechargeNotifier.transactions;
   bool hasPaid = false;
+  double discount = 0;
+  double referralComInPercentage = 0;
+  double amountInSelectedCur = 0;
 
   // remember to add phoneNumberToCache
   // remember commissions even referral's decides what to give
@@ -66,7 +71,7 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
         });
       }
       if(unSavedTrans != null){
-        bool saved = await rechargeNotifier.addTransToCloud(unSavedTrans!, widget.isAirtime);
+        bool saved = await addTransToCloud(unSavedTrans!);
         if(mounted && saved) {
           setState(() {
             tranWasSaved = true;
@@ -88,6 +93,66 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
       if(unSavedTrans != null) await rechargeNotifier.updateUnsavedTrans(unSavedTrans!, isAirtime: widget.isAirtime);
       if(unboughtOrder != null) await rechargeNotifier.updateUnBoughtOrder(unboughtOrder!, isAirtime: widget.isAirtime);
     }
+  }
+
+  Future<bool> addTransToCloud(TopUpTransaction tran) async {
+    bool saved = false;
+    try {
+      double grandTotalInNaira = totalAmountToPay;
+      double discountInNaira = 0, totalCostInSenderCur = 0;
+      if (
+        widget.operator.fx != null &&
+        widget.operator.fx!.rate != null &&
+        widget.operator.commission != null &&
+        widget.operator.commission! > 0
+      ) {
+        discountInNaira = discount / widget.operator.fx!.rate!;
+      }
+      totalCostInSenderCur = tran.requestedAmount! / widget.operator.fx!.rate!;
+      double income = (grandTotalInNaira - tran.requestedAmount!) + discountInNaira;
+      double appReferralCommission = income > 0 ? (income * installReferralCommission) : 0;
+      double referComm = 0;
+      if (referralComInPercentage > 0) {
+        double referralSupposeGet = income * referralCommission;
+        referComm = referralSupposeGet > 0 ? (referralSupposeGet *
+            (referralComInPercentage / 100)) : 0;
+      } else {
+        referComm = 0;
+      }
+      if (myStorage.installReferralCode == null) appReferralCommission = 0;
+      if (myStorage.giftReferral == null) referComm = 0;
+      double profit = income - (referComm + appReferralCommission);
+      RechargeTransactionDetails details = RechargeTransactionDetails(
+        income: income,
+        installReferralCommission: appReferralCommission,
+        installReferralId: appReferralCommission > 0 ? myStorage.installReferralCode : null,
+        profitForPrudapp: profit,
+        customerGot: discountInNaira,
+        commissionFromReloadly: discountInNaira,
+        referralsGot: appReferralCommission + referComm,
+        referralCommission: referComm,
+        transCurrency: tran.requestedAmountCurrencyCode,
+        referralId: referComm > 0 ? myStorage.giftReferral : null,
+        transDate: DateTime.parse(tran.transactionDate!),
+        affId: myStorage.user?.id,
+        transId: tran.transactionId,
+        transactionPaid: grandTotalInNaira,
+        transactionPaidInSelected: amountInSelectedCur,
+        selectedCurrencyCode: tran.deliveredAmountCurrencyCode,
+        transactionCost: tran.requestedAmount,
+        transactionCostInSelected: totalCostInSenderCur,
+        refunded: false,
+        beneficiaryNo: widget.selectedPhone.phoneNumber,
+        providerPhoto: widget.operator.logoUrls?[0],
+        transactionType: widget.isAirtime ? "Airtime" : "Data Bundle",
+      );
+      debugPrint("Trans Amount: ${details.transactionCost} | Profit: ${details.profitForPrudapp}");
+      saved = await rechargeNotifier.saveTransactionToCloud(details);
+      if (saved == true) rechargeNotifier.addToTransactions(details);
+    }catch(ex){
+      debugPrint("addTransCloud: $ex");
+    }
+    return saved;
   }
 
   Future<void> paymentMade(String transID) async {
@@ -119,7 +184,7 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
               transaction = trans;
             });
           }
-          bool saved = await rechargeNotifier.addTransToCloud(trans, widget.isAirtime);
+          bool saved = await addTransToCloud(trans);
           if(mounted && saved) {
             setState(() => tranWasSaved = true);
           }else{
@@ -145,6 +210,8 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
               });
               rechargeNotifier.addItemToPhoneNumber(widget.selectedPhone);
               rechargeNotifier.updateContinuedStatus(false);
+              rechargeNotifier.dataProviders = [];
+              rechargeNotifier.airtimeProviders = [];
             }
           }else{
             await setUnfinishedData();
@@ -203,24 +270,49 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
         }
       }else{
         bool isLocal = widget.isLocal;
-        bool isInternallyForeign = tabData.checkIfLocal(widget.operator.destinationCurrencyCode!);
+        bool isInternallyForeign = tabData.checkIfForeign(widget.operator.destinationCurrencyCode!);
         double charges = isLocal? widget.operator.fees!.local! : widget.operator.fees!.international!;
+        debugPrint("Foreign: $isInternallyForeign");
         if(isInternallyForeign) charges+=(widget.selectedAmount * rechargeForeignCharge);
         double amount = 0;
+        debugPrint("charges: $charges");
+        double commission = isLocal? widget.operator.localDiscount! : widget.operator.internationalDiscount!;
+        if(commission > 0){
+          debugPrint("commission: $commission");
+          double customerDiscount = (commission/100 * widget.selectedAmount) * rechargeCustomerDiscountInPercentage;
+          String? linkId = myStorage.getRechargeReferral();
+          debugPrint("customerDiscount: $customerDiscount");
+          if(linkId != null){
+            double? discountFromReferralInPercentage = await influencerNotifier.getLinkReferralPercentage(linkId);
+            if(discountFromReferralInPercentage != null && discountFromReferralInPercentage > 0){
+              if(mounted) setState(() => referralComInPercentage = discountFromReferralInPercentage);
+              double discountFromLink = customerDiscount * (discountFromReferralInPercentage/100);
+              customerDiscount = customerDiscount + discountFromLink;
+            }
+            debugPrint("customerDiscount: $customerDiscount");
+          }
+          if(mounted) setState(() => discount = customerDiscount);
+        }
+        double amtInSelectedCur = (widget.selectedAmount - discount) + charges;
+        debugPrint("amtInSelectedCur ${widget.operator.destinationCurrencyCode}: $amtInSelectedCur");
+        if(mounted) setState(() => amountInSelectedCur = amtInSelectedCur);
+        debugPrint("amountInSelectedCur ${widget.operator.destinationCurrencyCode}: $amountInSelectedCur");
         if(widget.operator.fx != null && widget.operator.fx!.rate != null){
-          amount = (widget.selectedAmount + charges)/widget.operator.fx!.rate!;
+          amount = amtInSelectedCur/widget.operator.fx!.rate!;
         }else{
           amount = await currencyMath.convert(
-            amount: widget.selectedAmount + charges,
+            amount: amtInSelectedCur,
             quoteCode: "NGN",
             baseCode: widget.operator.destinationCurrencyCode!
           );
         }
+        debugPrint("ExchangeRate: ${widget.operator.fx!.rate}");
         if(mounted){
           setState(() {
             totalAmountToPay = amount;
             loading = true;
           });
+          debugPrint("Amount To Pay: $totalAmountToPay");
         }
         if(totalAmountToPay > 0){
           bool isOk = await rechargeNotifier.isBalanceSufficient(

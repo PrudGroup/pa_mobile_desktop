@@ -78,6 +78,10 @@ class PrudImages {
   String avatar_2;
   String avatar_3;
   String avatar_4;
+  String prepaid;
+  String postpaid;
+  String internet;
+  String water;
 
 
 
@@ -160,7 +164,11 @@ class PrudImages {
     required this.avatar_1,
     required this.avatar_2,
     required this.avatar_3,
-    required this.avatar_4
+    required this.avatar_4,
+    required this.internet,
+    required this.water,
+    required this.prepaid,
+    required this.postpaid
   });
 }
 
@@ -244,4 +252,8 @@ PrudImages prudImages = PrudImages(
   avatar_2: "assets/images/woman.png",
   avatar_3: "assets/images/boy.png",
   avatar_4: "assets/images/man.png",
+  prepaid: "assets/images/prepaid.png",
+  postpaid: "assets/images/postpaid.png",
+  water: "assets/images/drop.png",
+  internet: "assets/images/networks.png",
 );

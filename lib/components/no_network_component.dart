@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
 import '../models/images.dart';
-import 'translate.dart';
+import 'translate_text.dart';
 
 class NoNetworkComponent extends StatelessWidget {
   const NoNetworkComponent({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prudapp/components/main_menu.dart';
-import 'package:prudapp/components/translate.dart';
+import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/models/theme.dart';
 
 import '../singletons/i_cloud.dart';
@@ -17,18 +17,24 @@ class MainMenuItem extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 50.0,
-            height: 50.0,
             decoration: BoxDecoration(
-              color: obj.bgColor,
+              color: prudColorTheme.bgE,
               border: Border.all(color: prudColorTheme.bgD,width: 3,),
               borderRadius: BorderRadius.circular(20.0),
             ),
-            child: Center(
-              child: Image(
-                image: AssetImage(obj.menu.icon),
-                width: 30.0,
-                color: prudColorTheme.primary
+            child: Container(
+              width: 50.0,
+              height: 50.0,
+              decoration: BoxDecoration(
+                color: obj.bgColor,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Center(
+                child: Image(
+                    image: AssetImage(obj.menu.icon),
+                    width: 30.0,
+                    color: prudColorTheme.primary
+                ),
               ),
             ),
           ),

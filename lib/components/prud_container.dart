@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:prudapp/components/translate.dart';
+import 'package:prudapp/components/translate_text.dart';
 
 import '../models/theme.dart';
 

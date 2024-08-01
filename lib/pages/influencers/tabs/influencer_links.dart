@@ -4,7 +4,7 @@ import 'package:prudapp/pages/influencers/tabs/link_tabs/spark_links.dart';
 import 'package:prudapp/pages/influencers/tabs/link_tabs/switz_store_links.dart';
 
 import '../../../components/inner_menu.dart';
-import '../../../components/translate.dart';
+import '../../../components/translate_text.dart';
 import '../../../models/theme.dart';
 
 class InfluencerLinks extends StatefulWidget {

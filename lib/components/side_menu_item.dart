@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:prudapp/components/translate.dart';
+import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/models/theme.dart';
 
 import '../singletons/i_cloud.dart';

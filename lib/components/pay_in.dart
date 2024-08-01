@@ -10,7 +10,7 @@ import 'package:flutterwave_standard/models/requests/customer.dart';
 import 'package:flutterwave_standard/models/requests/customizations.dart';
 import '../constants.dart';
 import '../singletons/i_cloud.dart';
-import 'translate.dart';
+import 'translate_text.dart';
 import 'package:opay_online_flutter_sdk/opay_online_flutter_sdk.dart';
 
 class PayIn extends StatefulWidget {
@@ -73,7 +73,6 @@ class PayInState extends State<PayIn> {
         isTestMode: paymentIsInTestMode,
       );
     }
-    debugPrint("I got here A");
   }
 
   initiateOpayPayment() async {
@@ -138,17 +137,14 @@ class PayInState extends State<PayIn> {
 
   Future<void> verifyPayment() async {
     try{
-      debugPrint("I got here F");
       if(mounted) setState(() => loading = true);
       if(paymentId != null && paymentMade && transRef != null){
         bool verified = await checkPaymentStatus(
           paymentId!, widget.amount,
           transRef!,currency: widget.currencyCode?? "EUR"
         );
-        debugPrint("I got here G");
         if(verified && mounted){
           widget.onPaymentMade(verified, paymentId!);
-          debugPrint("I got here PAID");
           setState(() {
             paymentId = null;
             transRef = null;
@@ -237,12 +233,10 @@ class PayInState extends State<PayIn> {
           await processOpayPayment();
         }else {
           handlePaymentInitialization();
-          debugPrint("I got here B");
           if (mounted) setState(() => loading = true);
           final ChargeResponse? response = await flutterwave?.charge();
           if (response != null && response.transactionId != null &&
               response.txRef != null) {
-            debugPrint("I got here C");
             if (mounted) {
               setState(() {
                 paymentId = response.transactionId;
@@ -250,9 +244,7 @@ class PayInState extends State<PayIn> {
                 paymentMade = response.status!.toLowerCase() == "successful";
               });
             }
-            debugPrint("I got here D");
             await verifyPayment();
-            debugPrint("I got here E");
           }
           if (mounted) setState(() => loading = false);
         }

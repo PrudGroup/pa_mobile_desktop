@@ -10,6 +10,7 @@ import 'package:prudapp/components/prud_panel.dart';
 import 'package:prudapp/components/recharge_denomination.dart';
 import 'package:prudapp/components/recharge_operator_promos.dart';
 import 'package:prudapp/components/save_phone_numbers.dart';
+import 'package:prudapp/singletons/shared_local_storage.dart';
 
 import '../models/images.dart';
 import '../models/reloadly.dart';
@@ -18,7 +19,7 @@ import '../pages/recharge/recharge_history.dart';
 import '../singletons/i_cloud.dart';
 import '../singletons/recharge_notifier.dart';
 import '../singletons/tab_data.dart';
-import 'Translate.dart';
+import 'translate_text.dart';
 import 'loading_component.dart';
 import 'modals/recharge_order_modal_sheet.dart';
 import 'network_provider.dart';
@@ -50,15 +51,21 @@ class RechargeComponentState extends State<RechargeComponent> {
   bool phoneIsValid = false;
   Country? selectedCountry;
   RechargeOperator? detectedOperator;
-  List<RechargeOperator> networkProviders = rechargeNotifier.airtimeProviders;
+  List<RechargeOperator> networkProviders = [];
   double selectedAmount = 0;
   FocusNode focusN = FocusNode();
   List<Widget> carousels = [];
   int selectedIndex = 0;
   bool showNumberEntry = true;
   bool isLocalAmount = true;
+  bool hasNoProvider = false;
+  Widget noProvider = tabData.getNotFoundWidget(
+    title: "No Provider Found",
+    desc: "Probably the phone number provider don't have data top-up capabilities."
+  );
 
-  void setPhoneNo(){
+
+  Future<void> setPhoneNo() async {
     if(mounted && rechargeNotifier.selectedPhoneNumber != null) {
       setState(() {
         phoneNo = rechargeNotifier.selectedPhoneNumber;
@@ -66,6 +73,8 @@ class RechargeComponentState extends State<RechargeComponent> {
         justNum = phoneNo!.phoneNumber;
         phoneIsValid = true;
       });
+      await detectProvider();
+      rechargeNotifier.selectedPhoneNumber = null;
     }
     if(phoneNo != null && phoneNo!.phoneNumber != null) phoneTextController.text = phoneNo!.phoneNumber!;
   }
@@ -132,6 +141,24 @@ class RechargeComponentState extends State<RechargeComponent> {
       setState(() {
         selectedIndex = index;
         detectedOperator = opt;
+        carousels = detectedOperator!.logoUrls!.map((dynamic str){
+          return PrudNetworkImage(
+            url: str,
+            width: 60.0,
+            fit: BoxFit.contain,
+          );
+        }).toList();
+        if(detectedOperator != null && detectedOperator!.logoUrls != null && detectedOperator!.logoUrls!.isNotEmpty) {
+          carousels = detectedOperator!.logoUrls!.map((dynamic str){
+            return PrudNetworkImage(
+              url: str,
+              width: 60,
+              fit: BoxFit.contain,
+            );
+          }).toList();
+        }
+        if(detectedOperator!.minAmount != null) selectedAmount = detectedOperator!.minAmount!;
+        if(detectedOperator!.localMinAmount != null) selectedAmount = detectedOperator!.localMinAmount!;
       });
     }
   }
@@ -201,6 +228,9 @@ class RechargeComponentState extends State<RechargeComponent> {
         await rechargeNotifier.getRechargeableCountries();
         if(rechargeableCountries.isNotEmpty) rechargeNotifier.saveRechargeableCountriesToCache();
       }
+      if(widget.affLinkId != null){
+        await myStorage.saveRechargeReferral(widget.affLinkId!);
+      }
       if(rechargeableCountries.isNotEmpty){
         for(ReloadlyCountry cty in rechargeableCountries){
           if(cty.isoName != null) countries.add(cty.isoName!);
@@ -224,6 +254,36 @@ class RechargeComponentState extends State<RechargeComponent> {
     }
   }
 
+  Future<void> getTheProvider(String ctyCode) async {
+    RechargeOperator? operator = await rechargeNotifier.detectOperator(ctyCode, justNum!);
+    if(mounted && operator != null){
+      setState(() {
+        detectedOperator = operator;
+        carousels = detectedOperator!.logoUrls!.map((dynamic str){
+          return PrudNetworkImage(
+            url: str,
+            width: 60.0,
+            fit: BoxFit.contain,
+          );
+        }).toList();
+        if(detectedOperator != null && detectedOperator!.logoUrls != null && detectedOperator!.logoUrls!.isNotEmpty) {
+          carousels = detectedOperator!.logoUrls!.map((dynamic str){
+            return PrudNetworkImage(
+              url: str,
+              width: 60,
+              fit: BoxFit.contain,
+            );
+          }).toList();
+        }
+        if(detectedOperator!.minAmount != null) selectedAmount = detectedOperator!.minAmount!;
+        if(detectedOperator!.localMinAmount != null) selectedAmount = detectedOperator!.localMinAmount!;
+        getting = false;
+      });
+    }else{
+      await rechargeNotifier.getOperators(ctyCode, false, widget.isAirtime);
+    }
+  }
+
   Future<void> detectProvider() async {
     try{
       focusN.unfocus();
@@ -232,31 +292,27 @@ class RechargeComponentState extends State<RechargeComponent> {
         String? country = phoneNo!.isoCode;
         if(country != null || selectedCountry != null){
           String ctyCode = country ?? selectedCountry!.countryCode;
-          RechargeOperator? operator = await rechargeNotifier.detectOperator(ctyCode, justNum!, isAirtime: widget.isAirtime);
-          if(mounted && operator != null){
-            setState(() {
-              detectedOperator = operator;
-              carousels = detectedOperator!.logoUrls!.map((dynamic str){
-                return PrudNetworkImage(
-                  url: str,
-                  width: double.maxFinite,
-                );
-              }).toList();
-              if(detectedOperator != null && detectedOperator!.logoUrls != null && detectedOperator!.logoUrls!.isNotEmpty) {
-                carousels = detectedOperator!.logoUrls!.map((dynamic str){
-                  return PrudNetworkImage(
-                    url: str,
-                    width: double.maxFinite,
-                  );
-                }).toList();
-              }
-              if(detectedOperator!.minAmount != null) selectedAmount = detectedOperator!.minAmount!;
-              if(detectedOperator!.localMinAmount != null) selectedAmount = detectedOperator!.localMinAmount!;
-              debugPrint("Operator: ${detectedOperator?.toJson()}");
-              getting = false;
-            });
+          if(widget.isAirtime){
+            await getTheProvider(ctyCode);
           }else{
-            await rechargeNotifier.getOperators(ctyCode, isAirtime: widget.isAirtime);
+            await rechargeNotifier.getOperators(ctyCode, true, widget.isAirtime);
+            RechargeOperator? operator = await rechargeNotifier.detectOperator(ctyCode, justNum!);
+            if(operator != null && networkProviders.isNotEmpty){
+              List<RechargeOperator> found = networkProviders.where((opt) => opt.data == true && opt.name!.toLowerCase().contains("${operator.name} Data".toLowerCase())).toList();
+              if(found.isNotEmpty && mounted) {
+                rechargeNotifier.dataProviders = found;
+                setState(() => networkProviders = found);
+                selectOperator(networkProviders[0], 0);
+              } else{
+                if(mounted) {
+                  setState(() {
+                    networkProviders = [];
+                    rechargeNotifier.dataProviders = [];
+                    hasNoProvider = true;
+                  });
+                }
+              }
+            }
           }
         }else{
           getCountry();
@@ -274,13 +330,13 @@ class RechargeComponentState extends State<RechargeComponent> {
       await initSettings();
     });
     super.initState();
-    rechargeNotifier.addListener((){
+    rechargeNotifier.addListener(() async {
       if(mounted){
         setState(() {
           networkProviders = widget.isAirtime? rechargeNotifier.airtimeProviders : rechargeNotifier.dataProviders;
         });
       }
-      setPhoneNo();
+      await setPhoneNo();
     });
   }
 
@@ -435,7 +491,7 @@ class RechargeComponentState extends State<RechargeComponent> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 20.0, bottom: 10.0),
                     child: SizedBox(
-                      height: 150,
+                      height: 160,
                       child: ListView.builder(
                           physics: const BouncingScrollPhysics(),
                           scrollDirection: Axis.horizontal,
@@ -457,13 +513,14 @@ class RechargeComponentState extends State<RechargeComponent> {
                 spacer.height,
               ],
             ),
+            if(networkProviders.isEmpty && hasNoProvider && !widget.isAirtime) noProvider,
             if(detectedOperator != null) Column(
               children: [
                 if(detectedOperator!.name != null) Row(
                   children: [
                     Container(
-                      width: 100.0,
-                      height: 100.0,
+                      width: 60.0,
+                      height: 60.0,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(30.0),
                         border: Border.all(
@@ -475,7 +532,7 @@ class RechargeComponentState extends State<RechargeComponent> {
                         borderRadius: BorderRadius.circular(30.0),
                         child: carousels.isNotEmpty?
                         GFCarousel(
-                            height: 100.0,
+                            height: 60.0,
                             autoPlay: true,
                             aspectRatio: double.maxFinite,
                             viewportFraction: 1.0,
@@ -487,7 +544,7 @@ class RechargeComponentState extends State<RechargeComponent> {
                         )
                             :
                         Center(
-                          child: Image.asset(prudImages.airtime, fit: BoxFit.contain,),
+                          child: Image.asset(prudImages.airtime, fit: BoxFit.contain, width: 40, height: 40),
                         ),
                       ),
                     ),
@@ -497,9 +554,9 @@ class RechargeComponentState extends State<RechargeComponent> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text(
-                          tabData.shortenStringWithPeriod(detectedOperator!.name!, length: 18),
+                          tabData.shortenStringWithPeriod(detectedOperator!.name!, length: 25),
                           style: prudWidgetStyle.tabTextStyle.copyWith(
-                            fontSize: 22,
+                            fontSize: 18,
                             color: prudColorTheme.secondary,
                             fontWeight: FontWeight.w600,
                           ),
@@ -509,7 +566,7 @@ class RechargeComponentState extends State<RechargeComponent> {
                           style: prudWidgetStyle.tabTextStyle.copyWith(
                               color: prudColorTheme.textB,
                               fontWeight: FontWeight.w600,
-                              fontSize: 16
+                              fontSize: 15
                           ),
 
                         ),
@@ -899,7 +956,7 @@ class RechargeComponentState extends State<RechargeComponent> {
                 if(
                   detectedOperator!.denominationType != null &&
                   detectedOperator!.denominationType!.toLowerCase() == "fixed" &&
-                  detectedOperator!.fixedAmountsDescriptions == null &&
+                  detectedOperator!.fixedAmountsDescriptions!.values.isEmpty &&
                   detectedOperator!.fixedAmounts != null && detectedOperator!.fixedAmounts!.isNotEmpty
                 ) PrudPanel(
                   title: "Fixed Amount",
@@ -909,7 +966,7 @@ class RechargeComponentState extends State<RechargeComponent> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 20.0, bottom: 10.0),
                     child: SizedBox(
-                      height: detectedOperator!.fixedAmountsDescriptions == null? 80 : 150,
+                      height: 80,
                       child: ListView.builder(
                           physics: const BouncingScrollPhysics(),
                           scrollDirection: Axis.horizontal,

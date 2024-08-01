@@ -26,7 +26,7 @@ import 'package:prudapp/singletons/tab_data.dart';
 
 import '../../components/city_picker.dart';
 import '../../components/splashscreen.dart';
-import '../../components/translate.dart';
+import '../../components/translate_text.dart';
 import '../../models/images.dart';
 import '../../models/theme.dart';
 import 'package:country_state_city/country_state_city.dart' as csc;

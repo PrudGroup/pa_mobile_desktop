@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/carousel/gf_carousel.dart';
-import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/components/prud_network_image.dart';
 import 'package:prudapp/models/images.dart';
 import 'package:prudapp/models/reloadly.dart';
@@ -11,7 +10,7 @@ import 'package:prudapp/singletons/gift_card_notifier.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 
 import '../singletons/tab_data.dart';
-import 'translate.dart';
+import 'translate_text.dart';
 
 class GiftProductComponent extends StatefulWidget {
   final GiftProduct product;

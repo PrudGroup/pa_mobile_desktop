@@ -3,7 +3,7 @@ import 'package:prudapp/pages/beneficiaries/tabs/existing_beneficiary.dart';
 import 'package:prudapp/pages/beneficiaries/tabs/new_beneficiary.dart';
 import 'package:prudapp/singletons/beneficiary_notifier.dart';
 
-import '../../components/Translate.dart';
+import '../../components/translate_text.dart';
 import '../../components/inner_menu.dart';
 import '../../models/theme.dart';
 

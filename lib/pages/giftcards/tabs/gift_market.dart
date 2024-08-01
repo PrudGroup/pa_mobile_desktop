@@ -9,7 +9,7 @@ import 'package:prudapp/models/reloadly.dart';
 import 'package:prudapp/singletons/gift_card_notifier.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 
-import '../../../components/Translate.dart';
+import '../../../components/translate_text.dart';
 import '../../../components/gift_cart_icon.dart';
 import '../../../models/theme.dart';
 import '../../../singletons/tab_data.dart';

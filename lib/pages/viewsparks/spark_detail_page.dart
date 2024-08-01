@@ -7,7 +7,7 @@ import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../components/modals/link_modal_sheet.dart';
-import '../../components/translate.dart';
+import '../../components/translate_text.dart';
 import '../../models/aff_link.dart';
 import '../../models/spark.dart';
 import '../../models/theme.dart';

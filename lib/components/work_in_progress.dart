@@ -4,7 +4,7 @@ import 'package:prudapp/singletons/tab_data.dart';
 
 import '../models/images.dart';
 import '../singletons/shared_local_storage.dart';
-import 'translate.dart';
+import 'translate_text.dart';
 
 class WorkInProgress extends StatelessWidget {
   const WorkInProgress({super.key});

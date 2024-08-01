@@ -18,39 +18,45 @@ class NetworkProvider extends StatelessWidget {
     List<Widget> carousels = operator.logoUrls == null? [] : operator.logoUrls!.map((dynamic str){
       return PrudNetworkImage(
         url: str,
-        width: double.maxFinite,
-        fit: BoxFit.cover,
+        width: 90.0,
+        fit: BoxFit.contain,
       );
     }).toList();
     return Column(
       children: [
         Container(
-          width: 100.0,
-          height: 100.0,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30.0),
+            color: prudColorTheme.bgE,
+            borderRadius: BorderRadius.circular(20.0),
             border: Border.all(
               color: selected? prudColorTheme.buttonC : prudColorTheme.bgD,
               width: 4.0
             ),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(30.0),
-            child: carousels.isNotEmpty?
-            GFCarousel(
-              height: 100.0,
-              autoPlay: true,
-              aspectRatio: double.maxFinite,
-              viewportFraction: 1.0,
-              enlargeMainPage: true,
-              enableInfiniteScroll: true,
-              pauseAutoPlayOnTouch: const Duration(seconds: 10),
-              autoPlayInterval: const Duration(seconds: 3),
-              items: carousels
-            )
-                :
-            Center(
-              child: Image.asset(prudImages.airtime, fit: BoxFit.contain,),
+          child: Container(
+            width: 90.0,
+            height: 90.0,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(15.0),
+              child: carousels.isNotEmpty?
+              GFCarousel(
+                  height: 90.0,
+                  autoPlay: true,
+                  aspectRatio: double.maxFinite,
+                  viewportFraction: 1.0,
+                  enlargeMainPage: true,
+                  enableInfiniteScroll: true,
+                  pauseAutoPlayOnTouch: const Duration(seconds: 10),
+                  autoPlayInterval: const Duration(seconds: 3),
+                  items: carousels
+              )
+                  :
+              Center(
+                child: Image.asset(prudImages.airtime, fit: BoxFit.contain,),
+              ),
             ),
           ),
         ),
@@ -64,6 +70,7 @@ class NetworkProvider extends StatelessWidget {
               color: prudColorTheme.secondary,
               fontWeight: FontWeight.w600,
             ),
+            textAlign: TextAlign.center,
           ),
         )
       ],

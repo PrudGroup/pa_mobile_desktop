@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/theme.dart';
-import '../../components/translate.dart';
+import '../../components/translate_text.dart';
 import "../../components/work_in_progress.dart";
 
 class Shippers extends StatefulWidget {

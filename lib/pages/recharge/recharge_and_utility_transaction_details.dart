@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../components/Translate.dart';
+import '../../components/translate_text.dart';
 import '../../components/prud_panel.dart';
 import '../../models/reloadly.dart';
 import '../../models/theme.dart';

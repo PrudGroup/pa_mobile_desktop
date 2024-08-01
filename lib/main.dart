@@ -14,6 +14,7 @@ import 'package:prudapp/singletons/gift_card_notifier.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/recharge_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
+import 'package:prudapp/singletons/utility_notifier.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -52,6 +53,7 @@ void main() async {
   await giftCardNotifier.initGiftCard();
   await rechargeNotifier.initRecharge();
   await beneficiaryNotifier.initBens();
+  await utilityNotifier.initUtility();
   await messenger.setAutoInitEnabled(true);
   myStorage.setWindowSize(size: const Size(400, 700));
 

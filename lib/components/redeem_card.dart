@@ -6,7 +6,7 @@ import '../models/images.dart';
 import '../models/reloadly.dart';
 import '../models/theme.dart';
 import '../singletons/tab_data.dart';
-import 'translate.dart';
+import 'translate_text.dart';
 
 class RedeemCard extends StatelessWidget {
   final GiftTransaction trans;
@@ -37,21 +37,21 @@ class RedeemCard extends StatelessWidget {
             validThru: '10/24',
             cardProviderLogo: Image.asset(prudImages.prudIcon, width: 30,),
             showValidThru: false,
-            bottomRightColor: prudColorTheme.primary.withRed(250),
-            topLeftColor: prudColorTheme.primary,
+            bottomRightColor: prudColorTheme.bgD,
+            topLeftColor: prudColorTheme.bgD,
             showBalance: true,
             showValidFrom: false,
             currencySymbol: tabData.getCurrencySymbol(trans.product!.currencyCode!),
             balance: trans.product!.unitPrice,
             enableFlipping: true,
             backgroundDecorationImage: DecorationImage(
-              fit: BoxFit.cover,
-              onError: (obj, stack){
-                debugPrint("NetworkImage Error: $obj : $stack");
-              },
-              image: FastCachedImageProvider(
-                tranDetails.productPhoto!,
-              )
+                fit: BoxFit.cover,
+                onError: (obj, stack){
+                  debugPrint("NetworkImage Error: $obj : $stack");
+                },
+                image: FastCachedImageProvider(
+                  tranDetails.productPhoto!,
+                )
             ),
           ),
           spacer.height,

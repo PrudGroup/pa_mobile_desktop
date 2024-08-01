@@ -1,6 +1,6 @@
 import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:prudapp/components/Translate.dart';
+import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/models/reloadly.dart';
 import 'package:prudapp/singletons/gift_card_notifier.dart';

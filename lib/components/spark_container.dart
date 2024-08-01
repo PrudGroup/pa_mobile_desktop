@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prudapp/components/prud_container.dart';
-import 'package:prudapp/components/translate.dart';
+import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/models/spark.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';

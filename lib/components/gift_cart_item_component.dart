@@ -10,7 +10,7 @@ import 'package:rflutter_alert/rflutter_alert.dart';
 
 import '../models/theme.dart';
 import '../singletons/tab_data.dart';
-import 'translate.dart';
+import 'translate_text.dart';
 
 class GiftCartItemComponent extends StatefulWidget {
   final CartItem item;

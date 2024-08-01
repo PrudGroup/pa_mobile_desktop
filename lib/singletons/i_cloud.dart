@@ -191,6 +191,10 @@ class ICloud extends ChangeNotifier{
 
   Future<bool> checkIfAffLoggedIn(String url) async {
     bool loggedIn = false;
+    if(lastAuthTokenGottenAt != null){
+      int minutes = myStorage.dateDifference(dDate: lastAuthTokenGottenAt!, inWhat: 1);
+      if(minutes > 15) { affAuthToken = null;}
+    }
     if(affAuthToken != null){
       loggedIn = true;
     }else{
@@ -198,6 +202,7 @@ class ICloud extends ChangeNotifier{
       loggedIn = logged[1];
       if(loggedIn){
         affAuthToken = 'Bearer PrudApp ${logged[0]["auth_token"]}';
+        lastAuthTokenGottenAt = DateTime.now();
       }
     }
     prudDio.options.headers.clear();
@@ -548,6 +553,7 @@ const reloadlySmsFee = 300.0;
 const installReferralCommission = 0.25;
 const referralCommission = 0.25;
 const merchantReferralCommission = 0.25;
+DateTime? lastAuthTokenGottenAt;
 FirebaseMessaging messenger = FirebaseMessaging.instance;
 Dio prudDio = Dio(BaseOptions(
   receiveDataWhenStatusError: true,

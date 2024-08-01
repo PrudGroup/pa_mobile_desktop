@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prudapp/components/prud_container.dart';
-import 'package:prudapp/components/translate.dart';
+import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/models/images.dart';
 
 import '../models/theme.dart';

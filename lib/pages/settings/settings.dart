@@ -1,7 +1,7 @@
 import 'package:prudapp/models/locale.dart';
 import 'package:flutter/material.dart';
 
-import '../../components/translate.dart';
+import '../../components/translate_text.dart';
 import '../../components/work_in_progress.dart';
 import '../../models/theme.dart';
 

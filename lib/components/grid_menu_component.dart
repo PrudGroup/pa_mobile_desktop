@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:prudapp/components/page_transitions/scale.dart';
 
-import 'translate.dart';
+import 'translate_text.dart';
 
 class PrudGridMenuItem{
   final String field;

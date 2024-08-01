@@ -5,7 +5,7 @@ import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/singletons/gift_card_notifier.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 
-import '../../../components/translate.dart';
+import '../../../components/translate_text.dart';
 import '../../../models/reloadly.dart';
 import '../../../models/theme.dart';
 import '../../../singletons/tab_data.dart';

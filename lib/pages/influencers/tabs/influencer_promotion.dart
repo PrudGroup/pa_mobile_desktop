@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:prudapp/components/work_in_progress.dart';
 
-import '../../../components/translate.dart';
+import '../../../components/translate_text.dart';
 import '../../../models/theme.dart';
 
 class InfluencerPromotion extends StatefulWidget {

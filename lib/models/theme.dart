@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:prudapp/models/shared_classes.dart';
 
-import '../components/translate.dart';
+import '../components/translate_text.dart';
 import '../singletons/tab_data.dart';
 
 class ColorTheme {
