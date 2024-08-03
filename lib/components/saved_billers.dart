@@ -33,9 +33,9 @@ class SavedBillers extends StatelessWidget {
               onTap: () => choose(lastBillers.electricity!, UtilityDevice(
                 no: lastBillers.lastDeviceUsedOnElectricity!,
                 serviceType: lastBillers.electricity!.serviceType!,
-                type: lastBillers.electricity!.type,
-                countryIsoCode: lastBillers.electricity!.countryCode,
-                billerId: lastBillers.electricity!.id,
+                type: lastBillers.electricity!.type!,
+                countryIsoCode: lastBillers.electricity!.countryCode!,
+                billerId: lastBillers.electricity!.id!,
               ), context),
               child: Container(
                 padding: const EdgeInsets.all(10),
@@ -107,9 +107,9 @@ class SavedBillers extends StatelessWidget {
               onTap: () => choose(lastBillers.water!, UtilityDevice(
                 no: lastBillers.lastDeviceUsedOnWater!,
                 serviceType: lastBillers.water!.serviceType!,
-                type: lastBillers.water!.type,
-                countryIsoCode: lastBillers.water!.countryCode,
-                billerId: lastBillers.water!.id,
+                type: lastBillers.water!.type!,
+                countryIsoCode: lastBillers.water!.countryCode!,
+                billerId: lastBillers.water!.id!,
               ), context),
               child: Container(
                 padding: const EdgeInsets.all(10),
@@ -181,9 +181,9 @@ class SavedBillers extends StatelessWidget {
               onTap: () => choose(lastBillers.tv!, UtilityDevice(
                 no: lastBillers.lastDeviceUsedOnTv!,
                 serviceType: lastBillers.tv!.serviceType!,
-                type: lastBillers.tv!.type,
-                countryIsoCode: lastBillers.tv!.countryCode,
-                billerId: lastBillers.tv!.id,
+                type: lastBillers.tv!.type!,
+                countryIsoCode: lastBillers.tv!.countryCode!,
+                billerId: lastBillers.tv!.id!,
               ), context),
               child: Container(
                 padding: const EdgeInsets.all(10),
@@ -255,9 +255,9 @@ class SavedBillers extends StatelessWidget {
               onTap: () => choose(lastBillers.internet!, UtilityDevice(
                 no: lastBillers.lastDeviceUsedOnInternet!,
                 serviceType: lastBillers.internet!.serviceType!,
-                type: lastBillers.internet!.type,
-                countryIsoCode: lastBillers.internet!.countryCode,
-                billerId: lastBillers.internet!.id,
+                type: lastBillers.internet!.type!,
+                countryIsoCode: lastBillers.internet!.countryCode!,
+                billerId: lastBillers.internet!.id!,
               ), context),
               child: Container(
                 padding: const EdgeInsets.all(10),

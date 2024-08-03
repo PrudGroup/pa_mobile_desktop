@@ -7,8 +7,8 @@ import '../../models/theme.dart';
 import '../../singletons/tab_data.dart';
 
 class RechargeAndUtilityTransactionDetails extends StatefulWidget {
-  final TopUpTransaction trans;
-  final RechargeTransactionDetails tranDetails;
+  final dynamic trans;
+  final dynamic tranDetails;
 
   const RechargeAndUtilityTransactionDetails({
     super.key, required this.trans, required this.tranDetails

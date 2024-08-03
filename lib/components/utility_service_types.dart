@@ -18,7 +18,7 @@ class UtilityServiceTypes extends StatelessWidget {
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     return Container(
-      height: height * 0.25,
+      height: height * 0.15,
       decoration: BoxDecoration(
         borderRadius: prudRad,
         color: prudColorTheme.bgC,
@@ -42,10 +42,11 @@ class UtilityServiceTypes extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    ImageIcon(
-                      AssetImage(prudImages.prepaid),
-                      color: prudColorTheme.secondary,
+                    Image(
+                      image: AssetImage(prudImages.prepaid),
+                      width: 30,
                     ),
+                    spacer.width,
                     Text(
                       "Prepaid Service Bills",
                       style: prudWidgetStyle.tabTextStyle.copyWith(
@@ -72,10 +73,11 @@ class UtilityServiceTypes extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    ImageIcon(
-                      AssetImage(prudImages.postpaid),
-                      color: prudColorTheme.secondary,
+                    Image(
+                      image: AssetImage(prudImages.postpaid),
+                      width: 30,
                     ),
+                    spacer.width,
                     Text(
                       "PostPaid Service Bills",
                       style: prudWidgetStyle.tabTextStyle.copyWith(

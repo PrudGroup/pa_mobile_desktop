@@ -46,6 +46,7 @@ class UtilityTypes extends StatelessWidget {
                       AssetImage(prudImages.power1),
                       color: prudColorTheme.secondary,
                     ),
+                    spacer.width,
                     Text(
                       "Electricity Bill",
                       style: prudWidgetStyle.tabTextStyle.copyWith(
@@ -76,6 +77,7 @@ class UtilityTypes extends StatelessWidget {
                       AssetImage(prudImages.water),
                       color: prudColorTheme.secondary,
                     ),
+                    spacer.width,
                     Text(
                       "Water Bill",
                       style: prudWidgetStyle.tabTextStyle.copyWith(
@@ -106,6 +108,7 @@ class UtilityTypes extends StatelessWidget {
                       AssetImage(prudImages.smartTv1),
                       color: prudColorTheme.secondary,
                     ),
+                    spacer.width,
                     Text(
                       "Television/Cable Subscriptions",
                       style: prudWidgetStyle.tabTextStyle.copyWith(
@@ -136,6 +139,7 @@ class UtilityTypes extends StatelessWidget {
                       AssetImage(prudImages.internet),
                       color: prudColorTheme.secondary,
                     ),
+                    spacer.width,
                     Text(
                       "Internet Subscriptions",
                       style: prudWidgetStyle.tabTextStyle.copyWith(

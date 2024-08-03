@@ -47,16 +47,16 @@ class SavedDeviceNumbers extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        if(device.countryIsoCode != null) Text(
-                          "${tabData.getCountryFlag(device.countryIsoCode!)}",
+                        Text(
+                          "${tabData.getCountryFlag(device.countryIsoCode)}",
                           style: prudWidgetStyle.typedTextStyle.copyWith(
                               fontWeight: FontWeight.w500,
                               fontSize: 15,
                               color: prudColorTheme.textB
                           ),
                         ),
-                        if(device.type != null) Text(
-                          "${device.type}",
+                        Text(
+                          device.type,
                           style: prudWidgetStyle.tabTextStyle.copyWith(
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
@@ -65,8 +65,8 @@ class SavedDeviceNumbers extends StatelessWidget {
                         ),
                       ],
                     ),
-                    if(device.serviceType != null) Text(
-                      "${device.serviceType}",
+                    Text(
+                      device.serviceType,
                       style: prudWidgetStyle.typedTextStyle.copyWith(
                         fontSize: 16,
                       ),

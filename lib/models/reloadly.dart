@@ -1781,6 +1781,8 @@ class UtilityTransactionDetails{
   double? transactionPaid;
   double? transactionPaidInSelected;
   String? selectedCurrencyCode;
+  String? transServiceType;
+  String? transactionType;
 
   UtilityTransactionDetails({
     this.transId,
@@ -1851,7 +1853,7 @@ class UtilityTransactionDetails{
         transactionCostInSelected: json["transaction_cost_in_selected"],
         transactionPaidInSelected: json["transaction_paid_in_selected"],
         selectedCurrencyCode: json["selected_currency_code"],
-        refunded: json["refunded"],
+        refunded: json["refunded"]
     );
   }
 }
@@ -2006,27 +2008,27 @@ enum BillerServiceType {
 }
 
 class UtilityDevice{
-  String? no;
-  String? serviceType;
-  String? type;
-  String? countryIsoCode;
-  int? billerId;
+  String no;
+  String serviceType;
+  String type;
+  String countryIsoCode;
+  int billerId;
 
   UtilityDevice({
-    this.serviceType,
-    this.type,
-    this.countryIsoCode,
-    this.no,
-    this.billerId,
+    required this.serviceType,
+    required this.type,
+    required this.countryIsoCode,
+    required this.no,
+    required this.billerId,
   });
 
   Map<String, dynamic> toJson(){
     return {
-      if(serviceType != null) "serviceType": serviceType,
-      if(type != null) "type": type,
-      if(countryIsoCode != null) "countryIsoCode": countryIsoCode,
-      if(no != null) "no": no,
-      if(billerId != null) "billerId": billerId,
+      "serviceType": serviceType,
+      "type": type,
+      "countryIsoCode": countryIsoCode,
+      "no": no,
+      "billerId": billerId,
     };
   }
 

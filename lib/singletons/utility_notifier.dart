@@ -222,6 +222,11 @@ class UtilityNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateSelectedBiller(Biller bill){
+    selectedBiller = bill;
+    notifyListeners();
+  }
+
   Future<void> updatePaymentStatus(bool status, String id) async {
     paymentMade = status;
     paymentId = id;
@@ -350,7 +355,7 @@ class UtilityNotifier extends ChangeNotifier {
     dynamic result = await makeRequest(path: path);
     List<Biller> bs = [];
     if(result != null && result.isNotEmpty){
-      for(Map<String, dynamic> res in result){
+      for(Map<String, dynamic> res in result["content"]){
         bs.add(Biller.fromJson(res));
       }
       billers = bs;
@@ -526,24 +531,23 @@ class UtilityNotifier extends ChangeNotifier {
 String utilityApiUrl = Constants.apiStatues == 'production'? "https://utilities.reloadly.com" : "https://utilities-sandbox.reloadly.com";
 List<ReloadlyCountry> utilitizedCountries = [];
 double utilityCustomerDiscountInPercentage = 1/3;
-double utilityCharge = 0.05;
 String? reloadlyUtilityToken;
 Dio utilityDio = Dio(BaseOptions(
-    receiveDataWhenStatusError: true,
-    connectTimeout: const Duration(seconds: 60), // 60 seconds
-    receiveTimeout: const Duration(seconds: 60),
-    validateStatus: (statusCode) {
-      if(statusCode != null) {
-        if (statusCode == 422) {
-          return true;
-        }
-        if (statusCode >= 200 && statusCode <= 300) {
-          return true;
-        }
-        return false;
-      } else {
-        return false;
+  receiveDataWhenStatusError: true,
+  connectTimeout: const Duration(seconds: 60), // 60 seconds
+  receiveTimeout: const Duration(seconds: 60),
+  validateStatus: (statusCode) {
+    if(statusCode != null) {
+      if (statusCode == 422) {
+        return true;
       }
+      if (statusCode >= 200 && statusCode <= 300) {
+        return true;
+      }
+      return false;
+    } else {
+      return false;
     }
+  }
 ));
 final utilityNotifier = UtilityNotifier();

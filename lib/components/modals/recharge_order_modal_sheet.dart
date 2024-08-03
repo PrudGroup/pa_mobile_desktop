@@ -279,7 +279,7 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
         double commission = isLocal? widget.operator.localDiscount! : widget.operator.internationalDiscount!;
         if(commission > 0){
           debugPrint("commission: $commission");
-          double customerDiscount = (commission/100 * widget.selectedAmount) * rechargeCustomerDiscountInPercentage;
+          double customerDiscount = ((commission/100) * widget.selectedAmount) * rechargeCustomerDiscountInPercentage;
           String? linkId = myStorage.getRechargeReferral();
           debugPrint("customerDiscount: $customerDiscount");
           if(linkId != null){
