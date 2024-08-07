@@ -7,7 +7,9 @@ import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_to_pdf/flutter_to_pdf.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pdf/widgets.dart' as pdf;
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import '../components/page_transitions/scale.dart';
@@ -71,6 +73,10 @@ class ICloud extends ChangeNotifier{
     } else {
       return false;
     }
+  }
+
+  Future<pdf.Document> exportToPdf(String id) async {
+    return await exportDelegate.exportToPdfDocument(id);
   }
 
   void initRegisterState() async {
@@ -554,6 +560,29 @@ const installReferralCommission = 0.25;
 const referralCommission = 0.25;
 const merchantReferralCommission = 0.25;
 DateTime? lastAuthTokenGottenAt;
+final ExportDelegate exportDelegate = ExportDelegate(
+  options: const ExportOptions(
+    pageFormatOptions: PageFormatOptions(
+      pageFormat: PageFormat.a4,
+      marginAll: 10.0
+    )
+  ),
+  ttfFonts: {
+    'Autobus': 'assets/fonts/Autobus.ttf',
+    'Cherione': 'assets/fonts/cherione.ttf',
+    'Champagne-Bold': 'assets/fonts/Champagne-Bold.ttf',
+    'NexaDemo-Bold': 'assets/fonts/NexaDemo-Bold.ttf',
+    'NexaDemo-Light': 'assets/fonts/NexaDemo-Light.ttf',
+    'OpenSans-Bold': 'assets/fonts/OpenSans-Bold.ttf',
+    'Revans': 'assets/fonts/revans.ttf',
+    'OpenSans-Regular': 'assets/fonts/OpenSans-Regular.ttf',
+    'OpenSans-SemiBold': 'assets/fonts/OpenSans-SemiBold.ttf',
+    'Oswald-Regular': 'assets/fonts/Oswald-Regular.ttf',
+    'Valeria': 'assets/fonts/valeria.ttf',
+    'Qhinanttika': 'assets/fonts/Qhinanttika.otf',
+    'Proxima-Light': 'assets/fonts/Proxima-Light.otf',
+  },
+);
 FirebaseMessaging messenger = FirebaseMessaging.instance;
 Dio prudDio = Dio(BaseOptions(
   receiveDataWhenStatusError: true,

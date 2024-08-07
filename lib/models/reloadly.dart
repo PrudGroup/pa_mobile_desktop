@@ -1872,6 +1872,40 @@ class UtilityAdditionalInfo{
   }
 }
 
+class UtilityOrderResult{
+  String? code;
+  String? finalStatusAvailabilityAt;
+  int? id;
+  String? submittedAt;
+  String? referenceId;
+  String? message;
+  String? status; // PROCESSING, SUCCESSFUL, FAILED and REFUNDED
+
+  UtilityOrderResult({
+    this.referenceId,
+    this.id,
+    this.status,
+    this.submittedAt,
+    this.code,
+    this.finalStatusAvailabilityAt,
+    this.message,
+  });
+
+
+  factory UtilityOrderResult.fromJson(Map<String, dynamic> json){
+    return UtilityOrderResult(
+      referenceId: json["referenceId"],
+      id: json["id"],
+      status: json["status"],
+      submittedAt: json["submittedAt"],
+      code: json["code"],
+      finalStatusAvailabilityAt: json["finalStatusAvailabilityAt"],
+      message: json["message"] ,
+    );
+  }
+
+}
+
 class UtilityOrder{
   UtilityAdditionalInfo? additionalInfo;
   double amount;

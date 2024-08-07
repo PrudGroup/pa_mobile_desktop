@@ -65,6 +65,7 @@ class RegisteredState extends State<Register> {
   bool loadingStates = false;
   bool loadingCities = false;
   String? referralCode;
+  String? pin;
 
   Future<void> pickCurrency(mc.Country country) async {
     showCurrencyPicker(
@@ -159,7 +160,7 @@ class RegisteredState extends State<Register> {
 
   void register() async {
     try{
-      if (newUser.city != null) {
+      if (newUser.city != null && pin != null) {
         setState(() => loading = true);
         await saveUserLocally();
         String apiUrl = "$apiEndPoint/affiliates/";
@@ -268,6 +269,7 @@ class RegisteredState extends State<Register> {
         type: 3
       );
     });
+    if(pin != null) await myStorage.addToStore(key: "pin", value: pin);
     if(referralCode != null) await myStorage.addToStore(key: "install_referral_code", value: referralCode);
     myStorage.addToStore(key: "user", value: jsonEncode(newUser));
   }
@@ -400,6 +402,35 @@ class RegisteredState extends State<Register> {
                             validator: FormBuilderValidators.compose([
                               FormBuilderValidators.minLength(3),
                               FormBuilderValidators.maxLength(100)
+                            ]),
+                          ),
+                          spacer.height,
+                          Translate(
+                            text: "You need a four digit pin which you will always use for"
+                                " transactions.",
+                            style: prudWidgetStyle.tabTextStyle.copyWith(
+                                fontSize: 16,
+                                color: prudColorTheme.textA,
+                                fontWeight: FontWeight.w500
+                            ),
+                            align: TextAlign.center,
+                          ),
+                          FormBuilderTextField(
+                            initialValue: "",
+                            name: 'pin',
+                            autofocus: true,
+                            style: tabData.npStyle,
+                            keyboardType: TextInputType.number,
+                            decoration: getDeco("Transaction Pin"),
+                            onChanged: (dynamic value){
+                              setState(() {
+                                pin = value?.trim();
+                              });
+                            },
+                            valueTransformer: (text) => num.tryParse(text!),
+                            validator: FormBuilderValidators.compose([
+                              FormBuilderValidators.minLength(4),
+                              FormBuilderValidators.maxLength(4)
                             ]),
                           ),
                           spacer.height,

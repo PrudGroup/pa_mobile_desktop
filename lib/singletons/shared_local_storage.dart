@@ -33,11 +33,11 @@ class MyStorage extends ChangeNotifier {
       isCloseButton: true,
       isOverlayTapDismiss: true,
       descStyle: const TextStyle(
-          color: Colors.black87,
-          fontSize: 13.0,
-          fontFamily: "Lato-Italic",
-          decoration: TextDecoration.none,
-          fontWeight: FontWeight.w400
+        color: Colors.black87,
+        fontSize: 13.0,
+        fontFamily: "Lato-Italic",
+        decoration: TextDecoration.none,
+        fontWeight: FontWeight.w400
       ),
       descTextAlign: TextAlign.center,
       animationDuration: const Duration(milliseconds: 400),

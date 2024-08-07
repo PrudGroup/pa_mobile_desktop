@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/components/avatar/gf_avatar.dart';
 import 'package:getwidget/size/gf_size.dart';
 import 'package:intl/intl.dart';
-import 'package:prudapp/pages/recharge/recharge_and_utility_transaction_details.dart';
+import 'package:prudapp/pages/recharge/recharge_transaction_detail_display.dart';
 import 'package:prudapp/singletons/recharge_notifier.dart';
 
 import '../models/images.dart';
@@ -35,7 +35,7 @@ class RechargeTransactionComponentState extends State<RechargeTransactionCompone
 
   void navigate(){
     if(tran != null){
-      iCloud.goto(context, RechargeAndUtilityTransactionDetails(trans: tran!, tranDetails: widget.tranDetails,));
+      iCloud.goto(context, RechargeTransactionDetailDisplay(trans: tran!, tranDetails: widget.tranDetails,));
     }
   }
 

@@ -56,7 +56,7 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
     remindLaunches: 10,
   );
   StreamSubscription? connectSub;
-  StreamSubscription? subscription;
+  StreamSubscription<FGBGType>? subscription;
   StreamSubscription? messageStream;
   double imageHeight = 0;
   List<Widget> carousels = [
@@ -300,7 +300,8 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
     connectSub = ConnectionNotifierTools.onStatusChange.listen((_) async {
       await changeConnectionStatus();
     });
-    subscription = FGBGEvents.stream.listen((event) {
+    FGBGEvents fgbg = FGBGEvents as FGBGEvents;
+    subscription = fgbg.stream.listen((event) {
       if(event == FGBGType.background) {
 
       } else {

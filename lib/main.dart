@@ -12,6 +12,7 @@ import 'package:prudapp/singletons/beneficiary_notifier.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/gift_card_notifier.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
+import 'package:prudapp/singletons/influencer_notifier.dart';
 import 'package:prudapp/singletons/recharge_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/utility_notifier.dart';
@@ -50,6 +51,7 @@ void main() async {
   await GetStorage.init();
   await myStorage.initializeValues();
   await currencyMath.init();
+  await influencerNotifier.initInfluencer();
   await giftCardNotifier.initGiftCard();
   await rechargeNotifier.initRecharge();
   await beneficiaryNotifier.initBens();

@@ -347,6 +347,7 @@ InputDecoration getDeco(String label, {
   String hintText = '',
   TextStyle? labelStyle,
   bool hasBorders = true,
+  bool onlyBottomBorder = false,
 }) => InputDecoration(
   labelText: label,
   filled: filled,
@@ -356,12 +357,16 @@ InputDecoration getDeco(String label, {
   labelStyle: labelStyle?? tabData.nRStyle.copyWith(
     fontSize: hintSize,
   ),
-  enabledBorder: hasBorders? prudWidgetStyle.enabledBorder : InputBorder.none,
-  focusedBorder: hasBorders? prudWidgetStyle.focusedBorder : InputBorder.none,
-  border: hasBorders? prudWidgetStyle.enabledBorder : InputBorder.none
+  enabledBorder: hasBorders? (onlyBottomBorder? bottomBorder : prudWidgetStyle.enabledBorder) : InputBorder.none,
+  focusedBorder: hasBorders? (onlyBottomBorder? bottomBorder : prudWidgetStyle.focusedBorder) : InputBorder.none,
+  border: hasBorders? (onlyBottomBorder? bottomBorder : prudWidgetStyle.enabledBorder) : InputBorder.none
 );
 BorderRadiusGeometry prudRad = const BorderRadius.only(
   topLeft: Radius.circular(30),
   topRight: Radius.circular(30),
 );
 BorderRadiusGeometry prudRadAll = BorderRadius.circular(30);
+InputBorder bottomBorder = UnderlineInputBorder(
+  borderSide: BorderSide(color: prudColorTheme.lineB),
+  borderRadius: const BorderRadius.all(Radius.zero),
+);

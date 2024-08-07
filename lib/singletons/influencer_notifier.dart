@@ -1,7 +1,10 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:prudapp/models/wallet.dart';
 import 'package:prudapp/singletons/currency_math.dart';
+import 'package:prudapp/singletons/shared_local_storage.dart';
+import 'package:prudapp/singletons/tab_data.dart';
 
 import 'i_cloud.dart';
 
@@ -15,7 +18,133 @@ class InfluencerNotifier extends ChangeNotifier {
   }
 
   double? referralPercentage;
+  String? pin;
+  int pinTrial = 0;
+  DateTime? lastPinTrialAt;
+  bool pinBlocked = false;
+  bool pinWasVerified = false;
+  String? influencerWalletCurrencyCode;
+  InfluencerWallet? myWallet;
+  List<WalletHistory>? myWalletHistory;
 
+  void updateWallet(InfluencerWallet wallet){
+    myWallet = wallet;
+    notifyListeners();
+  }
+
+  void clearPinStatus(){
+    pinTrial = 0;
+    pinBlocked = false;
+    lastPinTrialAt = null;
+  }
+
+  Future<InfluencerWallet?> getWallet(String affId) async {
+    return await tryAsync("getWallet", () async {
+      dynamic res = await makeRequest(path: "/wallets/aff/$affId");
+      if (res != null) {
+        InfluencerWallet wt = InfluencerWallet.fromJson(res);
+        updateWallet(wt);
+        return wt;
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<WalletTransactionResult> creditOrDebitWallet(WalletAction action) async{
+    WalletTransactionResult wtRes = WalletTransactionResult(tran: null, succeeded: false);
+    return await tryAsync("creditOrDebitWallet", () async {
+      String path = "/wallets/";
+      dynamic res = await makeRequest(path: path, isGet: false, data: action.toJson());
+      if (res != null) {
+        WalletHistory ht = WalletHistory.fromJson(res);
+        wtRes.succeeded = true;
+        wtRes.tran = ht;
+        return wtRes;
+      } else {
+        wtRes.succeeded = false;
+        return wtRes;
+      }
+    }, error: (){
+      wtRes.succeeded = false;
+      return wtRes;
+    });
+  }
+
+  Future<bool> verifyPin(String dPin) async {
+    bool verified = false;
+    if(dPin == pin){
+      verified = true;
+      clearPinStatus();
+    }else{
+      await incrementPinTrial();
+    }
+    updatePinStatus(verified);
+    return verified;
+  }
+
+  void updatePinStatus(bool status){
+    pinWasVerified = status;
+    notifyListeners();
+  }
+
+  Future<void> incrementPinTrial() async {
+    if(pinTrial >= 3){
+      pinTrial = 0;
+      blockPin();
+    }else{
+      pinTrial++;
+    }
+    await savePinStatus();
+    notifyListeners();
+  }
+
+  Future<void> unblockPin() async {
+    pinTrial = 0;
+    lastPinTrialAt = null;
+    pinBlocked = false;
+    await savePinStatus();
+    notifyListeners();
+  }
+
+  Future<void> blockPin() async {
+    lastPinTrialAt = DateTime.now();
+    pinBlocked = true;
+    await savePinStatus();
+    notifyListeners();
+  }
+
+  void checkPinBlockage(){
+    if(lastPinTrialAt != null && pinBlocked) {
+      int hours = myStorage.dateDifference(dDate: lastPinTrialAt!, inWhat: 2);
+      if(hours >= 3){
+        unblockPin();
+      }
+    }
+  }
+
+  Future<void> savePinStatus() async {
+    await myStorage.addToStore(key: "pin", value: pin);
+    await myStorage.addToStore(key: "pinTrial", value: pinTrial);
+    await myStorage.addToStore(key: "lastPinTrialAt", value: lastPinTrialAt);
+    await myStorage.addToStore(key: "pinBlocked", value: pinBlocked);
+  }
+
+  Future<void> changeWalletCurrency(String code) async {
+    influencerWalletCurrencyCode = code;
+    await myStorage.addToStore(key: "influencerWalletCurrencyCode", value: influencerWalletCurrencyCode);
+  }
+
+  void getWalletCurrency() {
+    influencerWalletCurrencyCode = myStorage.getFromStore(key: "influencerWalletCurrencyCode")?? "NGN";
+  }
+
+  void getPinStatus() {
+    pin = myStorage.getFromStore(key: "pin");
+    pinTrial = myStorage.getFromStore(key: "pinTrial")?? 0;
+    lastPinTrialAt = myStorage.getFromStore(key: "lastPinTrial");
+    pinBlocked = myStorage.getFromStore(key: "pinBlocked");
+  }
 
   void setDioHeaders(){
     influencerDio.options.headers.addAll({
@@ -55,6 +184,10 @@ class InfluencerNotifier extends ChangeNotifier {
 
   Future<void> initInfluencer() async {
     try{
+      await myStorage.addToStore(key: "pin", value: "1911");
+      await changeWalletCurrency("USD");
+      getPinStatus();
+      getWalletCurrency();
       notifyListeners();
     }catch(ex){
       debugPrint("InfluencerNotifier_initInfluencer Error: $ex");

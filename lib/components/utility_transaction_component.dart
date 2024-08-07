@@ -6,7 +6,7 @@ import 'package:prudapp/models/reloadly.dart';
 
 import '../models/images.dart';
 import '../models/theme.dart';
-import '../pages/recharge/recharge_and_utility_transaction_details.dart';
+import '../pages/recharge/utility_transaction_detail_display.dart';
 import '../singletons/currency_math.dart';
 import '../singletons/i_cloud.dart';
 import '../singletons/shared_local_storage.dart';
@@ -35,8 +35,10 @@ class UtilityTransactionComponentState extends State<UtilityTransactionComponent
   bool loading = false;
 
   void navigate(){
-    if(tran != null){
-      iCloud.goto(context, RechargeAndUtilityTransactionDetails(trans: tran!, tranDetails: widget.tranDetails,));
+    if(tran != null && tran!.transaction != null){
+      iCloud.goto(context, UtilityTransactionDetailDisplay(
+        trans: tran!.transaction!, tranDetails: widget.tranDetails,
+      ));
     }
   }
 

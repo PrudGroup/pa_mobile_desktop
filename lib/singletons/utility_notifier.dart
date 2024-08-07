@@ -28,7 +28,7 @@ class UtilityNotifier extends ChangeNotifier {
   bool paymentMade = false;
   String? paymentId;
   UtilityTransaction? unsavedTrans;
-  UtilityOrder? utilityUnBoughtOrder;
+  UtilityTransactionDetails? unsavedUtilityDetails;
   UtilitySearch? lastUtilitySearch;
   LastBillersUsed? lastBillerUsed;
 
@@ -165,18 +165,18 @@ class UtilityNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> updateUnBoughtOrder(UtilityOrder item) async {
-    utilityUnBoughtOrder = item;
-    await saveUnBoughtOrderToCache();
+  Future<void> updateUnsavedUtilityDetails(UtilityTransactionDetails item) async {
+    unsavedUtilityDetails = item;
+    await saveUnsavedUtilityDetailsToCache();
     notifyListeners();
   }
 
-  Future<void> saveUnBoughtOrderToCache() async {
-    if(utilityUnBoughtOrder != null){
-      Map<String, dynamic> item = utilityUnBoughtOrder!.toJson();
-      await myStorage.addToStore(key: "utilityUnBoughtOrder", value: item);
+  Future<void> saveUnsavedUtilityDetailsToCache() async {
+    if(unsavedUtilityDetails != null){
+      Map<String, dynamic> item = unsavedUtilityDetails!.toJson();
+      await myStorage.addToStore(key: "unsavedUtilityDetails", value: item);
     }else{
-      myStorage.lStore.remove("utilityUnBoughtOrder");
+      myStorage.lStore.remove("unsavedUtilityDetails");
     }
   }
 
@@ -210,10 +210,21 @@ class UtilityNotifier extends ChangeNotifier {
     }
   }
 
-  void getUnBoughtOrderFromCache(){
-    dynamic unboughtAir = myStorage.getFromStore(key: "utilityUnBoughtOrder");
-    if(unboughtAir != null){
-      utilityUnBoughtOrder = UtilityOrder.fromJson(unboughtAir);
+  Future<UtilityOrderResult?> makeOrder(UtilityOrder order) async {
+    String path = "pay";
+    dynamic result = await makeRequest(path: path, isGet: false, data: order.toJson());
+    if(result != null){
+      UtilityOrderResult tran = UtilityOrderResult.fromJson(result);
+      return tran;
+    }else{
+      return null;
+    }
+  }
+
+  void getUnsavedUtilityDetailsFromCache(){
+    dynamic unsavedDetail = myStorage.getFromStore(key: "unsavedUtilityDetails");
+    if(unsavedDetail != null){
+      unsavedUtilityDetails = UtilityTransactionDetails.fromJson(unsavedDetail);
     }
   }
 
@@ -435,7 +446,7 @@ class UtilityNotifier extends ChangeNotifier {
       setDioHeaders();
       String url = "$utilityApiUrl/$path";
       Response res = isGet? (await utilityDio.get(url)) : (await utilityDio.post(url, data: data));
-      debugPrint("Result: $res");
+      // debugPrint("Result: $res");
       return res.data;
     }
   }
@@ -497,12 +508,12 @@ class UtilityNotifier extends ChangeNotifier {
 
   Future<void> clearAllSavePaymentDetails() async {
     unsavedTrans = null;
-    utilityUnBoughtOrder = null;
+    unsavedUtilityDetails = null;
     paymentId = null;
     paymentMade = false;
     continueTransaction = false;
     myStorage.lStore.remove("unsavedTrans");
-    myStorage.lStore.remove("utilityUnBoughtOrder");
+    myStorage.lStore.remove("unsavedUtilityDetails");
     myStorage.lStore.remove("paymentMade");
     myStorage.lStore.remove("paymentId");
   }
@@ -512,12 +523,13 @@ class UtilityNotifier extends ChangeNotifier {
     try{
       await getUtilizeableCountries();
       getDeviceNumbersFromCache();
-      getUnBoughtOrderFromCache();
+      getUnsavedUtilityDetailsFromCache();
       getUnsavedTransFromCache();
       getPaymentStatusFromCache();
       getLastSearchFromCache();
       getLastBillerUsedFromCache();
       updateBillersInLastBillersUsed();
+      if(unsavedTrans != null && unsavedUtilityDetails != null) await saveTransactionToCloud(unsavedUtilityDetails!);
       notifyListeners();
     }catch(ex){
       debugPrint("UtilityNotifier_initUtility Error: $ex");
@@ -531,6 +543,7 @@ class UtilityNotifier extends ChangeNotifier {
 String utilityApiUrl = Constants.apiStatues == 'production'? "https://utilities.reloadly.com" : "https://utilities-sandbox.reloadly.com";
 List<ReloadlyCountry> utilitizedCountries = [];
 double utilityCustomerDiscountInPercentage = 1/3;
+double prudUtilityChargeInPercentage = 0.02;
 String? reloadlyUtilityToken;
 Dio utilityDio = Dio(BaseOptions(
   receiveDataWhenStatusError: true,

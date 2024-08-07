@@ -236,7 +236,7 @@ class TabData extends ChangeNotifier {
           children: [
             Image.asset(
               prudImages.prudIcon,
-              width: 100,
+              width: 60,
               fit: BoxFit.contain,
             ),
             const SizedBox(height: 20,),

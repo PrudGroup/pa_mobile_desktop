@@ -43,11 +43,60 @@ class BillerDetailsState extends State<BillerDetails> {
   int selectedInterIndex = 0;
   int? selectedFixedAmountId;
   bool transactionIsLocal = false;
+  double prudCharges = 0;
+  double totalLocalCharges = 0;
+  double totalInterCharges = 0;
+
+  double getTotalInNaira(bool isLocal){
+    double amount = isLocal? totalLocalToPay : totalInterToPay;
+    String cur = isLocal? widget.biller.localTransactionCurrencyCode! : widget.biller.internationalTransactionCurrencyCode!;
+    if(cur == "NGN"){
+      return amount;
+    }else{
+      if(cur != widget.biller.fx!.currencyCode){
+        return amount;
+      }else{
+        return (( 1/widget.biller.fx!.rate!) * amount);
+      }
+    }
+  }
+
+  double getDiscountInNaira(bool isLocal){
+    double amount = isLocal? localDiscount : interDiscount;
+    String cur = isLocal? widget.biller.localTransactionCurrencyCode! : widget.biller.internationalTransactionCurrencyCode!;
+    if(cur == "NGN"){
+      return amount;
+    }else{
+      if(cur != widget.biller.fx!.currencyCode){
+        return amount;
+      }else{
+        return (( 1/widget.biller.fx!.rate!) * amount);
+      }
+    }
+  }
 
   Future<void> startTransaction(bool isLocal) async {
     tryAsync("startTransaction", () async {
+      // debugPrint("isInter: ${selectedAmount! < widget.biller.minInternationalTransactionAmount! || selectedAmount! > widget.biller.maxInternationalTransactionAmount!}");
+      if(deviceNo == null || deviceNo == "") return;
+      if(isLocal){
+        if(selectedAmount! < widget.biller.minLocalTransactionAmount! || selectedAmount! > widget.biller.maxLocalTransactionAmount!) return;
+      }else{
+        if(selectedAmount! < widget.biller.minInternationalTransactionAmount! || selectedAmount! > widget.biller.maxInternationalTransactionAmount!) return;
+      }
       if(mounted) setState(() => startingTrans = true);
       calculateFigures(isLocal);
+      utilityNotifier.updateSelectedServiceType(utilityNotifier.translateToService(widget.biller.serviceType!));
+      utilityNotifier.updateSelectedUtilityType(utilityNotifier.translateToType(widget.biller.type!));
+      utilityNotifier.updateLastBillerUsed(widget.biller, deviceNo!);
+      utilityNotifier.updateSelectedBiller(widget.biller);
+      utilityNotifier.updateSelectedDeviceNo(UtilityDevice(
+        serviceType: widget.biller.serviceType!,
+        type: widget.biller.type!,
+        countryIsoCode: widget.biller.countryCode!,
+        no: deviceNo!,
+        billerId: widget.biller.id!,
+      ));
       UtilityOrder order = UtilityOrder(
         amount: selectedAmount!,
         billerId: widget.biller.id!,
@@ -73,6 +122,9 @@ class BillerDetailsState extends State<BillerDetails> {
             amountToPay: isLocal? totalLocalToPay : totalInterToPay,
             customerDiscount: isLocal? localDiscount : interDiscount,
             currencyCode: isLocal? widget.biller.localTransactionCurrencyCode! : widget.biller.internationalTransactionCurrencyCode!,
+            amountInNaira: getTotalInNaira(isLocal),
+            customerDiscountInNaira: getDiscountInNaira(isLocal),
+            referralCustomerDiscountPercentage: referralCustomerPercentage,
           );
         }
       ).whenComplete(() async {
@@ -125,8 +177,10 @@ class BillerDetailsState extends State<BillerDetails> {
           }
           if(mounted) {
             setState(() {
+              prudCharges = selectedAmount! * prudUtilityChargeInPercentage;
+              totalLocalCharges = prudCharges + (widget.biller.localTransactionFee?? 0);
               localDiscount = prudCusDiscount + refCusDiscount;
-              totalLocalToPay = localFeeInLocalCurrency + (selectedAmount! - localDiscount);
+              totalLocalToPay = localFeeInLocalCurrency + prudCharges + (selectedAmount! - localDiscount);
               transactionIsLocal = true;
             });
           }
@@ -153,8 +207,10 @@ class BillerDetailsState extends State<BillerDetails> {
           }
           if(mounted) {
             setState(() {
+              prudCharges = selectedAmount! * prudUtilityChargeInPercentage;
+              totalInterCharges = prudCharges + (widget.biller.internationalTransactionFee?? 0);
               interDiscount = prudCusDiscount + refCusDiscount;
-              totalInterToPay = interFeeInInterCurrency + (selectedAmount! - interDiscount);
+              totalInterToPay = interFeeInInterCurrency + prudCharges + (selectedAmount! - interDiscount);
               transactionIsLocal = false;
             });
           }
@@ -169,11 +225,17 @@ class BillerDetailsState extends State<BillerDetails> {
         double? discountFromReferralInPercentage = await influencerNotifier.getLinkReferralPercentage(myStorage.rechargeReferral!);
         double prudDiscount = currencyMath.roundDouble((utilityCustomerDiscountInPercentage * 100), 1);
         if(mounted) {
-          setState(() { 
+          setState(() {
             referralCustomerPercentage = discountFromReferralInPercentage?? 0;
             prudCustomerDiscountInPercentage = prudDiscount;
           });
         }
+      }
+      if(mounted){
+        setState(() {
+          totalInterCharges = prudCharges + (widget.biller.internationalTransactionFee?? 0);
+          totalLocalCharges = prudCharges + (widget.biller.localTransactionFee?? 0);
+        });
       }
     });
   }
@@ -249,7 +311,7 @@ class BillerDetailsState extends State<BillerDetails> {
                                 ),
                               ),
                               Text(
-                                "${tabData.getFormattedNumber(biller.localTransactionFee)}",
+                                "${tabData.getFormattedNumber(totalLocalCharges)}",
                                 style: prudWidgetStyle.btnTextStyle.copyWith(
                                     fontSize: 20.0,
                                     color: prudColorTheme.primary,
@@ -262,15 +324,15 @@ class BillerDetailsState extends State<BillerDetails> {
                                   Text(
                                     "${biller.localTransactionFeePercentage}",
                                     style: prudWidgetStyle.btnTextStyle.copyWith(
-                                        color: prudColorTheme.success,
-                                        fontSize: 12
+                                      color: prudColorTheme.success,
+                                      fontSize: 14
                                     ),
                                   ),
                                   Text(
                                     "%",
                                     style: prudWidgetStyle.btnTextStyle.copyWith(
                                         color: prudColorTheme.textB,
-                                        fontSize: 9
+                                        fontSize: 11
                                     ),
                                   )
                                 ],
@@ -299,11 +361,11 @@ class BillerDetailsState extends State<BillerDetails> {
                                 ),
                               ),
                               Text(
-                                "${tabData.getFormattedNumber(biller.internationalTransactionFee)}",
+                                "${tabData.getFormattedNumber(totalInterCharges)}",
                                 style: prudWidgetStyle.btnTextStyle.copyWith(
-                                    fontSize: 20.0,
-                                    color: prudColorTheme.primary,
-                                    fontWeight: FontWeight.w600
+                                  fontSize: 20.0,
+                                  color: prudColorTheme.primary,
+                                  fontWeight: FontWeight.w600
                                 ),
                               ),
                               spacer.width,
@@ -312,15 +374,15 @@ class BillerDetailsState extends State<BillerDetails> {
                                   Text(
                                     "${biller.internationalTransactionFeePercentage}",
                                     style: prudWidgetStyle.btnTextStyle.copyWith(
-                                        color: prudColorTheme.success,
-                                        fontSize: 12
+                                      color: prudColorTheme.success,
+                                      fontSize: 14
                                     ),
                                   ),
                                   Text(
                                     "%",
                                     style: prudWidgetStyle.btnTextStyle.copyWith(
                                         color: prudColorTheme.textB,
-                                        fontSize: 9
+                                        fontSize: 11
                                     ),
                                   )
                                 ],
@@ -343,6 +405,7 @@ class BillerDetailsState extends State<BillerDetails> {
                       child: Center(
                         child: FittedBox(
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               if(biller.localTransactionCurrencyCode != null) Text(
                                 "${tabData.getCurrencySymbol(biller.internationalTransactionCurrencyCode!)}",
@@ -360,63 +423,59 @@ class BillerDetailsState extends State<BillerDetails> {
                                 ),
                               ),
                               spacer.width,
+                              Row(
+                                children: [
+                                  Text(
+                                    "$prudCustomerDiscountInPercentage",
+                                    style: prudWidgetStyle.btnTextStyle.copyWith(
+                                        color: prudColorTheme.success,
+                                        fontSize: 14
+                                    ),
+                                  ),
+                                  Text(
+                                    "%",
+                                    style: prudWidgetStyle.btnTextStyle.copyWith(
+                                        color: prudColorTheme.textB,
+                                        fontSize: 11
+                                    ),
+                                  )
+                                ],
+                              ),
+                              spacer.width,
                               Stack(
                                 children: [
                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        "$prudCustomerDiscountInPercentage",
+                                        "$referralCustomerPercentage",
                                         style: prudWidgetStyle.btnTextStyle.copyWith(
                                             color: prudColorTheme.success,
-                                            fontSize: 12
+                                            fontSize: 14
                                         ),
                                       ),
                                       Text(
                                         "%",
                                         style: prudWidgetStyle.btnTextStyle.copyWith(
                                             color: prudColorTheme.textB,
-                                            fontSize: 9
+                                            fontSize: 11
                                         ),
                                       )
                                     ],
                                   ),
                                   Padding(
-                                      padding: const EdgeInsets.only(top: 10),
-                                      child: Stack(
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Text(
-                                                "$referralCustomerPercentage",
-                                                style: prudWidgetStyle.btnTextStyle.copyWith(
-                                                    color: prudColorTheme.success,
-                                                    fontSize: 12
-                                                ),
-                                              ),
-                                              Text(
-                                                "%",
-                                                style: prudWidgetStyle.btnTextStyle.copyWith(
-                                                    color: prudColorTheme.textB,
-                                                    fontSize: 9
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(top: 10),
-                                            child: Text(
-                                              "Referral Link",
-                                              style: prudWidgetStyle.btnTextStyle.copyWith(
-                                                  color: prudColorTheme.success,
-                                                  fontSize: 8
-                                              ),
-                                            ),
-                                          )
-                                        ],
-                                      )
+                                    padding: const EdgeInsets.only(top: 15),
+                                    child: Text(
+                                      "Referral Link",
+                                      style: prudWidgetStyle.btnTextStyle.copyWith(
+                                          color: prudColorTheme.success,
+                                          fontSize: 10
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
                                   )
                                 ],
-                              )
+                              ),
                             ],
                           ),
                         ),
@@ -449,60 +508,57 @@ class BillerDetailsState extends State<BillerDetails> {
                                 ),
                               ),
                               spacer.width,
+                              Row(
+                                children: [
+                                  Text(
+                                    "$prudCustomerDiscountInPercentage",
+                                    style: prudWidgetStyle.btnTextStyle.copyWith(
+                                        color: prudColorTheme.success,
+                                        fontSize: 14
+                                    ),
+                                  ),
+                                  Text(
+                                    "%",
+                                    style: prudWidgetStyle.btnTextStyle.copyWith(
+                                        color: prudColorTheme.textB,
+                                        fontSize: 11
+                                    ),
+                                  )
+                                ],
+                              ),
+                              spacer.width,
                               Stack(
                                 children: [
                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       Text(
-                                        "$prudCustomerDiscountInPercentage",
+                                        "$referralCustomerPercentage",
                                         style: prudWidgetStyle.btnTextStyle.copyWith(
                                             color: prudColorTheme.success,
-                                            fontSize: 12
+                                            fontSize: 14
                                         ),
                                       ),
                                       Text(
                                         "%",
                                         style: prudWidgetStyle.btnTextStyle.copyWith(
                                             color: prudColorTheme.textB,
-                                            fontSize: 9
+                                            fontSize: 11
                                         ),
                                       )
                                     ],
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.only(top: 10),
-                                    child: Stack(
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Text(
-                                              "$referralCustomerPercentage",
-                                              style: prudWidgetStyle.btnTextStyle.copyWith(
-                                                  color: prudColorTheme.success,
-                                                  fontSize: 12
-                                              ),
-                                            ),
-                                            Text(
-                                              "%",
-                                              style: prudWidgetStyle.btnTextStyle.copyWith(
-                                                  color: prudColorTheme.textB,
-                                                  fontSize: 9
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(top: 10),
-                                          child: Text(
-                                            "Referral Link",
-                                            style: prudWidgetStyle.btnTextStyle.copyWith(
-                                              color: prudColorTheme.success,
-                                              fontSize: 8
-                                            ),
-                                          ),
-                                        )
-                                      ],
-                                    )
+                                    padding: const EdgeInsets.only(top: 15),
+                                    child: Text(
+                                      "Referral Link",
+                                      style: prudWidgetStyle.btnTextStyle.copyWith(
+                                        color: prudColorTheme.success,
+                                        fontSize: 10
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
                                   )
                                 ],
                               )
@@ -538,7 +594,7 @@ class BillerDetailsState extends State<BillerDetails> {
                       autofocus: true,
                       style: tabData.npStyle,
                       keyboardType: TextInputType.text,
-                      decoration: getDeco("Device No:"),
+                      decoration: getDeco("Device No:", hasBorders: true, onlyBottomBorder: true),
                       onChanged: (dynamic value){
                         tryAsync("deviceNo form", (){
                           if(mounted && value != null) {
@@ -572,8 +628,8 @@ class BillerDetailsState extends State<BillerDetails> {
                               if(biller.localTransactionCurrencyCode != null) Text(
                                 "${tabData.getCurrencySymbol(biller.localTransactionCurrencyCode!)}",
                                 style: tabData.tBStyle.copyWith(
-                                    fontSize: 15.0,
-                                    color: prudColorTheme.textA
+                                  fontSize: 15.0,
+                                  color: prudColorTheme.textA
                                 ),
                               ),
                               Text(
@@ -591,16 +647,16 @@ class BillerDetailsState extends State<BillerDetails> {
                                     "$localDiscount",
                                     style: prudWidgetStyle.btnTextStyle.copyWith(
                                         color: prudColorTheme.success,
-                                        fontSize: 12
+                                        fontSize: 14
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.only(top: 10),
+                                    padding: const EdgeInsets.only(top: 15),
                                     child: Text(
                                       "Discount",
                                       style: prudWidgetStyle.btnTextStyle.copyWith(
                                         color: prudColorTheme.textB,
-                                        fontSize: 8
+                                        fontSize: 10
                                       ),
                                     ),
                                   )
@@ -615,7 +671,7 @@ class BillerDetailsState extends State<BillerDetails> {
                   spacer.width,
                   Expanded(
                     child: PrudPanel(
-                      title: "Global Fee",
+                      title: "Global: Total",
                       hasPadding: true,
                       bgColor: prudColorTheme.bgC,
                       child: Center(
@@ -644,16 +700,16 @@ class BillerDetailsState extends State<BillerDetails> {
                                     "$interDiscount",
                                     style: prudWidgetStyle.btnTextStyle.copyWith(
                                         color: prudColorTheme.success,
-                                        fontSize: 12
+                                        fontSize: 14
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.only(top: 10),
+                                    padding: const EdgeInsets.only(top: 15),
                                     child: Text(
                                       "Discount",
                                       style: prudWidgetStyle.btnTextStyle.copyWith(
                                           color: prudColorTheme.textB,
-                                          fontSize: 8
+                                          fontSize: 10
                                       ),
                                     ),
                                   )
@@ -747,11 +803,13 @@ class BillerDetailsState extends State<BillerDetails> {
                                 name: 'deno',
                                 style: tabData.npStyle,
                                 keyboardType: TextInputType.number,
-                                decoration: getDeco("Amount"),
+                                decoration: getDeco("Amount",  hasBorders: true, onlyBottomBorder: true),
                                 onChanged: (dynamic value){
                                   tryAsync("local amount form", (){
                                     if(mounted && value != null) {
-                                      setState(() => selectedAmount = double.parse(value?.trim()));
+                                      setState(() {
+                                        selectedAmount = double.parse(value?.trim());
+                                      });
                                     }
                                     calculateFigures(true);
                                   });
@@ -824,7 +882,7 @@ class BillerDetailsState extends State<BillerDetails> {
                                 size: 40,
                                 spinnerColor: prudColorTheme.primary,
                               ) : prudWidgetStyle.getIconButton(
-                                onPressed: () => startTransaction(true),
+                                onPressed: () async => await startTransaction(true),
                                 isIcon: false,
                                 image: widget.buttonIcon,
                               ),
@@ -917,11 +975,13 @@ class BillerDetailsState extends State<BillerDetails> {
                                 name: 'deno',
                                 style: tabData.npStyle,
                                 keyboardType: TextInputType.number,
-                                decoration: getDeco("Amount"),
+                                decoration: getDeco("Amount", hasBorders: true, onlyBottomBorder: true),
                                 onChanged: (dynamic value){
                                   tryAsync("inter amount form", (){
                                     if(mounted && value != null) {
-                                      setState(() => selectedAmount = double.parse(value?.trim()));
+                                      setState(() {
+                                        selectedAmount = double.parse(value?.trim());
+                                      });
                                     }
                                     calculateFigures(false);
                                   });
@@ -994,7 +1054,7 @@ class BillerDetailsState extends State<BillerDetails> {
                                 size: 40,
                                 spinnerColor: prudColorTheme.primary,
                               ) : prudWidgetStyle.getIconButton(
-                                onPressed: () => startTransaction(false),
+                                onPressed: () async => await startTransaction(false),
                                 isIcon: false,
                                 image: widget.buttonIcon,
                               ),
@@ -1066,7 +1126,8 @@ class BillerDetailsState extends State<BillerDetails> {
                   
                 ],
               ),
-              largeSpacer.height,
+              xLargeSpacer.height,
+              largeSpacer.height
             ],
           ),
         ),

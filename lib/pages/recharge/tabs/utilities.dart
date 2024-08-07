@@ -547,7 +547,10 @@ class UtilitiesState extends State<Utilities> {
                     )
                         :
                     prudWidgetStyle.getIconButton(
-                      onPressed: getBillers,
+                      onPressed: () async {
+                        utilityNotifier.billers = [];
+                        await getBillers();
+                      },
                       isIcon: false,
                       image: typeIcon
                     ),
