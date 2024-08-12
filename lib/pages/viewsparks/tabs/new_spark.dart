@@ -16,11 +16,12 @@ import 'package:country_state_city/models/state.dart' as ms;
 import '../../../components/countries_picker.dart';
 import '../../../components/figure_display.dart';
 import '../../../components/loading_component.dart';
-import '../../../components/pay_in.dart';
+import '../../../components/pay_from_wallet.dart';
 import '../../../components/prud_data_viewer.dart';
 import '../../../components/translate_text.dart';
 import '../../../models/spark_cost.dart';
 import '../../../models/theme.dart';
+import '../../../models/wallet.dart';
 import '../../../singletons/currency_math.dart';
 import '../../../singletons/shared_local_storage.dart';
 import '../../../singletons/tab_data.dart';
@@ -116,7 +117,9 @@ class NewSparkState extends State<NewSpark> {
   double? totalCost;
   double? vat;
   double? sumTotal;
+  double amountInNaira = 0;
   ScrollController scrollCtrl = ScrollController();
+
 
   Future<void> registerSpark() async {
     if (myStorage.user != null && myStorage.user!.id != null) {
@@ -285,6 +288,9 @@ class NewSparkState extends State<NewSpark> {
           case SparkCreationPhase.fifth:
             {
               getTotal();
+              tryAsync("SparkCreationPhase.fifth", () async {
+                amountInNaira = await getTotalInNaira();
+              });
               presentPhase = SparkCreationPhase.sixth;
             }
           case SparkCreationPhase.sixth:
@@ -412,6 +418,14 @@ class NewSparkState extends State<NewSpark> {
       }
     }
     return res;
+  }
+
+  Future<double> getTotalInNaira() async {
+    return await currencyMath.convert(
+      amount: totalCost?? sumTotal!,
+      quoteCode: "NGN",
+      baseCode: "EUR"
+    );
   }
 
   @override
@@ -1201,21 +1215,24 @@ class NewSparkState extends State<NewSpark> {
                                           Column(
                                             children: [
                                               spacer.height,
-                                              if (loading)
-                                                LoadingComponent(
+                                              if (loading) LoadingComponent(
                                                   shimmerType: 1,
                                                   height: screen.height - 100,
                                                 ),
-                                              PayIn(
-                                                  amount: sumTotal!,
-                                                  onPaymentMade:(bool verified, String transID) {
-                                                    if (mounted) setState(() => loading = true);
-                                                    if (verified) {
+                                              PayFromWallet(
+                                                currencyCode: "EUR",
+                                                walletType: WalletType.influencer,
+                                                forDesc: "Spark Purchase",
+                                                amountInNaira: amountInNaira,
+                                                amount: sumTotal!,
+                                                onPaymentCompleted: (WalletTransactionResult status){
+                                                  if(mounted){
+                                                    setState(() => loading = true);
+                                                    if(status.tran != null && status.succeeded) {
                                                       Future.delayed(Duration.zero, () async {
                                                         await currencyMath.loginAutomatically();
                                                         if (iCloud.affAuthToken != null) {
-                                                          bool saved = await savePaymentToCloud(transID);
-                                                          debugPrint("saved: $saved");
+                                                          bool saved = await savePaymentToCloud(status.tran!.transId);
                                                           if (saved && mounted) {
                                                             setState(() {
                                                               presentPhase = SparkCreationPhase.success;
@@ -1239,25 +1256,25 @@ class NewSparkState extends State<NewSpark> {
                                                           }
                                                         }
                                                       });
-                                                    } else {
-                                                      if (mounted) {
-                                                        setState(() {
-                                                          hasError = true;
-                                                          errorMsg = "Unable to verify payment.";
-                                                          presentPhase = SparkCreationPhase.failed;
-                                                          loading = false;
-                                                        });
-                                                      }
-                                                    }
-                                                  },
-                                                  onCancel: () {
-                                                    if (mounted) {
+                                                    }else{
                                                       setState(() {
-                                                        errorMsg = "Payment Canceled";
+                                                        hasError = true;
+                                                        errorMsg = "Unable to verify payment.";
                                                         presentPhase = SparkCreationPhase.failed;
+                                                        loading = false;
                                                       });
                                                     }
-                                                  }),
+                                                  }
+                                                },
+                                                onCanceled: (){
+                                                  if (mounted) {
+                                                    setState(() {
+                                                      errorMsg = "Payment Canceled";
+                                                      presentPhase = SparkCreationPhase.failed;
+                                                    });
+                                                  }
+                                                }
+                                              ),
                                               largeSpacer.height,
                                             ],
                                           )

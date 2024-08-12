@@ -1668,7 +1668,7 @@ class Utility {
   double? deliveryAmount;
   String? deliveryAmountCurrencyCode;
   double? discount;
-  double? discountCurrencyCode;
+  String? discountCurrencyCode;
   double? fee;
   String? feeCurrencyCode;
   int? id;

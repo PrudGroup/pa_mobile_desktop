@@ -23,10 +23,12 @@ class PinVerifierState extends State<PinVerifier> {
   int trials = 0;
   bool verified = false;
   DateTime? lastTrialedAt;
+  TextEditingController txtCtrl = TextEditingController();
 
 
   void setFigures(){
     if(mounted){
+      txtCtrl.text = "";
       setState(() {
         switch(widget.walletType){
           case WalletType.influencer: {
@@ -48,10 +50,12 @@ class PinVerifierState extends State<PinVerifier> {
   String getTrialText() {
     if(trials == 0){
       return "You only have 3 trials. Type your pin.";
-    }else if(trials < 0 && trials <= 2){
+    }else if(trials > 0 && trials <= 2){
       return "You have ${3 - trials} more trials left.";
-    }else{
+    }else if(trials == 3){
       return "This is your last trial after which your pin will be blocked.";
+    }else{
+      return "Pin Blocked. You have to wait for 3 hours";
     }
   }
 
@@ -60,8 +64,8 @@ class PinVerifierState extends State<PinVerifier> {
     super.dispose();
   }
 
-  String? verifyPin(String typedPin) {
-    tryAsync("verifyPin", () async {
+  Future<String?> verifyPin(String typedPin) async {
+    return await tryAsync("verifyPin", () async {
       switch(widget.walletType){
         case WalletType.influencer: {
           bool res = await influencerNotifier.verifyPin(typedPin);
@@ -75,7 +79,6 @@ class PinVerifierState extends State<PinVerifier> {
         default: return "";
       }
     });
-    return null;
   }
 
   @override
@@ -124,15 +127,12 @@ class PinVerifierState extends State<PinVerifier> {
             Pinput(
               obscureText: true,
               autofocus: true,
-              validator: (typedPin) => typedPin != null? verifyPin(typedPin) : "failed",
-              pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
+              controller: txtCtrl,
+              pinputAutovalidateMode: PinputAutovalidateMode.disabled,
               showCursor: true,
-              onCompleted: (pin) {
-                debugPrint("PinTried: $pin");
+              onCompleted: (pin) async {
+                await verifyPin(pin);
                 widget.onVerified(verified);
-                if(trials > 3 || verified) {
-                  Navigator.pop(context);
-                }
               },
             )
           ],

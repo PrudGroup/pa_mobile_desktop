@@ -17,7 +17,7 @@ class WalletTransactionResult{
 }
 
 class WalletHistory{
-  String id;
+  String? id;
   bool isCredit;
   String walletId;
   String transId;
@@ -32,7 +32,7 @@ class WalletHistory{
 
   WalletHistory({
     required this.isCredit,
-    required this.id,
+    this.id,
     required this.amount,
     required this.currency,
     required this.transId,
@@ -138,7 +138,7 @@ class Wallet{
     return {
       "id": id,
       "balance": balance,
-      "createdOn": createdOn,
+      "createdOn": createdOn.toIso8601String(),
       "balanceAsAt": balanceAsAt.toIso8601String(),
     };
   }
@@ -147,7 +147,7 @@ class Wallet{
     return Wallet(
       id: json["id"],
       balance: json["balance"],
-      createdOn: json["created_on"],
+      createdOn: DateTime.parse(json["created_on"]),
       balanceAsAt: DateTime.parse(json["balance_as_at"])
     );
   }
@@ -176,8 +176,8 @@ class InfluencerWallet extends Wallet {
       affId: json["aff_id"],
       id: json["id"],
       balance: json["balance"],
-      createdOn: json["created_on"],
-      balanceAsAt: json["balance_as_at"]
+      createdOn: DateTime.parse(json["created_on"]),
+      balanceAsAt: DateTime.parse(json["balance_as_at"])
     );
   }
 }
@@ -205,8 +205,8 @@ class ShipperWallet extends Wallet {
         shipperId: json["shipper_id"],
         id: json["id"],
         balance: json["balance"],
-        createdOn: json["created_on"],
-        balanceAsAt: json["balance_as_at"]
+        createdOn: DateTime.parse(json["created_on"]),
+        balanceAsAt: DateTime.parse(json["balance_as_at"])
     );
   }
 }
@@ -234,8 +234,8 @@ class HotelWallet extends Wallet {
       hotelId: json["hotel_id"],
       id: json["id"],
       balance: json["balance"],
-      createdOn: json["created_on"],
-      balanceAsAt: json["balance_as_at"]
+      createdOn: DateTime.parse(json["created_on"]),
+      balanceAsAt: DateTime.parse(json["balance_as_at"])
     );
   }
 }
@@ -263,8 +263,8 @@ class BusWallet extends Wallet {
         busId: json["busId"],
         id: json["id"],
         balance: json["balance"],
-        createdOn: json["created_on"],
-        balanceAsAt: json["balance_as_at"]
+        createdOn: DateTime.parse(json["created_on"]),
+        balanceAsAt: DateTime.parse(json["balance_as_at"])
     );
   }
 }
@@ -292,8 +292,8 @@ class SwitzStoreWallet extends Wallet {
         storeId: json["store_id"],
         id: json["id"],
         balance: json["balance"],
-        createdOn: json["created_on"],
-        balanceAsAt: json["balance_as_at"]
+        createdOn: DateTime.parse(json["created_on"]),
+        balanceAsAt: DateTime.parse(json["balance_as_at"])
     );
   }
 }

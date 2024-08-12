@@ -43,12 +43,18 @@ class PayFromWalletState extends State<PayFromWallet> {
   double amountInWalletSelectedCurrency = 0;
   bool continueTransaction = false;
   bool pinVerified = false;
+  bool unableToGetWallet = false;
 
 
   Future<void> checkBalance() async {
     await tryAsync("checkBalance", () async {
       if(myStorage.user != null && myStorage.user!.id != null && influencerNotifier.influencerWalletCurrencyCode != null){
-        if(mounted) setState(() => loading = true);
+        if(mounted) {
+          setState(() {
+            loading = true;
+            unableToGetWallet = false;
+          });
+        }
         dynamic wallet;
         switch(widget.walletType){
           case WalletType.influencer: {
@@ -69,12 +75,20 @@ class PayFromWalletState extends State<PayFromWallet> {
           setState(() {
             walletBalance = wallet.balance;
             hasCheckedWallet = true;
+            unableToGetWallet = false;
             balanceIsSufficient = wallet.checkIfSufficient(widget.amountInNaira);
             amountInWalletSelectedCurrency = amtInWalletSelectedCurrency;
+            loading = false;
           });
+        }else{
+          if(mounted){
+            setState(() {
+              unableToGetWallet = true;
+              loading = false;
+            });
+          }
         }
       }
-      if(mounted) setState(() => loading = false);
     },error: (){
       if(mounted) setState(() => loading = false);
     });
@@ -100,7 +114,18 @@ class PayFromWalletState extends State<PayFromWallet> {
                 isCreditAction: false
               );
               WalletTransactionResult debited = await influencerNotifier.creditOrDebitWallet(action);
-              widget.onPaymentCompleted(debited);
+              if(debited.tran != null && debited.succeeded){
+                widget.onPaymentCompleted(debited);
+              }else{
+                if(mounted){
+                  setState(() {
+                    balanceIsSufficient = false;
+                    paymentMade = false;
+                    hasCheckedWallet = true;
+                  });
+                }
+              }
+
             }
           case WalletType.shipper:
             return "";
@@ -125,6 +150,7 @@ class PayFromWalletState extends State<PayFromWallet> {
   @override
   void initState(){
     Future.delayed(Duration.zero, () async {
+      if(mounted) setState(() => loading = true);
       await checkBalance();
     });
     super.initState();
@@ -152,9 +178,9 @@ class PayFromWalletState extends State<PayFromWallet> {
             spacer.height,
             if(!pinVerified) PinVerifier(
               walletType: widget.walletType,
-              onVerified: (bool status){
+              onVerified: (bool status) async {
                 if(mounted) setState(() => pinVerified = status);
-                if(pinVerified) makePayment();
+                if(pinVerified) await makePayment();
               },
             ),
           ],
@@ -167,8 +193,8 @@ class PayFromWalletState extends State<PayFromWallet> {
                 spacer.height,
                 Translate(
                   text: "This transaction will debit your wallet, the sum of ${tabData.getCurrencySymbol(widget.currencyCode)}${widget.amount} "
-                      "( ${tabData.getCurrencySymbol(influencerNotifier.influencerWalletCurrencyCode!)}$amountInWalletSelectedCurrency, ${tabData.getCurrencySymbol('NGN')}${widget.amountInNaira}). "
-                      ". Should this transaction continue?",
+                      "( ${tabData.getCurrencySymbol(influencerNotifier.influencerWalletCurrencyCode!)}$amountInWalletSelectedCurrency, ${tabData.getCurrencySymbol('NGN')}${widget.amountInNaira}) will be deducted. "
+                      " Should this transaction continue?",
                   style: prudWidgetStyle.tabTextStyle.copyWith(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
@@ -197,36 +223,71 @@ class PayFromWalletState extends State<PayFromWallet> {
               ],
             )
                 :
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                spacer.height,
-                Translate(
-                  text: "Insufficient Fund.",
-                  style: prudWidgetStyle.tabTextStyle.copyWith(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: prudColorTheme.error,
+            (
+              unableToGetWallet?
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  spacer.height,
+                  Translate(
+                    text: "Wallet Inaccessible.",
+                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: prudColorTheme.error,
+                    ),
+                    align: TextAlign.center,
                   ),
-                  align: TextAlign.center,
-                ),
-                spacer.height,
-                Translate(
-                  text: "Your wallet balance is presently Insufficient.",
-                  style: prudWidgetStyle.tabTextStyle.copyWith(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: prudColorTheme.textB,
+                  spacer.height,
+                  Translate(
+                    text: "Unable to reach Prud services. Check your networks.",
+                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: prudColorTheme.textB,
+                    ),
+                    align: TextAlign.center,
                   ),
-                  align: TextAlign.center,
-                ),
-                spacer.height,
-                prudWidgetStyle.getLongButton(
-                    onPressed: () => Navigator.pop(context),
-                    text: "Cancel Transaction"
-                ),
-              ],
+                  spacer.height,
+                  prudWidgetStyle.getLongButton(
+                      onPressed: checkBalance,
+                      text: "Try Again"
+                  ),
+                ],
+              )
+              :
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  spacer.height,
+                  Translate(
+                    text: "Insufficient Fund.",
+                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: prudColorTheme.error,
+                    ),
+                    align: TextAlign.center,
+                  ),
+                  spacer.height,
+                  Translate(
+                    text: "Your wallet balance is presently Insufficient.",
+                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: prudColorTheme.textB,
+                    ),
+                    align: TextAlign.center,
+                  ),
+                  spacer.height,
+                  prudWidgetStyle.getLongButton(
+                      onPressed: () => Navigator.pop(context),
+                      text: "Cancel Transaction"
+                  ),
+                ],
+              )
             )
         )
       )

@@ -382,7 +382,7 @@ class UtilitiesState extends State<Utilities> {
         actions: [
           if(utilityNotifier.deviceNumbers.isNotEmpty) IconButton(
             onPressed: showDevices,
-            icon: const Icon(Icons.devices_other_outlined),
+            icon: const Icon(Icons.devices),
             color: prudColorTheme.bgA,
             iconSize: 18,
           ),
@@ -572,7 +572,7 @@ class UtilitiesState extends State<Utilities> {
               ),
             ),
             if(foundBillers.isEmpty && utilityNotifier.billers.isNotEmpty) noSearchedBillerFound,
-            if(foundBillers.isEmpty && utilityNotifier.billers.isEmpty) noBiller,
+            if(foundBillers.isEmpty && utilityNotifier.billers.isEmpty && selectedBiller == null) noBiller,
             if(selectedBiller != null && selectedBiller!.id != null) BillerComponent(
               biller: selectedBiller!,
               selected: checkIfBillerIsSelected(selectedBiller!.id!)

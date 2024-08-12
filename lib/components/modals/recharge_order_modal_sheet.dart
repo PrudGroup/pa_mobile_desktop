@@ -8,11 +8,12 @@ import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
 import '../../models/theme.dart';
+import '../../models/wallet.dart';
 import '../../singletons/currency_math.dart';
 import '../../singletons/i_cloud.dart';
+import '../pay_from_wallet.dart';
 import '../translate_text.dart';
 import '../loading_component.dart';
-import '../pay_in.dart';
 import '../prud_showroom.dart';
 
 class RechargeOrderModalSheet extends StatefulWidget {
@@ -53,7 +54,7 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
   TopUpTransaction? transaction;
   TopUpTransaction? unSavedTrans;
   TopUpOrder? unboughtOrder;
-  List<RechargeTransactionDetails> details = rechargeNotifier.transactions;
+  RechargeTransactionDetails? details;
   bool hasPaid = false;
   double discount = 0;
   double referralComInPercentage = 0;
@@ -122,7 +123,7 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
       if (myStorage.installReferralCode == null) appReferralCommission = 0;
       if (myStorage.giftReferral == null) referComm = 0;
       double profit = income - (referComm + appReferralCommission);
-      RechargeTransactionDetails details = RechargeTransactionDetails(
+      RechargeTransactionDetails dDetails = RechargeTransactionDetails(
         income: income,
         installReferralCommission: appReferralCommission,
         installReferralId: appReferralCommission > 0 ? myStorage.installReferralCode : null,
@@ -146,9 +147,11 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
         providerPhoto: widget.operator.logoUrls?[0],
         transactionType: widget.isAirtime ? "Airtime" : "Data Bundle",
       );
-      debugPrint("Trans Amount: ${details.transactionCost} | Profit: ${details.profitForPrudapp}");
-      saved = await rechargeNotifier.saveTransactionToCloud(details);
-      if (saved == true) rechargeNotifier.addToTransactions(details);
+      saved = await rechargeNotifier.saveTransactionToCloud(dDetails);
+      if (saved == true) {
+        if(mounted) setState(() => details = dDetails);
+        rechargeNotifier.addToTransactions(dDetails);
+      }
     }catch(ex){
       debugPrint("addTransCloud: $ex");
     }
@@ -156,6 +159,14 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
   }
 
   Future<void> paymentMade(String transID) async {
+    WalletAction refundAction = WalletAction(
+      amount: totalAmountToPay,
+      affId: myStorage.user!.id!,
+      selectedCurrency: "NGN",
+      amtInSelectedCurrency: totalAmountToPay,
+      channel: "REFUNDED: $paymentId : TopUp",
+      isCreditAction: true
+    );
     try{
       if(mounted) {
         setState(() {
@@ -197,6 +208,12 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
           if(mounted) {
             setState(() => unboughtOrder = newOrder);
             await setUnfinishedData();
+            if(paymentWasMade && paymentId != null && !itemWasBought){
+              WalletTransactionResult resp = await influencerNotifier.creditOrDebitWallet(refundAction);
+              if(resp.succeeded){
+                rechargeNotifier.clearAllSavePaymentDetails();
+              }
+            }
           }
         }
         if(mounted){
@@ -223,10 +240,17 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
             hasAttempted = true;
             itSucceeded = false;
             showPay = false;
+            paymentWasMade = false;
           });
         }
       }else{
         await setUnfinishedData();
+        if(paymentWasMade && paymentId != null && !itemWasBought){
+          WalletTransactionResult resp = await influencerNotifier.creditOrDebitWallet(refundAction);
+          if(resp.succeeded){
+            rechargeNotifier.clearAllSavePaymentDetails();
+          }
+        }
         if(mounted){
           setState((){
             purchasing = false;
@@ -235,12 +259,19 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
             hasAttempted = true;
             itSucceeded = false;
             showPay = false;
+            paymentWasMade = false;
           });
         }
       }
     }catch(ex){
       debugPrint("PaymentMade Error: $ex");
       await setUnfinishedData();
+      if(paymentWasMade && paymentId != null && !itemWasBought){
+        WalletTransactionResult resp = await influencerNotifier.creditOrDebitWallet(refundAction);
+        if(resp.succeeded){
+          rechargeNotifier.clearAllSavePaymentDetails();
+        }
+      }
       if(mounted) {
         setState(() {
           purchasing = false;
@@ -249,6 +280,7 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
           hasAttempted = true;
           itSucceeded = false;
           showPay = false;
+          paymentWasMade = false;
         });
       }
     }
@@ -367,11 +399,6 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
       rechargeNotifier.transactions = [];
     });
     super.initState();
-    rechargeNotifier.addListener((){
-      if(mounted){
-        details = rechargeNotifier.transactions;
-      }
-    });
   }
 
 
@@ -389,35 +416,46 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
           borderRadius: prudRad,
           child: SizedBox(
             height: double.maxFinite,
-            child: Column(
-              children: [
-                if(loading || purchasing || savingTrans) const LoadingComponent(
-                  isShimmer: false,
-                  size: 30,
-                  defaultSpinnerType: false,
-                ),
-                if((!loading && !purchasing && !savingTrans) && totalAmountToPay > 0 && weHaveEnoughBalance && !paymentWasMade && !hasAttempted && showPay) Expanded(
-                  child:  PayIn(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                children: [
+                  if(loading || purchasing || savingTrans) const LoadingComponent(
+                    isShimmer: false,
+                    size: 30,
+                    defaultSpinnerType: false,
+                  ),
+                  if((!loading && !purchasing && !savingTrans) && totalAmountToPay > 0 && weHaveEnoughBalance && !paymentWasMade && !hasAttempted && showPay) PayFromWallet(
+                      currencyCode: "NGN",
+                      walletType: WalletType.influencer,
+                      forDesc: "TopUp Purchase",
+                      amountInNaira: totalAmountToPay,
                       amount: totalAmountToPay,
-                      currencyCode: 'NGN',
-                      countryCode: "NG",
-                      useOpay: false,
-                      onPaymentMade:(bool verified, String transID) {
-                        if (mounted) setState(() => loading = true);
-                        if (verified) {
-                          Future.delayed(Duration.zero, () async {
-                            await paymentMade(transID);
+                      onPaymentCompleted: (WalletTransactionResult status){
+                        rechargeNotifier.updatePaymentStatus(
+                            status.succeeded, status.tran!.transId, widget.isAirtime
+                        );
+                        if(mounted){
+                          setState(() {
+                            loading = true;
+                            paymentWasMade = status.succeeded;
+                            if(status.tran != null) paymentId = status.tran!.transId;
                           });
-                        } else {
-                          if (mounted) {
-                            setState(() {
-                              errorMsg = "Unable to verify payment.";
-                              loading = false;
+                          if(paymentId != null && paymentWasMade) {
+                            Future.delayed(Duration.zero, () async {
+                              await paymentMade(paymentId!);
                             });
+                          }else{
+                            if (mounted) {
+                              setState(() {
+                                errorMsg = "Unable to verify payment.";
+                                loading = false;
+                              });
+                            }
                           }
                         }
                       },
-                      onCancel: () {
+                      onCanceled: (){
                         if (mounted) {
                           setState(() {
                             errorMsg = "Payment Canceled";
@@ -433,122 +471,108 @@ class RechargeOrderModalSheetState extends State<RechargeOrderModalSheet> {
                         }
                       }
                   ),
-                ),
-                if((!loading && !purchasing && !savingTrans) && paymentWasMade && itemWasBought && transaction != null && tranWasSaved && unSavedTrans == null && errorMsg == null) Column(
-                  children: [
-                    prudWidgetStyle.getLongButton(
-                        onPressed: () => Navigator.pop(context),
-                        text: "Finished"
-                    ),
-                    spacer.height,
-                  ],
-                ),
-                if((!loading && !purchasing && !savingTrans) && paymentWasMade && itemWasBought && transaction != null && tranWasSaved && unSavedTrans == null && errorMsg == null) Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 40),
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: rechargeNotifier.transactions.length,
-                      itemBuilder: (context, index){
-                        RechargeTransactionDetails detail = rechargeNotifier.transactions[index];
-                        return RechargeTransactionComponent(
-                          tranDetails: detail,
-                          tran: transaction,
-                        );
-                      },
-                    )
-                ),
-                if(!loading && !purchasing && !savingTrans) Column(
-                  children: [
-                    if(paymentWasMade && paymentId != null && !itemWasBought) Padding(
-                      padding: const EdgeInsets.only(left: 10, right: 10),
-                      child: Column(
-                        children: [
-                          spacer.height,
-                          Translate(
-                            text: "Payment was successful but your recharge transaction seems to have failed. You must try again.",
-                            style: prudWidgetStyle.tabTextStyle.copyWith(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16,
-                                color: prudColorTheme.textB
-                            ),
-                            align: TextAlign.center,
-                          ),
-                          spacer.height,
-                          prudWidgetStyle.getLongButton(
-                              onPressed: () async => paymentMade(paymentId!),
-                              text: "Try Purchasing"
-                          ),
-                          spacer.height,
-                        ],
+                  if((!loading && !purchasing && !savingTrans) && paymentWasMade && itemWasBought && transaction != null && tranWasSaved && unSavedTrans == null && errorMsg == null) Column(
+                    children: [
+                      prudWidgetStyle.getLongButton(
+                          onPressed: () => Navigator.pop(context),
+                          text: "Finished"
                       ),
-                    ),
-                    if(unSavedTrans == null && paymentWasMade && itemWasBought && unboughtOrder != null) Padding(
-                      padding: const EdgeInsets.only(left: 10, right: 10),
-                      child: Column(
-                        children: [
-                          spacer.height,
-                          Translate(
-                            text: "Your selected recharge did not go through.",
-                            style: prudWidgetStyle.tabTextStyle.copyWith(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16,
-                                color: prudColorTheme.textB
-                            ),
-                            align: TextAlign.center,
-                          ),
-                          spacer.height,
-                          prudWidgetStyle.getLongButton(
-                              onPressed: () async => paymentMade(paymentId!),
-                              text: "Try Again"
-                          ),
-                          spacer.height,
-                        ],
-                      ),
-                    ),
-                    if(unSavedTrans != null) Padding(
-                      padding: const EdgeInsets.only(left: 10, right: 10),
-                      child: Column(
-                        children: [
-                          spacer.height,
-                          Translate(
-                            text: "Oops!. Some gifts transactions could not be saved. Check your network and try again.",
-                            style: prudWidgetStyle.tabTextStyle.copyWith(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16,
-                                color: prudColorTheme.textB
-                            ),
-                            align: TextAlign.center,
-                          ),
-                          spacer.height,
-                          prudWidgetStyle.getLongButton(
-                              onPressed: saveUnsavedTrans,
-                              text: "Save Gifts Transactions"
-                          ),
-                          spacer.height,
-                        ],
-                      ),
-                    ),
-                    if(errorMsg != null && unSavedTrans != null) Padding(
-                      padding: const EdgeInsets.only(top: 20, left: 10, right: 10),
-                      child: Translate(
-                        text: "$errorMsg",
-                        style: prudWidgetStyle.tabTextStyle.copyWith(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16,
-                          color: prudColorTheme.primary
-                        ),
-                        align: TextAlign.center,
-                      ),
-                    ),
-                  ],
-                ),
-                if(loading || purchasing || savingTrans || (transaction != null && !showPay)) Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(left: 10, right: 10),
-                    child: PrudShowroom(items: showroom,),
+                      spacer.height,
+                    ],
                   ),
-                ),
-              ],
+                  if((!loading && !purchasing && !savingTrans) && paymentWasMade && itemWasBought && transaction != null && details != null && tranWasSaved && unSavedTrans == null && errorMsg == null) RechargeTransactionComponent(
+                    tranDetails: details!,
+                    tran: transaction,
+                  ),
+                  if(!loading && !purchasing && !savingTrans) Column(
+                    children: [
+                      if(paymentWasMade && paymentId != null && !itemWasBought) Padding(
+                        padding: const EdgeInsets.only(left: 10, right: 10),
+                        child: Column(
+                          children: [
+                            spacer.height,
+                            Translate(
+                              text: "Payment was successful but your recharge transaction seems to have failed. You must try again.",
+                              style: prudWidgetStyle.tabTextStyle.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16,
+                                  color: prudColorTheme.textB
+                              ),
+                              align: TextAlign.center,
+                            ),
+                            spacer.height,
+                            prudWidgetStyle.getLongButton(
+                                onPressed: () async => paymentMade(paymentId!),
+                                text: "Try Purchasing"
+                            ),
+                            spacer.height,
+                          ],
+                        ),
+                      ),
+                      if(unSavedTrans == null && paymentWasMade && itemWasBought && unboughtOrder != null) Padding(
+                        padding: const EdgeInsets.only(left: 10, right: 10),
+                        child: Column(
+                          children: [
+                            spacer.height,
+                            Translate(
+                              text: "Your selected recharge did not go through.",
+                              style: prudWidgetStyle.tabTextStyle.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16,
+                                  color: prudColorTheme.textB
+                              ),
+                              align: TextAlign.center,
+                            ),
+                            spacer.height,
+                            prudWidgetStyle.getLongButton(
+                                onPressed: () async => paymentMade(paymentId!),
+                                text: "Try Again"
+                            ),
+                            spacer.height,
+                          ],
+                        ),
+                      ),
+                      if(unSavedTrans != null) Padding(
+                        padding: const EdgeInsets.only(left: 10, right: 10),
+                        child: Column(
+                          children: [
+                            spacer.height,
+                            Translate(
+                              text: "Oops!. Some gifts transactions could not be saved. Check your network and try again.",
+                              style: prudWidgetStyle.tabTextStyle.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16,
+                                  color: prudColorTheme.textB
+                              ),
+                              align: TextAlign.center,
+                            ),
+                            spacer.height,
+                            prudWidgetStyle.getLongButton(
+                                onPressed: saveUnsavedTrans,
+                                text: "Save Gifts Transactions"
+                            ),
+                            spacer.height,
+                          ],
+                        ),
+                      ),
+                      if(errorMsg != null && unSavedTrans != null) Padding(
+                        padding: const EdgeInsets.only(top: 20, left: 10, right: 10),
+                        child: Translate(
+                          text: "$errorMsg",
+                          style: prudWidgetStyle.tabTextStyle.copyWith(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                              color: prudColorTheme.primary
+                          ),
+                          align: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                  spacer.height,
+                  PrudShowroom(items: showroom,),
+                ],
+              ),
             ),
           )
       ),

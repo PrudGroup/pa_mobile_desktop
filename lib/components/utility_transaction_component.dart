@@ -260,7 +260,7 @@ class UtilityTransactionComponentState extends State<UtilityTransactionComponent
                             ),
                           ),
                           Text(
-                            "${widget.tranDetails.transactionPaidInSelected}",
+                            "${currencyMath.roundDouble(widget.tranDetails.transactionPaidInSelected!, 2)}",
                             style: TextStyle(
                               fontSize: 20.0,
                               color: prudColorTheme.bgA,

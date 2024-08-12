@@ -46,6 +46,9 @@ class BillerDetailsState extends State<BillerDetails> {
   double prudCharges = 0;
   double totalLocalCharges = 0;
   double totalInterCharges = 0;
+  FocusNode focusNode1 = FocusNode();
+  FocusNode focusNode2 = FocusNode();
+  FocusNode focusNode3 = FocusNode();
 
   double getTotalInNaira(bool isLocal){
     double amount = isLocal? totalLocalToPay : totalInterToPay;
@@ -84,13 +87,18 @@ class BillerDetailsState extends State<BillerDetails> {
       }else{
         if(selectedAmount! < widget.biller.minInternationalTransactionAmount! || selectedAmount! > widget.biller.maxInternationalTransactionAmount!) return;
       }
-      if(mounted) setState(() => startingTrans = true);
+      if(mounted) {
+        if(focusNode1.hasFocus) focusNode1.unfocus();
+        if(focusNode2.hasFocus) focusNode2.unfocus();
+        if(focusNode3.hasFocus) focusNode3.unfocus();
+        setState(() => startingTrans = true);
+      }
       calculateFigures(isLocal);
       utilityNotifier.updateSelectedServiceType(utilityNotifier.translateToService(widget.biller.serviceType!));
       utilityNotifier.updateSelectedUtilityType(utilityNotifier.translateToType(widget.biller.type!));
       utilityNotifier.updateLastBillerUsed(widget.biller, deviceNo!);
-      utilityNotifier.updateSelectedBiller(widget.biller);
-      utilityNotifier.updateSelectedDeviceNo(UtilityDevice(
+      await utilityNotifier.updateSelectedBiller(widget.biller);
+      await utilityNotifier.updateSelectedDeviceNo(UtilityDevice(
         serviceType: widget.biller.serviceType!,
         type: widget.biller.type!,
         countryIsoCode: widget.biller.countryCode!,
@@ -100,13 +108,16 @@ class BillerDetailsState extends State<BillerDetails> {
       UtilityOrder order = UtilityOrder(
         amount: selectedAmount!,
         billerId: widget.biller.id!,
+        amountId: null,
         subscriberAccountNumber: deviceNo!,
         useLocalAmount: isLocal,
-        amountId: selectedFixedAmountId,
         additionalInfo: UtilityAdditionalInfo(
-          invoiceId: null
+          invoiceId: tabData.getRandomString(16),
         )
       );
+      if(widget.biller.denominationType == "FIXED"){
+        order.amountId = selectedFixedAmountId;
+      }
       showModalBottomSheet(
         context: context,
         backgroundColor: prudColorTheme.bgA,
@@ -243,6 +254,11 @@ class BillerDetailsState extends State<BillerDetails> {
   @override
   void initState(){
     Future.delayed(Duration.zero, () async {
+      if(mounted && utilityNotifier.selectedDeviceNumber != null){
+        setState(() {
+          deviceNo = utilityNotifier.selectedDeviceNumber!.no;
+        });
+      }
       await getReferralPercentage();
     });
     super.initState();
@@ -591,6 +607,7 @@ class BillerDetailsState extends State<BillerDetails> {
                     FormBuilderTextField(
                       initialValue: deviceNo,
                       name: 'deviceNo',
+                      focusNode: focusNode1,
                       autofocus: true,
                       style: tabData.npStyle,
                       keyboardType: TextInputType.text,
@@ -801,6 +818,7 @@ class BillerDetailsState extends State<BillerDetails> {
                               child: FormBuilderTextField(
                                 initialValue: "",
                                 name: 'deno',
+                                focusNode: focusNode2,
                                 style: tabData.npStyle,
                                 keyboardType: TextInputType.number,
                                 decoration: getDeco("Amount",  hasBorders: true, onlyBottomBorder: true),
@@ -974,6 +992,7 @@ class BillerDetailsState extends State<BillerDetails> {
                                 initialValue: "",
                                 name: 'deno',
                                 style: tabData.npStyle,
+                                focusNode: focusNode3,
                                 keyboardType: TextInputType.number,
                                 decoration: getDeco("Amount", hasBorders: true, onlyBottomBorder: true),
                                 onChanged: (dynamic value){

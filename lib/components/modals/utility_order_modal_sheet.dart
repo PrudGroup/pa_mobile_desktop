@@ -42,14 +42,14 @@ class UtilityOrderModalSheetState extends State<UtilityOrderModalSheet> {
   bool loading = true;
   List<Widget> showroom = [];
   bool showPayment = true;
-  bool paymentMade = false;
+  bool utilityPaymentMade = false;
   bool paymentAttempted = false;
-  String? paymentId;
+  String? utilityPaymentId;
   bool hasBoughtTrans = false;
   UtilityTransaction? trans;
   UtilityTransactionDetails? transDetails;
-  UtilityTransactionDetails? unsavedTransDetails;
-  UtilityTransaction? unsavedTrans;
+  UtilityTransactionDetails? unsavedUtilityTransDetails;
+  UtilityTransaction? unsavedUtilityTrans;
   bool hasBoughtTransButNotSaved = false;
   UtilityOrderResult? orderResult;
   bool transactionCompleted = false;
@@ -64,8 +64,8 @@ class UtilityOrderModalSheetState extends State<UtilityOrderModalSheet> {
           setState(() {
             trans = trn;
             transDetails = utd;
-            unsavedTrans = null;
-            unsavedTransDetails = null;
+            unsavedUtilityTrans = null;
+            unsavedUtilityTransDetails = null;
             hasBoughtTransButNotSaved = false;
             transactionCompleted = true;
             loading = false;
@@ -76,8 +76,8 @@ class UtilityOrderModalSheetState extends State<UtilityOrderModalSheet> {
           utilityNotifier.updateUnsavedTrans(trn);
           utilityNotifier.updateUnsavedUtilityDetails(utd);
           setState(() {
-            unsavedTrans = trn;
-            unsavedTransDetails = utd;
+            unsavedUtilityTrans = trn;
+            unsavedUtilityTransDetails = utd;
             loading = false;
           });
         }
@@ -132,7 +132,7 @@ class UtilityOrderModalSheetState extends State<UtilityOrderModalSheet> {
           referralId: linkReferral,
           profitForPrudapp: prudProfit,
           referralsGot: referralsGot,
-          commissionFromReloadly: trn.transaction!.discount!
+          commissionFromReloadly: trn.transaction!.discount?? 0,
         );
         await saveTransDetails(trn, utd);
       }else{
@@ -154,7 +154,7 @@ class UtilityOrderModalSheetState extends State<UtilityOrderModalSheet> {
       affId: myStorage.user!.id!,
       selectedCurrency: widget.currencyCode,
       amtInSelectedCurrency: widget.amountToPay,
-      channel: "REFUNDED: $paymentId : Utility",
+      channel: "REFUNDED: $utilityPaymentId : Utility",
       isCreditAction: true
     );
     await tryAsync("makeTransaction", () async {
@@ -168,7 +168,7 @@ class UtilityOrderModalSheetState extends State<UtilityOrderModalSheet> {
           setState(() {
             hasBoughtTrans = false;
           });
-          if(paymentMade && paymentId != null) {
+          if(utilityPaymentMade && utilityPaymentId != null) {
             WalletTransactionResult resp = await influencerNotifier.creditOrDebitWallet(refundAction);
             if(resp.succeeded){
               utilityNotifier.clearAllSavePaymentDetails();
@@ -177,7 +177,7 @@ class UtilityOrderModalSheetState extends State<UtilityOrderModalSheet> {
         }
       }
     }, error: () async {
-      if(paymentMade && paymentId != null && !hasBoughtTrans){
+      if(utilityPaymentMade && utilityPaymentId != null && !hasBoughtTrans){
         WalletTransactionResult resp = await influencerNotifier.creditOrDebitWallet(refundAction);
         if(resp.succeeded){
           utilityNotifier.clearAllSavePaymentDetails();
@@ -193,6 +193,7 @@ class UtilityOrderModalSheetState extends State<UtilityOrderModalSheet> {
       if(mounted) {
         setState(() {
           showroom = iCloud.getShowroom(context,showroomItems: 4);
+          loading = false;
         });
       }
     });
@@ -224,7 +225,7 @@ class UtilityOrderModalSheetState extends State<UtilityOrderModalSheet> {
                 ),
                 if(!loading) Column(
                   children: [
-                    if(showPayment && !paymentMade) PayFromWallet(
+                    if(showPayment && !utilityPaymentMade) PayFromWallet(
                         currencyCode: widget.currencyCode,
                         walletType: WalletType.influencer,
                         forDesc: "Utility Payment",
@@ -233,12 +234,12 @@ class UtilityOrderModalSheetState extends State<UtilityOrderModalSheet> {
                         onPaymentCompleted: (WalletTransactionResult status){
                           if(mounted){
                             setState(() {
-                              paymentMade = status.succeeded;
-                              if(status.tran != null) paymentId = status.tran!.transId;
+                              utilityPaymentMade = status.succeeded;
+                              if(status.tran != null) utilityPaymentId = status.tran!.transId;
                               paymentAttempted = true;
                             });
-                            if(paymentId != null && paymentMade) {
-                              utilityNotifier.updatePaymentStatus(paymentMade, paymentId!);
+                            if(utilityPaymentId != null && utilityPaymentMade) {
+                              utilityNotifier.updatePaymentStatus(utilityPaymentMade, utilityPaymentId!);
                               makeTransaction();
                             }
                           }
@@ -246,14 +247,14 @@ class UtilityOrderModalSheetState extends State<UtilityOrderModalSheet> {
                         onCanceled: (){
                           if(mounted){
                             setState(() {
-                              paymentMade = false;
+                              utilityPaymentMade = false;
                               paymentAttempted = true;
                               Navigator.pop(context);
                             });
                           }
                         }
                     ),
-                    if(paymentMade && orderResult != null && hasBoughtTransButNotSaved) Column(
+                    if(utilityPaymentMade && orderResult != null && hasBoughtTransButNotSaved) Column(
                       children: [
                         spacer.height,
                         Translate(
@@ -272,20 +273,20 @@ class UtilityOrderModalSheetState extends State<UtilityOrderModalSheet> {
                         )
                       ],
                     ),
-                    if(unsavedTrans != null && unsavedTransDetails != null) Column(
+                    if(unsavedUtilityTrans != null && unsavedUtilityTransDetails != null) Column(
                       children: [
                         spacer.height,
                         Translate(
                           text: "Transaction not completed. Kindly check your internet and try again.",
                           style: prudWidgetStyle.tabTextStyle.copyWith(
-                              color: prudColorTheme.textB,
-                              fontSize: 15
+                            color: prudColorTheme.textB,
+                            fontSize: 15
                           ),
                           align: TextAlign.center,
                         ),
                         spacer.height,
                         prudWidgetStyle.getLongButton(
-                          onPressed: () async => saveTransDetails(unsavedTrans!, unsavedTransDetails!),
+                          onPressed: () async => saveTransDetails(unsavedUtilityTrans!, unsavedUtilityTransDetails!),
                           text: "Complete Transaction",
                           shape: 1,
                         )
@@ -294,6 +295,7 @@ class UtilityOrderModalSheetState extends State<UtilityOrderModalSheet> {
                     if(transactionCompleted && trans != null && transDetails != null) UtilityTransactionComponent(tranDetails: transDetails!, tran: trans!,)
                   ],
                 ),
+                spacer.height,
                 PrudShowroom(items: showroom,),
               ],
             ),

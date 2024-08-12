@@ -215,7 +215,7 @@ class TabData extends ChangeNotifier {
     String chars = "0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
     chars = shuffle(chars);
     String result = ""; final random = Random();
-    for(int i=1; i==length; i++){
+    for(int i=1; i<=length; i++){
       result+=chars[random.nextInt(chars.length)];
     }
     return result;

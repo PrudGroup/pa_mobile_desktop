@@ -61,7 +61,7 @@ class UtilityTransactionDetailDisplayState extends State<UtilityTransactionDetai
 
 
   Future<void> share() async {
-    await tryAsync("share", () async {
+    // await tryAsync("share", () async {
       if(mounted) setState(() => sharing = true);
       pw.Document pdf = await iCloud.exportToPdf(frameId);
       String path = await writeToTemp(pdf);
@@ -74,9 +74,9 @@ class UtilityTransactionDetailDisplayState extends State<UtilityTransactionDetai
       }else{
         await Printing.sharePdf(bytes: await pdf.save(), filename: fileName);
       }
-    }, error: (){
+    /*}, error: (){
       if(mounted) setState(() => sharing = false);
-    });
+    });*/
   }
 
   Future<void>  save() async {

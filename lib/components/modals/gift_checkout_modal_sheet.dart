@@ -8,9 +8,10 @@ import 'package:prudapp/singletons/gift_card_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 
 import '../../models/theme.dart';
+import '../../models/wallet.dart';
 import '../../singletons/i_cloud.dart';
+import '../pay_from_wallet.dart';
 import '../translate_text.dart';
-import '../pay_in.dart';
 
 class GiftCheckoutModalSheet extends StatefulWidget {
   final double amount;
@@ -191,6 +192,7 @@ class GiftCheckoutModalSheetState extends State<GiftCheckoutModalSheet> {
       if(mounted) {
         setState(() {
           purchasing = false;
+          paymentWasMade = false;
           errorMsg = "An Unknown Error Occurred. $ex";
           loading = false;
           hasAttempted = true;
@@ -264,12 +266,9 @@ class GiftCheckoutModalSheetState extends State<GiftCheckoutModalSheet> {
 
   @override
   void initState() {
-    giftCardNotifier.updateCartListener(false);
     Future.delayed(Duration.zero, () async {
       if(mounted) {
-        debugPrint("paid: ${giftCardNotifier.selectedItemsPaid}");
-        debugPrint("unsavedTrans: ${giftCardNotifier.unsavedTrans.isNotEmpty}");
-        debugPrint("unsavedGifts: ${giftCardNotifier.unsavedGifts.isNotEmpty}");
+        giftCardNotifier.updateCartListener(false);
         setState(() {
           showroom = iCloud.getShowroom(context,showroomItems: 4);
           paymentWasMade = giftCardNotifier.selectedItemsPaid;
@@ -308,77 +307,79 @@ class GiftCheckoutModalSheetState extends State<GiftCheckoutModalSheet> {
         borderRadius: prudRad,
         child: SizedBox(
           height: double.maxFinite,
-          child: Column(
-            children: [
-              if(loading || purchasing || savingTrans) const LoadingComponent(
-                isShimmer: false,
-                size: 30,
-                defaultSpinnerType: false,
-              ),
-              if((!loading && !purchasing && !savingTrans) && totalAmountToPay > 0 && weHaveEnoughBalance && !paymentWasMade && !hasAttempted && showPay) Expanded(
-                child:  PayIn(
-                  amount: totalAmountToPay,
-                  currencyCode: 'NGN',
-                  onPaymentMade:(bool verified, String transID) {
-                    if (mounted) setState(() => loading = true);
-                    if (verified) {
-                      Future.delayed(Duration.zero, () async {
-                        await paymentMade(transID);
-                      });
-                    } else {
-                      if (mounted) {
-                        setState(() {
-                          errorMsg = "Unable to verify payment.";
-                          loading = false;
-                        });
-                      }
-                    }
-                  },
-                  onCancel: () {
-                      if (mounted) {
-                        setState(() {
-                          errorMsg = "Payment Canceled";
-                          loading = false;
-                          hasAttempted = true;
-                          itSucceeded = false;
-                          showPay = false;
-                          paymentWasMade = false;
-                          itemsWasBought = false;
-                          transWereSaved = false;
-                          giftTransactions = [];
-                        });
-                      }
-                    }
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              children: [
+                if(loading || purchasing || savingTrans) const LoadingComponent(
+                  isShimmer: false,
+                  size: 30,
+                  defaultSpinnerType: false,
                 ),
-              ),
-              if((!loading && !purchasing && !savingTrans) && paymentWasMade && itemsWasBought && giftTransactions.isNotEmpty && transWereSaved && unsavedTransactions.isEmpty && errorMsg == null) Column(
-                children: [
-                  prudWidgetStyle.getLongButton(
-                    onPressed: () => Navigator.pop(context),
-                    text: "Finished"
+                if((!loading && !purchasing && !savingTrans) && totalAmountToPay > 0 && weHaveEnoughBalance && !paymentWasMade && !hasAttempted && showPay) Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: PayFromWallet(
+                      currencyCode: widget.currencyCode,
+                      walletType: WalletType.influencer,
+                      forDesc: "Gift Card Purchase",
+                      amountInNaira: totalAmountToPay,
+                      amount: widget.amount,
+                      onPaymentCompleted: (WalletTransactionResult status){
+                        if(mounted){
+                          setState(() {
+                            loading = true;
+                            paymentWasMade = status.succeeded;
+                            if(status.tran != null) paymentId = status.tran!.transId;
+                          });
+                          if(paymentId != null && paymentWasMade) {
+                            Future.delayed(Duration.zero, () async {
+                              await paymentMade(paymentId!);
+                            });
+                          } else {
+                            if (mounted) {
+                              setState(() {
+                                errorMsg = "Payment Failed.";
+                                loading = false;
+                              });
+                            }
+                          }
+                        }
+                      },
+                      onCanceled: (){
+                        if (mounted) {
+                          setState(() {
+                            errorMsg = "Payment Canceled";
+                            loading = false;
+                            hasAttempted = true;
+                            itSucceeded = false;
+                            showPay = false;
+                            paymentWasMade = false;
+                            itemsWasBought = false;
+                            transWereSaved = false;
+                            giftTransactions = [];
+                          });
+                        }
+                      }
                   ),
-                  spacer.height,
-                ],
-              ),
-              if((!loading && !purchasing && !savingTrans) && paymentWasMade && itemsWasBought && giftTransactions.isNotEmpty && transWereSaved && unsavedTransactions.isEmpty && errorMsg == null) Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 40),
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: giftCardNotifier.transactions.length,
-                  itemBuilder: (context, index){
-                    GiftTransactionDetails detail = giftCardNotifier.transactions[index];
-                    return GiftTransactionComponent(
-                      tranDetails: detail,
-                      tran: getTransactionById(detail.transId!),
-                    );
-                  },
-                )
-              ),
-              if(!loading && !purchasing && !savingTrans) Column(
-                children: [
-                  if(paymentWasMade && paymentId != null && !itemsWasBought) Padding(
-                    padding: const EdgeInsets.only(left: 10, right: 10),
-                    child: Column(
+                ),
+                if((!loading && !purchasing && !savingTrans) && paymentWasMade && itemsWasBought && giftTransactions.isNotEmpty && transWereSaved && unsavedTransactions.isEmpty && errorMsg == null) Column(
+                  children: [
+                    prudWidgetStyle.getLongButton(
+                        onPressed: () => Navigator.pop(context),
+                        text: "Finished"
+                    ),
+                    spacer.height,
+                  ],
+                ),
+                if((!loading && !purchasing && !savingTrans) && paymentWasMade && itemsWasBought && giftTransactions.isNotEmpty && transWereSaved && unsavedTransactions.isEmpty && errorMsg == null) Column(
+                  children: giftCardNotifier.transactions.map(( GiftTransactionDetails detail) =>  GiftTransactionComponent(
+                    tranDetails: detail,
+                    tran: getTransactionById(detail.transId!),
+                  )).toList(),
+                ),
+                if(!loading && !purchasing && !savingTrans) Column(
+                  children: [
+                    if(paymentWasMade && paymentId != null && !itemsWasBought) Column(
                       children: [
                         spacer.height,
                         Translate(
@@ -392,39 +393,36 @@ class GiftCheckoutModalSheetState extends State<GiftCheckoutModalSheet> {
                         ),
                         spacer.height,
                         prudWidgetStyle.getLongButton(
-                          onPressed: () async => paymentMade(paymentId!),
-                          text: "Try Purchasing"
+                            onPressed: () async => paymentMade(paymentId!),
+                            text: "Try Purchasing"
                         ),
                         spacer.height,
                       ],
                     ),
-                  ),
-                  if(unsavedTransactions.isEmpty && paymentWasMade && itemsWasBought && giftCardNotifier.selectedItems.isNotEmpty) Padding(
-                    padding: const EdgeInsets.only(left: 10, right: 10),
-                    child: Column(
-                      children: [
-                        spacer.height,
-                        Translate(
-                          text: "Some gift transaction seems to have failed. Your selected gifts need go through.",
-                          style: prudWidgetStyle.tabTextStyle.copyWith(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16,
-                              color: prudColorTheme.textB
+                    if(unsavedTransactions.isEmpty && paymentWasMade && itemsWasBought && giftCardNotifier.selectedItems.isNotEmpty) Padding(
+                      padding: const EdgeInsets.only(left: 10, right: 10),
+                      child: Column(
+                        children: [
+                          spacer.height,
+                          Translate(
+                            text: "Some gift transaction seems to have failed. Your selected gifts need go through.",
+                            style: prudWidgetStyle.tabTextStyle.copyWith(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                                color: prudColorTheme.textB
+                            ),
+                            align: TextAlign.center,
                           ),
-                          align: TextAlign.center,
-                        ),
-                        spacer.height,
-                        prudWidgetStyle.getLongButton(
-                          onPressed: () async => paymentMade(paymentId!),
-                          text: "Get Remaining Gifts"
-                        ),
-                        spacer.height,
-                      ],
+                          spacer.height,
+                          prudWidgetStyle.getLongButton(
+                              onPressed: () async => paymentMade(paymentId!),
+                              text: "Get Remaining Gifts"
+                          ),
+                          spacer.height,
+                        ],
+                      ),
                     ),
-                  ),
-                  if(unsavedTransactions.isNotEmpty) Padding(
-                    padding: const EdgeInsets.only(left: 10, right: 10),
-                    child: Column(
+                    if(unsavedTransactions.isNotEmpty) Column(
                       children: [
                         spacer.height,
                         Translate(
@@ -444,28 +442,22 @@ class GiftCheckoutModalSheetState extends State<GiftCheckoutModalSheet> {
                         spacer.height,
                       ],
                     ),
-                  ),
-                  if(errorMsg != null && unsavedTransactions.isEmpty) Padding(
-                    padding: const EdgeInsets.only(top: 20, left: 10, right: 10),
-                    child: Translate(
+                    if(errorMsg != null && unsavedTransactions.isEmpty) Translate(
                       text: "$errorMsg",
                       style: prudWidgetStyle.tabTextStyle.copyWith(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16,
-                        color: prudColorTheme.primary
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16,
+                          color: prudColorTheme.primary
                       ),
                       align: TextAlign.center,
                     ),
-                  ),
-                ],
-              ),
-              if(loading || purchasing || savingTrans || (giftTransactions.isEmpty && !showPay)) Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.only(left: 10, right: 10),
-                  child: PrudShowroom(items: showroom,),
+                  ],
                 ),
-              ),
-            ],
+                spacer.height,
+                PrudShowroom(items: showroom,),
+                spacer.height,
+              ],
+            ),
           ),
         )
       ),

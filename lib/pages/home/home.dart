@@ -300,7 +300,7 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
     connectSub = ConnectionNotifierTools.onStatusChange.listen((_) async {
       await changeConnectionStatus();
     });
-    FGBGEvents fgbg = FGBGEvents as FGBGEvents;
+    FGBGEvents fgbg = FGBGEvents.instance;
     subscription = fgbg.stream.listen((event) {
       if(event == FGBGType.background) {
 

@@ -87,7 +87,7 @@ class UtilityHistoryState extends State<UtilityHistory> {
         foundTransactions = utilityNotifier.transactions;
         if(foundTransactions.isNotEmpty) showSearch = false;
         endDate = DateTime.now();
-        startDate = endDate!.subtract(const Duration(days: 7));
+        startDate = endDate!.subtract(const Duration(days: 14));
       });
     }
     super.initState();
@@ -148,7 +148,8 @@ class UtilityHistoryState extends State<UtilityHistory> {
             if(startDate != null && endDate != null) spacer.height,
             if(startDate != null && endDate != null) FormBuilderDateRangePicker(
               name: "dateRange",
-              firstDate: startDate!,
+              initialValue: DateTimeRange(start: startDate!, end: endDate!),
+              firstDate: endDate!.subtract(const Duration(days: 300)),
               decoration: getDeco("Select Dates"),
               lastDate: endDate!,
               onChanged: (DateTimeRange? dateRange){

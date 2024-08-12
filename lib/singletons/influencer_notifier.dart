@@ -32,15 +32,16 @@ class InfluencerNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void clearPinStatus(){
+  Future<void> clearPinStatus() async {
     pinTrial = 0;
     pinBlocked = false;
     lastPinTrialAt = null;
+    await savePinStatus();
   }
 
   Future<InfluencerWallet?> getWallet(String affId) async {
     return await tryAsync("getWallet", () async {
-      dynamic res = await makeRequest(path: "/wallets/aff/$affId");
+      dynamic res = await makeRequest(path: "affiliates/wallets/aff/$affId");
       if (res != null) {
         InfluencerWallet wt = InfluencerWallet.fromJson(res);
         updateWallet(wt);
@@ -54,7 +55,7 @@ class InfluencerNotifier extends ChangeNotifier {
   Future<WalletTransactionResult> creditOrDebitWallet(WalletAction action) async{
     WalletTransactionResult wtRes = WalletTransactionResult(tran: null, succeeded: false);
     return await tryAsync("creditOrDebitWallet", () async {
-      String path = "/wallets/";
+      String path = "affiliates/wallets/";
       dynamic res = await makeRequest(path: path, isGet: false, data: action.toJson());
       if (res != null) {
         WalletHistory ht = WalletHistory.fromJson(res);
@@ -75,7 +76,7 @@ class InfluencerNotifier extends ChangeNotifier {
     bool verified = false;
     if(dPin == pin){
       verified = true;
-      clearPinStatus();
+      await clearPinStatus();
     }else{
       await incrementPinTrial();
     }
@@ -114,11 +115,11 @@ class InfluencerNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void checkPinBlockage(){
+  Future<void> checkPinBlockage() async {
     if(lastPinTrialAt != null && pinBlocked) {
       int hours = myStorage.dateDifference(dDate: lastPinTrialAt!, inWhat: 2);
       if(hours >= 3){
-        unblockPin();
+        await unblockPin();
       }
     }
   }
@@ -126,7 +127,7 @@ class InfluencerNotifier extends ChangeNotifier {
   Future<void> savePinStatus() async {
     await myStorage.addToStore(key: "pin", value: pin);
     await myStorage.addToStore(key: "pinTrial", value: pinTrial);
-    await myStorage.addToStore(key: "lastPinTrialAt", value: lastPinTrialAt);
+    await myStorage.addToStore(key: "lastPinTrialAt", value: lastPinTrialAt == null? lastPinTrialAt : lastPinTrialAt!.toIso8601String());
     await myStorage.addToStore(key: "pinBlocked", value: pinBlocked);
   }
 
@@ -142,8 +143,9 @@ class InfluencerNotifier extends ChangeNotifier {
   void getPinStatus() {
     pin = myStorage.getFromStore(key: "pin");
     pinTrial = myStorage.getFromStore(key: "pinTrial")?? 0;
-    lastPinTrialAt = myStorage.getFromStore(key: "lastPinTrial");
-    pinBlocked = myStorage.getFromStore(key: "pinBlocked");
+    String? date = myStorage.getFromStore(key: "lastPinTrial");
+    lastPinTrialAt = date == null? null : DateTime.parse(date);
+    pinBlocked = myStorage.getFromStore(key: "pinBlocked")?? false;
   }
 
   void setDioHeaders(){
@@ -156,7 +158,7 @@ class InfluencerNotifier extends ChangeNotifier {
 
   Future<double?> getLinkReferralPercentage(String linkId) async {
     try{
-      String path = "/aff_links/$linkId";
+      String path = "affiliates/aff_links/$linkId";
       dynamic res = await makeRequest(path: path);
       if(res != null){
         return res.toDouble();
@@ -175,7 +177,7 @@ class InfluencerNotifier extends ChangeNotifier {
       setDioHeaders();
       String url = "$prudApiUrl/$path";
       Response res = isGet? (await influencerDio.get(url)) : (await influencerDio.post(url, data: data));
-      debugPrint("Result: $res");
+      // debugPrint("influencer Request: $res");
       return res.data;
     }else{
       return null;
@@ -184,8 +186,6 @@ class InfluencerNotifier extends ChangeNotifier {
 
   Future<void> initInfluencer() async {
     try{
-      await myStorage.addToStore(key: "pin", value: "1911");
-      await changeWalletCurrency("USD");
       getPinStatus();
       getWalletCurrency();
       notifyListeners();

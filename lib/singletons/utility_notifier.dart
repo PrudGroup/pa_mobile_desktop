@@ -25,9 +25,9 @@ class UtilityNotifier extends ChangeNotifier {
   BillerServiceType? selectedServiceType;
   BillerType? selectedUtilityType;
   bool continueTransaction = false;
-  bool paymentMade = false;
-  String? paymentId;
-  UtilityTransaction? unsavedTrans;
+  bool utilityPaymentMade = false;
+  String? utilityPaymentId;
+  UtilityTransaction? unsavedUtilityTrans;
   UtilityTransactionDetails? unsavedUtilityDetails;
   UtilitySearch? lastUtilitySearch;
   LastBillersUsed? lastBillerUsed;
@@ -69,7 +69,7 @@ class UtilityNotifier extends ChangeNotifier {
   }
 
   Future<void> updateUnsavedTrans(UtilityTransaction item) async {
-    unsavedTrans = item;
+    unsavedUtilityTrans = item;
     await saveUnsavedTransToCache();
     notifyListeners();
   }
@@ -181,18 +181,18 @@ class UtilityNotifier extends ChangeNotifier {
   }
 
   Future<void> saveUnsavedTransToCache() async {
-    if(unsavedTrans != null){
-      Map<String, dynamic> item = unsavedTrans!.toJson();
-      await myStorage.addToStore(key: "unsavedTrans", value: item);
+    if(unsavedUtilityTrans != null){
+      Map<String, dynamic> item = unsavedUtilityTrans!.toJson();
+      await myStorage.addToStore(key: "unsavedUtilityTrans", value: item);
     }else{
-      myStorage.lStore.remove("unsavedTrans");
+      myStorage.lStore.remove("unsavedUtilityTrans");
     }
   }
 
   void getUnsavedTransFromCache(){
-    dynamic unsaved = myStorage.getFromStore(key: "unsavedTrans");
+    dynamic unsaved = myStorage.getFromStore(key: "unsavedUtilityTrans");
     if(unsaved != null){
-      unsavedTrans = UtilityTransaction.fromJson(unsaved);
+      unsavedUtilityTrans = UtilityTransaction.fromJson(unsaved);
     }
   }
 
@@ -228,34 +228,36 @@ class UtilityNotifier extends ChangeNotifier {
     }
   }
 
-  void updateSelectedDeviceNo(UtilityDevice num){
+  Future<void> updateSelectedDeviceNo(UtilityDevice num) async {
     selectedDeviceNumber = num;
+    await saveDeviceNoToCache();
     notifyListeners();
   }
 
-  void updateSelectedBiller(Biller bill){
+  Future<void> updateSelectedBiller(Biller bill) async {
     selectedBiller = bill;
+    await saveLastBillerUsedToCache();
     notifyListeners();
   }
 
   Future<void> updatePaymentStatus(bool status, String id) async {
-    paymentMade = status;
-    paymentId = id;
+    utilityPaymentMade = status;
+    utilityPaymentId = id;
     savePaymentStatus();
     notifyListeners();
   }
 
   Future<void> savePaymentStatus() async {
-    await myStorage.addToStore(key: "paymentMade", value: paymentMade);
-    await myStorage.addToStore(key: "paymentId", value: paymentId);
+    await myStorage.addToStore(key: "utilityPaymentMade", value: utilityPaymentMade);
+    await myStorage.addToStore(key: "utilityPaymentId", value: utilityPaymentId);
   }
 
   void getPaymentStatusFromCache(){
-    bool? paid = myStorage.getFromStore(key: "paymentMade");
-    String? airPayId = myStorage.getFromStore(key: "paymentId");
+    bool? paid = myStorage.getFromStore(key: "utilityPaymentMade");
+    String? airPayId = myStorage.getFromStore(key: "utilityPaymentId");
     if(paid != null ){
-      paymentMade = paid;
-      if(airPayId != null) paymentId = airPayId;
+      utilityPaymentMade = paid;
+      if(airPayId != null) utilityPaymentId = airPayId;
     }
   }
 
@@ -379,8 +381,8 @@ class UtilityNotifier extends ChangeNotifier {
     Biller? bi;
     dynamic result = await makeRequest(path: path);
     List<Biller> bs = [];
-    if(result != null && result.isNotEmpty){
-      for(Map<String, dynamic> res in result){
+    if(result != null && result["content"] != null){
+      for(Map<String, dynamic> res in result["content"]){
         bs.add(Biller.fromJson(res));
       }
       if(bs.isNotEmpty) bi = bs[0];
@@ -507,15 +509,15 @@ class UtilityNotifier extends ChangeNotifier {
   }
 
   Future<void> clearAllSavePaymentDetails() async {
-    unsavedTrans = null;
+    unsavedUtilityTrans = null;
     unsavedUtilityDetails = null;
-    paymentId = null;
-    paymentMade = false;
+    utilityPaymentId = null;
+    utilityPaymentMade = false;
     continueTransaction = false;
-    myStorage.lStore.remove("unsavedTrans");
+    myStorage.lStore.remove("unsavedUtilityTrans");
     myStorage.lStore.remove("unsavedUtilityDetails");
-    myStorage.lStore.remove("paymentMade");
-    myStorage.lStore.remove("paymentId");
+    myStorage.lStore.remove("utilityPaymentMade");
+    myStorage.lStore.remove("utilityPaymentId");
   }
 
 
@@ -529,7 +531,7 @@ class UtilityNotifier extends ChangeNotifier {
       getLastSearchFromCache();
       getLastBillerUsedFromCache();
       updateBillersInLastBillersUsed();
-      if(unsavedTrans != null && unsavedUtilityDetails != null) await saveTransactionToCloud(unsavedUtilityDetails!);
+      if(unsavedUtilityTrans != null && unsavedUtilityDetails != null) await saveTransactionToCloud(unsavedUtilityDetails!);
       notifyListeners();
     }catch(ex){
       debugPrint("UtilityNotifier_initUtility Error: $ex");

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/images.dart';
 import '../models/reloadly.dart';
 import '../models/theme.dart';
+import '../singletons/tab_data.dart';
 import '../singletons/utility_notifier.dart';
 
 class SavedBillers extends StatelessWidget {
@@ -47,59 +48,64 @@ class SavedBillers extends StatelessWidget {
                     )
                   )
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        ImageIcon(
-                          AssetImage(prudImages.power1),
-                          color: prudColorTheme.secondary,
-                        ),
-                        Column(
-                          children: [
-                            Text(
-                              "${lastBillers.electricity?.name}",
-                              style: prudWidgetStyle.tabTextStyle.copyWith(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                color: prudColorTheme.textA
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  "${lastBillers.electricity?.type}",
-                                  style: prudWidgetStyle.tabTextStyle.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 13,
+                child: FittedBox(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          ImageIcon(
+                            AssetImage(prudImages.power1),
+                            color: prudColorTheme.secondary,
+                          ),
+                          spacer.width,
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if(lastBillers.electricity != null && lastBillers.electricity!.name!= null) Text(
+                                tabData.shortenStringWithPeriod(lastBillers.electricity!.name!, length: 20),
+                                style: prudWidgetStyle.tabTextStyle.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
                                     color: prudColorTheme.textA
-                                  ),
                                 ),
-                                spacer.width,
-                                Text(
-                                  "${lastBillers.electricity?.serviceType}",
-                                  style: prudWidgetStyle.tabTextStyle.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 13,
-                                      color: prudColorTheme.danger
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    "${lastBillers.electricity?.type}",
+                                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 13,
+                                        color: prudColorTheme.textA
+                                    ),
                                   ),
-                                ),
-                              ],
-                            )
-                          ],
-                        )
-                      ],
-                    ),
-                    if(lastBillers.lastDeviceUsedOnElectricity != null) Text(
-                      "${lastBillers.lastDeviceUsedOnElectricity}",
-                      style: prudWidgetStyle.tabTextStyle.copyWith(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 13,
-                        color: prudColorTheme.primary
+                                  spacer.width,
+                                  Text(
+                                    "${lastBillers.electricity?.serviceType}",
+                                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 13,
+                                        color: prudColorTheme.danger
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
+                          )
+                        ],
                       ),
-                    ),
-                  ],
+                      if(lastBillers.lastDeviceUsedOnElectricity != null) Text(
+                        "${lastBillers.lastDeviceUsedOnElectricity}",
+                        style: prudWidgetStyle.tabTextStyle.copyWith(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 13,
+                            color: prudColorTheme.primary
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -121,59 +127,64 @@ class SavedBillers extends StatelessWidget {
                         )
                     )
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        ImageIcon(
-                          AssetImage(prudImages.water),
-                          color: prudColorTheme.secondary,
-                        ),
-                        Column(
-                          children: [
-                            Text(
-                              "${lastBillers.water?.name}",
-                              style: prudWidgetStyle.tabTextStyle.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16,
-                                  color: prudColorTheme.textA
+                child: FittedBox(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          ImageIcon(
+                            AssetImage(prudImages.water),
+                            color: prudColorTheme.secondary,
+                          ),
+                          spacer.width,
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if(lastBillers.water != null && lastBillers.water!.name!= null) Text(
+                                tabData.shortenStringWithPeriod(lastBillers.water!.name!, length: 20),
+                                style: prudWidgetStyle.tabTextStyle.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                    color: prudColorTheme.textA
+                                ),
                               ),
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  "${lastBillers.water?.type}",
-                                  style: prudWidgetStyle.tabTextStyle.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 13,
-                                      color: prudColorTheme.textA
+                              Row(
+                                children: [
+                                  Text(
+                                    "${lastBillers.water?.type}",
+                                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 13,
+                                        color: prudColorTheme.textA
+                                    ),
                                   ),
-                                ),
-                                spacer.width,
-                                Text(
-                                  "${lastBillers.water?.serviceType}",
-                                  style: prudWidgetStyle.tabTextStyle.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 13,
-                                      color: prudColorTheme.danger
+                                  spacer.width,
+                                  Text(
+                                    "${lastBillers.water?.serviceType}",
+                                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 13,
+                                        color: prudColorTheme.danger
+                                    ),
                                   ),
-                                ),
-                              ],
-                            )
-                          ],
-                        )
-                      ],
-                    ),
-                    if(lastBillers.lastDeviceUsedOnWater != null) Text(
-                      "${lastBillers.lastDeviceUsedOnWater}",
-                      style: prudWidgetStyle.tabTextStyle.copyWith(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 13,
-                          color: prudColorTheme.primary
+                                ],
+                              )
+                            ],
+                          )
+                        ],
                       ),
-                    ),
-                  ],
+                      if(lastBillers.lastDeviceUsedOnWater != null) Text(
+                        "${lastBillers.lastDeviceUsedOnWater}",
+                        style: prudWidgetStyle.tabTextStyle.copyWith(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 13,
+                            color: prudColorTheme.primary
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -195,59 +206,64 @@ class SavedBillers extends StatelessWidget {
                         )
                     )
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        ImageIcon(
-                          AssetImage(prudImages.smartTv1),
-                          color: prudColorTheme.secondary,
-                        ),
-                        Column(
-                          children: [
-                            Text(
-                              "${lastBillers.tv?.name}",
-                              style: prudWidgetStyle.tabTextStyle.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16,
-                                  color: prudColorTheme.textA
+                child: FittedBox(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          ImageIcon(
+                            AssetImage(prudImages.smartTv1),
+                            color: prudColorTheme.secondary,
+                          ),
+                          spacer.width,
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if(lastBillers.tv != null && lastBillers.tv!.name!= null) Text(
+                                tabData.shortenStringWithPeriod(lastBillers.tv!.name!, length: 20),
+                                style: prudWidgetStyle.tabTextStyle.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                    color: prudColorTheme.textA
+                                ),
                               ),
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  "${lastBillers.tv?.type}",
-                                  style: prudWidgetStyle.tabTextStyle.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 13,
-                                      color: prudColorTheme.textA
+                              Row(
+                                children: [
+                                  Text(
+                                    "${lastBillers.tv?.type}",
+                                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 13,
+                                        color: prudColorTheme.textA
+                                    ),
                                   ),
-                                ),
-                                spacer.width,
-                                Text(
-                                  "${lastBillers.tv?.serviceType}",
-                                  style: prudWidgetStyle.tabTextStyle.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 13,
-                                      color: prudColorTheme.danger
+                                  spacer.width,
+                                  Text(
+                                    "${lastBillers.tv?.serviceType}",
+                                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 13,
+                                        color: prudColorTheme.danger
+                                    ),
                                   ),
-                                ),
-                              ],
-                            )
-                          ],
-                        )
-                      ],
-                    ),
-                    if(lastBillers.lastDeviceUsedOnTv != null) Text(
-                      "${lastBillers.lastDeviceUsedOnTv}",
-                      style: prudWidgetStyle.tabTextStyle.copyWith(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 13,
-                          color: prudColorTheme.primary
+                                ],
+                              )
+                            ],
+                          )
+                        ],
                       ),
-                    ),
-                  ],
+                      if(lastBillers.lastDeviceUsedOnTv != null) Text(
+                        "${lastBillers.lastDeviceUsedOnTv}",
+                        style: prudWidgetStyle.tabTextStyle.copyWith(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 13,
+                            color: prudColorTheme.primary
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -269,59 +285,64 @@ class SavedBillers extends StatelessWidget {
                         )
                     )
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        ImageIcon(
-                          AssetImage(prudImages.internet),
-                          color: prudColorTheme.secondary,
-                        ),
-                        Column(
-                          children: [
-                            Text(
-                              "${lastBillers.internet?.name}",
-                              style: prudWidgetStyle.tabTextStyle.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16,
-                                  color: prudColorTheme.textA
+                child: FittedBox(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          ImageIcon(
+                            AssetImage(prudImages.internet),
+                            color: prudColorTheme.secondary,
+                          ),
+                          spacer.width,
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if(lastBillers.internet != null && lastBillers.internet!.name!= null) Text(
+                                tabData.shortenStringWithPeriod(lastBillers.internet!.name!, length: 20),
+                                style: prudWidgetStyle.tabTextStyle.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                    color: prudColorTheme.textA
+                                ),
                               ),
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  "${lastBillers.internet?.type}",
-                                  style: prudWidgetStyle.tabTextStyle.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 13,
-                                      color: prudColorTheme.textA
+                              Row(
+                                children: [
+                                  Text(
+                                    "${lastBillers.internet?.type}",
+                                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 13,
+                                        color: prudColorTheme.textA
+                                    ),
                                   ),
-                                ),
-                                spacer.width,
-                                Text(
-                                  "${lastBillers.internet?.serviceType}",
-                                  style: prudWidgetStyle.tabTextStyle.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 13,
-                                      color: prudColorTheme.danger
+                                  spacer.width,
+                                  Text(
+                                    "${lastBillers.internet?.serviceType}",
+                                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 13,
+                                        color: prudColorTheme.danger
+                                    ),
                                   ),
-                                ),
-                              ],
-                            )
-                          ],
-                        )
-                      ],
-                    ),
-                    if(lastBillers.lastDeviceUsedOnInternet != null) Text(
-                      "${lastBillers.lastDeviceUsedOnInternet}",
-                      style: prudWidgetStyle.tabTextStyle.copyWith(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 13,
-                          color: prudColorTheme.primary
+                                ],
+                              )
+                            ],
+                          )
+                        ],
                       ),
-                    ),
-                  ],
+                      if(lastBillers.lastDeviceUsedOnInternet != null) Text(
+                        "${lastBillers.lastDeviceUsedOnInternet}",
+                        style: prudWidgetStyle.tabTextStyle.copyWith(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 13,
+                            color: prudColorTheme.primary
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

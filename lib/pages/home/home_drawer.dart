@@ -11,6 +11,7 @@ import 'package:prudapp/pages/viewsparks/view_spark.dart';
 import '../../components/side_menu_item.dart';
 import '../../models/images.dart';
 import '../ads/ads.dart';
+import '../beneficiaries/my_beneficiaries.dart';
 import '../giftcards/gift_cards.dart';
 import '../recharge/recharge.dart';
 import '../settings/legal.dart';
@@ -50,6 +51,12 @@ class HomeDrawerState extends State<HomeDrawer> {
               indent: 0.0,
               endIndent: 0.0,
               color: prudColorTheme.primary
+            ),
+            SideMenuItem(
+              text: "Beneficiaries",
+              page: const MyBeneficiaries(),
+              isIcon: false,
+              image: prudImages.avatar_2,
             ),
             SideMenuItem(
               text: "Gift Cards",

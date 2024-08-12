@@ -141,7 +141,7 @@ class RechargeTransactionComponentState extends State<RechargeTransactionCompone
                           ),
                         ),
                         Text(
-                          "${tran?.customIdentifier} | ${widget.tranDetails.selectedCurrencyCode}",
+                          "${tran?.customIdentifier?? tran?.deliveredAmountCurrencyCode} | ${widget.tranDetails.selectedCurrencyCode}",
                           style: prudWidgetStyle.hintStyle.copyWith(
                             fontSize: 10,
                             fontWeight: FontWeight.w500,
@@ -238,7 +238,7 @@ class RechargeTransactionComponentState extends State<RechargeTransactionCompone
                             ),
                           ),
                           Text(
-                            "${widget.tranDetails.transactionPaidInSelected}",
+                            "${currencyMath.roundDouble(widget.tranDetails.transactionPaidInSelected!, 2)}",
                             style: TextStyle(
                               fontSize: 20.0,
                               color: prudColorTheme.bgA,

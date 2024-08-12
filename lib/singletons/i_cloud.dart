@@ -199,7 +199,7 @@ class ICloud extends ChangeNotifier{
     bool loggedIn = false;
     if(lastAuthTokenGottenAt != null){
       int minutes = myStorage.dateDifference(dDate: lastAuthTokenGottenAt!, inWhat: 1);
-      if(minutes > 15) { affAuthToken = null;}
+      if(minutes > 10) { affAuthToken = null;}
     }
     if(affAuthToken != null){
       loggedIn = true;
@@ -569,7 +569,9 @@ final ExportDelegate exportDelegate = ExportDelegate(
   ),
   ttfFonts: {
     'Autobus': 'assets/fonts/Autobus.ttf',
+    'Lato-Italic': 'assets/fonts/Lato-Italic.ttf',
     'Cherione': 'assets/fonts/cherione.ttf',
+    'Champagne': 'assets/fonts/Champagne.ttf',
     'Champagne-Bold': 'assets/fonts/Champagne-Bold.ttf',
     'NexaDemo-Bold': 'assets/fonts/NexaDemo-Bold.ttf',
     'NexaDemo-Light': 'assets/fonts/NexaDemo-Light.ttf',
