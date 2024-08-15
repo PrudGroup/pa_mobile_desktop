@@ -5,9 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:prudapp/components/loading_component.dart';
+import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/models/images.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/pages/home/home.dart';
+import 'package:prudapp/pages/register/password_reset.dart';
 
 import '../../models/user.dart';
 import '../../singletons/i_cloud.dart';
@@ -31,6 +34,8 @@ class LoginState extends State<Login> {
   String? email;
   String? password;
   bool showPassword = false;
+  String? pin;
+  bool sendingCode = false;
 
   String errorMsg = "Network Issues!";
 
@@ -40,7 +45,7 @@ class LoginState extends State<Login> {
       await messenger.getToken().then((String? token) async{
         if(token != null){
           String deviceRegToken = token;
-          if(email != null && password != null){
+          if(email != null && password != null && pin != null){
             String url = "$prudApiUrl/affiliates/auth/login";
             Response res = await prudDio.get(url, queryParameters: {
               "email": email,
@@ -61,11 +66,12 @@ class LoginState extends State<Login> {
                   await myStorage.addToStore(key: 'isNew', value: false);
                   await myStorage.addToStore(key: "user", value: jsonEncode(user));
                   await myStorage.addToStore(key: "referralCode", value: user.referralCode);
+                  await myStorage.addToStore(key: "pin", value: pin);
                   myStorage.user = user;
                   if(mounted) {
                     iCloud.showSnackBar(
-                        "Authenticated",  context,
-                        title: "Authentication", type: 2
+                      "Authenticated",  context,
+                      title: "Authentication", type: 2
                     );
                   }
                 }
@@ -129,7 +135,22 @@ class LoginState extends State<Login> {
   }
 
   Future<void> _forgotPassword() async{
-
+    await tryAsync("_forgotPassword", () async {
+      if(email != null){
+        if(mounted) setState(() => sendingCode = true);
+        String? code = await iCloud.sendCodeToEmail(email!);
+        if(code != null && code.isNotEmpty){
+          if(mounted) iCloud.goto(context, PasswordReset(email: email!, code: code));
+        }else{
+          if(mounted) iCloud.showSnackBar("Email Not Found.", context, title: 'Email Failed');
+        }
+        if(mounted) setState(() => sendingCode = false);
+      }else{
+        iCloud.showSnackBar("Email Missing.", context, title: 'Email Needed');
+      }
+    }, error: (){
+      if(mounted) setState(() => sendingCode = false);
+    });
   }
 
   @override
@@ -216,6 +237,40 @@ class LoginState extends State<Login> {
                           autovalidateMode: AutovalidateMode.disabled,
                           child: Column(
                             children: [
+                              Translate(
+                                text: "A four digit pin is required for all transactions on Prudapp. Type what you "
+                                    "can easily remember.",
+                                style: prudWidgetStyle.tabTextStyle.copyWith(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: prudColorTheme.textB
+                                ),
+                                align: TextAlign.center,
+                              ),
+                              FormBuilderTextField(
+                                initialValue: "",
+                                name: 'pin',
+                                style: tabData.npStyle,
+                                keyboardType: TextInputType.number,
+                                obscureText: true,
+                                obscuringCharacter: "*",
+                                decoration: getDeco("Transaction Pin"),
+                                onChanged: (String? value){
+                                  if(mounted) {
+                                    setState(() {
+                                      pin = value?.trim();
+                                    });
+                                  }
+                                },
+                                valueTransformer: (text) => num.tryParse(text!),
+                                validator: FormBuilderValidators.compose([
+                                  FormBuilderValidators.required(),
+                                  FormBuilderValidators.integer(),
+                                  FormBuilderValidators.minLength(4),
+                                  FormBuilderValidators.maxLength(4)
+                                ]),
+                              ),
+                              spacer.height,
                               FormBuilderTextField(
                                 initialValue: "",
                                 name: 'email',
@@ -299,7 +354,12 @@ class LoginState extends State<Login> {
                                 ]),
                               ),
                               spacer.height,
-                              getTextButton(
+                              sendingCode? LoadingComponent(
+                                isShimmer: false,
+                                defaultSpinnerType: false,
+                                spinnerColor: prudColorTheme.iconB,
+                                size: 25,
+                              ) : getTextButton(
                                   title: "Forgot Password",
                                   color: prudColorTheme.iconB,
                                   onPressed: _forgotPassword

@@ -25,6 +25,7 @@ class InnerMenuItem{
   final IconData? icon;
   final String? imageIcon;
 
+
   InnerMenuItem({required this.title, required this.menu, this.icon, this.imageIcon});
 }
 
@@ -44,7 +45,6 @@ class InnerMenuState extends State<InnerMenu> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     changeWidget(widget.menus[widget.activeTab].menu, widget.activeTab);
     iCloud.addListener(() {
@@ -107,7 +107,25 @@ class InnerMenuState extends State<InnerMenu> {
             ),
           ),
         ),
-        Expanded(child: _widget?? const SizedBox()),
+        Expanded(
+          child: Listener(
+            onPointerMove: (moveEvent){
+              if(moveEvent.delta.dx > 0) {
+                int newIndex = selectedIndex - 1;
+                if(newIndex >= 0){
+                  changeWidget(widget.menus[newIndex].menu, newIndex);
+                }
+              }
+              if(moveEvent.delta.dx < 0){
+                int newIndex = selectedIndex + 1;
+                if(newIndex < widget.menus.length){
+                  changeWidget(widget.menus[newIndex].menu, newIndex);
+                }
+              }
+            },
+            child: _widget?? const SizedBox() // or any other widget
+          )
+        ),
       ],
     );
   }

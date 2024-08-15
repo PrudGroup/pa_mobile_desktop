@@ -3,16 +3,14 @@ import 'package:intl/intl.dart';
 import 'package:pinput/pinput.dart';
 import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/models/theme.dart';
-import 'package:prudapp/models/wallet.dart';
 import 'package:prudapp/singletons/influencer_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
 class PinVerifier extends StatefulWidget {
-  final WalletType walletType;
   final Function(bool) onVerified;
 
-  const PinVerifier({super.key,required this.walletType, required this.onVerified});
+  const PinVerifier({super.key, required this.onVerified});
 
   @override
   PinVerifierState createState() => PinVerifierState();
@@ -30,19 +28,11 @@ class PinVerifierState extends State<PinVerifier> {
     if(mounted){
       txtCtrl.text = "";
       setState(() {
-        switch(widget.walletType){
-          case WalletType.influencer: {
-            influencerNotifier.checkPinBlockage();
-            pinBlocked = influencerNotifier.pinBlocked;
-            trials = influencerNotifier.pinTrial;
-            verified = influencerNotifier.pinWasVerified;
-            lastTrialedAt = influencerNotifier.lastPinTrialAt;
-          }
-          case WalletType.shipper: {}
-          case WalletType.switzStore: {}
-          case WalletType.hotel: {}
-          default: {}
-        }
+        influencerNotifier.checkPinBlockage();
+        pinBlocked = influencerNotifier.pinBlocked;
+        trials = influencerNotifier.pinTrial;
+        verified = influencerNotifier.pinWasVerified;
+        lastTrialedAt = influencerNotifier.lastPinTrialAt;
       });
     }
   }
@@ -66,18 +56,9 @@ class PinVerifierState extends State<PinVerifier> {
 
   Future<String?> verifyPin(String typedPin) async {
     return await tryAsync("verifyPin", () async {
-      switch(widget.walletType){
-        case WalletType.influencer: {
-          bool res = await influencerNotifier.verifyPin(typedPin);
-          setFigures();
-          return res? null : "Failed";
-        }
-        case WalletType.shipper: return "";
-        case WalletType.switzStore: return "";
-        case WalletType.hotel: return "";
-        case WalletType.bus: return "";
-        default: return "";
-      }
+      bool res = await influencerNotifier.verifyPin(typedPin);
+      setFigures();
+      return res? null : "Failed";
     });
   }
 

@@ -19,11 +19,17 @@ class MyBeneficiariesState extends State<MyBeneficiaries> {
 
   int selectedTab = beneficiaryNotifier.selectedTab;
   List<InnerMenuItem> tabMenus = [];
+  final GlobalKey<InnerMenuState> _key = GlobalKey();
 
   @override
   void dispose() {
-    beneficiaryNotifier.removeListener((){});
     super.dispose();
+  }
+
+  void moveTo(int index){
+    if(_key.currentState != null){
+      _key.currentState!.changeWidget(_key.currentState!.widget.menus[index].menu, index);
+    }
   }
 
   @override
@@ -32,24 +38,11 @@ class MyBeneficiariesState extends State<MyBeneficiaries> {
     if(mounted){
       setState(() {
         tabMenus = [
-          InnerMenuItem(title: "Add New", menu: const NewBeneficiary()),
+          InnerMenuItem(title: "Add New", menu: NewBeneficiary(goToTab: (int index) => moveTo(index))),
           InnerMenuItem(title: "Existing", menu: ExistingBeneficiary(isPage: widget.isPage,)),
         ];
       });
     }
-    beneficiaryNotifier.addListener((){
-      try{
-        if(selectedTab != beneficiaryNotifier.selectedTab && mounted){
-          Future.delayed(Duration.zero, (){
-            setState(() {
-              selectedTab = beneficiaryNotifier.selectedTab;
-            });
-          });
-        }
-      }catch(ex){
-        debugPrint("selectedTab Error: $ex");
-      }
-    });
   }
 
 
@@ -64,7 +57,7 @@ class MyBeneficiariesState extends State<MyBeneficiaries> {
       ),
       child: ClipRRect(
         borderRadius: widget.isPage? BorderRadius.zero : prudRad,
-        child: InnerMenu(menus: tabMenus, type: 0, activeTab: selectedTab),
+        child: InnerMenu(key: _key, menus: tabMenus, type: 0, activeTab: selectedTab),
       ),
     );
     return widget.isPage? Scaffold(

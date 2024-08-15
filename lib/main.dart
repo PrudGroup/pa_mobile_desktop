@@ -9,6 +9,7 @@ import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/pages/register/register.dart';
 import 'package:prudapp/router.dart';
 import 'package:prudapp/singletons/beneficiary_notifier.dart';
+import 'package:prudapp/singletons/bus_notifier.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/gift_card_notifier.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
@@ -56,6 +57,7 @@ void main() async {
   await rechargeNotifier.initRecharge();
   await beneficiaryNotifier.initBens();
   await utilityNotifier.initUtility();
+  await busNotifier.initBus();
   await messenger.setAutoInitEnabled(true);
   myStorage.setWindowSize(size: const Size(400, 700));
 

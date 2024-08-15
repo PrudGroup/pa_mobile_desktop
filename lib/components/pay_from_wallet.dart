@@ -177,7 +177,6 @@ class PayFromWalletState extends State<PayFromWallet> {
           children: [
             spacer.height,
             if(!pinVerified) PinVerifier(
-              walletType: widget.walletType,
               onVerified: (bool status) async {
                 if(mounted) setState(() => pinVerified = status);
                 if(pinVerified) await makePayment();

@@ -169,6 +169,26 @@ class ICloud extends ChangeNotifier{
     }
   }
 
+  Future<String?> sendCodeToEmail(String email) async {
+    String codeUrl = "$apiEndPoint/affiliates/send_code";
+    Response res = await prudDio.get(codeUrl, queryParameters: {"email": email});
+    if (res.statusCode == 200) {
+      return res.data;
+    } else {
+      return null;
+    }
+  }
+
+  Future<bool> resetPassword(String email, String newPassword) async {
+    String codeUrl = "$apiEndPoint/affiliates/password/reset";
+    Response res = await prudDio.get(codeUrl, queryParameters: {"email": email, "password": newPassword});
+    if (res.statusCode == 200) {
+      return res.data;
+    } else {
+      return false;
+    }
+  }
+
   Future<List> logAffiliateIn(String url) async{
     String? storedUser = myStorage.getFromStore(key: "user");
     if(storedUser != null){

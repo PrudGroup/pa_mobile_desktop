@@ -121,7 +121,7 @@ class WidgetStyle{
           borderRadius: BorderRadius.circular(6.0)
       ),
       focusedBorder: focusedBorder.copyWith(
-          borderRadius: BorderRadius.circular(6.0)
+        borderRadius: BorderRadius.circular(6.0)
       ),
       counter: const SizedBox(),
       contentPadding: EdgeInsets.zero,
@@ -348,6 +348,7 @@ InputDecoration getDeco(String label, {
   TextStyle? labelStyle,
   bool hasBorders = true,
   bool onlyBottomBorder = false,
+  Color? borderColor,
 }) => InputDecoration(
   labelText: label,
   filled: filled,
@@ -357,9 +358,21 @@ InputDecoration getDeco(String label, {
   labelStyle: labelStyle?? tabData.nRStyle.copyWith(
     fontSize: hintSize,
   ),
-  enabledBorder: hasBorders? (onlyBottomBorder? bottomBorder : prudWidgetStyle.enabledBorder) : InputBorder.none,
-  focusedBorder: hasBorders? (onlyBottomBorder? bottomBorder : prudWidgetStyle.focusedBorder) : InputBorder.none,
-  border: hasBorders? (onlyBottomBorder? bottomBorder : prudWidgetStyle.enabledBorder) : InputBorder.none
+  enabledBorder: hasBorders? (onlyBottomBorder? bottomBorder.copyWith(
+    borderSide: BorderSide(color: borderColor?? prudColorTheme.lineB)
+  ) : prudWidgetStyle.enabledBorder.copyWith(
+      borderSide: BorderSide(color: borderColor?? prudColorTheme.lineB)
+  )) : InputBorder.none,
+  focusedBorder: hasBorders? (onlyBottomBorder? bottomBorder.copyWith(
+      borderSide: BorderSide(color: borderColor?? prudColorTheme.iconB)
+  ) : prudWidgetStyle.focusedBorder.copyWith(
+      borderSide: BorderSide(color: borderColor?? prudColorTheme.iconB)
+  )) : InputBorder.none,
+  border: hasBorders? (onlyBottomBorder? bottomBorder.copyWith(
+      borderSide: BorderSide(color: borderColor?? prudColorTheme.lineB)
+  ) : prudWidgetStyle.enabledBorder.copyWith(
+      borderSide: BorderSide(color: borderColor?? prudColorTheme.lineB)
+  )) : InputBorder.none
 );
 BorderRadiusGeometry prudRad = const BorderRadius.only(
   topLeft: Radius.circular(30),

@@ -22,7 +22,8 @@ import '../../../models/theme.dart';
 import '../../../singletons/tab_data.dart';
 
 class NewBeneficiary extends StatefulWidget {
-  const NewBeneficiary({super.key});
+  final Function(int) goToTab;
+  const NewBeneficiary({super.key, required this.goToTab});
 
   @override
   NewBeneficiaryState createState() => NewBeneficiaryState();
@@ -62,6 +63,7 @@ class NewBeneficiaryState extends State<NewBeneficiary> {
       });
     }
   }
+
 
   void clear({bool nextExisting = false}){
     if(mounted){
@@ -106,7 +108,7 @@ class NewBeneficiaryState extends State<NewBeneficiary> {
         ],
       ).show();
       iCloud.scrollTop(scrollCtrl);
-      if(nextExisting) beneficiaryNotifier.changeTab(1);
+      if(nextExisting) widget.goToTab(1);
     }
   }
 
@@ -171,20 +173,20 @@ class NewBeneficiaryState extends State<NewBeneficiary> {
 
   void getCountry(){
     showCountryPicker(
-        context: context,
-        favorite: ["NG", "UK", "GN", "US"],
-        onSelect: (Country country){
-          try{
-            if(mounted){
-              setState(() {
-                selectedBenCountry = country;
-                if(selectedBenCountry != null) newBen!.countryCode = selectedBenCountry!.countryCode;
-              });
-            }
-          }catch(ex){
-            debugPrint("getCurrency Error: $ex");
+      context: context,
+      favorite: ["NG", "UK", "GN", "US"],
+      onSelect: (Country country){
+        try{
+          if(mounted){
+            setState(() {
+              selectedBenCountry = country;
+              if(selectedBenCountry != null) newBen!.countryCode = selectedBenCountry!.countryCode;
+            });
           }
+        }catch(ex){
+          debugPrint("getCurrency Error: $ex");
         }
+      }
     );
   }
 
