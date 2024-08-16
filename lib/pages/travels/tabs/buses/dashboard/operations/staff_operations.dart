@@ -4,14 +4,14 @@ import '../../../../../../components/translate_text.dart';
 import '../../../../../../components/work_in_progress.dart';
 import '../../../../../../models/theme.dart';
 
-class OtherOperations extends StatefulWidget {
-  const OtherOperations({super.key});
+class StaffOperations extends StatefulWidget {
+  const StaffOperations({super.key});
 
   @override
-  OtherOperationsState createState() => OtherOperationsState();
+  StaffOperationsState createState() => StaffOperationsState();
 }
 
-class OtherOperationsState extends State<OtherOperations> {
+class StaffOperationsState extends State<StaffOperations> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,7 +24,7 @@ class OtherOperationsState extends State<OtherOperations> {
           splashRadius: 20,
         ),
         title: Translate(
-          text: "Other Operations",
+          text: "Staff Operations",
           style: prudWidgetStyle.tabTextStyle.copyWith(
               fontSize: 16,
               color: prudColorTheme.bgA

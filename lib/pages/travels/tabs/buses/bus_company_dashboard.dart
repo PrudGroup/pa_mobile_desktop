@@ -12,6 +12,8 @@ import 'package:prudapp/singletons/tab_data.dart';
 import '../../../../components/translate_text.dart';
 import '../../../../models/theme.dart';
 import '../../../../singletons/i_cloud.dart';
+import '../../../../singletons/shared_local_storage.dart';
+import '../../switz_travels.dart';
 
 class BusCompanyDashboard extends StatefulWidget {
   const BusCompanyDashboard({super.key});
@@ -24,6 +26,7 @@ class BusCompanyDashboardState extends State<BusCompanyDashboard> {
   bool isOperator = false;
   bool checkingStatus = false;
   bool isActive = busNotifier.isActive;
+  bool loading = false;
 
   Future<void> checkBrandStatus() async {
     await tryAsync("checkBrandStatus", () async {
@@ -51,6 +54,31 @@ class BusCompanyDashboardState extends State<BusCompanyDashboard> {
     });
   }
 
+  Future<void> joinTeam() async {
+    if(busNotifier.busOperatorId == null && busNotifier.busBrandId == null && busNotifier.busBrandRole == null && myStorage.user != null && myStorage.user!.id != null){
+      await tryAsync("joinTeam", () async {
+        if(mounted) setState(() => loading = true);
+        BusBrandOperator? optr = await busNotifier.getOperatorByAffId(myStorage.user!.id!);
+        if(optr != null){
+          busNotifier.busOperatorId = optr.id;
+          busNotifier.busBrandRole = optr.role;
+          busNotifier.isActive = optr.status.toLowerCase() == "active";
+          busNotifier.busBrandId = optr.brandId;
+          busNotifier.saveDefaultSettings();
+          if(mounted){
+            setState(() {
+              isActive = busNotifier.isActive;
+              isOperator = true;
+            });
+          }
+        }
+        if(mounted) setState(() => loading = false);
+      }, error: (){
+        if(mounted) setState(() => loading = false);
+      });
+    }
+  }
+
   @override
   void initState() {
     if(mounted){
@@ -60,6 +88,7 @@ class BusCompanyDashboardState extends State<BusCompanyDashboard> {
     }
     Future.delayed(Duration.zero, () async {
       if(isOperator) await checkBrandStatus();
+      await joinTeam();
     });
     super.initState();
   }
@@ -67,6 +96,33 @@ class BusCompanyDashboardState extends State<BusCompanyDashboard> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  Future<void> createOperator() async {
+    await tryAsync("createOperator", () async {
+      if(mounted) setState(() => loading = true);
+      BusBrandOperator newOpr = BusBrandOperator(
+        affId: myStorage.user!.id!,
+        status: "ACTIVE",
+        brandId: busNotifier.busBrandId!,
+        role: "SUPER"
+      );
+      BusBrandOperator? opr = await busNotifier.createNewOperator(newOpr);
+      if(mounted) {
+        if(opr != null){
+          busNotifier.busOperatorId = opr.id;
+          busNotifier.busBrandRole = opr.role;
+          await busNotifier.saveDefaultSettings();
+          if(mounted) {
+            iCloud.goto(context, const SwitzTravels(tab: 2,));
+            Navigator.pop(context);
+          }
+        }
+      }
+      if(mounted) setState(() => loading = false);
+    }, error: (){
+      if(mounted) setState(() => loading = false);
+    });
   }
 
   @override
@@ -85,6 +141,7 @@ class BusCompanyDashboardState extends State<BusCompanyDashboard> {
                 hasPadding: true,
                 child: Column(
                   children: [
+                    spacer.height,
                     Translate(
                       text: "The staff/operator you have on SwitzTravel, the lesser your work. Easily add more staff/operator here.",
                       style: prudWidgetStyle.tabTextStyle.copyWith(
@@ -98,7 +155,8 @@ class BusCompanyDashboardState extends State<BusCompanyDashboard> {
                     prudWidgetStyle.getLongButton(
                       onPressed: () => iCloud.goto(context, const NewBusBrandOperator()),
                       text: "Add More Staff/Operator"
-                    )
+                    ),
+                    spacer.height,
                   ],
                 )
               ),
@@ -111,11 +169,13 @@ class BusCompanyDashboardState extends State<BusCompanyDashboard> {
                 hasPadding: true,
                 child: Column(
                   children: [
+                    mediumSpacer.height,
                     PinVerifier(
                       onVerified: (bool verified){
                         if(verified) iCloud.goto(context, const BusDashboard());
                       }
                     ),
+                    mediumSpacer.height,
                   ],
                 )
               ),
@@ -154,37 +214,100 @@ class BusCompanyDashboardState extends State<BusCompanyDashboard> {
                   ),
                   align: TextAlign.center,
                 ),
+                spacer.height,
               ],
             ),
           )
         )
       )
           :
-      Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
+      (
+        busNotifier.busBrandId != null && busNotifier.busOperatorId == null?
+        Column(
           children: [
             spacer.height,
-            Translate(
-              text: "Do you have a bus transport company which you intend bring unto our platform? We will be"
-                  " glad to have you onboard. There are many reasons why you should put your transport"
-                  " company on SwitzTravels under Prudapp. One of these reasons is that you get to have "
-                  "a world class mobile app with which you can manage your transport inventory effectively with less cost of operations.",
-              style: prudWidgetStyle.tabTextStyle.copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: prudColorTheme.textB
-              ),
-              align: TextAlign.center,
+            PrudContainer(
+              hasTitle: true,
+              hasPadding: true,
+              title: "Operator",
+              titleBorderColor: prudColorTheme.bgC,
+              titleAlignment: MainAxisAlignment.end,
+              child: Column(
+                children: [
+                  mediumSpacer.height,
+                  Translate(
+                    text: "We were unable to create access for you automatically. Kindly try it again",
+                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: prudColorTheme.textB
+                    ),
+                    align: TextAlign.center,
+                  ),
+                  spacer.height,
+                  loading? LoadingComponent(
+                    isShimmer: false,
+                    size: 35,
+                    spinnerColor: prudColorTheme.primary,
+                  )
+                      :
+                  prudWidgetStyle.getLongButton(
+                    onPressed: createOperator,
+                    text: "Create Access"
+                  ),
+                  spacer.height,
+                ],
+              )
             ),
-            spacer.height,
-            prudWidgetStyle.getLongButton(
+          ],
+        )
+            :
+        Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            children: [
+              spacer.height,
+              Translate(
+                text: "Do you have a bus transport company which you intend bring unto our platform? We will be"
+                    " glad to have you onboard. There are many reasons why you should put your transport"
+                    " company on SwitzTravels under Prudapp. One of these reasons is that you get to have "
+                    "a world class mobile app with which you can manage your transport inventory effectively with less cost of operations.",
+                style: prudWidgetStyle.tabTextStyle.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: prudColorTheme.textB
+                ),
+                align: TextAlign.center,
+              ),
+              spacer.height,
+              prudWidgetStyle.getLongButton(
                 onPressed: () => iCloud.goto(context, const NewBusDashboard()),
                 text: "Create Bus Transport System",
                 shape: 1
-            ),
-          ],
-        ),
+              ),
+              mediumSpacer.height,
+              Translate(
+                text: "If you are a staff/admin of a particular transport company, ask your admin to add you as an operator and then click below to join.",
+                style: prudWidgetStyle.tabTextStyle.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: prudColorTheme.textB
+                ),
+                align: TextAlign.center,
+              ),
+              spacer.height,
+              loading? LoadingComponent(
+                isShimmer: false,
+                spinnerColor: prudColorTheme.primary,
+                size: 30,
+              ) : prudWidgetStyle.getLongButton(
+                onPressed: joinTeam,
+                text: "Join A Transport Company",
+                shape: 1
+              ),
+            ],
+          ),
+        )
       )
     );
   }

@@ -8,7 +8,7 @@ class BusBrand{
   String? status;
   String logo;
   String registrar;
-  String? emailVerified;
+  bool? emailVerified;
   String govRegistrationId;
   int votes;
   int voters;

@@ -22,8 +22,16 @@ class BusNotifier extends ChangeNotifier {
   String? busDriverId;
   bool isActive = false;
   String? busBrandRole;
+  String? selectedRole;
+  List<String> roles = ["SUPER", "ADMIN", "DRIVER"];
 
-  getDefaultSettings(){
+  void updateSelectedRole(String role){
+    selectedRole = role;
+    notifyListeners();
+  }
+
+
+  void getDefaultSettings(){
     busOperatorId = myStorage.getFromStore(key: "busOperatorId");
     busDriverId = myStorage.getFromStore(key: "busDriverId");
     busBrandId = myStorage.getFromStore(key: "busBrandId");
@@ -39,10 +47,40 @@ class BusNotifier extends ChangeNotifier {
     if(busBrandRole != null) await myStorage.addToStore(key: "busBrandRole", value: busBrandRole);
   }
 
-  Future<bool> createNewOperator(BusBrandOperator opr) async {
-    String path = "/";
+  Future<BusBrandOperator?> createNewOperator(BusBrandOperator opr) async {
+    String path = "operators/";
     dynamic res = await makeRequest(path: path, method: 1, data: opr.toJson());
-    if(res != null){
+    if(res != null && res != false){
+      if(res["id"] != null){
+        BusBrandOperator opr = BusBrandOperator.fromJson(res);
+        return opr;
+      }else{
+        return null;
+      }
+    }else{
+      return null;
+    }
+  }
+
+  Future<BusBrandOperator?> getOperatorByAffId(String affId) async {
+    String path = "operators/aff/$affId";
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false){
+      if(res["id"] != null){
+        BusBrandOperator opr = BusBrandOperator.fromJson(res);
+        return opr;
+      }else{
+        return null;
+      }
+    }else{
+      return null;
+    }
+  }
+
+  Future<bool> createNewBrand(BusBrand brand) async {
+    String path = "";
+    dynamic res = await makeRequest(path: path, method: 1, data: brand.toJson());
+    if(res != null && res != false){
       if(res["id"] != null){
         busBrand = BusBrand.fromJson(res);
         if(busBrand != null && busBrand!.id != null) busBrandId = busBrand!.id;
@@ -57,19 +95,24 @@ class BusNotifier extends ChangeNotifier {
     }
   }
 
-  Future<bool> createNewBrand(BusBrand brand) async {
-    String path = "/";
-    dynamic res = await makeRequest(path: path, method: 1, data: brand.toJson());
-    if(res != null){
-      if(res["id"] != null){
-        busBrand = BusBrand.fromJson(res);
-        if(busBrand != null && busBrand!.id != null) busBrandId = busBrand!.id;
-        await saveDefaultSettings();
-        notifyListeners();
-        return true;
-      }else{
-        return false;
-      }
+  Future<String?> sendCode(String email, String code) async {
+    String path = "send_code";
+    dynamic res = await makeRequest(path: path,data: {
+      "email": email,
+      "code": code,
+    });
+    if(res != null && res != false){
+      return res;
+    }else{
+      return null;
+    }
+  }
+
+  Future<bool> updateEmailVerification(String brandId, String email) async {
+    String path = "$brandId/email/verify";
+    dynamic res = await makeRequest(path: path);
+    if(res == true){
+      return true;
     }else{
       return false;
     }
@@ -78,7 +121,7 @@ class BusNotifier extends ChangeNotifier {
   Future<BusBrand?> getBusBrandById(String id) async {
     String path = id;
     dynamic res = await makeRequest(path: path);
-    if(res != null){
+    if(res != null && res != false){
       dynamic brand = res;
       if(brand["id"] == id){
         busBrand = BusBrand.fromJson(brand);
@@ -124,9 +167,19 @@ class BusNotifier extends ChangeNotifier {
     }
   }
 
+  Future<void> clearDefaultSettings() async {
+    busBrandId = null;
+    busBrand = null;
+    busBrandRole = null;
+    busOperatorId = null;
+    isActive = false;
+    await saveDefaultSettings();
+  }
+
   Future<void> initBus() async {
     await tryAsync("initBus", () async {
       getDefaultSettings();
+      await clearDefaultSettings();
       notifyListeners();
     });
   }

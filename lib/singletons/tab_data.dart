@@ -221,6 +221,17 @@ class TabData extends ChangeNotifier {
     return result;
   }
 
+  String getRandomDigitString(int length){
+    if(length > 30) return "";
+    String chars = "0123456789012345678901234567899876543210";
+    chars = shuffle(chars);
+    String result = ""; final random = Random();
+    for(int i=1; i<=length; i++){
+      result+=chars[random.nextInt(chars.length)];
+    }
+    return result;
+  }
+
   String shuffle(String str) {
     List arr = str.split('');
     arr.shuffle();

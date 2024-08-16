@@ -3,7 +3,7 @@ import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/account_op
 import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/bus_operations.dart';
 import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/customer_operations.dart';
 import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/journey_operations.dart';
-import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/other_operations.dart';
+import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/staff_operations.dart';
 import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/promotion_operations.dart';
 import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/wallet_operations.dart';
 
@@ -37,7 +37,7 @@ class BusDashboardState extends State<BusDashboard> with TickerProviderStateMixi
           WalletOperations(),
           PromotionOperations(),
           AccountOperations(),
-          OtherOperations()
+          StaffOperations()
         ],
       ),
       bottomNavigationBar: TabBar(
