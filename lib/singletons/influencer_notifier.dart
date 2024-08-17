@@ -6,6 +6,7 @@ import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
+import '../models/user.dart';
 import 'i_cloud.dart';
 
 
@@ -169,6 +170,21 @@ class InfluencerNotifier extends ChangeNotifier {
       debugPrint("InfluencerNotifier_getReferralPercentage Error: $ex");
       return null;
     }
+  }
+
+  Future<User?> getInfluencerById(String id) async {
+    return await tryAsync("getInfluencerById",() async{
+      String path = "affiliates/$id";
+      dynamic res = await makeRequest(path: path);
+      if(res != null){
+        User foundUser = User.fromJson(res);
+        return foundUser;
+      }else{
+        return null;
+      }
+    }, error: (){
+      return null;
+    });
   }
 
   Future<dynamic> makeRequest({required String path, bool isGet = true, Map<String, dynamic>? data}) async {

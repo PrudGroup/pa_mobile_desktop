@@ -82,6 +82,11 @@ class PrudImages {
   String postpaid;
   String internet;
   String water;
+  String driver;
+  String operators;
+  String addDriver;
+  String addOperator;
+  String busDriver;
 
 
 
@@ -168,7 +173,12 @@ class PrudImages {
     required this.internet,
     required this.water,
     required this.prepaid,
-    required this.postpaid
+    required this.postpaid,
+    required this.busDriver,
+    required this.addOperator,
+    required this.addDriver,
+    required this.operators,
+    required this.driver,
   });
 }
 
@@ -256,4 +266,9 @@ PrudImages prudImages = PrudImages(
   postpaid: "assets/images/postpaid.png",
   water: "assets/images/drop.png",
   internet: "assets/images/networks.png",
+  busDriver: "assets/images/bus-driver.png",
+  addOperator: "assets/images/add-friend.png",
+  addDriver: "assets/images/add.png",
+  operators: "assets/images/management.png",
+  driver: "assets/images/rudder.png",
 );

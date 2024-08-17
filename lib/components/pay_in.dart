@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutterwave_standard/models/responses/charge_response.dart';
+// import 'package:flutterwave_standard/models/responses/charge_response.dart';
 import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/components/prud_showroom.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:uuid/uuid.dart';
-import 'package:flutterwave_standard/core/flutterwave.dart';
-import 'package:flutterwave_standard/models/requests/customer.dart';
-import 'package:flutterwave_standard/models/requests/customizations.dart';
-import '../constants.dart';
+// import 'package:flutterwave_standard/core/flutterwave.dart';
+// import 'package:flutterwave_standard/models/requests/customer.dart';
+// import 'package:flutterwave_standard/models/requests/customizations.dart';
+// import '../constants.dart';
 import '../singletons/i_cloud.dart';
 import 'translate_text.dart';
 import 'package:opay_online_flutter_sdk/opay_online_flutter_sdk.dart';
@@ -36,7 +36,7 @@ class PayIn extends StatefulWidget {
 }
 
 class PayInState extends State<PayIn> {
-  Flutterwave? flutterwave;
+  // Flutterwave? flutterwave;
   PayParams? opayPayParams;
   bool loading = false;
   List<Widget> showroom = [];
@@ -46,7 +46,7 @@ class PayInState extends State<PayIn> {
   dynamic getCashierStatusResult;
 
 
-  handlePaymentInitialization() async {
+  /*handlePaymentInitialization() async {
     const uuid = Uuid();
     String ranRef = uuid.v1();
     String wave = Constants.wavePublicKey;
@@ -73,7 +73,7 @@ class PayInState extends State<PayIn> {
         isTestMode: paymentIsInTestMode,
       );
     }
-  }
+  }*/
 
   initiateOpayPayment() async {
     const uuid = Uuid();
@@ -232,9 +232,9 @@ class PayInState extends State<PayIn> {
           if (mounted) setState(() => loading = true);
           await processOpayPayment();
         }else {
-          handlePaymentInitialization();
+          // handlePaymentInitialization();
           if (mounted) setState(() => loading = true);
-          final ChargeResponse? response = await flutterwave?.charge();
+          /*final ChargeResponse? response = await flutterwave?.charge();
           if (response != null && response.transactionId != null &&
               response.txRef != null) {
             if (mounted) {
@@ -245,7 +245,7 @@ class PayInState extends State<PayIn> {
               });
             }
             await verifyPayment();
-          }
+          }*/
           if (mounted) setState(() => loading = false);
         }
       }catch(ex){

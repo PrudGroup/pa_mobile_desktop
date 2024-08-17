@@ -27,6 +27,7 @@ class BusCompanyDashboardState extends State<BusCompanyDashboard> {
   bool checkingStatus = false;
   bool isActive = busNotifier.isActive;
   bool loading = false;
+  bool getting = false;
 
   Future<void> checkBrandStatus() async {
     await tryAsync("checkBrandStatus", () async {
@@ -51,6 +52,34 @@ class BusCompanyDashboardState extends State<BusCompanyDashboard> {
       }
     }, error: (){
       if(mounted) setState(() => checkingStatus = false);
+    });
+  }
+
+  Future<void> updateOperator() async {
+    await tryAsync("", () async {
+      if(mounted) setState(() => getting = true);
+      BusBrandOperator? optr = await busNotifier.getOperatorById(busNotifier.busOperatorId!);
+      if(optr != null){
+        busNotifier.busOperatorId = optr.id;
+        busNotifier.busBrandRole = optr.role;
+        busNotifier.isActive = optr.status.toLowerCase() == "active";
+        busNotifier.busBrandId = optr.brandId;
+        busNotifier.saveDefaultSettings();
+        if(mounted){
+          setState(() {
+            isActive = busNotifier.isActive;
+            isOperator = true;
+          });
+          if(isActive) {
+            iCloud.goto(context, const BusDashboard());
+          } else{
+            iCloud.showSnackBar("Access Denied. Ask Admin",context, type: 3);
+          }
+        }
+      }
+      if(mounted) setState(() => getting = false);
+    }, error: (){
+      if(mounted) setState(() => getting = false);
     });
   }
 
@@ -170,9 +199,14 @@ class BusCompanyDashboardState extends State<BusCompanyDashboard> {
                 child: Column(
                   children: [
                     mediumSpacer.height,
-                    PinVerifier(
-                      onVerified: (bool verified){
-                        if(verified) iCloud.goto(context, const BusDashboard());
+                    getting? LoadingComponent(
+                      isShimmer: false,
+                      defaultSpinnerType: false,
+                      spinnerColor: prudColorTheme.primary,
+                      size: 20,
+                    ) : PinVerifier(
+                      onVerified: (bool verified) async {
+                        if(verified) await updateOperator();
                       }
                     ),
                     mediumSpacer.height,

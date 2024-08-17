@@ -22,11 +22,13 @@ class BusNotifier extends ChangeNotifier {
   String? busDriverId;
   bool isActive = false;
   String? busBrandRole;
-  String? selectedRole;
-  List<String> roles = ["SUPER", "ADMIN", "DRIVER"];
+  BusBrandOperator? selectedOperator;
+  List<String> roles = ["ADMIN", "DRIVER", "SUPER"];
+  List<BusBrandOperator> operators = [];
+  List<BusBrandDriver> drivers = [];
 
-  void updateSelectedRole(String role){
-    selectedRole = role;
+  void updateSelectedOperator(BusBrandOperator op){
+    selectedOperator = op;
     notifyListeners();
   }
 
@@ -64,6 +66,21 @@ class BusNotifier extends ChangeNotifier {
 
   Future<BusBrandOperator?> getOperatorByAffId(String affId) async {
     String path = "operators/aff/$affId";
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false){
+      if(res["id"] != null){
+        BusBrandOperator opr = BusBrandOperator.fromJson(res);
+        return opr;
+      }else{
+        return null;
+      }
+    }else{
+      return null;
+    }
+  }
+
+  Future<BusBrandOperator?> getOperatorById(String id) async {
+    String path = "operators/$id";
     dynamic res = await makeRequest(path: path);
     if(res != null && res != false){
       if(res["id"] != null){
@@ -179,7 +196,6 @@ class BusNotifier extends ChangeNotifier {
   Future<void> initBus() async {
     await tryAsync("initBus", () async {
       getDefaultSettings();
-      await clearDefaultSettings();
       notifyListeners();
     });
   }

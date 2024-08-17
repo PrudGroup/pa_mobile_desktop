@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:prudapp/components/bus_brand_roles_component.dart';
 import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/models/bus_models.dart';
 import 'package:prudapp/models/theme.dart';
@@ -21,9 +20,29 @@ class NewBusBrandOperator extends StatefulWidget {
 }
 
 class NewBusBrandOperatorState extends State<NewBusBrandOperator> {
-  String role = "";
+  String role = "ADMIN";
   String affId = "";
   bool loading = false;
+  bool isSuper = false;
+  Widget notSuper = Center(
+    child: tabData.getNotFoundWidget(
+      title: "Access Denied",
+      desc: "You do not have sufficient privileges to add new staff/operator."
+    ),
+  );
+
+
+  @override
+  void initState(){
+    tryOnly("initState", (){
+      if(mounted){
+        setState(() {
+          isSuper = busNotifier.busBrandRole != null && busNotifier.busBrandRole!.toUpperCase() == "SUPER";
+        });
+      }
+    });
+    super.initState();
+  }
 
   void clearInput(){
     if(mounted){
@@ -66,28 +85,13 @@ class NewBusBrandOperatorState extends State<NewBusBrandOperator> {
   }
 
 
-  void getRoles(){
-    showModalBottomSheet(
-      context: context,
-      useSafeArea: true,
-      enableDrag: true,
-      showDragHandle: true,
-      backgroundColor: prudColorTheme.bgA,
-      elevation: 10,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: prudRad,
-      ),
-      builder: (BuildContext context) => const BusBrandRolesComponent(),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     Widget content = SingleChildScrollView(
       padding: const EdgeInsets.all(10),
       physics: const BouncingScrollPhysics(),
-      child: Column(
+      child: isSuper?
+      Column(
         children: [
           spacer.height,
           spacer.height,
@@ -100,40 +104,41 @@ class NewBusBrandOperatorState extends State<NewBusBrandOperator> {
             child: Column(
               children: [
                 mediumSpacer.height,
-                InkWell(
-                  onTap: getRoles,
-                  child: Flex(
-                    direction: Axis.horizontal,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      FittedBox(
-                        child: Row(
-                          children: [
-                            if(role.isNotEmpty) Text(
-                              role,
-                              style: prudWidgetStyle.tabTextStyle.copyWith(
-                                  fontSize: 20.0
-                              ),
-                            ),
-                            spacer.width,
-                            Translate(
-                              text: role.isNotEmpty? role : "Select Role",
-                              style: prudWidgetStyle.tabTextStyle.copyWith(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w500
-                              ),
-                            ),
-                          ],
+                FormBuilder(
+                  child: FormBuilderChoiceChip(
+                    decoration: getDeco("Role"),
+                    backgroundColor: prudColorTheme.bgA,
+                    disabledColor: prudColorTheme.bgD,
+                    spacing: spacer.width.width!,
+                    shape: prudWidgetStyle.choiceChipShape,
+                    selectedColor: prudColorTheme.primary,
+                    onChanged: (String? selected){
+                      tryOnly("RoleSelector", (){
+                        if(mounted && selected != null){
+                          setState(() {
+                            role = selected;
+                          });
+                        }
+                      });
+                    },
+                    name: "role",
+                    initialValue: role,
+                    options: busNotifier.roles.map((String ele) {
+                      return FormBuilderChipOption(
+                        value: ele,
+                        child: Translate(
+                          text: ele,
+                          style: prudWidgetStyle.btnTextStyle.copyWith(
+                              color: ele == role?
+                              prudColorTheme.bgA : prudColorTheme.primary
+                          ),
+                          align: TextAlign.center,
                         ),
-                      ),
-                      Icon(
-                        Icons.keyboard_arrow_down_sharp,
-                        size: 20,
-                        color: prudColorTheme.lineB,
-                      )
-                    ],
+                      );
+                    }).toList(),
                   ),
-                )
+                ),
+                spacer.height,
               ],
             )
           ),
@@ -188,7 +193,9 @@ class NewBusBrandOperatorState extends State<NewBusBrandOperator> {
           largeSpacer.height,
           xLargeSpacer.height,
         ],
-      ),
+      )
+          :
+      notSuper,
     );
 
     return widget.isPage? Scaffold(
