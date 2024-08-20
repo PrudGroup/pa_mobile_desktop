@@ -262,12 +262,7 @@ class RegisteredState extends State<Register> {
         newUser.deviceRegToken = token;
       }
     }).catchError((ex){
-      iCloud.showSnackBar(
-        "$ex",
-        context,
-        title: 'Messenger',
-        type: 3
-      );
+      if(mounted) iCloud.showSnackBar("$ex", context, title: 'Messenger', type: 3);
     });
     if(pin != null) await myStorage.addToStore(key: "pin", value: pin);
     if(referralCode != null) await myStorage.addToStore(key: "install_referral_code", value: referralCode);
@@ -283,7 +278,7 @@ class RegisteredState extends State<Register> {
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return PopScope(
-      onPopInvoked: (bool poped) => poped,
+      onPopInvokedWithResult: (bool poped, dynamic res) => poped,
       child: Scaffold(
         backgroundColor: prudColorTheme.bgA,
         resizeToAvoidBottomInset: false,

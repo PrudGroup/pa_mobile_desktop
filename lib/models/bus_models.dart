@@ -1,3 +1,5 @@
+import 'package:prudapp/models/user.dart';
+
 class BusBrand{
   String? id;
   String brandName;
@@ -79,6 +81,48 @@ class BusBrand{
       voters: json["voters"],
       votes: json["votes"],
       emailVerified: json["email_verified"],
+    );
+  }
+}
+
+class OperatorDetails{
+  BusBrandOperator op;
+  User detail;
+
+  OperatorDetails({required this.op, required this.detail});
+
+  Map<String, dynamic> toJson(){
+    return {
+      "op": op.toJson(),
+      "detail": detail.toJson()
+    };
+  }
+
+  factory OperatorDetails.fromJson(Map<String, dynamic> json) {
+    return OperatorDetails(
+      op: BusBrandOperator.fromJson(json["op"]),
+      detail: User.fromJson(json["detail"])
+    );
+  }
+}
+
+class DriverDetails{
+  BusBrandDriver dr;
+  User detail;
+
+  DriverDetails({required this.dr, required this.detail});
+
+  Map<String, dynamic> toJson(){
+    return {
+      "dr": dr.toJson(),
+      "detail": detail.toJson()
+    };
+  }
+
+  factory DriverDetails.fromJson(Map<String, dynamic> json) {
+    return DriverDetails(
+      dr: BusBrandDriver.fromJson(json["dr"]),
+      detail: User.fromJson(json["detail"])
     );
   }
 }
@@ -179,7 +223,7 @@ class BusBrandDriver{
   factory BusBrandDriver.fromJson(Map<String, dynamic> json){
     return BusBrandDriver(
       operatorId: json["operator_id"],
-      joinedDate: json["joined_date"],
+      joinedDate: DateTime.parse(json["joined_date"]),
       addedBy: json["added_by"],
       rank: json["rank"],
       journeys: json["journeys"],

@@ -30,6 +30,8 @@ class NewBusBrandOperatorState extends State<NewBusBrandOperator> {
       desc: "You do not have sufficient privileges to add new staff/operator."
     ),
   );
+  FocusNode focusNode = FocusNode();
+  TextEditingController txtCtrl = TextEditingController();
 
 
   @override
@@ -44,13 +46,20 @@ class NewBusBrandOperatorState extends State<NewBusBrandOperator> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    txtCtrl.dispose();
+    super.dispose();
+  }
+
   void clearInput(){
     if(mounted){
       setState(() {
-        role = "";
+        role = "ADMIN";
         affId = "";
         loading = false;
       });
+      txtCtrl.text = "";
     }
   }
 
@@ -64,6 +73,7 @@ class NewBusBrandOperatorState extends State<NewBusBrandOperator> {
     ){
       await tryAsync("addNewOperator", () async {
         if(mounted) setState(() => loading = true);
+        focusNode.unfocus();
         BusBrandOperator newOpr = BusBrandOperator(
           affId: affId,
           status: "ACTIVE",
@@ -105,7 +115,7 @@ class NewBusBrandOperatorState extends State<NewBusBrandOperator> {
               children: [
                 mediumSpacer.height,
                 FormBuilder(
-                  child: FormBuilderChoiceChip(
+                  child: FormBuilderChoiceChip<String>(
                     decoration: getDeco("Role"),
                     backgroundColor: prudColorTheme.bgA,
                     disabledColor: prudColorTheme.bgD,
@@ -129,8 +139,8 @@ class NewBusBrandOperatorState extends State<NewBusBrandOperator> {
                         child: Translate(
                           text: ele,
                           style: prudWidgetStyle.btnTextStyle.copyWith(
-                              color: ele == role?
-                              prudColorTheme.bgA : prudColorTheme.primary
+                            color: ele == role?
+                            prudColorTheme.bgA : prudColorTheme.primary
                           ),
                           align: TextAlign.center,
                         ),
@@ -146,15 +156,16 @@ class NewBusBrandOperatorState extends State<NewBusBrandOperator> {
           PrudContainer(
             hasTitle: true,
             hasPadding: true,
-            title: "Prudapp ID",
+            title: "Prudapp ID *",
             titleBorderColor: prudColorTheme.bgC,
             titleAlignment: MainAxisAlignment.end,
             child: Column(
               children: [
                 spacer.height,
                 FormBuilderTextField(
-                  initialValue: affId,
+                  controller: txtCtrl,
                   name: 'affiliateId',
+                  focusNode: focusNode,
                   style: tabData.npStyle,
                   keyboardType: TextInputType.text,
                   decoration: getDeco(

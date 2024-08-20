@@ -113,14 +113,11 @@ class LoginState extends State<Login> {
           }
         }
       }).catchError((ex){
-        if(mounted) setState(() => loading = false);
         debugPrint("Firebase: $ex");
-        iCloud.showSnackBar(
-          "$ex",
-          context,
-          title: 'Messenger',
-          type: 3
-        );
+        if(mounted) {
+          iCloud.showSnackBar("$ex", context, title: 'Messenger', type: 3);
+          setState(() => loading = false);
+        }
       });
     }catch(ex){
       debugPrint("Renew SignIn Error: $ex");
@@ -185,7 +182,7 @@ class LoginState extends State<Login> {
     BorderRadiusGeometry rad = BorderRadius.circular(sideSize);
     return PopScope(
       canPop: false,
-      onPopInvoked: (bool poped) async => poped,
+      onPopInvokedWithResult: (bool poped, dynamic res) async => poped,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Stack(

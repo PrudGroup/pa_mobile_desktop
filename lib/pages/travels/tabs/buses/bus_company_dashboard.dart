@@ -28,6 +28,7 @@ class BusCompanyDashboardState extends State<BusCompanyDashboard> {
   bool isActive = busNotifier.isActive;
   bool loading = false;
   bool getting = false;
+  bool verified = false;
 
   Future<void> checkBrandStatus() async {
     await tryAsync("checkBrandStatus", () async {
@@ -57,19 +58,24 @@ class BusCompanyDashboardState extends State<BusCompanyDashboard> {
 
   Future<void> updateOperator() async {
     await tryAsync("", () async {
-      if(mounted) setState(() => getting = true);
+      if(mounted) {
+        setState(() {
+          getting = true;
+          verified = true;
+        });
+      }
       BusBrandOperator? optr = await busNotifier.getOperatorById(busNotifier.busOperatorId!);
       if(optr != null){
         busNotifier.busOperatorId = optr.id;
         busNotifier.busBrandRole = optr.role;
         busNotifier.isActive = optr.status.toLowerCase() == "active";
         busNotifier.busBrandId = optr.brandId;
-        busNotifier.saveDefaultSettings();
         if(mounted){
           setState(() {
             isActive = busNotifier.isActive;
             isOperator = true;
           });
+          busNotifier.saveDefaultSettings();
           if(isActive) {
             iCloud.goto(context, const BusDashboard());
           } else{
@@ -159,8 +165,10 @@ class BusCompanyDashboardState extends State<BusCompanyDashboard> {
     Size screen = MediaQuery.of(context).size;
     return SizedBox(
       height: screen.height,
-      child: isOperator? (
-        isActive? SingleChildScrollView(
+      child: isOperator?
+      (
+        isActive?
+        SingleChildScrollView(
           padding: const EdgeInsets.all(10),
           physics: const BouncingScrollPhysics(),
           child: Column(
@@ -204,10 +212,19 @@ class BusCompanyDashboardState extends State<BusCompanyDashboard> {
                       defaultSpinnerType: false,
                       spinnerColor: prudColorTheme.primary,
                       size: 20,
-                    ) : PinVerifier(
-                      onVerified: (bool verified) async {
-                        if(verified) await updateOperator();
-                      }
+                    )
+                        :
+                    (
+                      verified?
+                      const SizedBox()
+                          :
+                      PinVerifier(
+                        onVerified: (bool isVerified) async {
+                          debugPrint("Things got here AA");
+                          if(isVerified) await updateOperator();
+                          debugPrint("Things got here AAB");
+                        }
+                      )
                     ),
                     mediumSpacer.height,
                   ],
@@ -216,12 +233,17 @@ class BusCompanyDashboardState extends State<BusCompanyDashboard> {
               spacer.height,
             ],
           ),
-        ) : (
-          checkingStatus? LoadingComponent(
+        )
+            :
+        (
+          checkingStatus?
+          LoadingComponent(
             isShimmer: true,
             shimmerType: 3,
             height: screen.height,
-          ) : Padding(
+          )
+              :
+          Padding(
             padding: const EdgeInsets.all(10),
             child: Column(
               children: [

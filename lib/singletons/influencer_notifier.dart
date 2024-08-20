@@ -42,7 +42,7 @@ class InfluencerNotifier extends ChangeNotifier {
 
   Future<InfluencerWallet?> getWallet(String affId) async {
     return await tryAsync("getWallet", () async {
-      dynamic res = await makeRequest(path: "affiliates/wallets/aff/$affId");
+      dynamic res = await makeRequest(path: "wallets/aff/$affId");
       if (res != null) {
         InfluencerWallet wt = InfluencerWallet.fromJson(res);
         updateWallet(wt);
@@ -56,7 +56,7 @@ class InfluencerNotifier extends ChangeNotifier {
   Future<WalletTransactionResult> creditOrDebitWallet(WalletAction action) async{
     WalletTransactionResult wtRes = WalletTransactionResult(tran: null, succeeded: false);
     return await tryAsync("creditOrDebitWallet", () async {
-      String path = "affiliates/wallets/";
+      String path = "wallets/";
       dynamic res = await makeRequest(path: path, isGet: false, data: action.toJson());
       if (res != null) {
         WalletHistory ht = WalletHistory.fromJson(res);
@@ -159,7 +159,7 @@ class InfluencerNotifier extends ChangeNotifier {
 
   Future<double?> getLinkReferralPercentage(String linkId) async {
     try{
-      String path = "affiliates/aff_links/$linkId";
+      String path = "aff_links/$linkId";
       dynamic res = await makeRequest(path: path);
       if(res != null){
         return res.toDouble();
@@ -174,8 +174,7 @@ class InfluencerNotifier extends ChangeNotifier {
 
   Future<User?> getInfluencerById(String id) async {
     return await tryAsync("getInfluencerById",() async{
-      String path = "affiliates/$id";
-      dynamic res = await makeRequest(path: path);
+      dynamic res = await makeRequest(path: id);
       if(res != null){
         User foundUser = User.fromJson(res);
         return foundUser;
@@ -191,9 +190,9 @@ class InfluencerNotifier extends ChangeNotifier {
     currencyMath.loginAutomatically();
     if(iCloud.affAuthToken != null){
       setDioHeaders();
-      String url = "$prudApiUrl/$path";
+      String url = "$prudApiUrl/affiliates/$path";
       Response res = isGet? (await influencerDio.get(url)) : (await influencerDio.post(url, data: data));
-      // debugPrint("influencer Request: $res");
+      debugPrint("influencer Request: $res");
       return res.data;
     }else{
       return null;

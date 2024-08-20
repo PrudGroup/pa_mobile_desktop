@@ -57,7 +57,7 @@ class MyBeneficiariesState extends State<MyBeneficiaries> {
       ),
       child: ClipRRect(
         borderRadius: widget.isPage? BorderRadius.zero : prudRad,
-        child: InnerMenu(key: _key, menus: tabMenus, type: 0, activeTab: selectedTab),
+        child: InnerMenu(key: _key, menus: tabMenus, type: 0, activeTab: selectedTab, canSwipe: true,),
       ),
     );
     return widget.isPage? Scaffold(

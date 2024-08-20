@@ -7,11 +7,24 @@ import '../models/theme.dart';
 import '../singletons/bus_notifier.dart';
 
 class BusSelectOperatorsComponent extends StatelessWidget {
-  const BusSelectOperatorsComponent({super.key});
+  final String? onlyRole;
+  final List<String>? excludeIds;
+  const BusSelectOperatorsComponent({super.key, this.onlyRole, this.excludeIds});
 
-  void choose(BusBrandOperator optr, BuildContext context){
+  void choose(OperatorDetails optr, BuildContext context){
     busNotifier.updateSelectedOperator(optr);
     Navigator.pop(context);
+  }
+
+  List<OperatorDetails> getList(){
+    List<OperatorDetails> found = onlyRole != null? busNotifier.operatorDetails.where((ele) => ele.op.role.toLowerCase() == onlyRole!.toLowerCase()).toList() : busNotifier.operatorDetails;
+    List<OperatorDetails> reversed = found.reversed.toList();
+    if(excludeIds != null && excludeIds!.isNotEmpty){
+      return reversed.where((ele) =>
+        excludeIds!.contains(ele.op.id)? false : true).toList();
+    }else{
+      return reversed;
+    }
   }
 
   @override
@@ -19,8 +32,10 @@ class BusSelectOperatorsComponent extends StatelessWidget {
     double height = MediaQuery.of(context).size.height;
     Widget noOperators = tabData.getNotFoundWidget(
       title: "No Staff/Operator",
-      desc: "No operator found. You can start by creating one."
+      desc: "No ${onlyRole ?? ''} operator found. You can start by creating one."
     );
+
+    List<OperatorDetails> dOps = getList();
     return Container(
       height: height * 0.35,
       decoration: BoxDecoration(
@@ -29,15 +44,14 @@ class BusSelectOperatorsComponent extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: prudRad,
-        child: busNotifier.operators.isEmpty?
+        child: dOps.isEmpty?
         Center(child: noOperators,)
             :
         ListView.builder(
           physics: const BouncingScrollPhysics(),
-          itemCount: busNotifier.operators.length,
+          itemCount: dOps.length,
           itemBuilder: (context, index){
-            List<BusBrandOperator> dOps = busNotifier.operators.reversed.toList();
-            BusBrandOperator op = dOps[index];
+            OperatorDetails op = dOps[index];
             return InkWell(
               onTap: () => choose(op, context),
               child: OperatorComponent(operator: op),

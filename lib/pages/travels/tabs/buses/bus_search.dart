@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../components/translate_text.dart';
 import '../../../../models/theme.dart';
 
 class BusSearch extends StatefulWidget {

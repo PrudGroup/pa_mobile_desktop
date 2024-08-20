@@ -57,7 +57,7 @@ class BusDashboardState extends State<BusDashboard> with TickerProviderStateMixi
         splashFactory: NoSplash.splashFactory,
         tabs: [
           Tab(
-            icon: Image.asset(prudImages.links, width: 30,),
+            icon: Image.asset(prudImages.operators, width: 30,),
             text: "Staff",
           ),
           Tab(

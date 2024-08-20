@@ -118,29 +118,31 @@ class BillerDetailsState extends State<BillerDetails> {
       if(widget.biller.denominationType == "FIXED"){
         order.amountId = selectedFixedAmountId;
       }
-      showModalBottomSheet(
-        context: context,
-        backgroundColor: prudColorTheme.bgA,
-        elevation: 5,
-        isScrollControlled: true,
-        isDismissible: false,
-        shape: RoundedRectangleBorder(
-          borderRadius: prudRad,
-        ),
-        builder: (context){
-          return UtilityOrderModalSheet(
-            order: order,
-            amountToPay: isLocal? totalLocalToPay : totalInterToPay,
-            customerDiscount: isLocal? localDiscount : interDiscount,
-            currencyCode: isLocal? widget.biller.localTransactionCurrencyCode! : widget.biller.internationalTransactionCurrencyCode!,
-            amountInNaira: getTotalInNaira(isLocal),
-            customerDiscountInNaira: getDiscountInNaira(isLocal),
-            referralCustomerDiscountPercentage: referralCustomerPercentage,
-          );
-        }
-      ).whenComplete(() async {
-        if(mounted) setState(() => startingTrans = false);
-      });
+      if(mounted) {
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: prudColorTheme.bgA,
+          elevation: 5,
+          isScrollControlled: true,
+          isDismissible: false,
+          shape: RoundedRectangleBorder(
+            borderRadius: prudRad,
+          ),
+          builder: (context){
+            return UtilityOrderModalSheet(
+              order: order,
+              amountToPay: isLocal? totalLocalToPay : totalInterToPay,
+              customerDiscount: isLocal? localDiscount : interDiscount,
+              currencyCode: isLocal? widget.biller.localTransactionCurrencyCode! : widget.biller.internationalTransactionCurrencyCode!,
+              amountInNaira: getTotalInNaira(isLocal),
+              customerDiscountInNaira: getDiscountInNaira(isLocal),
+              referralCustomerDiscountPercentage: referralCustomerPercentage,
+            );
+          }
+        ).whenComplete(() async {
+          if(mounted) setState(() => startingTrans = false);
+        });
+      }
     }, error: (){
       if(mounted) setState(() => startingTrans = false);
     });

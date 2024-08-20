@@ -12,8 +12,9 @@ class InnerMenu extends StatefulWidget {
   final int type; //0 => Inner, 1 => deep
   final bool hasIcon;
   final int activeTab;
+  final bool canSwipe;
 
-  const InnerMenu({super.key, required this.menus, this.type = 0, this.hasIcon= false, this.activeTab = 0});
+  const InnerMenu({super.key, required this.menus, this.type = 0, this.hasIcon= false, this.activeTab = 0, this.canSwipe = false});
 
   @override
   InnerMenuState createState() => InnerMenuState();
@@ -108,7 +109,8 @@ class InnerMenuState extends State<InnerMenu> {
           ),
         ),
         Expanded(
-          child: Listener(
+          child: widget.canSwipe?
+          Listener(
             onPointerMove: (moveEvent){
               if(moveEvent.delta.dx > 0) {
                 int newIndex = selectedIndex - 1;
@@ -125,6 +127,8 @@ class InnerMenuState extends State<InnerMenu> {
             },
             child: _widget?? const SizedBox() // or any other widget
           )
+              :
+          _widget?? const SizedBox()
         ),
       ],
     );

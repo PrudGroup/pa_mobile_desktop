@@ -207,9 +207,9 @@ class MyStorage extends ChangeNotifier {
   // inWhat: 0 -seconds, 1 -minutes, 2 -hour, 3 -days
   int dateDifference({required DateTime dDate, int inWhat = 3}){
     final today = DateTime.now();
-    int diff = inWhat == 0? dDate.difference(today).inSeconds : (
-        inWhat == 1? dDate.difference(today).inMinutes : (
-            inWhat == 2?  dDate.difference(today).inHours : dDate.difference(today).inDays
+    int diff = inWhat == 0? today.difference(dDate).inSeconds : (
+        inWhat == 1? today.difference(dDate).inMinutes : (
+            inWhat == 2?  today.difference(dDate).inHours : today.difference(dDate).inDays
         )
     );
     return diff;

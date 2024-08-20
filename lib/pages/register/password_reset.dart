@@ -54,7 +54,7 @@ class PasswordResetState extends State<PasswordReset> {
     BorderRadiusGeometry rad = BorderRadius.circular(sideSize);
     return PopScope(
       canPop: false,
-      onPopInvoked: (bool poped) async => poped,
+      onPopInvokedWithResult: (bool poped, dynamic res) async => poped,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Stack(

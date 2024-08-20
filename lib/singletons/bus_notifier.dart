@@ -6,7 +6,9 @@ import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
 import '../models/bus_models.dart';
+import '../models/user.dart';
 import 'currency_math.dart';
+import 'influencer_notifier.dart';
 
 class BusNotifier extends ChangeNotifier {
   static final BusNotifier _busNotifier = BusNotifier._internal();
@@ -22,16 +24,17 @@ class BusNotifier extends ChangeNotifier {
   String? busDriverId;
   bool isActive = false;
   String? busBrandRole;
-  BusBrandOperator? selectedOperator;
+  OperatorDetails? selectedOperator;
   List<String> roles = ["ADMIN", "DRIVER", "SUPER"];
-  List<BusBrandOperator> operators = [];
-  List<BusBrandDriver> drivers = [];
+  List<String> driverRanks = ["Junior", "Senior"];
+  List<OperatorDetails> operatorDetails = [];
+  List<DriverDetails> driverDetails = [];
 
-  void updateSelectedOperator(BusBrandOperator op){
+
+  void updateSelectedOperator(OperatorDetails op){
     selectedOperator = op;
     notifyListeners();
   }
-
 
   void getDefaultSettings(){
     busOperatorId = myStorage.getFromStore(key: "busOperatorId");
@@ -41,6 +44,7 @@ class BusNotifier extends ChangeNotifier {
     busBrandRole = myStorage.getFromStore(key: "busBrandRole");
   }
 
+
   Future<void> saveDefaultSettings() async {
     if(busOperatorId != null) await myStorage.addToStore(key: "busOperatorId", value: busOperatorId);
     if(busDriverId != null) await myStorage.addToStore(key: "busDriverId", value: busDriverId);
@@ -49,12 +53,110 @@ class BusNotifier extends ChangeNotifier {
     if(busBrandRole != null) await myStorage.addToStore(key: "busBrandRole", value: busBrandRole);
   }
 
+  Future<void> saveOperatorDetailsToCache() async {
+    List<Map<String, dynamic>> items = operatorDetails.map((od) => od.toJson()).toList();
+    await myStorage.addToStore(key: "operatorDetails", value: items);
+  }
+
+  Future<void> saveDriverDetailsToCache() async {
+    List<Map<String, dynamic>> items = driverDetails.map((od) => od.toJson()).toList();
+    await myStorage.addToStore(key: "driverDetails", value: items);
+  }
+
+  void getDriverDetailsFromCache() async {
+    List<dynamic>? items = myStorage.getFromStore(key: "driverDetails");
+    if(items != null){
+      driverDetails = items.map((dynamic od) => DriverDetails.fromJson(od)).toList();
+    }
+  }
+
+  void getOperatorDetailsFromCache() async {
+    List<dynamic>? items = myStorage.getFromStore(key: "operatorDetails");
+    if(items != null){
+      operatorDetails = items.map((dynamic od) => OperatorDetails.fromJson(od)).toList();
+    }
+  }
+
+  Future<void> addToOperatorDetails(OperatorDetails od) async {
+    operatorDetails.add(od);
+    await saveOperatorDetailsToCache();
+  }
+
+  Future<void> addToDriverDetails(DriverDetails dd) async {
+    driverDetails.add(dd);
+    await saveDriverDetailsToCache();
+  }
+
   Future<BusBrandOperator?> createNewOperator(BusBrandOperator opr) async {
     String path = "operators/";
     dynamic res = await makeRequest(path: path, method: 1, data: opr.toJson());
     if(res != null && res != false){
       if(res["id"] != null){
         BusBrandOperator opr = BusBrandOperator.fromJson(res);
+        return opr;
+      }else{
+        return null;
+      }
+    }else{
+      return null;
+    }
+  }
+
+  Future<void> getOperators() async {
+    String path = "operators/brands/$busBrandId";
+    List<BusBrandOperator> found = [];
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false){
+      if(res.isNotEmpty){
+        for(dynamic re in res){
+          found.add(BusBrandOperator.fromJson(re));
+        }
+        if(found.isNotEmpty){
+          for(BusBrandOperator bo in found){
+            User? usr = await influencerNotifier.getInfluencerById(bo.affId);
+            if(usr != null){
+              await addToOperatorDetails(OperatorDetails(op: bo, detail: usr));
+            }
+          }
+        }
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<void> getDrivers() async {
+    String path = "operators/brands/$busBrandId/role";
+    List<BusBrandOperator> found = [];
+    dynamic res = await makeRequest(path: path, data: {"role": "DRIVER"});
+    if(res != null && res != false){
+      if(res.isNotEmpty){
+        for(dynamic re in res){
+          found.add(BusBrandOperator.fromJson(re));
+        }
+        if(found.isNotEmpty){
+          for(BusBrandOperator bo in found){
+            BusBrandDriver? drive = await getDriverByOperatorId(bo.id!);
+            debugPrint("drive: $drive");
+            if(drive != null){
+              User? usr = await busNotifier.getDriverDetail(drive.id!);
+              debugPrint("user: $usr");
+              if(usr != null){
+                await addToDriverDetails(DriverDetails(dr: drive, detail: usr));
+              }
+            }
+          }
+        }
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<BusBrandDriver?> createNewDriver(BusBrandDriver dr) async {
+    String path = "drivers/";
+    dynamic res = await makeRequest(path: path, method: 1, data: dr.toJson());
+    if(res != null && res != false){
+      if(res["id"] != null){
+        BusBrandDriver opr = BusBrandDriver.fromJson(res);
         return opr;
       }else{
         return null;
@@ -91,6 +193,96 @@ class BusNotifier extends ChangeNotifier {
       }
     }else{
       return null;
+    }
+  }
+
+  Future<BusBrandDriver?> getDriverByOperatorId(String id) async {
+    String path = "drivers/operators/$id";
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false){
+      if(res["id"] != null){
+        BusBrandDriver opr = BusBrandDriver.fromJson(res);
+        return opr;
+      }else{
+        return null;
+      }
+    }else{
+      return null;
+    }
+  }
+
+  Future<User?> getDriverDetail(String drId) async {
+    String path = "drivers/$drId/aff";
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false){
+      if(res["id"] != null){
+        User usr = User.fromJson(res);
+        return usr;
+      }else{
+        return null;
+      }
+    }else{
+      return null;
+    }
+  }
+
+  Future<bool> blockOperator(String opId) async {
+    String path = "operators/$opId/block";
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
+  Future<bool> blockDriver(String drId) async {
+    String path = "drivers/$drId/block";
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
+  Future<bool> unblockOperator(String opId) async {
+    String path = "operators/$opId/unblock";
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
+  Future<bool> unblockDriver(String drId) async {
+    String path = "drivers/$drId/unblock";
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
+  Future<bool> deleteOperator(String opId) async {
+    String path = "operators/$opId";
+    dynamic res = await makeRequest(path: path, method: 3);
+    if(res != null && res != false){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
+  Future<bool> deleteDriver(String drId) async {
+    String path = "drivers/$drId";
+    dynamic res = await makeRequest(path: path, method: 3);
+    if(res != null && res != false){
+      return true;
+    }else{
+      return false;
     }
   }
 
@@ -193,9 +385,18 @@ class BusNotifier extends ChangeNotifier {
     await saveDefaultSettings();
   }
 
+  Future<void> clearStaffing() async {
+    operatorDetails = [];
+    driverDetails = [];
+    myStorage.lStore.remove("operatorDetails");
+    myStorage.lStore.remove("driverDetails");
+  }
+
   Future<void> initBus() async {
     await tryAsync("initBus", () async {
       getDefaultSettings();
+      getDriverDetailsFromCache();
+      getOperatorDetailsFromCache();
       notifyListeners();
     });
   }
