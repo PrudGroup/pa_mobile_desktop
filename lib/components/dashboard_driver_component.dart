@@ -61,6 +61,7 @@ class DashboardDriverComponentState extends State<DashboardDriverComponent> {
   }
 
   Future<void> unblock() async{
+    Navigator.pop(context);
     if(!unblocking && !blocking && !deleting){
       await tryAsync("unblock", () async {
         if(mounted) setState(() => unblocking = true);
@@ -95,6 +96,7 @@ class DashboardDriverComponentState extends State<DashboardDriverComponent> {
   }
 
   Future<void> block() async{
+    Navigator.pop(context);
     if(!unblocking && !blocking && !deleting){
       await tryAsync("block", () async {
         if(mounted) setState(() => blocking = true);
@@ -129,6 +131,7 @@ class DashboardDriverComponentState extends State<DashboardDriverComponent> {
   }
 
   Future<void> delete() async{
+    Navigator.pop(context);
     if(!unblocking && !blocking && !deleting){
       await tryAsync("delete", () async {
         if(mounted) setState(() => deleting = true);

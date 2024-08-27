@@ -135,6 +135,7 @@ class NewDriverState extends State<NewDriver> {
   }
 
   void getOperator(){
+    debugPrint("New Driver: $excludeIds");
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
@@ -158,197 +159,197 @@ class NewDriverState extends State<NewDriver> {
     Size screen = MediaQuery.of(context).size;
     return SizedBox(
       height: screen.height,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(10),
-        physics: const BouncingScrollPhysics(),
-        child: isSuper?
-        (
-            loading? Center(
-              child: LoadingComponent(
-                isShimmer: false,
-                size: 50,
-                spinnerColor: prudColorTheme.bgA,
-              ),
-            )
-                :
-            Column(
-              children: [
-                spacer.height,
-                spacer.height,
-                PrudContainer(
-                    hasTitle: true,
-                    hasPadding: true,
-                    title: "Operator ID *",
-                    titleBorderColor: prudColorTheme.bgC,
-                    titleAlignment: MainAxisAlignment.end,
-                    child: Column(
-                      children: [
-                        mediumSpacer.height,
-                        InkWell(
-                          onTap: getOperator,
-                          child: selectedOperator != null? OperatorComponent(operator: selectedOperator!) : Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Translate(
-                                  text: "Click & Select Operator"
-                              ),
-                              Icon(
-                                Icons.keyboard_arrow_down_sharp,
-                                size: 30,
-                                color: prudColorTheme.lineB,
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    )
-                ),
-                spacer.height,
-                PrudContainer(
-                    hasTitle: true,
-                    hasPadding: true,
-                    title: "Rank *",
-                    titleBorderColor: prudColorTheme.bgC,
-                    titleAlignment: MainAxisAlignment.end,
-                    child: Column(
-                      children: [
-                        mediumSpacer.height,
-                        FormBuilder(
-                          child: FormBuilderChoiceChip(
-                            decoration: getDeco("Rank"),
-                            backgroundColor: prudColorTheme.bgA,
-                            disabledColor: prudColorTheme.bgD,
-                            spacing: spacer.width.width!,
-                            shape: prudWidgetStyle.choiceChipShape,
-                            selectedColor: prudColorTheme.primary,
-                            onChanged: (String? selected){
-                              tryOnly("RankSelector", (){
-                                if(mounted && selected != null){
-                                  setState(() {
-                                    rank = selected;
-                                  });
-                                }
-                              });
-                            },
-                            name: "rank",
-                            initialValue: rank,
-                            options: busNotifier.driverRanks.map((String ele) {
-                              return FormBuilderChipOption(
-                                value: ele,
-                                child: Translate(
-                                  text: ele,
-                                  style: prudWidgetStyle.btnTextStyle.copyWith(
-                                      color: ele == rank?
-                                      prudColorTheme.bgA : prudColorTheme.primary
-                                  ),
-                                  align: TextAlign.center,
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                        spacer.height,
-                      ],
-                    )
-                ),
-                spacer.height,
-                PrudContainer(
-                    hasTitle: true,
-                    hasPadding: true,
-                    title: "Joined Date *",
-                    titleBorderColor: prudColorTheme.bgC,
-                    titleAlignment: MainAxisAlignment.end,
-                    child: Column(
-                      children: [
-                        mediumSpacer.height,
-                        FormBuilderDateTimePicker(
-                          initialValue: joinedDate,
-                          name: 'joinedDate',
-                          style: tabData.npStyle,
-                          inputType: InputType.date,
-                          keyboardType: TextInputType.datetime,
-                          decoration: getDeco(
-                              "Joined On",
-                              onlyBottomBorder: true,
-                              borderColor: prudColorTheme.lineC
-                          ),
-                          onChanged: (DateTime? value){
-                            if(mounted && value != null) setState(() => joinedDate = value);
-                          },
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.dateTime(),
-                            FormBuilderValidators.required(),
-                          ]),
-                        ),
-                        spacer.height,
-                      ],
-                    )
-                ),
-                spacer.height,
-                PrudContainer(
-                    hasTitle: true,
-                    hasPadding: true,
-                    title: "Journeys *",
-                    titleBorderColor: prudColorTheme.bgC,
-                    titleAlignment: MainAxisAlignment.end,
-                    child: Column(
-                      children: [
-                        mediumSpacer.height,
-                        Translate(
-                          text: "How many Journeys has this driver made so far while working with your company/brand. ",
-                          style: prudWidgetStyle.tabTextStyle.copyWith(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: prudColorTheme.textB
-                          ),
-                          align: TextAlign.center,
-                        ),
-                        spacer.height,
-                        FormBuilderTextField(
-                          initialValue: "$journeys",
-                          name: 'journeys',
-                          style: tabData.npStyle,
-                          keyboardType: TextInputType.number,
-                          decoration: getDeco(
-                              "How Many Journeys Taken",
-                              onlyBottomBorder: true,
-                              borderColor: prudColorTheme.lineC
-                          ),
-                          onChanged: (String? value){
-                            if(mounted && value != null) setState(() => journeys = int.parse(value));
-                          },
-                          valueTransformer: (text) => num.tryParse(text!),
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.integer(),
-                            FormBuilderValidators.required(),
-                          ]),
-                        ),
-                        spacer.height,
-                      ],
-                    )
-                ),
-                spacer.height,
-                loading?
-                LoadingComponent(
-                  isShimmer: false,
-                  size: 30,
-                  spinnerColor: prudColorTheme.primary,
-                )
-                    :
-                (
-                    validateForm()? prudWidgetStyle.getLongButton(
-                        onPressed: addNewDriver,
-                        text: "Add Driver"
-                    ) : const SizedBox()
-                ),
-                largeSpacer.height,
-                xLargeSpacer.height,
-              ],
-            )
+      child: isSuper?
+      (
+        loading? Center(
+          child: LoadingComponent(
+            isShimmer: false,
+            size: 50,
+            spinnerColor: prudColorTheme.primary,
+          ),
         )
             :
-        notSuper,
-      ),
+        SingleChildScrollView(
+          padding: const EdgeInsets.all(10),
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            children: [
+              spacer.height,
+              spacer.height,
+              PrudContainer(
+                  hasTitle: true,
+                  hasPadding: true,
+                  title: "Operator ID *",
+                  titleBorderColor: prudColorTheme.bgC,
+                  titleAlignment: MainAxisAlignment.end,
+                  child: Column(
+                    children: [
+                      mediumSpacer.height,
+                      InkWell(
+                        onTap: getOperator,
+                        child: selectedOperator != null? OperatorComponent(operator: selectedOperator!) : Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Translate(
+                                text: "Click & Select Operator"
+                            ),
+                            Icon(
+                              Icons.keyboard_arrow_down_sharp,
+                              size: 30,
+                              color: prudColorTheme.lineB,
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  )
+              ),
+              spacer.height,
+              PrudContainer(
+                  hasTitle: true,
+                  hasPadding: true,
+                  title: "Rank *",
+                  titleBorderColor: prudColorTheme.bgC,
+                  titleAlignment: MainAxisAlignment.end,
+                  child: Column(
+                    children: [
+                      mediumSpacer.height,
+                      FormBuilder(
+                        child: FormBuilderChoiceChip(
+                          decoration: getDeco("Rank"),
+                          backgroundColor: prudColorTheme.bgA,
+                          disabledColor: prudColorTheme.bgD,
+                          spacing: spacer.width.width!,
+                          shape: prudWidgetStyle.choiceChipShape,
+                          selectedColor: prudColorTheme.primary,
+                          onChanged: (String? selected){
+                            tryOnly("RankSelector", (){
+                              if(mounted && selected != null){
+                                setState(() {
+                                  rank = selected;
+                                });
+                              }
+                            });
+                          },
+                          name: "rank",
+                          initialValue: rank,
+                          options: busNotifier.driverRanks.map((String ele) {
+                            return FormBuilderChipOption(
+                              value: ele,
+                              child: Translate(
+                                text: ele,
+                                style: prudWidgetStyle.btnTextStyle.copyWith(
+                                    color: ele == rank?
+                                    prudColorTheme.bgA : prudColorTheme.primary
+                                ),
+                                align: TextAlign.center,
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      spacer.height,
+                    ],
+                  )
+              ),
+              spacer.height,
+              PrudContainer(
+                  hasTitle: true,
+                  hasPadding: true,
+                  title: "Joined Date *",
+                  titleBorderColor: prudColorTheme.bgC,
+                  titleAlignment: MainAxisAlignment.end,
+                  child: Column(
+                    children: [
+                      mediumSpacer.height,
+                      FormBuilderDateTimePicker(
+                        initialValue: joinedDate,
+                        name: 'joinedDate',
+                        style: tabData.npStyle,
+                        inputType: InputType.date,
+                        keyboardType: TextInputType.datetime,
+                        decoration: getDeco(
+                            "Joined On",
+                            onlyBottomBorder: true,
+                            borderColor: prudColorTheme.lineC
+                        ),
+                        onChanged: (DateTime? value){
+                          if(mounted && value != null) setState(() => joinedDate = value);
+                        },
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.dateTime(),
+                          FormBuilderValidators.required(),
+                        ]),
+                      ),
+                      spacer.height,
+                    ],
+                  )
+              ),
+              spacer.height,
+              PrudContainer(
+                  hasTitle: true,
+                  hasPadding: true,
+                  title: "Journeys *",
+                  titleBorderColor: prudColorTheme.bgC,
+                  titleAlignment: MainAxisAlignment.end,
+                  child: Column(
+                    children: [
+                      mediumSpacer.height,
+                      Translate(
+                        text: "How many Journeys has this driver made so far while working with your company/brand. ",
+                        style: prudWidgetStyle.tabTextStyle.copyWith(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: prudColorTheme.textB
+                        ),
+                        align: TextAlign.center,
+                      ),
+                      spacer.height,
+                      FormBuilderTextField(
+                        initialValue: "$journeys",
+                        name: 'journeys',
+                        style: tabData.npStyle,
+                        keyboardType: TextInputType.number,
+                        decoration: getDeco(
+                            "How Many Journeys Taken",
+                            onlyBottomBorder: true,
+                            borderColor: prudColorTheme.lineC
+                        ),
+                        onChanged: (String? value){
+                          if(mounted && value != null) setState(() => journeys = int.parse(value));
+                        },
+                        valueTransformer: (text) => num.tryParse(text!),
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.integer(),
+                          FormBuilderValidators.required(),
+                        ]),
+                      ),
+                      spacer.height,
+                    ],
+                  )
+              ),
+              spacer.height,
+              loading?
+              LoadingComponent(
+                isShimmer: false,
+                size: 30,
+                spinnerColor: prudColorTheme.primary,
+              )
+                  :
+              (
+                  validateForm()? prudWidgetStyle.getLongButton(
+                      onPressed: addNewDriver,
+                      text: "Add Driver"
+                  ) : const SizedBox()
+              ),
+              largeSpacer.height,
+              xLargeSpacer.height,
+            ],
+          ),
+        )
+      )
+          :
+      notSuper
     );
   }
 }

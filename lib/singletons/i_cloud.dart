@@ -219,7 +219,7 @@ class ICloud extends ChangeNotifier{
     bool loggedIn = false;
     if(lastAuthTokenGottenAt != null){
       int minutes = myStorage.dateDifference(dDate: lastAuthTokenGottenAt!, inWhat: 1);
-      if(minutes > 15) { affAuthToken = null;}
+      if(minutes > 20) { affAuthToken = null;}
       debugPrint("minutes: $minutes : auth: $affAuthToken");
     }
     if(affAuthToken != null){

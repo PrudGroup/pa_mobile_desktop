@@ -285,14 +285,14 @@ class Bus{
       "bus_type": busType,
       "bus_no": busNo,
       "bus_manufacturer": busManufacturer,
-      "bought_on": boughtOn,
+      "bought_on": boughtOn.toIso8601String(),
       "brand_id": brandId,
       "active": active,
       "created_by": createdBy,
       "manufactured_year": manufacturedYear,
       "votes": votes,
       "voters": voters,
-      "plateN_no": plateNo,
+      "plate_no": plateNo,
       "total_journey": totalJourney
     };
   }
@@ -300,7 +300,7 @@ class Bus{
   factory Bus.fromJson(Map<String, dynamic> json){
     return Bus(
       brandId: json["brand_id"],
-      boughtOn: json["bought_on"],
+      boughtOn: DateTime.parse(json["bought_on"]),
       busManufacturer: json["bus_manufacturer"],
       busNo: json["bus_no"],
       busType: json["bus_type"],
@@ -482,7 +482,7 @@ class BusFeature{
 }
 
 
-class BusImages{
+class BusImage{
   String? id;
   String busId;
   String imgUrl;
@@ -490,7 +490,7 @@ class BusImages{
   DateTime? createdOn;
   DateTime? updatedOn;
 
-  BusImages({
+  BusImage({
     required this.createdBy,
     required this.imgUrl,
     required this.busId,
@@ -510,8 +510,8 @@ class BusImages{
     };
   }
 
-  factory BusImages.fromJson(Map<String, dynamic> json){
-    return BusImages(
+  factory BusImage.fromJson(Map<String, dynamic> json){
+    return BusImage(
       busId: json["bus_id"],
       imgUrl: json["img_url"],
       createdBy: json["created_by"],
@@ -925,6 +925,39 @@ class JourneyAddOnUser{
       id: json["id"],
       createdAt: json["createdAt"] != null? DateTime.parse(json["createdAt"]) : null,
       updatedAt: json["updatedAt"] != null? DateTime.parse(json["updatedAt"]) : null,
+    );
+  }
+}
+
+
+class BusDetail{
+  Bus bus;
+  List<BusFeature> features;
+  List<BusSeat> seats;
+  List<BusImage> images;
+
+  BusDetail({
+    required this.bus,
+    required this.features,
+    required this.images,
+    required this.seats,
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      "bus": bus.toJson(),
+      "features": features.map((feature) => feature.toJson()).toList(),
+      "seats": seats.map((seat) => seat.toJson()).toList(),
+      "images": images.map((image) => image.toJson()).toList(),
+    };
+  }
+
+  factory BusDetail.fromJson(Map<String, dynamic> json){
+    return BusDetail(
+      bus: Bus.fromJson(json["bus"]),
+      features: json["features"].map((feature) => BusFeature.fromJson(feature)).toList(),
+      images: json["images"].map((image) => BusImage.fromJson(image)).toList(),
+      seats: json["seats"].map((seat) => BusSeat.fromJson(seat)).toList()
     );
   }
 }

@@ -20,8 +20,10 @@ class BusSelectOperatorsComponent extends StatelessWidget {
     List<OperatorDetails> found = onlyRole != null? busNotifier.operatorDetails.where((ele) => ele.op.role.toLowerCase() == onlyRole!.toLowerCase()).toList() : busNotifier.operatorDetails;
     List<OperatorDetails> reversed = found.reversed.toList();
     if(excludeIds != null && excludeIds!.isNotEmpty){
-      return reversed.where((ele) =>
-        excludeIds!.contains(ele.op.id)? false : true).toList();
+      return reversed.where((ele) {
+        debugPrint("excludes: $excludeIds | ${ele.op.id}");
+        return excludeIds!.contains(ele.op.id)? false : true;
+      }).toList();
     }else{
       return reversed;
     }

@@ -77,33 +77,36 @@ class ExistingOperatorsState extends State<ExistingOperators> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              spacer.height,
               if(busNotifier.operatorDetails.isNotEmpty) Expanded(
                 child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    physics: const BouncingScrollPhysics(),
-                    scrollDirection: Axis.vertical,
-                    itemCount: operators.length,
-                    itemBuilder: (context, index){
-                      return OperatorComponent(operator: operators[index], showControls: true,);
-                    }
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  physics: const BouncingScrollPhysics(),
+                  scrollDirection: Axis.vertical,
+                  itemCount: operators.length,
+                  itemBuilder: (context, index){
+                    return OperatorComponent(operator: operators[index], showControls: true,);
+                  }
                 ),
               ),
               if(busNotifier.operatorDetails.isEmpty) Expanded(
-                  child: Center(child: noOperator,)
+                child: Center(child: noOperator,)
               ),
-              largeSpacer.height
+              spacer.height
             ],
           ),
-          Positioned(
-              right: 40,
-              bottom: 80,
-              child: FloatingActionButton(
+          if(busNotifier.showFloatingButton) Positioned(
+            right: 30,
+            bottom: 80,
+            child: FloatingActionButton(
                 foregroundColor: prudColorTheme.bgC,
                 backgroundColor: prudColorTheme.primary,
                 tooltip: "Refreshes data from PrudServices",
                 onPressed: refresh,
-                child: const Icon(FontAwesomeIcons.arrowsRotate, size: 30,),
+                child: loading? LoadingComponent(
+                  isShimmer: false,
+                  size: 30,
+                  spinnerColor: prudColorTheme.bgA,
+                ) : const Icon(FontAwesomeIcons.arrowsRotate, size: 30,),
               )
           )
         ],

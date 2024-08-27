@@ -3,6 +3,7 @@ import 'package:prudapp/models/images.dart';
 import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/staff/existing_drivers.dart';
 import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/staff/existing_operators.dart';
 import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/staff/new_driver.dart';
+import 'package:prudapp/singletons/bus_notifier.dart';
 
 import '../../../../../../components/inner_menu.dart';
 import '../../../../../../components/translate_text.dart';
@@ -66,7 +67,12 @@ class StaffOperationsState extends State<StaffOperations> {
               color: prudColorTheme.bgA
           ),
         ),
-        actions: const [
+        actions: [
+          IconButton(
+            onPressed: busNotifier.toggleButton,
+            icon: Icon(busNotifier.showFloatingButton? Icons.toggle_on : Icons.toggle_off),
+            color: prudColorTheme.bgA,
+          ),
         ],
       ),
       body: InnerMenu(key: _key, menus: tabMenus, type: 0, hasIcon: true,),

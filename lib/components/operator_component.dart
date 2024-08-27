@@ -59,6 +59,7 @@ class OperatorComponentState extends State<OperatorComponent> {
   }
 
   Future<void> unblock() async{
+    Navigator.pop(context);
     if(!unblocking && !blocking && !deleting){
       await tryAsync("unblock", () async {
         if(mounted) setState(() => unblocking = true);
@@ -93,6 +94,7 @@ class OperatorComponentState extends State<OperatorComponent> {
   }
 
   Future<void> block() async{
+    Navigator.pop(context);
     if(!unblocking && !blocking && !deleting){
       await tryAsync("block", () async {
         if(mounted) setState(() => blocking = true);
@@ -127,6 +129,7 @@ class OperatorComponentState extends State<OperatorComponent> {
   }
 
   Future<void> delete() async{
+    Navigator.pop(context);
     if(!unblocking && !blocking && !deleting){
       await tryAsync("delete", () async {
         if(mounted) setState(() => deleting = true);
@@ -313,7 +316,7 @@ class OperatorComponentState extends State<OperatorComponent> {
                         style: myStorage.alertStyle,
                         type: AlertType.warning,
                         title: "Unblock Operator",
-                        desc: "You are about to unblock a operator(${ben!.fullName}).",
+                        desc: "You are about to unblock ${ben!.fullName} as an operator.",
                         buttons: [
                           DialogButton(
                             onPressed: unblock,
@@ -353,7 +356,7 @@ class OperatorComponentState extends State<OperatorComponent> {
                           style: myStorage.alertStyle,
                           type: AlertType.warning,
                           title: "Block Operator",
-                          desc: "You are about to block a operator(${ben!.fullName}).",
+                          desc: "You are about to block ${ben!.fullName} as an operator.",
                           buttons: [
                             DialogButton(
                               onPressed: block,
@@ -392,7 +395,7 @@ class OperatorComponentState extends State<OperatorComponent> {
                       style: myStorage.alertStyle,
                       type: AlertType.warning,
                       title: "Delete Operator",
-                      desc: "You are about to delete a operator(${ben!.fullName}).",
+                      desc: "You are about to delete ${ben!.fullName} as an operator.",
                       buttons: [
                         DialogButton(
                           onPressed: delete,

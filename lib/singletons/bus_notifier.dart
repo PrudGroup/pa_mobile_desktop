@@ -19,20 +19,34 @@ class BusNotifier extends ChangeNotifier {
   }
 
   BusBrand? busBrand;
+  bool showFloatingButton = true;
   String? busBrandId;
   String? busOperatorId;
   String? busDriverId;
   bool isActive = false;
   String? busBrandRole;
+  BusDetail? selectedBus;
   OperatorDetails? selectedOperator;
   List<String> roles = ["ADMIN", "DRIVER", "SUPER"];
   List<String> driverRanks = ["Junior", "Senior"];
   List<OperatorDetails> operatorDetails = [];
   List<DriverDetails> driverDetails = [];
+  List<BusDetail> busDetails = [];
+  List<String> busTypes = ["Luxurious Bus", "18 Seater", "J5", "14 Seater", "Sienna", "Others"];
 
 
   void updateSelectedOperator(OperatorDetails op){
     selectedOperator = op;
+    notifyListeners();
+  }
+
+  void updateSelectedBus(BusDetail op){
+    selectedBus = op;
+    notifyListeners();
+  }
+
+  void updateShowFloatButton(bool status){
+    showFloatingButton = status;
     notifyListeners();
   }
 
@@ -63,6 +77,11 @@ class BusNotifier extends ChangeNotifier {
     await myStorage.addToStore(key: "driverDetails", value: items);
   }
 
+  Future<void> saveBusDetailsToCache() async {
+    List<Map<String, dynamic>> items = busDetails.map((od) => od.toJson()).toList();
+    await myStorage.addToStore(key: "busDetails", value: items);
+  }
+
   void getDriverDetailsFromCache() async {
     List<dynamic>? items = myStorage.getFromStore(key: "driverDetails");
     if(items != null){
@@ -74,6 +93,13 @@ class BusNotifier extends ChangeNotifier {
     List<dynamic>? items = myStorage.getFromStore(key: "operatorDetails");
     if(items != null){
       operatorDetails = items.map((dynamic od) => OperatorDetails.fromJson(od)).toList();
+    }
+  }
+
+  void getBusDetailsFromCache() async {
+    List<dynamic>? items = myStorage.getFromStore(key: "busDetails");
+    if(items != null){
+      busDetails = items.map((dynamic od) => BusDetail.fromJson(od)).toList();
     }
   }
 
@@ -102,6 +128,36 @@ class BusNotifier extends ChangeNotifier {
     }
   }
 
+  Future<Bus?> createNewBus(Bus bus) async {
+    String path = "buses/";
+    dynamic res = await makeRequest(path: path, method: 1, data: bus.toJson());
+    if(res != null && res != false){
+      if(res["id"] != null){
+        Bus bu = Bus.fromJson(res);
+        return bu;
+      }else{
+        return null;
+      }
+    }else{
+      return null;
+    }
+  }
+
+  Future<BusImage?> createBusImage(BusImage busImage) async {
+    String path = "busImages/";
+    dynamic res = await makeRequest(path: path, method: 1, data: busImage.toJson());
+    if(res != null && res != false){
+      if(res["id"] != null){
+        BusImage bu = BusImage.fromJson(res);
+        return bu;
+      }else{
+        return null;
+      }
+    }else{
+      return null;
+    }
+  }
+
   Future<void> getOperators() async {
     String path = "operators/brands/$busBrandId";
     List<BusBrandOperator> found = [];
@@ -112,12 +168,14 @@ class BusNotifier extends ChangeNotifier {
           found.add(BusBrandOperator.fromJson(re));
         }
         if(found.isNotEmpty){
+          List<OperatorDetails> results = [];
           for(BusBrandOperator bo in found){
             User? usr = await influencerNotifier.getInfluencerById(bo.affId);
             if(usr != null){
-              await addToOperatorDetails(OperatorDetails(op: bo, detail: usr));
+              results.add(OperatorDetails(op: bo, detail: usr));
             }
           }
+          if(results.isNotEmpty) operatorDetails = results;
         }
         notifyListeners();
       }
@@ -134,6 +192,7 @@ class BusNotifier extends ChangeNotifier {
           found.add(BusBrandOperator.fromJson(re));
         }
         if(found.isNotEmpty){
+          List<DriverDetails> results = [];
           for(BusBrandOperator bo in found){
             BusBrandDriver? drive = await getDriverByOperatorId(bo.id!);
             debugPrint("drive: $drive");
@@ -141,12 +200,37 @@ class BusNotifier extends ChangeNotifier {
               User? usr = await busNotifier.getDriverDetail(drive.id!);
               debugPrint("user: $usr");
               if(usr != null){
-                await addToDriverDetails(DriverDetails(dr: drive, detail: usr));
+                results.add(DriverDetails(dr: drive, detail: usr));
               }
             }
           }
+          if(results.isNotEmpty) driverDetails = results;
         }
         notifyListeners();
+      }
+    }
+  }
+
+  Future<void> getBusesFromCloud() async {
+    if(busBrandId != null) {
+      List<BusDetail> found = [];
+      List<Bus>? buses = await getBrandBuses(busBrandId!);
+      if (buses != null) {
+        if (buses.isNotEmpty) {
+          for (Bus bus in buses) {
+            List<BusImage>? images = await getBusImagesViaId(busBrandId!);
+            List<BusSeat>? seats = await getBusSeatsViaId(busBrandId!);
+            List<BusFeature>? features = await getBusFeaturesViaId(busBrandId!);
+            if(images != null && features != null && seats != null){
+              found.add(BusDetail(bus: bus, features: features, images: images, seats: seats));
+            }
+          }
+          if (found.isNotEmpty) {
+            busDetails = found;
+            await saveBusDetailsToCache();
+            notifyListeners();
+          }
+        }
       }
     }
   }
@@ -184,6 +268,7 @@ class BusNotifier extends ChangeNotifier {
   Future<BusBrandOperator?> getOperatorById(String id) async {
     String path = "operators/$id";
     dynamic res = await makeRequest(path: path);
+    debugPrint("result: $res, path: $path");
     if(res != null && res != false){
       if(res["id"] != null){
         BusBrandOperator opr = BusBrandOperator.fromJson(res);
@@ -211,6 +296,66 @@ class BusNotifier extends ChangeNotifier {
     }
   }
 
+  Future<List<BusImage>?> getBusImagesViaId(String busId) async {
+    String path = "buses/$busId/images";
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false){
+      if(res.isNotEmpty){
+        List<BusImage> imgs = res.map((re) => BusImage.fromJson(re)).toList();
+        return imgs;
+      }else{
+        return null;
+      }
+    }else{
+      return null;
+    }
+  }
+
+  Future<List<BusSeat>?> getBusSeatsViaId(String busId) async {
+    String path = "buses/$busId/seats";
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false){
+      if(res.isNotEmpty){
+        List<BusSeat> seats = res.map((re) => BusSeat.fromJson(re)).toList();
+        return seats;
+      }else{
+        return null;
+      }
+    }else{
+      return null;
+    }
+  }
+
+  Future<List<BusFeature>?> getBusFeaturesViaId(String busId) async {
+    String path = "buses/$busId/features";
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false){
+      if(res.isNotEmpty){
+        List<BusFeature> features = res.map((re) => BusFeature.fromJson(re)).toList();
+        return features;
+      }else{
+        return null;
+      }
+    }else{
+      return null;
+    }
+  }
+
+  Future<List<Bus>?> getBrandBuses(String brandId) async {
+    String path = "buses/brands/$brandId";
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false){
+      if(res.isNotEmpty){
+        List<Bus> buses = res.map((re) => Bus.fromJson(re)).toList();
+        return buses;
+      }else{
+        return null;
+      }
+    }else{
+      return null;
+    }
+  }
+
   Future<User?> getDriverDetail(String drId) async {
     String path = "drivers/$drId/aff";
     dynamic res = await makeRequest(path: path);
@@ -226,8 +371,26 @@ class BusNotifier extends ChangeNotifier {
     }
   }
 
+  void toggleButton(){
+    if(showFloatingButton){
+      updateShowFloatButton(false);
+    }else{
+      updateShowFloatButton(true);
+    }
+  }
+
   Future<bool> blockOperator(String opId) async {
     String path = "operators/$opId/block";
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
+  Future<bool> blockBus(String busId) async {
+    String path = "buses/$busId/block";
     dynamic res = await makeRequest(path: path);
     if(res != null && res != false){
       return true;
@@ -256,6 +419,16 @@ class BusNotifier extends ChangeNotifier {
     }
   }
 
+  Future<bool> unblockBus(String busId) async {
+    String path = "buses/$busId/unblock";
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
   Future<bool> unblockDriver(String drId) async {
     String path = "drivers/$drId/unblock";
     dynamic res = await makeRequest(path: path);
@@ -268,6 +441,16 @@ class BusNotifier extends ChangeNotifier {
 
   Future<bool> deleteOperator(String opId) async {
     String path = "operators/$opId";
+    dynamic res = await makeRequest(path: path, method: 3);
+    if(res != null && res != false){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
+  Future<bool> deleteBus(String busId) async {
+    String path = "buses/$busId";
     dynamic res = await makeRequest(path: path, method: 3);
     if(res != null && res != false){
       return true;
@@ -397,6 +580,7 @@ class BusNotifier extends ChangeNotifier {
       getDefaultSettings();
       getDriverDetailsFromCache();
       getOperatorDetailsFromCache();
+      getBusDetailsFromCache();
       notifyListeners();
     });
   }

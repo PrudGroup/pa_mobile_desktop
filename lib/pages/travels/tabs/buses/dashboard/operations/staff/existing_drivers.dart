@@ -76,7 +76,6 @@ class ExistingDriversState extends State<ExistingDrivers> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              spacer.height,
               if(busNotifier.driverDetails.isNotEmpty) Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(vertical: 10),
@@ -91,18 +90,22 @@ class ExistingDriversState extends State<ExistingDrivers> {
               if(busNotifier.driverDetails.isEmpty) Expanded(
                 child: Center(child: noDriver,)
               ),
-              largeSpacer.height
+              spacer.height
             ],
           ),
-          Positioned(
-            right: 40,
+          if(busNotifier.showFloatingButton) Positioned(
+            right: 30,
             bottom: 80,
             child: FloatingActionButton(
               foregroundColor: prudColorTheme.bgC,
               backgroundColor: prudColorTheme.primary,
               tooltip: "Refreshes data from PrudServices",
               onPressed: refresh,
-              child: const Icon(FontAwesomeIcons.arrowsRotate, size: 30,),
+              child: loading? LoadingComponent(
+                isShimmer: false,
+                size: 30,
+                spinnerColor: prudColorTheme.bgA,
+              ) : const Icon(FontAwesomeIcons.arrowsRotate, size: 30,),
             )
           )
         ],

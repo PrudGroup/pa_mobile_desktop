@@ -57,28 +57,34 @@ class BusCompanyDashboardState extends State<BusCompanyDashboard> {
   }
 
   Future<void> updateOperator() async {
-    await tryAsync("", () async {
+    await tryAsync("updateOperator", () async {
       if(mounted) {
         setState(() {
-          getting = true;
           verified = true;
+          getting = true;
         });
       }
+      debugPrint("We got here: AB");
       BusBrandOperator? optr = await busNotifier.getOperatorById(busNotifier.busOperatorId!);
+      debugPrint("We got result: $optr");
       if(optr != null){
         busNotifier.busOperatorId = optr.id;
         busNotifier.busBrandRole = optr.role;
         busNotifier.isActive = optr.status.toLowerCase() == "active";
         busNotifier.busBrandId = optr.brandId;
+        debugPrint("We got here: AD");
         if(mounted){
           setState(() {
             isActive = busNotifier.isActive;
             isOperator = true;
           });
+          debugPrint("We got here: AE");
           busNotifier.saveDefaultSettings();
           if(isActive) {
+            debugPrint("We got here: AF");
             iCloud.goto(context, const BusDashboard());
-          } else{
+          } else {
+            debugPrint("We got here: AG");
             iCloud.showSnackBar("Access Denied. Ask Admin",context, type: 3);
           }
         }
@@ -220,9 +226,8 @@ class BusCompanyDashboardState extends State<BusCompanyDashboard> {
                           :
                       PinVerifier(
                         onVerified: (bool isVerified) async {
-                          debugPrint("Things got here AA");
                           if(isVerified) await updateOperator();
-                          debugPrint("Things got here AAB");
+                          debugPrint("Pin Verification Completed");
                         }
                       )
                     ),
