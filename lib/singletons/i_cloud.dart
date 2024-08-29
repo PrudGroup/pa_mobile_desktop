@@ -9,6 +9,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_to_pdf/flutter_to_pdf.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:pdf/widgets.dart' as pdf;
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
@@ -186,6 +187,19 @@ class ICloud extends ChangeNotifier{
       return res.data;
     } else {
       return false;
+    }
+  }
+
+  Future<String?> saveFileToCloud(XFile file, String destination, String name) async {
+    String codeUrl = "$apiEndPoint/files/$destination/$name";
+    var formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(file.path, filename: name),
+    });
+    Response res = await prudDio.post(codeUrl, data: formData);
+    if (res.statusCode == 201) {
+      return res.data;
+    } else {
+      return null;
     }
   }
 

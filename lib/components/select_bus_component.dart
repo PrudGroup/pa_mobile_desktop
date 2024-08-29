@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/models/bus_models.dart';
 
 import '../models/theme.dart';
@@ -82,19 +83,29 @@ class SelectBusComponentState extends State<SelectBusComponent> {
       ),
       child: ClipRRect(
         borderRadius: prudRad,
-        child: buses.isEmpty?
-        Center(child: noOperators,)
+        child: loading? Center(
+          child: LoadingComponent(
+            isShimmer: false,
+            spinnerColor: prudColorTheme.primary,
+            size: 40,
+          ),
+        )
             :
-        ListView.builder(
-          physics: const BouncingScrollPhysics(),
-          itemCount: buses.length,
-          itemBuilder: (context, index){
-            BusDetail op = buses[index];
-            return InkWell(
-              onTap: () => choose(op, context),
-              child: BusComponent(bus: op, isOperator: true,),
-            );
-          }
+        (
+            buses.isEmpty?
+            Center(child: noOperators,)
+                :
+            ListView.builder(
+                physics: const BouncingScrollPhysics(),
+                itemCount: buses.length,
+                itemBuilder: (context, index){
+                  BusDetail op = buses[index];
+                  return InkWell(
+                    onTap: () => choose(op, context),
+                    child: BusComponent(bus: op, isOperator: true,),
+                  );
+                }
+            )
         ),
       ),
     );

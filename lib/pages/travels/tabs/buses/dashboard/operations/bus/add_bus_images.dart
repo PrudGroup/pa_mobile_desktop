@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:prudapp/components/prud_image_picker.dart';
 import 'package:prudapp/models/bus_models.dart';
 
 import '../../../../../../../components/bus_component.dart';
@@ -26,6 +27,7 @@ class AddBusImagesState extends State<AddBusImages> {
   String busId = "";
   String imgUrl = "";
   BusDetail? selectedBus;
+  bool shouldReset = false;
 
 
   @override
@@ -46,6 +48,7 @@ class AddBusImagesState extends State<AddBusImages> {
 
   void clearInput(){
     setState(() {
+      shouldReset = true;
       busId = "";
       imgUrl = "";
       loading = false;
@@ -54,10 +57,6 @@ class AddBusImagesState extends State<AddBusImages> {
 
   bool validateForm(){
     return busId.isNotEmpty && createdBy != null && imgUrl.isNotEmpty;
-  }
-  
-  Future<void> uploadImage() async {
-    
   }
 
   Future<void> addNewBusImage() async {
@@ -152,6 +151,19 @@ class AddBusImagesState extends State<AddBusImages> {
               )
             ),
             spacer.height,
+            PrudImagePicker(
+              destination: "bus_brands/$brandId/buses/$busId/bus_images",
+              saveToCloud: true,
+              reset: shouldReset,
+              onSaveToCloud: (String? url){
+                tryOnly("Picker onSaveToCloud", (){
+                  if(mounted && url != null) setState(() => imgUrl = url);
+                });
+              },
+              onError: (err){
+                debugPrint("Picker Error: $err");
+              },
+            ),
             spacer.height,
             loading?
             LoadingComponent(
