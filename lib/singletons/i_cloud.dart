@@ -190,14 +190,20 @@ class ICloud extends ChangeNotifier{
     }
   }
 
-  Future<String?> saveFileToCloud(XFile file, String destination, String name) async {
-    String codeUrl = "$apiEndPoint/files/$destination/$name";
+  Future<String?> saveFileToCloud(XFile file, String destination) async {
+    String codeUrl = "$prudApiUrl/files/single/";
     var formData = FormData.fromMap({
-      'file': await MultipartFile.fromFile(file.path, filename: name),
+      'upload': await MultipartFile.fromFile(file.path, filename: file.name),
+      "destination": destination,
     });
     Response res = await prudDio.post(codeUrl, data: formData);
     if (res.statusCode == 201) {
-      return res.data;
+      if(res.data != null && res.data["url"] != null && res.data["uploaded"]){
+        return res.data["url"];
+      }else{
+        return null;
+      }
+
     } else {
       return null;
     }

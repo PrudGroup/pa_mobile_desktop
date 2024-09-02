@@ -955,9 +955,9 @@ class BusDetail{
   factory BusDetail.fromJson(Map<String, dynamic> json){
     return BusDetail(
       bus: Bus.fromJson(json["bus"]),
-      features: json["features"].map((feature) => BusFeature.fromJson(feature)).toList(),
-      images: json["images"].map((image) => BusImage.fromJson(image)).toList(),
-      seats: json["seats"].map((seat) => BusSeat.fromJson(seat)).toList()
+      features: json["features"].map<BusFeature>((feature) => BusFeature.fromJson(feature)).toList(),
+      images: json["images"].map<BusImage>((image) => BusImage.fromJson(image)).toList(),
+      seats: json["seats"].map<BusSeat>((seat) => BusSeat.fromJson(seat)).toList()
     );
   }
 }

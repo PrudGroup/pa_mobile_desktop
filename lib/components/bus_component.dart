@@ -16,8 +16,16 @@ import 'loading_component.dart';
 class BusComponent extends StatefulWidget {
   final BusDetail bus;
   final bool isOperator;
+  final bool isForSelection;
+  final bool isSelected;
 
-  const BusComponent({super.key, required this.bus, this.isOperator = false});
+  const BusComponent({
+    super.key,
+    required this.bus,
+    this.isOperator = false,
+    this.isForSelection = true,
+    this.isSelected = false,
+  });
 
   @override
   BusComponentState createState() => BusComponentState();
@@ -113,11 +121,11 @@ class BusComponentState extends State<BusComponent> {
       decoration: BoxDecoration(
         color: prudColorTheme.bgA,
         border: Border(
-              bottom: BorderSide(
-                  color: prudColorTheme.primary,
-                  width: 5.0
-              )
+          bottom: BorderSide(
+            color: prudColorTheme.lineC,
+            width: 5.0
           )
+        )
       ),
       child: Column(
         children: [
@@ -130,7 +138,7 @@ class BusComponentState extends State<BusComponent> {
                     backgroundColor: prudColorTheme.lineC,
                     size: GFSize.SMALL,
                     child: Center(
-                      child: ImageIcon(AssetImage(prudImages.transport), size: 30,),
+                      child: ImageIcon(AssetImage(prudImages.bus), size: 30,),
                     ),
                   ),
                   spacer.width,
@@ -178,8 +186,8 @@ class BusComponentState extends State<BusComponent> {
                 ],
               ),
               if(bus != null && images != null && !loading) Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     "Journeys: ${bus?.totalJourney}",
@@ -199,13 +207,13 @@ class BusComponentState extends State<BusComponent> {
                   GFRating(
                     onChanged: (rate){},
                     value: bus!.votes > 0? bus!.votes/bus!.voters : 0,
-                    size: GFSize.SMALL,
+                    size: 15,
                   ),
                 ],
               )
             ],
           ),
-          if(bus != null) Column(
+          if(bus != null && !widget.isForSelection) Column(
             children: [
               Divider(
                 height: 10,
@@ -225,8 +233,9 @@ class BusComponentState extends State<BusComponent> {
                     spinnerColor: prudColorTheme.primary,
                   )
                       :
-                  getTextButton(
-                    title: "DELETE",
+                  prudWidgetStyle.getIconButton(
+                    isIcon: true,
+                    icon: Icons.delete,
                     onPressed: () => Alert(
                       context: context,
                       style: myStorage.alertStyle,

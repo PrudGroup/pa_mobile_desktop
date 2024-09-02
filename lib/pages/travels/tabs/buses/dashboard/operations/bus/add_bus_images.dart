@@ -41,7 +41,10 @@ class AddBusImagesState extends State<AddBusImages> {
     super.initState();
     busNotifier.addListener((){
       if(mounted && busNotifier.selectedBus != null){
-        setState(() => selectedBus = busNotifier.selectedBus);
+        setState(() {
+          selectedBus = busNotifier.selectedBus;
+          if(selectedBus != null && selectedBus!.bus.id != null) busId = selectedBus!.bus.id!;
+        });
       }
     });
   }
@@ -49,7 +52,6 @@ class AddBusImagesState extends State<AddBusImages> {
   void clearInput(){
     setState(() {
       shouldReset = true;
-      busId = "";
       imgUrl = "";
       loading = false;
     });
@@ -151,7 +153,7 @@ class AddBusImagesState extends State<AddBusImages> {
               )
             ),
             spacer.height,
-            PrudImagePicker(
+            if(busId.isNotEmpty) PrudImagePicker(
               destination: "bus_brands/$brandId/buses/$busId/bus_images",
               saveToCloud: true,
               reset: shouldReset,

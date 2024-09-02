@@ -169,6 +169,7 @@ class WidgetStyle{
     required Function onPressed,
     String? image,
     IconData? icon,
+    double? size,
     bool isIcon = false,
     bool makeLight = false,
   }){

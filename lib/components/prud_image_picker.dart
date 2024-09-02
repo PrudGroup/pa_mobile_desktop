@@ -12,7 +12,6 @@ import 'loading_component.dart';
 
 class PrudImagePicker extends StatefulWidget {
   final String destination;
-  final String? name;
   final bool saveToCloud;
   final Function(XFile)? onPickedFile;
   final Function(Uint8List)? onPickedMemory;
@@ -29,7 +28,6 @@ class PrudImagePicker extends StatefulWidget {
     this.onError,
     this.onPickedMemory,
     required this.destination,
-    this.name,
   });
 
   @override
@@ -53,8 +51,10 @@ class PrudImagePickerState extends State<PrudImagePicker> {
 
   Future<void> save(XFile file) async {
     await tryAsync("Picker save", () async {
-      String? url = await iCloud.saveFileToCloud(file, widget.destination, widget.name?? file.name);
+      String? url = await iCloud.saveFileToCloud(file, widget.destination);
       if(widget.onSaveToCloud != null) widget.onSaveToCloud!(url);
+    }, error: (){
+      if(mounted) setState(() => picking = false);
     });
   }
   
@@ -86,25 +86,30 @@ class PrudImagePickerState extends State<PrudImagePicker> {
     return PrudContainer(
       hasTitle: true,
       title: "Select Image",
-      child: Center(
-        child: Flex(
-          direction: Axis.horizontal,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            if(photo != null) GFAvatar(
-              backgroundImage: MemoryImage(photo!),
-              size: GFSize.LARGE,
+      child: Column(
+        children: [
+          mediumSpacer.height,
+          Center(
+            child: Flex(
+              direction: Axis.horizontal,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if(photo != null) GFAvatar(
+                  backgroundImage: MemoryImage(photo!),
+                  size: GFSize.LARGE,
+                ),
+                picking? LoadingComponent(
+                  size: 40,
+                  isShimmer: false,
+                  spinnerColor: prudColorTheme.primary,
+                ) : prudWidgetStyle.getShortButton(
+                    text: "Pick From Gallery",
+                    onPressed: pickImage
+                )
+              ],
             ),
-            picking? LoadingComponent(
-              size: 40,
-              isShimmer: false,
-              spinnerColor: prudColorTheme.primary,
-            ) : prudWidgetStyle.getShortButton(
-              text: "Pick From Gallery",
-              onPressed: pickImage
-            )
-          ],
-        ),
+          ),
+        ],
       )
     );
   }

@@ -85,21 +85,21 @@ class BusNotifier extends ChangeNotifier {
   void getDriverDetailsFromCache() async {
     List<dynamic>? items = myStorage.getFromStore(key: "driverDetails");
     if(items != null){
-      driverDetails = items.map((dynamic od) => DriverDetails.fromJson(od)).toList();
+      driverDetails = items.map<DriverDetails>((dynamic od) => DriverDetails.fromJson(od)).toList();
     }
   }
 
   void getOperatorDetailsFromCache() async {
     List<dynamic>? items = myStorage.getFromStore(key: "operatorDetails");
     if(items != null){
-      operatorDetails = items.map((dynamic od) => OperatorDetails.fromJson(od)).toList();
+      operatorDetails = items.map<OperatorDetails>((dynamic od) => OperatorDetails.fromJson(od)).toList();
     }
   }
 
   void getBusDetailsFromCache() async {
     List<dynamic>? items = myStorage.getFromStore(key: "busDetails");
     if(items != null){
-      busDetails = items.map((dynamic od) => BusDetail.fromJson(od)).toList();
+      busDetails = items.map<BusDetail>((dynamic od) => BusDetail.fromJson(od)).toList();
     }
   }
 
@@ -144,7 +144,7 @@ class BusNotifier extends ChangeNotifier {
   }
 
   Future<BusImage?> createBusImage(BusImage busImage) async {
-    String path = "busImages/";
+    String path = "buses/${busImage.busId}/images/";
     dynamic res = await makeRequest(path: path, method: 1, data: busImage.toJson());
     if(res != null && res != false){
       if(res["id"] != null){
@@ -304,7 +304,7 @@ class BusNotifier extends ChangeNotifier {
         List<BusImage> imgs = res.map((re) => BusImage.fromJson(re)).toList();
         return imgs;
       }else{
-        return null;
+        return [];
       }
     }else{
       return null;
@@ -319,7 +319,7 @@ class BusNotifier extends ChangeNotifier {
         List<BusSeat> seats = res.map((re) => BusSeat.fromJson(re)).toList();
         return seats;
       }else{
-        return null;
+        return [];
       }
     }else{
       return null;
@@ -334,7 +334,7 @@ class BusNotifier extends ChangeNotifier {
         List<BusFeature> features = res.map((re) => BusFeature.fromJson(re)).toList();
         return features;
       }else{
-        return null;
+        return [];
       }
     }else{
       return null;
@@ -346,7 +346,7 @@ class BusNotifier extends ChangeNotifier {
     dynamic res = await makeRequest(path: path);
     if(res != null && res != false){
       if(res.isNotEmpty){
-        List<Bus> buses = res.map((re) => Bus.fromJson(re)).toList();
+        List<Bus> buses = res.map<Bus>((dynamic re) => Bus.fromJson(re)).toList();
         return buses;
       }else{
         return null;
