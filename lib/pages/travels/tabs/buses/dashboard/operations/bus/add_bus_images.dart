@@ -10,7 +10,6 @@ import '../../../../../../../components/translate_text.dart';
 import '../../../../../../../models/theme.dart';
 import '../../../../../../../singletons/bus_notifier.dart';
 import '../../../../../../../singletons/i_cloud.dart';
-import '../../../../../../../singletons/shared_local_storage.dart';
 import '../../../../../../../singletons/tab_data.dart';
 
 class AddBusImages extends StatefulWidget {
@@ -22,7 +21,7 @@ class AddBusImages extends StatefulWidget {
 
 class AddBusImagesState extends State<AddBusImages> {
   bool loading = false;
-  String? createdBy = myStorage.user?.id;
+  String? createdBy = busNotifier.busOperatorId;
   String? brandId = busNotifier.busBrandId;
   String busId = "";
   String imgUrl = "";
@@ -66,13 +65,13 @@ class AddBusImagesState extends State<AddBusImages> {
       await tryAsync("addNewBusImage", () async {
         if(mounted) setState(() => loading = true);
         BusImage newBusImage = BusImage(
-          createdBy: createdBy!, 
-          imgUrl: imgUrl, 
+          createdBy: createdBy!,
+          imgUrl: imgUrl,
           busId: busId
         );
         BusImage? resImage = await busNotifier.createBusImage(newBusImage);
         if(resImage != null && mounted){
-          iCloud.showSnackBar("Bus Created", context,title: "Success", type: 2);
+          iCloud.showSnackBar("Bus Image Created", context,title: "Success", type: 2);
           clearInput();
         }else{
           if(mounted) {
@@ -85,7 +84,6 @@ class AddBusImagesState extends State<AddBusImages> {
       });
     }
   }
-
 
   void getBus(){
     showModalBottomSheet(

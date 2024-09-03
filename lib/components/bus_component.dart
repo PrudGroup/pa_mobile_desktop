@@ -233,9 +233,10 @@ class BusComponentState extends State<BusComponent> {
                     spinnerColor: prudColorTheme.primary,
                   )
                       :
-                  prudWidgetStyle.getIconButton(
-                    isIcon: true,
-                    icon: Icons.delete,
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    color: prudColorTheme.warning,
+                    iconSize: 25,
                     onPressed: () => Alert(
                       context: context,
                       style: myStorage.alertStyle,
@@ -263,7 +264,7 @@ class BusComponentState extends State<BusComponent> {
                         ),
                       ],
                     ).show(),
-                  ),
+                  )
                 ],
               )
             ],
