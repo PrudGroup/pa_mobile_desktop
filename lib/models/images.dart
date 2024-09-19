@@ -87,6 +87,10 @@ class PrudImages {
   String addDriver;
   String addOperator;
   String busDriver;
+  String journeyCreate;
+  String journeyActive;
+  String journeyPending;
+  String journeyCompleted;
 
 
 
@@ -179,6 +183,10 @@ class PrudImages {
     required this.addDriver,
     required this.operators,
     required this.driver,
+    required this.journeyActive,
+    required this.journeyCompleted,
+    required this.journeyCreate,
+    required this.journeyPending,
   });
 }
 
@@ -271,4 +279,8 @@ PrudImages prudImages = PrudImages(
   addDriver: "assets/images/add.png",
   operators: "assets/images/management.png",
   driver: "assets/images/rudder.png",
+  journeyActive: "assets/images/journey_active.png",
+  journeyCompleted: "assets/images/journey_completed.png",
+  journeyCreate: "assets/images/journey_create.png",
+  journeyPending: "assets/images/journey_pending.png",
 );

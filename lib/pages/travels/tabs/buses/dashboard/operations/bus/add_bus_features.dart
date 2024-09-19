@@ -60,7 +60,6 @@ class AddBusFeaturesState extends State<AddBusFeatures> {
       description = "";
       howTo = "";
       status = "Bad";
-      busId = "";
       loading = false;
     });
   }

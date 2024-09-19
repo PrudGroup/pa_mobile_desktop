@@ -26,9 +26,13 @@ class BusNotifier extends ChangeNotifier {
   bool isActive = false;
   String? busBrandRole;
   BusDetail? selectedBus;
+  BusImage? selectedBusImage;
+  BusSeat? selectedBusSeat;
+  BusFeature? selectedBusFeature;
   OperatorDetails? selectedOperator;
   List<String> roles = ["ADMIN", "DRIVER", "SUPER"];
   List<String> statuses = ["Bad", "Good", "Very Good", "Excellent"];
+  List<String> seatTypes = ["Economy", "Business", "Executive"];
   List<String> driverRanks = ["Junior", "Senior"];
   List<OperatorDetails> operatorDetails = [];
   List<DriverDetails> driverDetails = [];
@@ -43,6 +47,21 @@ class BusNotifier extends ChangeNotifier {
 
   void updateSelectedBus(BusDetail op){
     selectedBus = op;
+    notifyListeners();
+  }
+
+  void updateSelectedBusSeat(BusSeat bs){
+    selectedBusSeat = bs;
+    notifyListeners();
+  }
+
+  void updateSelectedBusFeature(BusFeature bf){
+    selectedBusFeature = bf;
+    notifyListeners();
+  }
+
+  void updateSelectedBusImage(BusImage bi){
+    selectedBusImage = bi;
     notifyListeners();
   }
 
@@ -144,6 +163,21 @@ class BusNotifier extends ChangeNotifier {
     }
   }
 
+  Future<Journey?> createNewJourney(Journey journey) async {
+    String path = "journeys/";
+    dynamic res = await makeRequest(path: path, method: 1, data: journey.toJson());
+    if(res != null && res != false){
+      if(res["id"] != null){
+        Journey bu = Journey.fromJson(res);
+        return bu;
+      }else{
+        return null;
+      }
+    }else{
+      return null;
+    }
+  }
+
   Future<BusImage?> createBusImage(BusImage busImage) async {
     String path = "buses/${busImage.busId}/images/";
     dynamic res = await makeRequest(path: path, method: 1, data: busImage.toJson());
@@ -165,6 +199,21 @@ class BusNotifier extends ChangeNotifier {
     if(res != null && res != false){
       if(res["id"] != null){
         BusFeature bu = BusFeature.fromJson(res);
+        return bu;
+      }else{
+        return null;
+      }
+    }else{
+      return null;
+    }
+  }
+
+  Future<BusSeat?> createBusSeat(BusSeat busSeat) async {
+    String path = "buses/${busSeat.busId}/seats/";
+    dynamic res = await makeRequest(path: path, method: 1, data: busSeat.toJson());
+    if(res != null && res != false){
+      if(res["id"] != null){
+        BusSeat bu = BusSeat.fromJson(res);
         return bu;
       }else{
         return null;
@@ -467,6 +516,36 @@ class BusNotifier extends ChangeNotifier {
 
   Future<bool> deleteBus(String busId) async {
     String path = "buses/$busId";
+    dynamic res = await makeRequest(path: path, method: 3);
+    if(res != null && res != false){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
+  Future<bool> deleteBusImage(String busId, String imageId) async {
+    String path = "buses/$busId/images/$imageId";
+    dynamic res = await makeRequest(path: path, method: 3);
+    if(res != null && res != false){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
+  Future<bool> deleteBusSeat(String busId, String seatId) async {
+    String path = "buses/$busId/seats/$seatId";
+    dynamic res = await makeRequest(path: path, method: 3);
+    if(res != null && res != false){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
+  Future<bool> deleteBusFeature(String busId, String featureId) async {
+    String path = "buses/$busId/features/$featureId";
     dynamic res = await makeRequest(path: path, method: 3);
     if(res != null && res != false){
       return true;

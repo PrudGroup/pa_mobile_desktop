@@ -11,6 +11,7 @@ import 'package:flutter_to_pdf/flutter_to_pdf.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pdf/widgets.dart' as pdf;
+import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import '../components/page_transitions/scale.dart';
@@ -206,6 +207,17 @@ class ICloud extends ChangeNotifier{
 
     } else {
       return null;
+    }
+  }
+
+
+  Future<bool> deleteFileFromCloud(String url) async {
+    String codeUrl = "$prudApiUrl/files/single/delete";
+    Response res = await prudDio.get(codeUrl, queryParameters: {"file": url});
+    if (res.statusCode == 200) {
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -474,7 +486,7 @@ class ICloud extends ChangeNotifier{
       content: AwesomeSnackbarContent(
         title: title,
         message: msg,
-        messageFontSize: 16.0,
+        messageTextStyle: prudWidgetStyle.tabTextStyle,
         contentType: contentType,
       ),
     );

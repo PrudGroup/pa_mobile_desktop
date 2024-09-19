@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/journey/active_journey.dart';
+import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/journey/completed_journey.dart';
+import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/journey/create_journey.dart';
+import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/journey/pending_journey.dart';
 
+import '../../../../../../components/inner_menu.dart';
 import '../../../../../../components/translate_text.dart';
-import '../../../../../../components/work_in_progress.dart';
+import '../../../../../../models/images.dart';
 import '../../../../../../models/theme.dart';
+import '../../../../../../singletons/bus_notifier.dart';
 
 class JourneyOperations extends StatefulWidget {
   const JourneyOperations({super.key});
@@ -12,6 +18,35 @@ class JourneyOperations extends StatefulWidget {
 }
 
 class JourneyOperationsState extends State<JourneyOperations> {
+  List<InnerMenuItem> tabMenus = [];
+  final GlobalKey<InnerMenuState> _key = GlobalKey();
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void moveTo(int index){
+    if(_key.currentState != null){
+      _key.currentState!.changeWidget(_key.currentState!.widget.menus[index].menu, index);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if(mounted){
+      setState(() {
+        tabMenus = [
+          InnerMenuItem(imageIcon: prudImages.journeyCreate, title: "Create", menu: const CreateJourney()),
+          InnerMenuItem(imageIcon: prudImages.journeyPending, title: "Pending", menu: const PendingJourney()),
+          InnerMenuItem(imageIcon: prudImages.journeyActive, title: "Active", menu: const ActiveJourney()),
+          InnerMenuItem(imageIcon: prudImages.journeyCompleted, title: "Completed", menu: const CompletedJourney()),
+        ];
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,10 +65,15 @@ class JourneyOperationsState extends State<JourneyOperations> {
               color: prudColorTheme.bgA
           ),
         ),
-        actions: const [
+        actions: [
+          IconButton(
+            onPressed: busNotifier.toggleButton,
+            icon: Icon(busNotifier.showFloatingButton? Icons.toggle_on : Icons.toggle_off),
+            color: prudColorTheme.bgA,
+          ),
         ],
       ),
-      body: const WorkInProgress(),
+      body: InnerMenu(key: _key, menus: tabMenus, type: 0, hasIcon: true,),
     );
   }
 }

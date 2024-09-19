@@ -206,7 +206,7 @@ class BusComponentState extends State<BusComponent> {
                   ),
                   GFRating(
                     onChanged: (rate){},
-                    value: bus!.votes > 0? bus!.votes/bus!.voters : 0,
+                    value: bus!.getRating(),
                     size: 15,
                   ),
                 ],
