@@ -26,6 +26,7 @@ class BusNotifier extends ChangeNotifier {
   bool isActive = false;
   String? busBrandRole;
   BusDetail? selectedBus;
+  DriverDetails? selectedDriver;
   BusImage? selectedBusImage;
   BusSeat? selectedBusSeat;
   BusFeature? selectedBusFeature;
@@ -45,8 +46,13 @@ class BusNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateSelectedBus(BusDetail op){
-    selectedBus = op;
+  void updateSelectedBus(BusDetail bu){
+    selectedBus = bu;
+    notifyListeners();
+  }
+
+  void updateSelectedDriver(DriverDetails dd){
+    selectedDriver = dd;
     notifyListeners();
   }
 
@@ -260,16 +266,17 @@ class BusNotifier extends ChangeNotifier {
           List<DriverDetails> results = [];
           for(BusBrandOperator bo in found){
             BusBrandDriver? drive = await getDriverByOperatorId(bo.id!);
-            debugPrint("drive: $drive");
             if(drive != null){
               User? usr = await busNotifier.getDriverDetail(drive.id!);
-              debugPrint("user: $usr");
               if(usr != null){
                 results.add(DriverDetails(dr: drive, detail: usr));
               }
             }
           }
-          if(results.isNotEmpty) driverDetails = results;
+          if(results.isNotEmpty) {
+            driverDetails = results;
+            saveDriverDetailsToCache();
+          }
         }
         notifyListeners();
       }

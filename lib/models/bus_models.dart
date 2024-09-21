@@ -579,8 +579,10 @@ class Journey{
   DateTime? departedAt;
   DateTime? arrivedAt;
   String createdBy;
-  JourneyPoint depPoint;
-  JourneyPoint arrPoint;
+  JourneyPoint? depPoint;
+  JourneyPoint? arrPoint;
+  String depTerminal;
+  String arrTerminal;
   String status; // Pending Boarding Active Completed Cancelled
   DateTime? statusDate;
   DateTime? createdOn;
@@ -599,7 +601,8 @@ class Journey{
     required this.driverId,
     required this.busId,
     required this.departureCity,
-    required this.depPoint,
+    required this.depTerminal,
+    required this.arrTerminal,
     required this.departureCountry,
     required this.departureDate,
     required this.destinationCity,
@@ -610,7 +613,6 @@ class Journey{
     required this.businessSeatPrice,
     required this.economySeatPrice,
     required this.executiveSeatPrice,
-    required this.arrPoint,
     required this.priceCurrencyCode,
     this.status = "PENDING",
     this.trackable = true,
@@ -625,7 +627,9 @@ class Journey{
     this.id,
     this.statusDate,
     this.departedAt,
-    this.arrivedAt
+    this.arrivedAt,
+    this.depPoint,
+    this.arrPoint
   });
 
   double getRating(){
@@ -641,9 +645,11 @@ class Journey{
       "driverId": driverId,
       "busId": busId,
       "departureCity": departureCity,
-      "depPoint": depPoint.toJson(),
-      "arrPoint": arrPoint.toJson(),
+      if(depPoint != null) "depPoint": depPoint!.toJson(),
+      if(arrPoint != null) "arrPoint": arrPoint!.toJson(),
       "status": status,
+      "arrTerminal": arrTerminal,
+      "depTerminal": depTerminal,
       "createdBy": createdBy,
       "departureCountry": departureCountry,
       "votes": votes,
@@ -675,8 +681,8 @@ class Journey{
       driverId: json["driverId"],
       busId: json["busId"],
       departureCity: json["departureCity"],
-      depPoint: JourneyPoint.fromJson(json["depPoint"]),
-      arrPoint: JourneyPoint.fromJson(json["arrPoint"]),
+      depPoint: json["depPoint"] != null? JourneyPoint.fromJson(json["depPoint"]) : null,
+      arrPoint: json["arrPoint"] != null? JourneyPoint.fromJson(json["arrPoint"]) : null,
       departureCountry: json["departureCountry"],
       priceCurrencyCode: json["priceCurrencyCode"],
       status: json["status"],
@@ -702,6 +708,8 @@ class Journey{
       platformCharges: json["platformCharges"],
       totalFromAddOn: json["totalFromAddOn"],
       totalFromFare: json["totalFromFare"],
+      depTerminal: json["depTerminal"],
+      arrTerminal: json["arrTerminal"]
     );
   }
 
