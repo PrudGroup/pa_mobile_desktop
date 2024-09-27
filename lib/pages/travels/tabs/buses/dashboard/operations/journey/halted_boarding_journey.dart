@@ -17,7 +17,7 @@ class HaltedBoardingJourney extends StatefulWidget {
 }
 
 class HaltedBoardingJourneyState extends State<HaltedBoardingJourney> {
-  List<Journey> journeys = busNotifier.brandHaltedBoardingJourneys;
+  List<JourneyWithBrand> journeys = busNotifier.brandHaltedBoardingJourneys;
   bool loading = false;
   Widget noJourney = tabData.getNotFoundWidget(
       title: "No Journey",
@@ -30,7 +30,7 @@ class HaltedBoardingJourneyState extends State<HaltedBoardingJourney> {
   Future<void> getJourneyFromCloud() async {
     await tryAsync("getJourneyFromCloud", () async {
       if(mounted) setState(() => loading = true);
-      List<Journey> found = await busNotifier.getBrandJourneysFromCloud(4);
+      List<JourneyWithBrand> found = await busNotifier.getBrandJourneysFromCloud(4, busNotifier.busBrandId!);
       if(mounted) {
         busNotifier.brandHaltedBoardingJourneys = found;
         setState(() {
@@ -86,16 +86,17 @@ class HaltedBoardingJourneyState extends State<HaltedBoardingJourney> {
             children: [
               if(journeys.isNotEmpty) Expanded(
                 child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    physics: const BouncingScrollPhysics(),
-                    scrollDirection: Axis.vertical,
-                    itemCount: journeys.length,
-                    itemBuilder: (context, index){
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 5),
-                        child: JourneyComponent(journey: journeys[index]),
-                      );
-                    }
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  physics: const BouncingScrollPhysics(),
+                  scrollDirection: Axis.vertical,
+                  itemCount: journeys.length,
+                  itemBuilder: (context, index){
+                    JourneyWithBrand jb = journeys[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5),
+                      child: JourneyComponent(journey: jb.journey, brand: jb.brand,),
+                    );
+                  }
                 ),
               ),
               if(busNotifier.brandHaltedBoardingJourneys.isEmpty) Expanded(

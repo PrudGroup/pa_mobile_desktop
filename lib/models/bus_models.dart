@@ -973,3 +973,55 @@ class BusDetail{
     );
   }
 }
+
+class JourneyWithBrand{
+  Journey journey;
+  BusBrand brand;
+
+  JourneyWithBrand({
+    required this.journey,
+    required this.brand,
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      "journey": journey.toJson(),
+      "brand": brand.toJson(),
+    };
+  }
+
+  factory JourneyWithBrand.fromJson(Map<String, dynamic> json){
+    return JourneyWithBrand(
+      journey: Journey.fromJson(json["journey"]),
+      brand: BusBrand.fromJson(json["brand"])
+    );
+  }
+}
+
+class PassengerDetail{
+  JourneyPassenger passenger;
+  User user;
+  BusSeat seat;
+
+  PassengerDetail({
+    required this.passenger,
+    required this.user,
+    required this.seat,
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      "passenger": passenger.toJson(),
+      "user": user.toJson(),
+      "seat": seat.toJson(),
+    };
+  }
+
+  factory PassengerDetail.fromJson(Map<String, dynamic> json){
+    return PassengerDetail(
+      passenger: JourneyPassenger.fromJson(json["passenger"]),
+      user: User.fromJson(json["user"]),
+      seat: BusSeat.fromJson(json["seat"]),
+    );
+  }
+}

@@ -17,7 +17,7 @@ class ActiveJourney extends StatefulWidget {
 
 class ActiveJourneyState extends State<ActiveJourney> {
 
-  List<Journey> journeys = busNotifier.brandActiveJourneys;
+  List<JourneyWithBrand> journeys = busNotifier.brandActiveJourneys;
   bool loading = false;
   Widget noJourney = tabData.getNotFoundWidget(
       title: "No Journey",
@@ -29,7 +29,7 @@ class ActiveJourneyState extends State<ActiveJourney> {
   Future<void> getJourneyFromCloud() async {
     await tryAsync("getJourneyFromCloud", () async {
       if(mounted) setState(() => loading = true);
-      List<Journey> found = await busNotifier.getBrandJourneysFromCloud(2);
+      List<JourneyWithBrand> found = await busNotifier.getBrandJourneysFromCloud(2, busNotifier.busBrandId!);
       if(mounted) {
         busNotifier.brandActiveJourneys = found;
         setState(() {
@@ -90,9 +90,10 @@ class ActiveJourneyState extends State<ActiveJourney> {
                   scrollDirection: Axis.vertical,
                   itemCount: journeys.length,
                   itemBuilder: (context, index){
+                    JourneyWithBrand jb = journeys[index];
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: JourneyComponent(journey: journeys[index],),
+                      child: JourneyComponent(journey: jb.journey, brand: jb.brand,),
                     );
                   }
                 ),

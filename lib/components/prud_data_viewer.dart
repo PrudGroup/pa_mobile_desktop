@@ -19,6 +19,8 @@ class PrudDataViewer extends StatelessWidget {
   final bool valueIsMoney;
   final Color? headColor;
   final bool removeWidth;
+  final bool makeTransparent;
+  final dynamic subValue;
 
   const PrudDataViewer({
     super.key,
@@ -28,37 +30,36 @@ class PrudDataViewer extends StatelessWidget {
     this.inverseColor = false,
     this.valueIsMoney = false,
     this.removeWidth = false,
+    this.makeTransparent = false,
     this.fontSize = 25,
     this.headColor,
+    this.subValue,
   }): assert(fontSize > 15 && inverseColor? headColor==null : true);
 
   double getSize(){
     switch(size){
-      case PrudSize.smaller: return 60.0;
-      case PrudSize.small: return 120.0;
-      case PrudSize.medium: return 150.0;
-      default: return 200.0;
+      case PrudSize.smaller: return subValue != null? 100 : 60.0;
+      case PrudSize.small: return subValue != null? 180 : 120.0;
+      case PrudSize.medium: return subValue != null? 220 : 150.0;
+      default: return subValue != null? 300 : 200.0;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     double height = getSize();
+    double spa = fontSize + 5;
     return Container(
       height: height,
       constraints: BoxConstraints(minWidth: removeWidth? 50 : 120),
       padding: const EdgeInsets.all(10.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: inverseColor? prudColorTheme.primary : prudColorTheme.bgA,
+        color: makeTransparent? prudColorTheme.bgE : ( inverseColor? prudColorTheme.primary : prudColorTheme.bgA),
       ),
       child: Center(
-        child: Wrap(
-          direction:  Axis.vertical,
-          spacing: -(fontSize - 15),
-          runAlignment: WrapAlignment.center,
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
+        child: Stack(
+          alignment: Alignment.center,
           children: [
             Text(
               "$value",
@@ -71,16 +72,30 @@ class PrudDataViewer extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            Text(
-              field.toUpperCase(),
-              style: prudWidgetStyle.typedTextStyle.copyWith(
-                color: inverseColor? prudColorTheme.textHeader : prudColorTheme.textB,
-                fontSize: fontSize - 15,
+            if(subValue != null) Padding(
+              padding: EdgeInsets.only(top: spa + 5),
+              child: Text(
+                "$subValue",
+                style: prudWidgetStyle.typedTextStyle.copyWith(
+                  color: inverseColor? prudColorTheme.buttonA : prudColorTheme.secondary,
+                  fontSize: fontSize - 8,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            )
+            ),
+            Padding(
+                padding: EdgeInsets.only(top: subValue != null? spa + 25 : spa),
+                child: Text(
+                  field.toUpperCase(),
+                  style: prudWidgetStyle.typedTextStyle.copyWith(
+                    color: inverseColor? prudColorTheme.textHeader : prudColorTheme.textB,
+                    fontSize: fontSize - 15,
+                  ),
+                  textAlign: TextAlign.center,
+                )
+            ),
           ],
-        )
+        ),
       ),
     );
   }

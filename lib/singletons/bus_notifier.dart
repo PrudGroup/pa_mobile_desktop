@@ -39,13 +39,13 @@ class BusNotifier extends ChangeNotifier {
   List<DriverDetails> driverDetails = [];
   List<BusDetail> busDetails = [];
   List<String> busTypes = ["Luxurious Bus", "18 Seater", "J5", "14 Seater", "Sienna", "Others"];
-  List<Journey> brandPendingJourneys = [];
-  List<Journey> brandCompletedJourneys = [];
-  List<Journey> brandActiveJourneys = [];
-  List<Journey> brandBoardingJourneys = [];
-  List<Journey> brandHaltedJourneys = [];
-  List<Journey> brandHaltedBoardingJourneys = [];
-  List<Journey> brandCancelledJourneys = [];
+  List<JourneyWithBrand> brandPendingJourneys = [];
+  List<JourneyWithBrand> brandCompletedJourneys = [];
+  List<JourneyWithBrand> brandActiveJourneys = [];
+  List<JourneyWithBrand> brandBoardingJourneys = [];
+  List<JourneyWithBrand> brandHaltedJourneys = [];
+  List<JourneyWithBrand> brandHaltedBoardingJourneys = [];
+  List<JourneyWithBrand> brandCancelledJourneys = [];
   Journey? selectedJourney;
 
 
@@ -338,6 +338,28 @@ class BusNotifier extends ChangeNotifier {
     }
   }
 
+  Future<List<PassengerDetail>> getJourneyPassengersFromCloud(String journeyId, String busId) async {
+    List<PassengerDetail> found = [];
+    String path = "journeys/$journeyId/passengers";
+    List<JourneyPassenger>? passengers;
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false) {
+      if (res.isNotEmpty) {
+        passengers = res.map<JourneyPassenger>((dynamic re) => JourneyPassenger.fromJson(re)).toList();
+        if (passengers != null && passengers.isNotEmpty) {
+          for (JourneyPassenger pas in passengers) {
+            User? usr = await influencerNotifier.getInfluencerById(pas.affId);
+            BusSeat? seat = await getBusSeatViaId(busId, pas.seatId );
+            if(usr != null && seat != null){
+              found.add(PassengerDetail(seat: seat, passenger: pas, user: usr));
+            }
+          }
+        }
+      }
+    }
+    return found;
+  }
+
   Future<BusDetail?> getBusByIdFromCloud(String busId) async {
     String path = "buses/$busId";
     BusDetail? details;
@@ -356,18 +378,25 @@ class BusNotifier extends ChangeNotifier {
     return details;
   }
 
-  Future<List<Journey>> getBrandJourneysFromCloud(int status) async {
+  Future<List<JourneyWithBrand>> getBrandJourneysFromCloud(int status, String brandId) async {
     List<Journey> found = [];
-    if(busBrandId != null) {
-      String path = "journeys/brands/$busBrandId/status/$status";
+    List<JourneyWithBrand> foundWithBrands = [];
+    BusBrand? brand = await getBusBrandById(brandId);
+    if(brand != null) {
+      String path = "journeys/brands/$brandId/status/$status";
       dynamic res = await makeRequest(path: path);
       if(res != null && res != false){
         if(res.isNotEmpty){
           found = res.map<Journey>((dynamic re) => Journey.fromJson(re)).toList();
+          if(found.isNotEmpty){
+            for(Journey journey in found){
+              foundWithBrands.add(JourneyWithBrand(journey: journey, brand: brand));
+            }
+          }
         }
       }
     }
-    return found;
+    return foundWithBrands;
   }
 
   Future<BusBrandDriver?> createNewDriver(BusBrandDriver dr) async {
@@ -456,6 +485,16 @@ class BusNotifier extends ChangeNotifier {
       }else{
         return [];
       }
+    }else{
+      return null;
+    }
+  }
+
+  Future<BusSeat?> getBusSeatViaId(String busId, String seatId) async {
+    String path = "buses/$busId/seats/$seatId";
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false){
+      return BusSeat.fromJson(res);
     }else{
       return null;
     }

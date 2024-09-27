@@ -16,7 +16,7 @@ class CancelledJourney extends StatefulWidget {
 }
 
 class CancelledJourneyState extends State<CancelledJourney> {
-  List<Journey> journeys = busNotifier.brandCancelledJourneys;
+  List<JourneyWithBrand> journeys = busNotifier.brandCancelledJourneys;
   bool loading = false;
   Widget noJourney = tabData.getNotFoundWidget(
       title: "No Journey",
@@ -29,7 +29,7 @@ class CancelledJourneyState extends State<CancelledJourney> {
   Future<void> getJourneyFromCloud() async {
     await tryAsync("getJourneyFromCloud", () async {
       if(mounted) setState(() => loading = true);
-      List<Journey> found = await busNotifier.getBrandJourneysFromCloud(6);
+      List<JourneyWithBrand> found = await busNotifier.getBrandJourneysFromCloud(6, busNotifier.busBrandId!);
       if(mounted) {
         busNotifier.brandCancelledJourneys = found;
         setState(() {
@@ -85,16 +85,17 @@ class CancelledJourneyState extends State<CancelledJourney> {
             children: [
               if(journeys.isNotEmpty) Expanded(
                 child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    physics: const BouncingScrollPhysics(),
-                    scrollDirection: Axis.vertical,
-                    itemCount: journeys.length,
-                    itemBuilder: (context, index){
-                      return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 5),
-                          child: JourneyComponent(journey: journeys[index],),
-                        );
-                    }
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  physics: const BouncingScrollPhysics(),
+                  scrollDirection: Axis.vertical,
+                  itemCount: journeys.length,
+                  itemBuilder: (context, index){
+                    JourneyWithBrand jb = journeys[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5),
+                      child: JourneyComponent(journey: jb.journey, brand: jb.brand,),
+                    );
+                  }
                 ),
               ),
               if(busNotifier.brandCancelledJourneys.isEmpty) Expanded(

@@ -15,9 +15,11 @@ import '../singletons/i_cloud.dart';
 
 class JourneyComponent extends StatefulWidget {
   final Journey journey;
+  final BusBrand brand;
 
   const JourneyComponent({
     super.key, required this.journey,
+    required this.brand,
   });
 
   @override
@@ -31,20 +33,19 @@ class JourneyComponentState extends State<JourneyComponent> {
 
   Future<void> getBrand() async {
     await tryAsync("getBrand", () async {
-      if(mounted) setState(() => loading = false);
-      BusBrand? dBrand = await busNotifier.getBusBrandById(widget.journey.brandId);
       if(mounted) {
         setState(() {
-          brand = dBrand;
-          loading = false;
-        });
-      }
-    }, error: (){
-      if(mounted){
-        setState(() {
           loading = true;
+          brand = widget.brand;
         });
       }
+      if(brand == null) {
+        BusBrand? dBrand = await busNotifier.getBusBrandById(widget.journey.brandId);
+        if (mounted) setState(() => brand = dBrand);
+      }
+      if (mounted) setState(() => loading = false);
+    }, error: (){
+      if (mounted) setState(() => loading = false);
     });
   }
 
@@ -139,7 +140,7 @@ class JourneyComponentState extends State<JourneyComponent> {
                             padding: const EdgeInsets.only(top: 30),
                             child: FittedBox(
                               child: Text(
-                                DateFormat('dd, MMM. hh:mm a').format(widget.journey.departureDate),
+                                DateFormat('dd MMM. hh:mm a').format(widget.journey.departureDate),
                                 style: prudWidgetStyle.typedTextStyle.copyWith(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 8,
@@ -214,7 +215,7 @@ class JourneyComponentState extends State<JourneyComponent> {
                             padding: const EdgeInsets.only(top: 30),
                             child: FittedBox(
                               child: Text(
-                                DateFormat('dd, MMM. hh:mm a').format(widget.journey.destinationDate),
+                                DateFormat('dd MMM. hh:mm a').format(widget.journey.destinationDate),
                                 style: prudWidgetStyle.typedTextStyle.copyWith(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 8,

@@ -10,7 +10,11 @@ import 'bus_component.dart';
 class SelectBusComponent extends StatefulWidget {
   final bool onlyActive;
   final List<String>? excludeIds;
-  const SelectBusComponent({super.key, required this.onlyActive, this.excludeIds});
+  final String? onlyOfType;
+  const SelectBusComponent({
+    super.key, required this.onlyActive,
+    this.excludeIds, this.onlyOfType
+  });
 
   @override
   SelectBusComponentState createState() => SelectBusComponentState();
@@ -63,12 +67,25 @@ class SelectBusComponentState extends State<SelectBusComponent> {
   List<BusDetail> getList(){
     List<BusDetail> found = widget.onlyActive? busNotifier.busDetails.where((ele) => ele.bus.active == true).toList() : busNotifier.busDetails;
     List<BusDetail> reversed = found.reversed.toList();
-    if(widget.excludeIds != null && widget.excludeIds!.isNotEmpty){
-      return reversed.where((ele) {
-        return widget.excludeIds!.contains(ele.bus.id)? false : true;
+    if(widget.onlyOfType != null){
+      List<BusDetail> sameTyped = reversed.where((ele) {
+        return ele.bus.busType == widget.onlyOfType;
       }).toList();
+      if(widget.excludeIds != null && widget.excludeIds!.isNotEmpty){
+        return sameTyped.where((ele) {
+          return widget.excludeIds!.contains(ele.bus.id)? false : true;
+        }).toList();
+      }else{
+        return sameTyped;
+      }
     }else{
-      return reversed;
+      if(widget.excludeIds != null && widget.excludeIds!.isNotEmpty){
+        return reversed.where((ele) {
+          return widget.excludeIds!.contains(ele.bus.id)? false : true;
+        }).toList();
+      }else{
+        return reversed;
+      }
     }
   }
 

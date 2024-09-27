@@ -15,7 +15,8 @@ import 'loading_component.dart';
 
 class DashboardDriverComponent extends StatefulWidget {
   final DriverDetails driver;
-  const DashboardDriverComponent({super.key, required this.driver});
+  final bool isDashboard;
+  const DashboardDriverComponent({super.key, required this.driver, this.isDashboard = true});
 
   @override
   DashboardDriverComponentState createState() => DashboardDriverComponentState();
@@ -277,7 +278,7 @@ class DashboardDriverComponentState extends State<DashboardDriverComponent> {
               )
             ],
           ),
-          if(driver != null) Column(
+          if(driver != null && widget.isDashboard) Column(
             children: [
               Divider(
                 height: 10,
