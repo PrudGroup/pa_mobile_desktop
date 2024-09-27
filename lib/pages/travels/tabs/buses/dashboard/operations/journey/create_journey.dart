@@ -104,6 +104,8 @@ class CreateJourneyState extends State<CreateJourney> {
       loading = false;
       busId = "";
       selectedBus = null;
+      busNotifier.selectedBus = null;
+      busNotifier.selectedDriver = null;
       selectedDriver = null;
       driverId = null;
       departureCity = null;
@@ -121,6 +123,7 @@ class CreateJourneyState extends State<CreateJourney> {
       economySeatPrice = 0;
       executiveSeatPrice = 0;
       priceCurrencyCode = null;
+      selectedCurrency = null;
     });
   }
 
@@ -134,12 +137,13 @@ class CreateJourneyState extends State<CreateJourney> {
       departureDate != null &&
       departureCountry != null &&
       destinationDate != null &&
+      destinationDate!.difference(departureDate!).inHours > 1  &&
       destinationCountry != null &&
       destinationCity != null &&
       duration != null &&
-      businessSeatPrice != 0 &&
-      economySeatPrice != 0 &&
-      executiveSeatPrice != 0 &&
+      businessSeatPrice > 0 &&
+      economySeatPrice > 0 &&
+      executiveSeatPrice > 0 &&
       priceCurrencyCode != null;
   }
 
@@ -201,6 +205,7 @@ class CreateJourneyState extends State<CreateJourney> {
           economySeatPrice: economySeatPrice,
           executiveSeatPrice: executiveSeatPrice,
           arrPoint: arrPoint,
+          departure: tabData.getTimestampFromDate(departureDate!),
           priceCurrencyCode: priceCurrencyCode!,
           depTerminal: depTerminal!,
           arrTerminal: arrTerminal!
@@ -216,12 +221,16 @@ class CreateJourneyState extends State<CreateJourney> {
           }
         }
       }, error: () {
-        if(mounted) setState(() => loading = false);
+        if(mounted) {
+          iCloud.showSnackBar("Journey Failed", context);
+          setState(() => loading = false);
+        }
       });
     }
   }
 
   void getBus(){
+    if(mounted) setState(() => selectedBus = null);
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
@@ -238,6 +247,7 @@ class CreateJourneyState extends State<CreateJourney> {
   }
 
   void getDriver(){
+    if(mounted) setState(() => selectedDriver = null);
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
@@ -331,6 +341,16 @@ class CreateJourneyState extends State<CreateJourney> {
             spacer.height,
             if(busId.isNotEmpty && driverId != null) Column(
               children: [
+                spacer.height,
+                Translate(
+                  text: "* Be sure that the destination date is higher than the departure date. *",
+                  style: prudWidgetStyle.tabTextStyle.copyWith(
+                    color: prudColorTheme.iconB,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  align: TextAlign.center,
+                ),
                 spacer.height,
                 PrudContainer(
                   hasTitle: true,

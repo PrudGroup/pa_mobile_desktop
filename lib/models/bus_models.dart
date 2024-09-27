@@ -595,11 +595,13 @@ class Journey{
   double grandTotal;
   bool trackable;
   JourneyDuration duration;
+  int departure;
 
   Journey({
     required this.createdBy,
     required this.driverId,
     required this.busId,
+    required this.departure,
     required this.departureCity,
     required this.depTerminal,
     required this.arrTerminal,
@@ -629,7 +631,7 @@ class Journey{
     this.departedAt,
     this.arrivedAt,
     this.depPoint,
-    this.arrPoint
+    this.arrPoint,
   });
 
   double getRating(){
@@ -669,6 +671,7 @@ class Journey{
       "totalFromAddOn": totalFromAddOn,
       "totalFromFare": totalFromFare,
       "trackable": trackable,
+      "departure": departure,
       if(departedAt != null) "departedAt": departedAt!.toIso8601String(),
       if(arrivedAt != null) "arrivedAt": arrivedAt!.toIso8601String(),
       if(statusDate != null) "statusDate": statusDate!.toIso8601String(),
@@ -693,7 +696,7 @@ class Journey{
       businessSeatPrice: json["businessSeatPrice"],
       economySeatPrice: json["economySeatPrice"],
       executiveSeatPrice: json["executiveSeatPrice"],
-      statusDate: json["statusDate"] != null? DateTime.parse(json["status_date"]) : null,
+      statusDate: json["statusDate"] != null? DateTime.parse(json["statusDate"]) : null,
       departureDate: DateTime.parse(json["departureDate"]),
       destinationDate: DateTime.parse(json["destinationDate"]),
       createdOn: json["createdOn"] != null? DateTime.parse(json["createdOn"]) : null,
@@ -709,7 +712,8 @@ class Journey{
       totalFromAddOn: json["totalFromAddOn"],
       totalFromFare: json["totalFromFare"],
       depTerminal: json["depTerminal"],
-      arrTerminal: json["arrTerminal"]
+      arrTerminal: json["arrTerminal"],
+      departure: json["departure"]
     );
   }
 

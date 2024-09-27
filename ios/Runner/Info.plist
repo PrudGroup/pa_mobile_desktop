@@ -26,12 +26,14 @@
 		<true/>
 		<key>UILaunchStoryboardName</key>
 		<string>LaunchScreen</string>
+        <key>NSMicrophoneUsageDescription</key>
+        <string>To enable microphone access when recording video</string>
+        <key>NSLocationWhenInUseUsageDescription</key>
+        <string>To enable GPS location access for Exif data</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>This will be used to identify your beneficiary</string>
+		<string>This will be used to identify your beneficiary and you</string>
 		<key>NSCameraUsageDescription</key>
-		<string>This will be used to identify your beneficiary</string>
-		<key>NSMicrophoneUsageDescription</key>
-		<string>Microphone is needed in conjunction with the camera to identify your beneficiary</string>
+		<string>This will be used for live streaming videos</string>
 		<key>UIMainStoryboardFile</key>
 		<string>Main</string>
 		<key>UISupportedInterfaceOrientations</key>

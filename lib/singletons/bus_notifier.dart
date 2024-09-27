@@ -39,6 +39,20 @@ class BusNotifier extends ChangeNotifier {
   List<DriverDetails> driverDetails = [];
   List<BusDetail> busDetails = [];
   List<String> busTypes = ["Luxurious Bus", "18 Seater", "J5", "14 Seater", "Sienna", "Others"];
+  List<Journey> brandPendingJourneys = [];
+  List<Journey> brandCompletedJourneys = [];
+  List<Journey> brandActiveJourneys = [];
+  List<Journey> brandBoardingJourneys = [];
+  List<Journey> brandHaltedJourneys = [];
+  List<Journey> brandHaltedBoardingJourneys = [];
+  List<Journey> brandCancelledJourneys = [];
+  Journey? selectedJourney;
+
+
+  void updateSelectedJourney(Journey jy){
+    selectedJourney = jy;
+    notifyListeners();
+  }
 
 
   void updateSelectedOperator(OperatorDetails op){
@@ -171,6 +185,7 @@ class BusNotifier extends ChangeNotifier {
 
   Future<Journey?> createNewJourney(Journey journey) async {
     String path = "journeys/";
+    debugPrint("Journey: ${journey.toJson()}");
     dynamic res = await makeRequest(path: path, method: 1, data: journey.toJson());
     if(res != null && res != false){
       if(res["id"] != null){
@@ -283,6 +298,22 @@ class BusNotifier extends ChangeNotifier {
     }
   }
 
+  Future<DriverDetails?> getDriverById(String drvId) async {
+    String path = "drivers/$drvId";
+    DriverDetails? details;
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false){
+      if(res.isNotEmpty){
+        BusBrandDriver? drive = BusBrandDriver.fromJson(res);
+        User? usr = await busNotifier.getDriverDetail(drive.id!);
+        if(usr != null){
+          details = DriverDetails(dr: drive, detail: usr);
+        }
+      }
+    }
+    return details;
+  }
+
   Future<void> getBusesFromCloud() async {
     if(busBrandId != null) {
       List<BusDetail> found = [];
@@ -305,6 +336,38 @@ class BusNotifier extends ChangeNotifier {
         }
       }
     }
+  }
+
+  Future<BusDetail?> getBusByIdFromCloud(String busId) async {
+    String path = "buses/$busId";
+    BusDetail? details;
+    dynamic res = await makeRequest(path: path);
+    if(res != null && res != false) {
+      if (res.isNotEmpty) {
+        Bus? bus = Bus.fromJson(res);
+        List<BusImage>? images = await getBusImagesViaId(bus.id!);
+        List<BusSeat>? seats = await getBusSeatsViaId(bus.id!);
+        List<BusFeature>? features = await getBusFeaturesViaId(bus.id!);
+        if(images != null && features != null && seats != null){
+          details = BusDetail(bus: bus, features: features, images: images, seats: seats);
+        }
+      }
+    }
+    return details;
+  }
+
+  Future<List<Journey>> getBrandJourneysFromCloud(int status) async {
+    List<Journey> found = [];
+    if(busBrandId != null) {
+      String path = "journeys/brands/$busBrandId/status/$status";
+      dynamic res = await makeRequest(path: path);
+      if(res != null && res != false){
+        if(res.isNotEmpty){
+          found = res.map<Journey>((dynamic re) => Journey.fromJson(re)).toList();
+        }
+      }
+    }
+    return found;
   }
 
   Future<BusBrandDriver?> createNewDriver(BusBrandDriver dr) async {
@@ -711,3 +774,8 @@ Dio busDio = Dio(BaseOptions(
     }
 ));
 final busNotifier = BusNotifier();
+final List<Journey> localJourneys = [
+  Journey(createdBy: "BERTY", driverId: "", busId: "", departure: 234567838, departureCity: "Lagos", depTerminal: "23, Chisco park, Alaba Market, Lagos.", arrTerminal: "33, Chisco park, Utako.", departureCountry: "NG", departureDate: DateTime.now().subtract(const Duration(days: 3)), destinationCity: "Abuja", destinationCountry: "NG", destinationDate: DateTime.now().subtract(const Duration(days: 2)), duration: JourneyDuration(hours: 22, minutes: 30), brandId: "24567", businessSeatPrice: 35000.00, economySeatPrice: 25000.00, executiveSeatPrice: 45000.00, priceCurrencyCode: "NGN"),
+  Journey(createdBy: "BERTY", driverId: "", busId: "", departure: 234567838, departureCity: "Abuja", depTerminal: "23, Chisco park, Abuja.", arrTerminal: "33, Chisco park, Uyo.", departureCountry: "NG", departureDate: DateTime.now().subtract(const Duration(days: 3)), destinationCity: "Uyo", destinationCountry: "NG", destinationDate: DateTime.now().subtract(const Duration(days: 2)), duration: JourneyDuration(hours: 22, minutes: 30), brandId: "24567", businessSeatPrice: 25000.00, economySeatPrice: 20000.00, executiveSeatPrice: 30000.00, priceCurrencyCode: "NGN"),
+  Journey(createdBy: "BERTY", driverId: "", busId: "", departure: 234567838, departureCity: "Asaba", depTerminal: "23, Chisco park, Asaba.", arrTerminal: "33, Chisco park, Calabar", departureCountry: "NG", departureDate: DateTime.now().subtract(const Duration(days: 3)), destinationCity: "Calabar", destinationCountry: "NG", destinationDate: DateTime.now().subtract(const Duration(days: 2)), duration: JourneyDuration(hours: 22, minutes: 30), brandId: "24567", businessSeatPrice: 45000.00, economySeatPrice: 35000.00, executiveSeatPrice: 55000.00, priceCurrencyCode: "NGN"),
+];

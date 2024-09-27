@@ -258,6 +258,7 @@ class ICloud extends ChangeNotifier{
       loggedIn = true;
     }else{
       List logged = await logAffiliateIn(url);
+      debugPrint("logged: $logged");
       loggedIn = logged[1];
       if(loggedIn){
         affAuthToken = 'Bearer PrudApp ${logged[0]["auth_token"]}';

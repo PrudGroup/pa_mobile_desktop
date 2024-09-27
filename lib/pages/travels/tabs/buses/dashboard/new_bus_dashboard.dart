@@ -189,12 +189,12 @@ class NewBusDashboardState extends State<NewBusDashboard> {
               children: [
                 spacer.height,
                 PrudContainer(
-                    hasTitle: true,
-                    hasPadding: true,
-                    title: "Referral Code",
-                    titleBorderColor: prudColorTheme.bgC,
-                    titleAlignment: MainAxisAlignment.end,
-                    child: Column(
+                  hasTitle: true,
+                  hasPadding: true,
+                  title: "Referral Code",
+                  titleBorderColor: prudColorTheme.bgC,
+                  titleAlignment: MainAxisAlignment.end,
+                  child: Column(
                       children: [
                         mediumSpacer.height,
                         Translate(

@@ -174,6 +174,33 @@ class TabData extends ChangeNotifier {
     }
   }
 
+  int getTimestampFromDate(DateTime dDate){
+    String dRealDate = DateFormat('yyyy-MM-dd').format(dDate.toLocal());
+    return (DateTime.parse(dRealDate)).microsecondsSinceEpoch;
+  }
+
+  String getRateInterpretation(double rate){
+    if(rate < 1){
+      return "Unrated";
+    }else if(rate >= 1 && rate <= 1.49){
+      return "Worst";
+    }else if(rate >= 1.5 && rate <= 1.99){
+      return "Very Bad";
+    }else if(rate >= 2 && rate <= 2.49){
+      return "Bad";
+    }else if(rate >= 2.5 && rate <= 2.99){
+      return "Fair";
+    }else if(rate >= 3 && rate <= 3.49){
+      return "Good";
+    }else if(rate >= 3.5 && rate <= 3.99){
+      return "Very Good";
+    }else if(rate >= 4 && rate <= 4.49){
+      return "Excellent";
+    }else{
+      return "Cloud 9";
+    }
+  }
+
   bool checkIfForeign(String currencyCode) => currencyCode != myStorage.user!.currencyCode;
 
   dynamic getCurrencySymbol(String curCode){

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/journey/active_journey.dart';
+import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/journey/boarding_journey.dart';
+import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/journey/cancelled_journey.dart';
 import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/journey/completed_journey.dart';
 import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/journey/create_journey.dart';
+import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/journey/halted_boarding_journey.dart';
+import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/journey/halted_journey.dart';
 import 'package:prudapp/pages/travels/tabs/buses/dashboard/operations/journey/pending_journey.dart';
 
 import '../../../../../../components/inner_menu.dart';
@@ -41,6 +45,10 @@ class JourneyOperationsState extends State<JourneyOperations> {
           InnerMenuItem(imageIcon: prudImages.journeyCreate, title: "Create", menu: const CreateJourney()),
           InnerMenuItem(imageIcon: prudImages.journeyPending, title: "Pending", menu: const PendingJourney()),
           InnerMenuItem(imageIcon: prudImages.journeyActive, title: "Active", menu: const ActiveJourney()),
+          InnerMenuItem(icon: Icons.family_restroom, title: "Boarding", menu: const BoardingJourney()),
+          InnerMenuItem(icon: Icons.stroller_outlined, title: "Halted", menu: const HaltedJourney()),
+          InnerMenuItem(icon: Icons.elderly_outlined, title: "Re-boarding", menu: const HaltedBoardingJourney()),
+          InnerMenuItem(icon: Icons.cancel_outlined, title: "Cancelled", menu: const CancelledJourney()),
           InnerMenuItem(imageIcon: prudImages.journeyCompleted, title: "Completed", menu: const CompletedJourney()),
         ];
       });

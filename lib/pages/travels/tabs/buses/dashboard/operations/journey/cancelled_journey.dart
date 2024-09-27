@@ -8,15 +8,15 @@ import '../../../../../../../models/theme.dart';
 import '../../../../../../../singletons/bus_notifier.dart';
 import '../../../../../../../singletons/tab_data.dart';
 
-class CompletedJourney extends StatefulWidget {
-  const CompletedJourney({super.key});
+class CancelledJourney extends StatefulWidget {
+  const CancelledJourney({super.key});
 
   @override
-  CompletedJourneyState createState() => CompletedJourneyState();
+  CancelledJourneyState createState() => CancelledJourneyState();
 }
 
-class CompletedJourneyState extends State<CompletedJourney> {
-  List<Journey> journeys = busNotifier.brandCompletedJourneys;
+class CancelledJourneyState extends State<CancelledJourney> {
+  List<Journey> journeys = busNotifier.brandCancelledJourneys;
   bool loading = false;
   Widget noJourney = tabData.getNotFoundWidget(
       title: "No Journey",
@@ -29,9 +29,9 @@ class CompletedJourneyState extends State<CompletedJourney> {
   Future<void> getJourneyFromCloud() async {
     await tryAsync("getJourneyFromCloud", () async {
       if(mounted) setState(() => loading = true);
-      List<Journey> found = await busNotifier.getBrandJourneysFromCloud(5);
+      List<Journey> found = await busNotifier.getBrandJourneysFromCloud(6);
       if(mounted) {
-        busNotifier.brandCompletedJourneys = found;
+        busNotifier.brandCancelledJourneys = found;
         setState(() {
           journeys = found;
           loading = false;
@@ -91,13 +91,13 @@ class CompletedJourneyState extends State<CompletedJourney> {
                     itemCount: journeys.length,
                     itemBuilder: (context, index){
                       return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 5),
-                        child: JourneyComponent(journey: journeys[index]),
-                      );
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          child: JourneyComponent(journey: journeys[index],),
+                        );
                     }
                 ),
               ),
-              if(busNotifier.brandCompletedJourneys.isEmpty) Expanded(
+              if(busNotifier.brandCancelledJourneys.isEmpty) Expanded(
                   child: Center(child: noJourney,)
               ),
               spacer.height

@@ -26,6 +26,7 @@ class ExistingBusesState extends State<ExistingBuses> {
     desc: "You have not registered any bus yet"
   );
   int selectedIndex = -1;
+  bool showFloatingButton = busNotifier.showFloatingButton;
 
   void select(BusDetail bus, int index){
     if(mounted){
@@ -64,6 +65,7 @@ class ExistingBusesState extends State<ExistingBuses> {
       if(mounted && busNotifier.busDetails.isNotEmpty){
         setState(() => buses = busNotifier.busDetails);
       }
+      if(mounted) setState(() => showFloatingButton = busNotifier.showFloatingButton);
     });
   }
 
@@ -115,19 +117,19 @@ class ExistingBusesState extends State<ExistingBuses> {
               spacer.height
             ],
           ),
-          if(busNotifier.showFloatingButton) Positioned(
-              right: 30,
+          if(showFloatingButton) Positioned(
+              right: 15,
               bottom: 80,
-              child: FloatingActionButton(
+              child: FloatingActionButton.small(
                 foregroundColor: prudColorTheme.bgC,
                 backgroundColor: prudColorTheme.primary,
                 tooltip: "Refreshes data from PrudServices",
                 onPressed: refresh,
                 child: loading? LoadingComponent(
                   isShimmer: false,
-                  size: 30,
+                  size: 25,
                   spinnerColor: prudColorTheme.bgA,
-                ) : const Icon(FontAwesomeIcons.arrowsRotate, size: 30,),
+                ) : const Icon(FontAwesomeIcons.arrowsRotate, size: 25,),
               )
           )
         ],

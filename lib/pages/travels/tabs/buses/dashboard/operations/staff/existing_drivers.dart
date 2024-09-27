@@ -22,6 +22,7 @@ class ExistingDriversState extends State<ExistingDrivers> {
       title: "No Driver Found",
       desc: " It's either you have not registered any driver or you have only added them as operators with driver privileges."
   );
+  bool showFloatingButton = busNotifier.showFloatingButton;
 
   Future<void> getDriversFromCloud() async {
     await tryAsync("getDriversFromCloud", () async {
@@ -51,6 +52,7 @@ class ExistingDriversState extends State<ExistingDrivers> {
       if(mounted && busNotifier.driverDetails.isNotEmpty){
         setState(() => drivers = busNotifier.driverDetails);
       }
+      if(mounted) setState(() => showFloatingButton = busNotifier.showFloatingButton);
     });
   }
 
@@ -93,8 +95,8 @@ class ExistingDriversState extends State<ExistingDrivers> {
               spacer.height
             ],
           ),
-          if(busNotifier.showFloatingButton) Positioned(
-            right: 30,
+          if(showFloatingButton) Positioned(
+            right: 15,
             bottom: 80,
             child: FloatingActionButton(
               foregroundColor: prudColorTheme.bgC,
@@ -103,9 +105,9 @@ class ExistingDriversState extends State<ExistingDrivers> {
               onPressed: refresh,
               child: loading? LoadingComponent(
                 isShimmer: false,
-                size: 30,
+                size: 25,
                 spinnerColor: prudColorTheme.bgA,
-              ) : const Icon(FontAwesomeIcons.arrowsRotate, size: 30,),
+              ) : const Icon(FontAwesomeIcons.arrowsRotate, size: 25,),
             )
           )
         ],

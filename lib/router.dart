@@ -22,7 +22,7 @@ final GoRouter prudRouter = GoRouter(
       path: '/',
       name: 'home',
       builder: (BuildContext context, GoRouterState state) {
-        return MyHomePage(title: 'Prudapp',);
+        return MyHomePage(title: 'Prudapp',) /*const JourneyOperations()*/;
       },
       redirect: (BuildContext context, GoRouterState state) {
         // if the path is null or empty, go to '/'

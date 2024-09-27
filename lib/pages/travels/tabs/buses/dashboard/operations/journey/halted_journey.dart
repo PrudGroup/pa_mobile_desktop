@@ -8,15 +8,16 @@ import '../../../../../../../models/theme.dart';
 import '../../../../../../../singletons/bus_notifier.dart';
 import '../../../../../../../singletons/tab_data.dart';
 
-class CompletedJourney extends StatefulWidget {
-  const CompletedJourney({super.key});
+
+class HaltedJourney extends StatefulWidget {
+  const HaltedJourney({super.key});
 
   @override
-  CompletedJourneyState createState() => CompletedJourneyState();
+  HaltedJourneyState createState() => HaltedJourneyState();
 }
 
-class CompletedJourneyState extends State<CompletedJourney> {
-  List<Journey> journeys = busNotifier.brandCompletedJourneys;
+class HaltedJourneyState extends State<HaltedJourney> {
+  List<Journey> journeys = busNotifier.brandHaltedJourneys;
   bool loading = false;
   Widget noJourney = tabData.getNotFoundWidget(
       title: "No Journey",
@@ -29,9 +30,9 @@ class CompletedJourneyState extends State<CompletedJourney> {
   Future<void> getJourneyFromCloud() async {
     await tryAsync("getJourneyFromCloud", () async {
       if(mounted) setState(() => loading = true);
-      List<Journey> found = await busNotifier.getBrandJourneysFromCloud(5);
+      List<Journey> found = await busNotifier.getBrandJourneysFromCloud(3);
       if(mounted) {
-        busNotifier.brandCompletedJourneys = found;
+        busNotifier.brandHaltedJourneys = found;
         setState(() {
           journeys = found;
           loading = false;
@@ -97,7 +98,7 @@ class CompletedJourneyState extends State<CompletedJourney> {
                     }
                 ),
               ),
-              if(busNotifier.brandCompletedJourneys.isEmpty) Expanded(
+              if(busNotifier.brandHaltedJourneys.isEmpty) Expanded(
                   child: Center(child: noJourney,)
               ),
               spacer.height

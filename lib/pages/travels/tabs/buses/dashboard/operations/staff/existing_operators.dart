@@ -23,6 +23,7 @@ class ExistingOperatorsState extends State<ExistingOperators> {
     title: "No Operator Found",
     desc: "You are yet to add operators/staff to your transport"
   );
+  bool showFloatingButton = busNotifier.showFloatingButton;
 
   Future<void> getOperatorsFromCloud() async {
     await tryAsync("getOperatorsFromCloud", () async {
@@ -52,6 +53,7 @@ class ExistingOperatorsState extends State<ExistingOperators> {
       if(mounted && busNotifier.operatorDetails.isNotEmpty){
         setState(() => operators = busNotifier.operatorDetails);
       }
+      if(mounted) setState(() => showFloatingButton = busNotifier.showFloatingButton);
     });
   }
 
@@ -94,8 +96,8 @@ class ExistingOperatorsState extends State<ExistingOperators> {
               spacer.height
             ],
           ),
-          if(busNotifier.showFloatingButton) Positioned(
-            right: 30,
+          if(showFloatingButton) Positioned(
+            right: 15,
             bottom: 80,
             child: FloatingActionButton(
                 foregroundColor: prudColorTheme.bgC,
@@ -104,9 +106,9 @@ class ExistingOperatorsState extends State<ExistingOperators> {
                 onPressed: refresh,
                 child: loading? LoadingComponent(
                   isShimmer: false,
-                  size: 30,
+                  size: 25,
                   spinnerColor: prudColorTheme.bgA,
-                ) : const Icon(FontAwesomeIcons.arrowsRotate, size: 30,),
+                ) : const Icon(FontAwesomeIcons.arrowsRotate, size: 25,),
               )
           )
         ],
