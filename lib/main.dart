@@ -11,12 +11,10 @@ import 'package:prudapp/router.dart';
 import 'package:prudapp/singletons/beneficiary_notifier.dart';
 import 'package:prudapp/singletons/bus_notifier.dart';
 import 'package:prudapp/singletons/currency_math.dart';
-import 'package:prudapp/singletons/gift_card_notifier.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/influencer_notifier.dart';
-import 'package:prudapp/singletons/recharge_notifier.dart';
+import 'package:prudapp/singletons/prudio_client.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
-import 'package:prudapp/singletons/utility_notifier.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -53,10 +51,8 @@ void main() async {
   await myStorage.initializeValues();
   await currencyMath.init();
   await influencerNotifier.initInfluencer();
-  await giftCardNotifier.initGiftCard();
-  await rechargeNotifier.initRecharge();
+  await prudioNotifier.connect();
   await beneficiaryNotifier.initBens();
-  await utilityNotifier.initUtility();
   await busNotifier.initBus();
   await messenger.setAutoInitEnabled(true);
   myStorage.setWindowSize(size: const Size(400, 700));

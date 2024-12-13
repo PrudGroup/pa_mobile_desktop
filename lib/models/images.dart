@@ -40,9 +40,7 @@ class PrudImages {
   String adLight;
   String adDark;
   String announceMsg;
-  String announceMsgColor;
   String announceMsgMega;
-  String announceMsgMegaColor;
   String promo;
   String shortener;
   String account;
@@ -55,8 +53,6 @@ class PrudImages {
   String promotions;
   String points;
   String links;
-  String utility;
-  String utilities;
   String travel;
   String travel1;
   String transport;
@@ -64,26 +60,14 @@ class PrudImages {
   String smartTv;
   String smartTv1;
   String resort;
-  String power;
-  String power1;
-  String hotel;
-  String flight;
-  String airtime;
-  String gift;
-  String dataBundle;
   String cart;
   String history;
-  String giftSearch;
   String avatar_1;
   String avatar_2;
   String avatar_3;
   String avatar_4;
-  String prepaid;
-  String postpaid;
   String internet;
-  String water;
   String driver;
-  String operators;
   String addDriver;
   String addOperator;
   String busDriver;
@@ -91,11 +75,31 @@ class PrudImages {
   String journeyActive;
   String journeyPending;
   String journeyCompleted;
+  String likedVideo;
+  String localVideoLibrary;
+  String videoMembership;
+  String videoSearch;
+  String prudVid;
+  String videoHome;
+  String prudVidStudio;
+  String playlist;
+  String live;
+  String prudVider;
+  String studio;
+  String stream;
+  String streamDark;
+  String streamStudio;
+  String streamStudioDark;
+  String thriller;
+  String thrillerDark;
+  String operators;
 
 
 
   PrudImages({
     required this.front1,
+    required this.studio,
+    required this.live,
     required this.front2,
     required this.front3,
     required this.front4,
@@ -111,6 +115,7 @@ class PrudImages {
     required this.front14,
     required this.front15,
     required this.err,
+    required this.operators,
     required this.logo,
     required this.intro1,
     required this.intro2,
@@ -135,9 +140,7 @@ class PrudImages {
     required this.adLight,
     required this.adDark,
     required this.announceMsg,
-    required this.announceMsgColor,
     required this.announceMsgMega,
-    required this.announceMsgMegaColor,
     required this.promo,
     required this.account,
     required this.shipper,
@@ -151,42 +154,43 @@ class PrudImages {
     required this.income,
     required this.promotions,
     required this.wallet,
-    required this.airtime,
     required this.bus,
-    required this.flight,
-    required this.hotel,
-    required this.power,
-    required this.power1,
     required this.resort,
     required this.smartTv,
     required this.smartTv1,
     required this.transport,
     required this.travel,
     required this.travel1,
-    required this.utilities,
-    required this.utility,
-    required this.gift,
-    required this.dataBundle,
+    required this.stream,
+    required this.streamDark,
+    required this.streamStudio,
     required this.cart,
-    required this.giftSearch,
+    required this.streamStudioDark,
     required this.history,
     required this.avatar_1,
     required this.avatar_2,
     required this.avatar_3,
     required this.avatar_4,
     required this.internet,
-    required this.water,
-    required this.prepaid,
-    required this.postpaid,
     required this.busDriver,
     required this.addOperator,
     required this.addDriver,
-    required this.operators,
     required this.driver,
+    required this.playlist,
     required this.journeyActive,
     required this.journeyCompleted,
     required this.journeyCreate,
     required this.journeyPending,
+    required this.likedVideo,
+    required this.localVideoLibrary,
+    required this.videoMembership,
+    required this.videoSearch,
+    required this.prudVid,
+    required this.videoHome,
+    required this.prudVidStudio,
+    required this.prudVider,
+    required this.thriller,
+    required this.thrillerDark
   });
 }
 
@@ -207,6 +211,7 @@ PrudImages prudImages = PrudImages(
   front14: 'assets/images/carousels/14.jpg',
   front15: 'assets/images/carousels/15.jpg',
   dislike: 'assets/images/dislike.png',
+  resort: 'assets/images/dislike.png',
   err: 'assets/images/err.jpg',
   intro: 'assets/images/intros/intro.jpg',
   intro1: 'assets/images/intros/intro1.jpg',
@@ -232,9 +237,9 @@ PrudImages prudImages = PrudImages(
   adLight: 'assets/images/tv.png',
   adDark: 'assets/images/tv-1.png',
   announceMsg: 'assets/images/message.png',
-  announceMsgColor: 'assets/images/message-1.png',
+  stream: 'assets/images/stream.png',
   announceMsgMega: 'assets/images/megaphone-1.png',
-  announceMsgMegaColor: 'assets/images/megaphone.png',
+  streamDark: 'assets/images/stream-dark.png',
   promo: 'assets/images/promotion.png',
   shipper: 'assets/images/delivery.png',
   account: 'assets/images/account.png',
@@ -247,32 +252,22 @@ PrudImages prudImages = PrudImages(
   income: "assets/images/passive-income.png",
   promotions: "assets/images/discount.png",
   wallet: "assets/images/wallet.png",
-  airtime: "assets/images/airtime.png",
-  flight: "assets/images/flight.png",
-  hotel: "assets/images/hotel.png",
-  power: "assets/images/power.png",
-  power1: "assets/images/power1.png",
-  resort: "assets/images/resort.png",
+  streamStudio: "assets/images/stream-studio.png",
+  streamStudioDark: "assets/images/stream-studio-dark.png",
+  thriller: "assets/images/thriller.png",
+  thrillerDark: "assets/images/thriller-dark.png",
   smartTv: "assets/images/smart-tv.png",
   smartTv1: "assets/images/smart-tv1.png",
   bus: "assets/images/tour-bus.png",
   transport: "assets/images/transport.png",
   travel: "assets/images/travel.png",
   travel1: "assets/images/travel1.png",
-  utility: "assets/images/utility.png",
-  utilities: "assets/images/utilities.png",
-  gift: "assets/images/gift-card.png",
-  dataBundle: "assets/images/wifi-router.png",
   cart: "assets/images/cart.png",
   history: "assets/images/history.png",
-  giftSearch: "assets/images/gift.png",
   avatar_1: "assets/images/woman1.png",
   avatar_2: "assets/images/woman.png",
   avatar_3: "assets/images/boy.png",
   avatar_4: "assets/images/man.png",
-  prepaid: "assets/images/prepaid.png",
-  postpaid: "assets/images/postpaid.png",
-  water: "assets/images/drop.png",
   internet: "assets/images/networks.png",
   busDriver: "assets/images/bus-driver.png",
   addOperator: "assets/images/add-friend.png",
@@ -283,4 +278,15 @@ PrudImages prudImages = PrudImages(
   journeyCompleted: "assets/images/journey_completed.png",
   journeyCreate: "assets/images/journey_create.png",
   journeyPending: "assets/images/journey_pending.png",
+  likedVideo: "assets/images/likedVideo.png",
+  localVideoLibrary: "assets/images/localVideoLibrary.png",
+  videoMembership: "assets/images/videoMembership.png",
+  videoSearch: "assets/images/videoSearch.png",
+  prudVid: "assets/images/prudVid.png",
+  videoHome: "assets/images/videoHome.png",
+  prudVidStudio: "assets/images/prudVidStudio.png",
+  playlist: "assets/images/playlist.png",
+  live: "assets/images/live.png",
+  prudVider: "assets/images/prudVider.png",
+  studio: "assets/images/studio.png",
 );

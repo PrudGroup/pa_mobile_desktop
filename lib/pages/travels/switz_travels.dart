@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:prudapp/pages/travels/tabs/buses.dart';
-import 'package:prudapp/pages/travels/tabs/flight.dart';
-import 'package:prudapp/pages/travels/tabs/hotels.dart';
+import 'package:prudapp/pages/travels/tabs/bus_company_dashboard.dart';
+import 'package:prudapp/pages/travels/tabs/bus_search.dart';
+import 'package:prudapp/pages/travels/tabs/customer_bus_booking.dart';
 
 import '../../models/images.dart';
 import '../../models/theme.dart';
@@ -37,9 +37,9 @@ class SwitzTravelsState extends State<SwitzTravels> with TickerProviderStateMixi
       body: TabBarView(
         controller: tabCtrl,
         children: [
-          Buses(goToTab: (int index) => tabCtrl.animateTo(index)),
-          Flight(goToTab: (int index) => tabCtrl.animateTo(index)),
-          Hotels(goToTab: (int index) => tabCtrl.animateTo(index)),
+          BusSearch(goToTab: (int index) => tabCtrl.animateTo(index)),
+          CustomerBusBooking(goToTab: (int index) => tabCtrl.animateTo(index)),
+          BusCompanyDashboard(goToTab: (int index) => tabCtrl.animateTo(index)),
         ],
       ),
       bottomNavigationBar: TabBar(
@@ -47,16 +47,16 @@ class SwitzTravelsState extends State<SwitzTravels> with TickerProviderStateMixi
         // isScrollable: true,
         tabs: [
           Tab(
+            icon: Image.asset(prudImages.transport, width: 30,),
+            text: "Journeys",
+          ),
+          Tab(
             icon: Image.asset(prudImages.bus, width: 30,),
-            text: "Buses",
+            text: "My Bookings",
           ),
           Tab(
-            icon: Image.asset(prudImages.flight, width: 30,),
-            text: "Flights",
-          ),
-          Tab(
-            icon: Image.asset(prudImages.hotel, width: 30,),
-            text: "Hotels",
+            icon: Icon(Icons.dashboard_outlined, size: 30,),
+            text: "Dashboard",
           ),
         ],
       ),

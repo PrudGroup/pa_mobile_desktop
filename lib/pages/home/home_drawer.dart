@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/pages/prudStreams/prud_streams.dart';
+import 'package:prudapp/pages/prudStreams/studio/prud_stream_studio.dart';
+import 'package:prudapp/pages/prudVid/prud_vid.dart';
+import 'package:prudapp/pages/prudVid/prud_vid_studio.dart';
+import 'package:prudapp/pages/prudVid/thrillers.dart';
 import 'package:prudapp/pages/register/login.dart';
 import 'package:prudapp/pages/settings/policy.dart';
 import 'package:prudapp/pages/settings/settings.dart';
 import 'package:prudapp/pages/shippers/shippers.dart';
 import 'package:prudapp/pages/shorteners/shortener.dart';
 import 'package:prudapp/pages/switzstores/switz_stores.dart';
-import 'package:prudapp/pages/viewsparks/view_spark.dart';
 
 import '../../components/side_menu_item.dart';
 import '../../models/images.dart';
 import '../ads/ads.dart';
 import '../beneficiaries/my_beneficiaries.dart';
-import '../giftcards/gift_cards.dart';
-import '../recharge/recharge.dart';
 import '../settings/legal.dart';
 import '../support/support.dart';
 import '../travels/switz_travels.dart';
@@ -53,34 +55,40 @@ class HomeDrawerState extends State<HomeDrawer> {
               color: prudColorTheme.primary
             ),
             SideMenuItem(
+              text: "Thrillers",
+              page: const Thrillers(),
+              isIcon: false,
+              image: prudImages.thriller,
+            ),
+            SideMenuItem(
+              text: "PrudVid",
+              page: const PrudVid(),
+              isIcon: false,
+              image: prudImages.prudVid,
+            ),
+            SideMenuItem(
+              text: "PrudStreams",
+              page: const PrudStreams(),
+              isIcon: false,
+              image: prudImages.stream,
+            ),
+            SideMenuItem(
+              text: "PrudVid Studio",
+              page: const PrudVidStudio(),
+              isIcon: false,
+              image: prudImages.prudVidStudio,
+            ),
+            SideMenuItem(
+              text: "PrudStreams Studio",
+              page: const PrudStreamStudio(),
+              isIcon: false,
+              image: prudImages.streamStudio,
+            ),
+            SideMenuItem(
               text: "Beneficiaries",
               page: const MyBeneficiaries(),
               isIcon: false,
               image: prudImages.avatar_2,
-            ),
-            SideMenuItem(
-              text: "Gift Cards",
-              page: const GiftCards(),
-              isIcon: false,
-              image: prudImages.gift,
-            ),
-            SideMenuItem(
-              text: "Airtime",
-              page: const Recharge(tab: 0,),
-              isIcon: false,
-              image: prudImages.airtime,
-            ),
-            SideMenuItem(
-              text: "Data Bundles",
-              page: const Recharge(tab: 1,),
-              isIcon: false,
-              image: prudImages.dataBundle,
-            ),
-            SideMenuItem(
-              text: "Bills & Utilities",
-              page: const Recharge(tab: 2,),
-              isIcon: false,
-              image: prudImages.smartTv1,
             ),
             Divider(
               height: 3.0,
@@ -96,22 +104,16 @@ class HomeDrawerState extends State<HomeDrawer> {
               image: prudImages.travel1,
             ),
             SideMenuItem(
-              text: "Flights",
+              text: "My Bus Bookings",
               page: const SwitzTravels(tab: 1,),
-              isIcon: false,
-              image: prudImages.flight,
-            ),
-            SideMenuItem(
-              text: "Buses",
-              page: const SwitzTravels(tab: 0,),
               isIcon: false,
               image: prudImages.transport,
             ),
             SideMenuItem(
-              text: "Hotels",
+              text: "Transit Dashboard",
               page: const SwitzTravels(tab: 2,),
               isIcon: false,
-              image: prudImages.resort,
+              image: prudImages.transport,
             ),
             Divider(
               height: 3.0,
@@ -125,12 +127,6 @@ class HomeDrawerState extends State<HomeDrawer> {
               page: const Ads(),
               isIcon: false,
               image: prudImages.videoAd,
-            ),
-            SideMenuItem(
-              text: "Views & Audience",
-              page: const ViewSpark(),
-              isIcon: false,
-              image: prudImages.watchVideo,
             ),
             SideMenuItem(
               text: "Switz Stores",

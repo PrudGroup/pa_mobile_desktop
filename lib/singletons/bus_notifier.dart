@@ -199,6 +199,21 @@ class BusNotifier extends ChangeNotifier {
     }
   }
 
+  Future<JourneyPassenger?> bookPassengerForJourney(JourneyPassenger newPassenger) async {
+    String path = "journeys/${newPassenger.journeyId}/passengers/";
+    dynamic res = await makeRequest(path: path, method: 1, data: newPassenger.toJson());
+    if(res != null && res != false){
+      if(res["id"] != null){
+        JourneyPassenger jp = JourneyPassenger.fromJson(res);
+        return jp;
+      }else{
+        return null;
+      }
+    }else{
+      return null;
+    }
+  }
+
   Future<BusImage?> createBusImage(BusImage busImage) async {
     String path = "buses/${busImage.busId}/images/";
     dynamic res = await makeRequest(path: path, method: 1, data: busImage.toJson());

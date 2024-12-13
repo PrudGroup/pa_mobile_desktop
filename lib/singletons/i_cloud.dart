@@ -19,15 +19,10 @@ import '../components/prud_container.dart';
 import '../constants.dart';
 import '../models/images.dart';
 import '../models/shared_classes.dart';
-import '../models/spark.dart';
-import '../models/spark_cost.dart';
 import '../models/user.dart';
 import '../pages/ads/ads.dart';
 import '../pages/shippers/shippers.dart';
 import '../pages/switzstores/switz_stores.dart';
-import '../pages/viewsparks/view_spark.dart';
-import 'package:opay_online_flutter_sdk/opay_online_flutter_sdk.dart';
-
 
 enum RegisterState{
   first,
@@ -59,9 +54,6 @@ class ICloud extends ChangeNotifier{
   bool isRealTimeConnected = false;
   bool clearDigitInput = false;
   String? apiEndPoint;
-  List<SparkCost> sparkCosts = [];
-  List<Spark> mySparks = isProduction? [] : testSparks;
-  List<Spark> sparks = isProduction? [] : testSparks;
   bool showInnerTabsAndMenus = true;
 
 
@@ -84,31 +76,6 @@ class ICloud extends ChangeNotifier{
   void initRegisterState() async {
     int dState = (await myStorage.getFromStore(key: 'registerState'))?? -1;
     registerState = dState == -1? RegisterState.first : (dState == 3? RegisterState.second : intToRegisterState(state: dState));
-    notifyListeners();
-  }
-
-  void updateSparkCost(List<SparkCost> costs){
-    sparkCosts = costs;
-    notifyListeners();
-  }
-
-  void updateMySpark(List<Spark> spks){
-    mySparks = spks;
-    notifyListeners();
-  }
-
-  void addToMySpark(Spark spk){
-    mySparks.add(spk);
-    notifyListeners();
-  }
-
-  void updateSparks(List<Spark> spks){
-    sparks = spks;
-    notifyListeners();
-  }
-
-  void addToSparks(Spark spk){
-    sparks.add(spk);
     notifyListeners();
   }
 
@@ -276,26 +243,6 @@ class ICloud extends ChangeNotifier{
   List<Widget> getShowroom(BuildContext context, {int? showroomItems}){
     List<Widget> showroom = [
       InkWell(
-        onTap: () => iCloud.goto(context, const ViewSpark()),
-        child: PrudContainer(
-            hasPadding: false,
-            child: Image.asset(
-                prudImages.front7
-            )
-        ),
-      ),
-      InkWell(
-        onTap: () => iCloud.goto(context, const ViewSpark()),
-        child: PrudContainer(
-          hasPadding: false,
-          hasTitle: true,
-          title: "Get Views/Sparks",
-          child: Image.asset(
-              prudImages.front4
-          ),
-        ),
-      ),
-      InkWell(
         onTap: () => iCloud.goto(context, const Ads()),
         child: PrudContainer(
             hasPadding: false,
@@ -454,7 +401,6 @@ class ICloud extends ChangeNotifier{
 
   Future<FirebaseApp> setFirebase(String apiKey, String appId, String msgID) async {
     FirebaseApp? fireApp;
-    OPayTask.setSandBox(Constants.apiStatues == 'production'? false : true);
     await ConnectionNotifierTools.initialize();
     if (Platform.isAndroid || Platform.isIOS) {
       fireApp = await Firebase.initializeApp(
@@ -477,6 +423,11 @@ class ICloud extends ChangeNotifier{
     });
   }
 
+  /// Shows snackbar for messaging
+  /// @param msg the message to be displayed
+  /// @param context the builder context
+  /// @param title the title of the message
+  /// @param type 0 - indicates help message, 1 - warning, 2 - Success, 3 - Failure
   void showSnackBar(String msg, BuildContext context, {String title = 'Oops!'
     , int type = 0} ){
     ContentType contentType = getType(type);
@@ -565,26 +516,6 @@ class ICloud extends ChangeNotifier{
 
   void goto( BuildContext context, Widget where) => Navigator.push(context, ScaleRoute(page: where));
 
-  Future<String?> getReloadlyToken(String audience) async {
-    Dio reloadlyDio = Dio();
-    reloadlyDio.options.headers.addAll({
-      "Accept": "application/json",
-      "Content-Type": "application/json"
-    });
-    String url = "https://auth.reloadly.com/oauth/token";
-    Map<String, dynamic> credentials = {
-      "client_id": reloadlyKey,
-      "client_secret": reloadlySecret,
-      "grant_type": "client_credentials",
-      "audience": audience
-    };
-    Response res = await reloadlyDio.post(url, data: credentials);
-    if(res.data != null){
-      return "${res.data['token_type']} ${res.data['access_token']}";
-    }else {
-      return null;
-    }
-  }
 
   Future<bool> prudServiceIsAvailable() async {
     bool isConnected = await checkNetwork();
@@ -599,14 +530,16 @@ const bool isProduction = Constants.envType=="production";
 const String prudApiUrl = Constants.prudApiUrl;
 const String localApiUrl = Constants.localApiUrl;
 const String prudApiKey = Constants.prudApiKey;
-const String reloadlyKey = Constants.apiStatues == 'production'? Constants.reloadlyLiveClientId : Constants.reloadlyTestClientId;
-const String reloadlySecret = Constants.apiStatues == 'production'? Constants.reloadlyLiveSecretKey : Constants.reloadlyTestSecretKey;
+const String wasabiPublicKey = Constants.wasabiPublicKey;
+const String wasabiSecretKey = Constants.wasabiSecretKey;
+const String wasabiEndpoint = Constants.wasabiEndPoint;
 const String apiEndPoint = isProduction? prudApiUrl : localApiUrl;
 const String waveApiUrl = "https://api.flutterwave.com/v3";
+const String paystackSecret = Constants.apiStatues == 'production'? Constants.paystackSecretLive : Constants.paystackSecretTest;
+const String paystackPublic = Constants.apiStatues == 'production'? Constants.paystackPublicLive : Constants.paystackPublicTest;
+const String paystackCallUrl = "$prudApiUrl/payments/paystack_call";
+const String paystackHook = "$prudApiUrl/payments/paystack_hook";
 const double waveVat = 0.07;
-const String opayID = Constants.opayId;
-const String opayPublic = Constants.opayPublic;
-const String opaySecret = Constants.opaySecret;
 const bool paymentIsInTestMode = isProduction? false : true;
 List<PushMessage> pushMessages = [];
 const reloadlySmsFee = 300.0;
@@ -637,6 +570,7 @@ final ExportDelegate exportDelegate = ExportDelegate(
     'Valeria': 'assets/fonts/valeria.ttf',
     'Qhinanttika': 'assets/fonts/Qhinanttika.otf',
     'Proxima-Light': 'assets/fonts/Proxima-Light.otf',
+    "Tamil Sangam MN": "assets/fonts/tamil-sangam-mn.otf"
   },
 );
 FirebaseMessaging messenger = FirebaseMessaging.instance;
@@ -660,260 +594,5 @@ Dio prudDio = Dio(BaseOptions(
 ));
 
 
-List<Spark> testSparks = [
-  Spark(
-    id: "5678GETEYWB788OP0",
-    affId: "NniMlp8xumSPUSASYjJA",
-    title: "Ages Past",
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-    description: "Ages Past Many things fall apart for unbelievers and things got to be very cool.",
-    monthCreated: DateTime.now().month,
-    yearCreated: DateTime.now().year,
-    duration: 3,
-    locationTarget: "town",
-    sparkCategory: "prudapp",
-    sparkType: "all",
-    startDate: DateTime.now(),
-    targetCities: ["Abuja"],
-    targetCountries: ["Nigeria"],
-    targetSparks: 30000,
-    targetStates: ["Federal Capital Territory"],
-    targetTowns: ["Bwari"],
-    targetLink: "https://youtu.be/watch",
-    status: "Pending",
-    sparksCount: 20000,
-  ),
-  Spark(
-    id: "5678GETEYWB788OP0",
-    affId: "NniMlp8xumSPUSASYjJA",
-    title: "Ages Past",
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-    description: "Ages Past Many things fall apart for unbelievers and things got to be very cool.",
-    monthCreated: DateTime.now().month,
-    yearCreated: DateTime.now().year,
-    duration: 3,
-    locationTarget: "town",
-    sparkCategory: "instagram",
-    sparkType: "all",
-    startDate: DateTime.now(),
-    targetCities: ["Abuja"],
-    targetCountries: ["Nigeria"],
-    targetSparks: 30000,
-    targetStates: ["Federal Capital Territory"],
-    targetTowns: ["Bwari"],
-    targetLink: "https://youtu.be/watch",
-    status: "Pending",
-    sparksCount: 20000,
-  ),
-  Spark(
-    id: "5678GETEYWB788OP0",
-    affId: "NniMlp8xumSPUSASYjJA",
-    title: "Ages Past",
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-    description: "Ages Past Many things fall apart for unbelievers and things got to be very cool.",
-    monthCreated: DateTime.now().month,
-    yearCreated: DateTime.now().year,
-    duration: 3,
-    locationTarget: "town",
-    sparkCategory: "youtube",
-    sparkType: "all",
-    startDate: DateTime.now(),
-    targetCities: ["Abuja"],
-    targetCountries: ["Nigeria"],
-    targetSparks: 30000,
-    targetStates: ["Federal Capital Territory"],
-    targetTowns: ["Bwari"],
-    targetLink: "https://youtu.be/watch",
-    status: "Pending",
-    sparksCount: 20000,
-  ),
-  Spark(
-    id: "5678GETEYWB788OP0",
-    affId: "NniMlp8xumSPUSASYjJA",
-    title: "Making Dates In Years",
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-    description: "Ages Past Many things fall apart for unbelievers and things got to be very cool.",
-    monthCreated: DateTime.now().month,
-    yearCreated: DateTime.now().year,
-    duration: 3,
-    locationTarget: "town",
-    sparkCategory: "youtube",
-    sparkType: "all",
-    startDate: DateTime.now(),
-    targetCities: ["Abuja"],
-    targetCountries: ["Nigeria"],
-    targetSparks: 30000,
-    targetStates: ["Federal Capital Territory"],
-    targetTowns: ["Bwari"],
-    targetLink: "https://youtu.be/watch",
-    status: "Pending",
-    sparksCount: 20000,
-  ),
-  Spark(
-    id: "5678GETEYWB788OP0",
-    affId: "NniMlp8xumSPUSASYjJA",
-    title: "Ages Past",
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-    description: "Ages Past Many things fall apart for unbelievers and things got to be very cool.",
-    monthCreated: DateTime.now().month,
-    yearCreated: DateTime.now().year,
-    duration: 3,
-    locationTarget: "town",
-    sparkCategory: "youtube",
-    sparkType: "all",
-    startDate: DateTime.now(),
-    targetCities: ["Abuja"],
-    targetCountries: ["Nigeria"],
-    targetSparks: 30000,
-    targetStates: ["Federal Capital Territory"],
-    targetTowns: ["Bwari"],
-    targetLink: "https://youtu.be/watch",
-    status: "Pending",
-    sparksCount: 20000,
-  ),
-  Spark(
-    id: "5678GETEYWB788OP0",
-    affId: "NniMlp8xumSPUSASYjJA",
-    title: "Gaming Upside controls",
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-    description: "Most people think and things got to be very cool.",
-    monthCreated: DateTime.now().month,
-    yearCreated: DateTime.now().year,
-    duration: 3,
-    locationTarget: "town",
-    sparkCategory: "facebook",
-    sparkType: "all",
-    startDate: DateTime.now(),
-    targetCities: ["Abuja"],
-    targetCountries: ["Nigeria"],
-    targetSparks: 30000,
-    targetStates: ["Federal Capital Territory"],
-    targetTowns: ["Bwari"],
-    targetLink: "https://youtu.be/watch",
-    status: "Pending",
-    sparksCount: 20000,
-  ),
-  Spark(
-    id: "5678GETEYWB788OP0",
-    affId: "NniMlp8xumSPUSASYjJA",
-    title: "Ages Past",
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-    description: "Ages Past Many things fall apart for unbelievers and things got to be very cool.",
-    monthCreated: DateTime.now().month,
-    yearCreated: DateTime.now().year,
-    duration: 3,
-    locationTarget: "town",
-    sparkCategory: "youtube",
-    sparkType: "all",
-    startDate: DateTime.now(),
-    targetCities: ["Abuja"],
-    targetCountries: ["Nigeria"],
-    targetSparks: 30000,
-    targetStates: ["Federal Capital Territory"],
-    targetTowns: ["Bwari"],
-    targetLink: "https://youtu.be/watch",
-    status: "Pending",
-    sparksCount: 20000,
-  ),
-  Spark(
-    id: "5678GETEYWB788OP0",
-    affId: "NniMlp8xumSPUSASYjJA",
-    title: "Gaming Upside controls",
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-    description: "Most people think and things got to be very cool.",
-    monthCreated: DateTime.now().month,
-    yearCreated: DateTime.now().year,
-    duration: 3,
-    locationTarget: "town",
-    sparkCategory: "facebook",
-    sparkType: "all",
-    startDate: DateTime.now(),
-    targetCities: ["Abuja"],
-    targetCountries: ["Nigeria"],
-    targetSparks: 30000,
-    targetStates: ["Federal Capital Territory"],
-    targetTowns: ["Bwari"],
-    targetLink: "https://youtu.be/watch",
-    status: "Pending",
-    sparksCount: 20000,
-  ),
-  Spark(
-    id: "5678GETEYWB788OP0",
-    affId: "NniMlp8xumSPUSASYjJA",
-    title: "Gaming Upside controls",
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-    description: "Most people think and things got to be very cool.",
-    monthCreated: DateTime.now().month,
-    yearCreated: DateTime.now().year,
-    duration: 3,
-    locationTarget: "town",
-    sparkCategory: "facebook",
-    sparkType: "all",
-    startDate: DateTime.now(),
-    targetCities: ["Abuja"],
-    targetCountries: ["Nigeria"],
-    targetSparks: 30000,
-    targetStates: ["Federal Capital Territory"],
-    targetTowns: ["Bwari"],
-    targetLink: "https://youtu.be/watch",
-    status: "Pending",
-    sparksCount: 20000,
-  ),
-  Spark(
-    id: "5678GETEYWB788OP0",
-    affId: "NniMlp8xumSPUSASYjJA",
-    title: "Ages Past",
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-    description: "Ages Past Many things fall apart for unbelievers and things got to be very cool.",
-    monthCreated: DateTime.now().month,
-    yearCreated: DateTime.now().year,
-    duration: 3,
-    locationTarget: "town",
-    sparkCategory: "youtube",
-    sparkType: "all",
-    startDate: DateTime.now(),
-    targetCities: ["Abuja"],
-    targetCountries: ["Nigeria"],
-    targetSparks: 30000,
-    targetStates: ["Federal Capital Territory"],
-    targetTowns: ["Bwari"],
-    targetLink: "https://youtu.be/watch",
-    status: "Pending",
-    sparksCount: 20000,
-  ),
-  Spark(
-    id: "5678GETEYWB788OP0",
-    affId: "NniMlp8xumSPUSASYjJA",
-    title: "Gaming Upside controls",
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-    description: "Most people think and things got to be very cool.",
-    monthCreated: DateTime.now().month,
-    yearCreated: DateTime.now().year,
-    duration: 3,
-    locationTarget: "town",
-    sparkCategory: "facebook",
-    sparkType: "all",
-    startDate: DateTime.now(),
-    targetCities: ["Abuja"],
-    targetCountries: ["Nigeria"],
-    targetSparks: 30000,
-    targetStates: ["Federal Capital Territory"],
-    targetTowns: ["Bwari"],
-    targetLink: "https://youtu.be/watch",
-    status: "Pending",
-    sparksCount: 20000,
-  ),
-];
 final iCloud = ICloud();
 

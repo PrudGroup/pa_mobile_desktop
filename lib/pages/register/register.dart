@@ -165,9 +165,9 @@ class RegisteredState extends State<Register> {
         await saveUserLocally();
         String apiUrl = "$apiEndPoint/affiliates/";
         Response res = await iCloud.addAffiliate(apiUrl, newUser);
-        if(res.statusCode == 201){
-          debugPrint("user_id: ${res.data["affiliate_id"]}");
-          newUser.id = res.data["affiliate_id"];
+        if(res.statusCode == 201 && res.data != null){
+          newUser = User.fromJson(res.data);
+          debugPrint("user_id: ${newUser.id}");
           await saveUserLocally();
           iCloud.changeRegisterState(state: RegisterState.success);
         }else{
@@ -308,7 +308,7 @@ class RegisteredState extends State<Register> {
                           " click on the sign up. If you already joined then just click on sign-in",
                       align: TextAlign.center,
                       style: prudWidgetStyle.tabTextStyle.copyWith(
-                        fontSize: 20.0,
+                        fontSize: 16.0,
                         color: prudColorTheme.textA,
                         fontWeight: FontWeight.w500
                       )
@@ -374,12 +374,13 @@ class RegisteredState extends State<Register> {
                             text: "Do you have a referral code? With referral codes, you get 2% discount for everything on Prudapp."
                                 " If you don't have, don't worry! There are many more things you can enjoy on Prudapp.",
                             style: prudWidgetStyle.tabTextStyle.copyWith(
-                              fontSize: 16,
+                              fontSize: 12,
                               color: prudColorTheme.textA,
                               fontWeight: FontWeight.w500
                             ),
                             align: TextAlign.center,
                           ),
+                          spacer.height,
                           FormBuilderTextField(
                             initialValue: referralCode,
                             name: 'referral',
@@ -395,8 +396,8 @@ class RegisteredState extends State<Register> {
                             },
                             valueTransformer: (text) => num.tryParse(text!),
                             validator: FormBuilderValidators.compose([
-                              FormBuilderValidators.minLength(3),
-                              FormBuilderValidators.maxLength(100)
+                              // FormBuilderValidators.minLength(3),
+                              FormBuilderValidators.maxLength(100),
                             ]),
                           ),
                           spacer.height,
@@ -404,7 +405,7 @@ class RegisteredState extends State<Register> {
                             text: "You need a four digit pin which you will always use for"
                                 " transactions.",
                             style: prudWidgetStyle.tabTextStyle.copyWith(
-                                fontSize: 16,
+                                fontSize: 12,
                                 color: prudColorTheme.textA,
                                 fontWeight: FontWeight.w500
                             ),
@@ -470,7 +471,7 @@ class RegisteredState extends State<Register> {
                             text: "Create a password for your account. Must have at least one uppercase, lowercase, special character, and number. "
                                 "All must be at least 8 character long.. You must keep it safe from any other person.",
                             style: prudWidgetStyle.tabTextStyle.copyWith(
-                              fontSize: 16,
+                              fontSize: 12,
                               color: prudColorTheme.textA,
                               fontWeight: FontWeight.w500
                             ),
@@ -746,7 +747,7 @@ class RegisteredState extends State<Register> {
                                   text: "Welcome to PrudApp. A mail has been sent to you. Verify your mail and "
                                       "when you are done, click below.",
                                   style: prudWidgetStyle.tabTextStyle.copyWith(
-                                    fontSize: 17,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.w500,
                                     color: prudColorTheme.textA
                                   ),
@@ -769,7 +770,7 @@ class RegisteredState extends State<Register> {
                                 if(errorMsg != null) Translate(
                                   text: errorMsg!,
                                   style: prudWidgetStyle.tabTextStyle.copyWith(
-                                    fontSize: 10,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w500,
                                     color: prudColorTheme.error
                                   ),
@@ -784,7 +785,7 @@ class RegisteredState extends State<Register> {
                                 if(errorMsg != null) Translate(
                                   text: errorMsg!,
                                   style: prudWidgetStyle.tabTextStyle.copyWith(
-                                    fontSize: 17,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.w500,
                                     color: prudColorTheme.error
                                   )

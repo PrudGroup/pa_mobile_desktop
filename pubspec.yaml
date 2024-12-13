@@ -35,75 +35,75 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  url_launcher: ^6.3.0
-  flutter_local_notifications: ^17.2.1+2
-  font_awesome_flutter: ^10.7.0
+  url_launcher: ^6.3.1
+  flutter_local_notifications: ^18.0.1
+  font_awesome_flutter: ^10.8.0
   dio: ^5.7.0
   intro_slider: ^4.2.1
-  flutter_launcher_icons: ^0.14.0
+  flutter_launcher_icons: ^0.14.1
   rate_my_app: ^2.2.0
   provider: ^6.1.2
-  flutter_form_builder: ^9.4.1
+  flutter_form_builder: ^9.5.0
   flutter_spinkit: ^5.2.1
-  desktop_window: ^0.4.0
+  desktop_window: ^0.4.2
   getwidget: ^4.0.0
   intl: ^0.19.0
   universal_platform: ^1.1.0
   translator: ^1.0.0
   rflutter_alert: ^2.0.7
-  country_picker: ^2.0.26
+  country_picker: ^2.0.27
   intl_phone_number_input: ^0.7.4
   flutter_shimmer: ^2.1.2
   connection_notifier: ^2.0.1
   timeago: ^3.7.0
   form_builder_validators: ^11.0.0
-  firebase_core: ^3.5.0
-  firebase_messaging: ^15.1.2
-  firebase_analytics: ^11.3.2
-  firebase_remote_config: ^5.1.2
+  firebase_core: ^3.8.0
+  firebase_messaging: ^15.1.5
+  firebase_analytics: ^11.3.5
+  firebase_remote_config: ^5.1.5
   get_storage: ^2.1.1
   awesome_snackbar_content: ^0.1.4
   encrypt: ^5.0.3
-  flutter_advanced_drawer: ^1.3.6
+  flutter_advanced_drawer: ^1.3.7
   flutter_fgbg: ^0.6.0
   motion_tab_bar_v2: ^0.3.0
   country_state_city: ^0.1.6
   flutter_vector_icons: ^2.0.0
-#  flutterwave_standard: 1.0.8
-  uuid: ^4.5.0
-  go_router: ^14.2.7
+  uuid: ^4.5.1
+  go_router: ^14.6.0
   currency_picker: ^2.0.21
   forex_currency_conversion: ^0.9.1
   avatar_stack: ^1.2.0
   image_picker: ^1.1.2
-  u_credit_card: ^1.3.1
-  opay_online_flutter_sdk: "<1.0.0"
-  flutter_native_splash: ^2.4.1
+  u_credit_card: ^1.4.0
+  flutter_native_splash: ^2.4.3
   fast_cached_network_image: ^1.2.9
-  path_provider: ^2.1.4
+  path_provider: ^2.1.5
   pinput: ^5.0.0
   flutter_to_pdf: ^0.2.2
   pdf: ^3.11.1
-  share_plus: ^10.0.2
-  printing: ^5.13.2
-  socket_io_client: ^3.0.0-beta.3
+  share_plus: ^10.1.2
+  printing: ^5.13.4
+  socket_io_client: ^3.0.1
   camerawesome: ^2.0.1
+  paystack_for_flutter: ^1.0.2
+  minio: ^3.5.7
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   msix: ^3.16.8
-  lints: ^4.0.0
+  lints: ^5.0.0
   mockito: ^5.4.4
-  build_runner: ^2.4.12
+  build_runner: ^2.4.13
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 flutter_launcher_icons:
   image_path: "assets/images/prudapp_icon.png"
@@ -152,6 +152,7 @@ flutter:
     - assets/fonts/Qhinanttika.otf
     - assets/fonts/revans.ttf
     - assets/fonts/valeria.ttf
+    - assets/fonts/tamil-sangam-mn.otf
     - assets/images/prudapp_icon.png
     - assets/images/prud_logo.png
     - assets/images/intros/intro.jpg
@@ -187,10 +188,8 @@ flutter:
     - assets/images/document.png
     - assets/images/influencer.png
     - assets/images/influencer-1.png
-    - assets/images/megaphone.png
     - assets/images/megaphone-1.png
     - assets/images/message.png
-    - assets/images/message-1.png
     - assets/images/promotion.png
     - assets/images/supermaket.png
     - assets/images/tv.png
@@ -206,26 +205,14 @@ flutter:
     - assets/images/discount.png
     - assets/images/marketing.png
     - assets/images/passive-income.png
-    - assets/images/pos-terminal.png
     - assets/images/wallet.png
     - assets/images/link1.png
-    - assets/images/airtime.png
-    - assets/images/flight.png
-    - assets/images/hotel.png
-    - assets/images/power.png
-    - assets/images/power1.png
-    - assets/images/resort.png
     - assets/images/smart-tv.png
     - assets/images/smart-tv1.png
     - assets/images/tour-bus.png
     - assets/images/transport.png
     - assets/images/travel.png
     - assets/images/travel1.png
-    - assets/images/utilities.png
-    - assets/images/utility.png
-    - assets/images/gift-card.png
-    - assets/images/wifi-router.png
-    - assets/images/gift.png
     - assets/images/cart.png
     - assets/images/history.png
     - assets/images/boy.png
@@ -234,9 +221,6 @@ flutter:
     - assets/images/woman1.png
     - assets/images/prudapp_logo_white.png
     - assets/images/icon_1152.png
-    - assets/images/prepaid.png
-    - assets/images/postpaid.png
-    - assets/images/drop.png
     - assets/images/networks.png
     - assets/images/bus-driver.png
     - assets/images/add-friend.png
@@ -247,6 +231,23 @@ flutter:
     - assets/images/journey_pending.png
     - assets/images/journey_active.png
     - assets/images/journey_completed.png
+    - assets/images/likedVideo.png
+    - assets/images/localVideoLibrary.png
+    - assets/images/videoMembership.png
+    - assets/images/videoSearch.png
+    - assets/images/prudVid.png
+    - assets/images/videoHome.png
+    - assets/images/prudVidStudio.png
+    - assets/images/playlist.png
+    - assets/images/prudVider.png
+    - assets/images/studio.png
+    - assets/images/live.png
+    - assets/images/thriller.png
+    - assets/images/thriller-dark.png
+    - assets/images/stream.png
+    - assets/images/stream-dark.png
+    - assets/images/stream-studio.png
+    - assets/images/stream-studio-dark.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -329,6 +330,10 @@ flutter:
     - family: Lato-Italic
       fonts:
         - asset: assets/fonts/Lato-Italic.ttf
+          weight: 100
+    - family: "Tamil"
+      fonts:
+        - asset: assets/fonts/tamil-sangam-mn.otf
           weight: 100
 
 flutter_native_splash:

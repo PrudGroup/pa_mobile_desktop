@@ -45,21 +45,21 @@ class BusBrand{
   Map<String, dynamic> toJson(){
     return {
       if(id != null) "id": id,
-      "brand_name": brandName,
+      "brandName": brandName,
       "email": email,
       "country": country,
-      "own_by": ownBy,
+      "ownBy": ownBy,
       if(slogan != null) "slogan": slogan!,
       if(status != null) "status": status,
       "logo": logo,
       "registrar": registrar,
-      if(emailVerified != null) "email_verified": emailVerified,
-      "gov_registration_id": govRegistrationId,
+      if(emailVerified != null) "emailVerified": emailVerified,
+      "govRegistrationId": govRegistrationId,
       "votes": votes,
       "voters": voters,
-      "referral_code": referralCode,
-      if(createdOn != null) "created_on": createdOn!.toIso8601String(),
-      if(updatedAt != null) "updated_at": updatedAt!.toIso8601String()
+      "referralCode": referralCode,
+      if(createdOn != null) "createdOn": createdOn!.toIso8601String(),
+      if(updatedAt != null) "updatedAt": updatedAt!.toIso8601String()
     };
   }
 
@@ -67,20 +67,20 @@ class BusBrand{
     return BusBrand(
       email: json["email"],
       country: json["country"],
-      brandName: json["brand_name"],
-      govRegistrationId: json["gov_registration_id"],
+      brandName: json["brandName"],
+      govRegistrationId: json["govRegistrationId"],
       logo: json["logo"],
-      ownBy: json["own_by"],
+      ownBy: json["ownBy"],
       registrar: json["registrar"],
-      referralCode: json["referral_code"],
+      referralCode: json["referralCode"],
       slogan: json["slogan"],
       status: json["status"],
-      createdOn: json["created_on"] != null? DateTime.parse(json["created_on"]) : null,
-      updatedAt: json["updated_at"] != null? DateTime.parse(json["updated_at"]) : null,
+      createdOn: json["createdOn"] != null? DateTime.parse(json["createdOn"]) : null,
+      updatedAt: json["updatedAt"] != null? DateTime.parse(json["updatedAt"]) : null,
       id: json["id"],
       voters: json["voters"],
       votes: json["votes"],
-      emailVerified: json["email_verified"],
+      emailVerified: json["emailVerified"],
     );
   }
 }
@@ -149,24 +149,24 @@ class BusBrandOperator{
 
   Map<String, dynamic> toJson(){
     return {
-      if(createdOn != null) "created_on": createdOn!.toIso8601String(),
-      if(updatedAt != null) "updated_at": updatedAt!.toIso8601String(),
+      if(createdOn != null) "createdOn": createdOn!.toIso8601String(),
+      if(updatedAt != null) "updatedAt": updatedAt!.toIso8601String(),
       if(id != null) "id": id,
       "role": role,
-      "brand_id": brandId,
+      "brandId": brandId,
       "status": status,
-      "aff_id": affId
+      "affId": affId
     };
   }
 
   factory BusBrandOperator.fromJson(Map<String, dynamic> json){
     return BusBrandOperator(
-      affId: json["aff_id"],
+      affId: json["affId"],
       status: json["status"],
-      brandId: json["brand_id"],
+      brandId: json["brandId"],
       role: json["role"],
-      createdOn: json["created_on"] != null? DateTime.parse(json["created_on"]) : null,
-      updatedAt: json["updated_at"] != null? DateTime.parse(json["updated_at"]) : null,
+      createdOn: json["createdOn"] != null? DateTime.parse(json["createdOn"]) : null,
+      updatedAt: json["updatedAt"] != null? DateTime.parse(json["updatedAt"]) : null,
       id: json["id"],
     );
   }
@@ -207,31 +207,31 @@ class BusBrandDriver{
   Map<String, dynamic> toJson(){
     return {
       if(id != null) "id": id,
-      "operator_id": operatorId,
-      "joined_date": joinedDate.toIso8601String(),
-      "added_by": addedBy,
+      "operatorId": operatorId,
+      "joinedDate": joinedDate.toIso8601String(),
+      "addedBy": addedBy,
       "rank": rank,
       "journeys": journeys,
       "active": active,
       "votes": votes,
       "voters": voters,
-      if(createdAt != null) "created_at": createdAt!.toIso8601String(),
-      if(updatedAt != null) "updated_at": updatedAt!.toIso8601String()
+      if(createdAt != null) "createdAt": createdAt!.toIso8601String(),
+      if(updatedAt != null) "updatedAt": updatedAt!.toIso8601String()
     };
   }
 
   factory BusBrandDriver.fromJson(Map<String, dynamic> json){
     return BusBrandDriver(
-      operatorId: json["operator_id"],
-      joinedDate: DateTime.parse(json["joined_date"]),
-      addedBy: json["added_by"],
+      operatorId: json["operatorId"],
+      joinedDate: DateTime.parse(json["joinedDate"]),
+      addedBy: json["addedBy"],
       rank: json["rank"],
       journeys: json["journeys"],
       active: json["active"],
       votes: json["votes"],
       voters: json["voters"],
-      createdAt: json["created_at"] != null? DateTime.parse(json["created_at"]) : null,
-      updatedAt: json["updated_at"] != null? DateTime.parse(json["updated_at"]) : null,
+      createdAt: json["createdAt"] != null? DateTime.parse(json["createdAt"]) : null,
+      updatedAt: json["updatedAt"] != null? DateTime.parse(json["updatedAt"]) : null,
       id: json["id"],
     );
   }
@@ -280,36 +280,36 @@ class Bus{
   Map<String, dynamic> toJson(){
     return {
       if(id != null) "id": id,
-      if(createdOn != null) "created_on": createdOn!.toIso8601String(),
-      if(updatedOn != null) "updated_on": updatedOn!.toIso8601String(),
-      "bus_type": busType,
-      "bus_no": busNo,
-      "bus_manufacturer": busManufacturer,
-      "bought_on": boughtOn.toIso8601String(),
-      "brand_id": brandId,
+      if(createdOn != null) "createdOn": createdOn!.toIso8601String(),
+      if(updatedOn != null) "updatedOn": updatedOn!.toIso8601String(),
+      "busType": busType,
+      "busNo": busNo,
+      "busManufacturer": busManufacturer,
+      "boughtOn": boughtOn.toIso8601String(),
+      "brandId": brandId,
       "active": active,
-      "created_by": createdBy,
-      "manufactured_year": manufacturedYear,
+      "createdBy": createdBy,
+      "manufacturedYear": manufacturedYear,
       "votes": votes,
       "voters": voters,
-      "plate_no": plateNo,
-      "total_journey": totalJourney
+      "plateNo": plateNo,
+      "totalJourney": totalJourney
     };
   }
 
   factory Bus.fromJson(Map<String, dynamic> json){
     return Bus(
-      brandId: json["brand_id"],
-      boughtOn: DateTime.parse(json["bought_on"]),
-      busManufacturer: json["bus_manufacturer"],
-      busNo: json["bus_no"],
-      busType: json["bus_type"],
-      createdBy: json["created_by"],
-      manufacturedYear: json["manufactured_year"],
-      plateNo: json["plate_no"],
-      totalJourney: json["total_journey"],
-      createdOn: json["created_on"] != null? DateTime.parse(json["created_on"]) : null,
-      updatedOn: json["updated_on"] != null? DateTime.parse(json["updated_on"]) : null,
+      brandId: json["brandId"],
+      boughtOn: DateTime.parse(json["boughtOn"]),
+      busManufacturer: json["busManufacturer"],
+      busNo: json["busNo"],
+      busType: json["busType"],
+      createdBy: json["createdBy"],
+      manufacturedYear: json["manufacturedYear"],
+      plateNo: json["plateNo"],
+      totalJourney: json["totalJourney"],
+      createdOn: json["createdOn"] != null? DateTime.parse(json["createdOn"]) : null,
+      updatedOn: json["updatedOn"] != null? DateTime.parse(json["updatedOn"]) : null,
       id: json["id"],
       active: json["active"],
       voters: json["voters"],
@@ -361,37 +361,37 @@ class BusSeat{
   Map<String, dynamic> toJson(){
     return {
       if(id != null) "id": id,
-      if(createdOn != null) "created_on": createdOn!.toIso8601String(),
-      if(updatedOn != null) "updated_on": updatedOn!.toIso8601String(),
+      if(createdOn != null) "createdOn": createdOn!.toIso8601String(),
+      if(updatedOn != null) "updatedOn": updatedOn!.toIso8601String(),
       "description": description,
-      "bus_id": busId,
-      "seat_no": seatNo,
+      "busId": busId,
+      "seatNo": seatNo,
       "position": position,
-      "seat_type": seatType,
+      "seatType": seatType,
       "status": status,
-      "created_by": createdBy,
+      "createdBy": createdBy,
       "fixed": fixed,
       "votes": votes,
       "voters": voters,
-      if(fixedDate != null) "fixed_date": fixedDate!.toIso8601String(),
-      if(statusDate != null) "status_date": statusDate!.toIso8601String(),
+      if(fixedDate != null) "fixedDate": fixedDate!.toIso8601String(),
+      if(statusDate != null) "statusDate": statusDate!.toIso8601String(),
     };
   }
 
   factory BusSeat.fromJson(Map<String, dynamic> json){
     return BusSeat(
       description: json["description"],
-      busId: json["bus_id"],
+      busId: json["busId"],
       position: json["position"],
-      seatNo: json["seat_no"],
-      seatType: json["seat_type"],
-      createdBy: json["created_by"],
+      seatNo: json["seatNo"],
+      seatType: json["seatType"],
+      createdBy: json["createdBy"],
       status: json["status"],
       fixed: json["fixed"],
-      statusDate: json["status_date"] != null? DateTime.parse(json["status_date"]) : null,
-      fixedDate: json["fixed_date"] != null? DateTime.parse(json["fixed_date"]) : null,
-      createdOn: json["created_on"] != null? DateTime.parse(json["created_on"]) : null,
-      updatedOn: json["updated_on"] != null? DateTime.parse(json["updated_on"]) : null,
+      statusDate: json["statusDate"] != null? DateTime.parse(json["statusDate"]) : null,
+      fixedDate: json["fixedDate"] != null? DateTime.parse(json["fixedDate"]) : null,
+      createdOn: json["createdOn"] != null? DateTime.parse(json["createdOn"]) : null,
+      updatedOn: json["updatedOn"] != null? DateTime.parse(json["updatedOn"]) : null,
       id: json["id"],
       voters: json["voters"],
       votes: json["votes"],
@@ -443,37 +443,37 @@ class BusFeature{
   Map<String, dynamic> toJson(){
     return {
       if(id != null) "id": id,
-      if(createdOn != null) "created_on": createdOn!.toIso8601String(),
-      if(updatedOn != null) "updated_on": updatedOn!.toIso8601String(),
+      if(createdOn != null) "createdOn": createdOn!.toIso8601String(),
+      if(updatedOn != null) "updatedOn": updatedOn!.toIso8601String(),
       "description": description,
-      "bus_id": busId,
-      "feature_name": featureName,
+      "busId": busId,
+      "featureName": featureName,
       "subtitle": subtitle,
-      "how_to": howTo,
+      "howTo": howTo,
       "status": status,
-      "created_by": createdBy,
+      "createdBy": createdBy,
       "fixed": fixed,
       "votes": votes,
       "voters": voters,
-      if(fixedDate != null) "fixed_date": fixedDate!.toIso8601String(),
-      if(statusDate != null) "status_date": statusDate!.toIso8601String(),
+      if(fixedDate != null) "fixedDate": fixedDate!.toIso8601String(),
+      if(statusDate != null) "statusDate": statusDate!.toIso8601String(),
     };
   }
 
   factory BusFeature.fromJson(Map<String, dynamic> json){
     return BusFeature(
       description: json["description"],
-      busId: json["bus_id"],
-      featureName: json["feature_name"],
+      busId: json["busId"],
+      featureName: json["featureName"],
       subtitle: json["subtitle"],
-      howTo: json["how_to"],
-      createdBy: json["created_by"],
+      howTo: json["howTo"],
+      createdBy: json["createdBy"],
       status: json["status"],
       fixed: json["fixed"],
-      statusDate: json["status_date"] != null? DateTime.parse(json["status_date"]) : null,
-      fixedDate: json["fixed_date"] != null? DateTime.parse(json["fixed_date"]) : null,
-      createdOn: json["created_on"] != null? DateTime.parse(json["created_on"]) : null,
-      updatedOn: json["updated_on"] != null? DateTime.parse(json["updated_on"]) : null,
+      statusDate: json["statusDate"] != null? DateTime.parse(json["statusDate"]) : null,
+      fixedDate: json["fixedDate"] != null? DateTime.parse(json["fixedDate"]) : null,
+      createdOn: json["createdOn"] != null? DateTime.parse(json["createdOn"]) : null,
+      updatedOn: json["updatedOn"] != null? DateTime.parse(json["updatedOn"]) : null,
       id: json["id"],
       voters: json["voters"],
       votes: json["votes"],
@@ -502,21 +502,21 @@ class BusImage{
   Map<String, dynamic> toJson(){
     return {
       if(id != null) "id": id,
-      if(createdOn != null) "created_on": createdOn!.toIso8601String(),
-      if(updatedOn != null) "updated_on": updatedOn!.toIso8601String(),
-      "bus_id": busId,
-      "img_url": imgUrl,
-      "created_by": createdBy,
+      if(createdOn != null) "createdOn": createdOn!.toIso8601String(),
+      if(updatedOn != null) "updatedOn": updatedOn!.toIso8601String(),
+      "busId": busId,
+      "imgUrl": imgUrl,
+      "createdBy": createdBy,
     };
   }
 
   factory BusImage.fromJson(Map<String, dynamic> json){
     return BusImage(
-      busId: json["bus_id"],
-      imgUrl: json["img_url"],
-      createdBy: json["created_by"],
-      createdOn: json["created_on"] != null? DateTime.parse(json["created_on"]) : null,
-      updatedOn: json["updated_on"] != null? DateTime.parse(json["updated_on"]) : null,
+      busId: json["busId"],
+      imgUrl: json["imgUrl"],
+      createdBy: json["createdBy"],
+      createdOn: json["createdOn"] != null? DateTime.parse(json["createdOn"]) : null,
+      updatedOn: json["updatedOn"] != null? DateTime.parse(json["updatedOn"]) : null,
       id: json["id"],
     );
   }

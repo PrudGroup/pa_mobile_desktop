@@ -10,7 +10,7 @@ import 'package:prudapp/singletons/tab_data.dart';
 
 import '../models/bus_models.dart';
 import '../models/theme.dart';
-import '../pages/travels/tabs/buses/dashboard/operations/journey/journey_detail_view.dart';
+import '../pages/travels/dashboard/operations/journey/journey_detail_view.dart';
 import '../singletons/i_cloud.dart';
 
 class JourneyComponent extends StatefulWidget {

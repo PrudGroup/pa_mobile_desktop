@@ -1,5 +1,6 @@
 import 'package:prudapp/singletons/currency_math.dart';
-import 'package:prudapp/singletons/influencer_notifier.dart';
+
+import '../singletons/influencer_notifier.dart';
 
 enum WalletType {
   influencer,
@@ -47,17 +48,17 @@ class WalletHistory{
 
   Map<String, dynamic> toJson(){
     return {
-      "is_credit": isCredit,
+      "isCredit": isCredit,
       "id": id,
       "amount": amount,
       "currency": currency,
-      "trans_id": transId,
+      "transId": transId,
       "dated": dated.toIso8601String(),
       "month": month,
-      "via_channel": viaChannel,
-      "selected_currency": selectedCurrency,
-      "amt_in_selected_currency": amtInSelectedCurrency,
-      "wallet_id": walletId,
+      "viaChannel": viaChannel,
+      "selectedCurrency": selectedCurrency,
+      "amtInSelectedCurrency": amtInSelectedCurrency,
+      "walletId": walletId,
       "year": year,
     };
   }
@@ -65,46 +66,46 @@ class WalletHistory{
   factory WalletHistory.fromJson(Map<String, dynamic> json) {
     return WalletHistory(
       id: json["id"],
-      isCredit: json["is_credit"],
+      isCredit: json["isCredit"],
       amount: json["amount"],
       currency: json["currency"],
-      transId: json["trans_id"],
+      transId: json["transId"],
       dated: DateTime.parse(json["dated"]),
       month: json["month"],
-      viaChannel: json["via_channel"],
-      selectedCurrency: json["selected_currency"],
-      amtInSelectedCurrency: json["amt_in_selected_currency"],
-      walletId: json["wallet_id"],
+      viaChannel: json["viaChannel"],
+      selectedCurrency: json["selectedCurrency"],
+      amtInSelectedCurrency: json["amtInSelectedCurrency"],
+      walletId: json["walletId"],
       year: json["year"]
     );
   }
 }
 
 class WalletAction {
-  String affId;
   double amount;
   bool isCreditAction;
   String channel;
   String selectedCurrency;
   double amtInSelectedCurrency;
+  String ownerId;
 
   WalletAction({
     required this.amount,
-    required this.affId,
     required this.selectedCurrency,
     required this.amtInSelectedCurrency,
     required this.channel,
-    required this.isCreditAction
+    required this.isCreditAction,
+    required this.ownerId
   });
 
   Map<String, dynamic> toJson(){
     return {
       "amount": amount,
-      "aff_id": affId,
-      "selected_currency": selectedCurrency,
-      "amt_in_selected_currency": amtInSelectedCurrency,
+      "selectedCurrency": selectedCurrency,
+      "amtInSelectedCurrency": amtInSelectedCurrency,
       "channel": channel,
-      "is_credit_action": isCreditAction,
+      "isCreditAction": isCreditAction,
+      "ownerId": ownerId
     };
   }
 }
@@ -147,8 +148,8 @@ class Wallet{
     return Wallet(
       id: json["id"],
       balance: json["balance"],
-      createdOn: DateTime.parse(json["created_on"]),
-      balanceAsAt: DateTime.parse(json["balance_as_at"])
+      createdOn: DateTime.parse(json["createdOn"]),
+      balanceAsAt: DateTime.parse(json["balanceAsAt"])
     );
   }
 }
@@ -173,11 +174,11 @@ class InfluencerWallet extends Wallet {
 
   factory InfluencerWallet.fromJson(Map<String, dynamic> json){
     return InfluencerWallet(
-      affId: json["aff_id"],
+      affId: json["affId"],
       id: json["id"],
       balance: json["balance"],
-      createdOn: DateTime.parse(json["created_on"]),
-      balanceAsAt: DateTime.parse(json["balance_as_at"])
+      createdOn: DateTime.parse(json["createdOn"]),
+      balanceAsAt: DateTime.parse(json["balanceAsAt"])
     );
   }
 }
@@ -196,17 +197,17 @@ class ShipperWallet extends Wallet {
   @override
   Map<String, dynamic> toJson() {
     Map<String, dynamic> res = super.toJson();
-    res["shipper_id"] = shipperId;
+    res["shipperId"] = shipperId;
     return res;
   }
 
   factory ShipperWallet.fromJson(Map<String, dynamic> json){
     return ShipperWallet(
-        shipperId: json["shipper_id"],
+        shipperId: json["shipperId"],
         id: json["id"],
         balance: json["balance"],
-        createdOn: DateTime.parse(json["created_on"]),
-        balanceAsAt: DateTime.parse(json["balance_as_at"])
+        createdOn: DateTime.parse(json["createdOn"]),
+        balanceAsAt: DateTime.parse(json["balanceAsAt"])
     );
   }
 }
@@ -231,11 +232,11 @@ class HotelWallet extends Wallet {
 
   factory HotelWallet.fromJson(Map<String, dynamic> json){
     return HotelWallet(
-      hotelId: json["hotel_id"],
+      hotelId: json["hotelId"],
       id: json["id"],
       balance: json["balance"],
-      createdOn: DateTime.parse(json["created_on"]),
-      balanceAsAt: DateTime.parse(json["balance_as_at"])
+      createdOn: DateTime.parse(json["createdOn"]),
+      balanceAsAt: DateTime.parse(json["balanceAsAt"])
     );
   }
 }
@@ -263,8 +264,8 @@ class BusWallet extends Wallet {
         busId: json["busId"],
         id: json["id"],
         balance: json["balance"],
-        createdOn: DateTime.parse(json["created_on"]),
-        balanceAsAt: DateTime.parse(json["balance_as_at"])
+        createdOn: DateTime.parse(json["createdOn"]),
+        balanceAsAt: DateTime.parse(json["balanceAsAt"])
     );
   }
 }
@@ -283,17 +284,17 @@ class SwitzStoreWallet extends Wallet {
   @override
   Map<String, dynamic> toJson() {
     Map<String, dynamic> res = super.toJson();
-    res["store_id"] = storeId;
+    res["storeId"] = storeId;
     return res;
   }
 
   factory SwitzStoreWallet.fromJson(Map<String, dynamic> json){
     return SwitzStoreWallet(
-        storeId: json["store_id"],
+        storeId: json["storeId"],
         id: json["id"],
         balance: json["balance"],
-        createdOn: DateTime.parse(json["created_on"]),
-        balanceAsAt: DateTime.parse(json["balance_as_at"])
+        createdOn: DateTime.parse(json["createdOn"]),
+        balanceAsAt: DateTime.parse(json["balanceAsAt"])
     );
   }
 }

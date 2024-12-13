@@ -24,7 +24,7 @@ final List<Locale> locales = [
   Locale(lang : "Danish", symbol: "da"),
   Locale(lang : "Dutch", symbol: "nl"),
   Locale(lang : "English", symbol: "en"),
-  Locale(lang : "American English", symbol: "en_us"),
+  Locale(lang : "American English", symbol: "enUs"),
   Locale(lang : "Esperanto", symbol: "eo"),
   Locale(lang : "Estonian", symbol: "et"),
   Locale(lang : "Filipino", symbol: "tl"),

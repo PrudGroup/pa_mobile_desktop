@@ -45,34 +45,19 @@ abstract class Constants {
     defaultValue: '',
   );
 
-  static const String wavePublicKey = String.fromEnvironment(
-    'WAVE_PUBLIC_KEY',
+  static const String wasabiPublicKey = String.fromEnvironment(
+    'WASABI_PUBLIC_KEY',
     defaultValue: '',
   );
 
-  static const String waveSecretKey = String.fromEnvironment(
-    'WAVE_SECRET_KEY',
+  static const String wasabiSecretKey = String.fromEnvironment(
+    'WASABI_SECRET_KEY',
     defaultValue: '',
   );
 
-  static const String reloadlyTestSecretKey = String.fromEnvironment(
-    'RELOADLY_TEST_CLIENT_SECRET',
-    defaultValue: '',
-  );
-
-  static const String reloadlyTestClientId = String.fromEnvironment(
-    'RELOADLY_TEST_CLIENT_ID',
-    defaultValue: '',
-  );
-
-  static const String reloadlyLiveSecretKey = String.fromEnvironment(
-    'RELOADLY_LIVE_CLIENT_SECRET',
-    defaultValue: '',
-  );
-
-  static const String reloadlyLiveClientId = String.fromEnvironment(
-    'RELOADLY_LIVE_CLIENT_ID',
-    defaultValue: '',
+  static const String wasabiEndPoint = String.fromEnvironment(
+    'WASABI_ENDPOINT',
+    defaultValue: ""
   );
 
   static const String apiStatues = String.fromEnvironment(
@@ -80,18 +65,22 @@ abstract class Constants {
     defaultValue: '',
   );
 
-  static const String opayId = String.fromEnvironment(
-    'OPAY_MERCHANT_ID',
+  static const String paystackSecretTest = String.fromEnvironment(
+    'PAYSTACK_SECRET_TEST',
     defaultValue: '',
   );
 
-  static const String opaySecret = String.fromEnvironment(
-    'OPAY_SECRET_KEY',
+  static const String paystackSecretLive = String.fromEnvironment(
+    'PAYSTACK_SECRET_LIVE',
+    defaultValue: '',
+  );
+  static const String paystackPublicTest = String.fromEnvironment(
+    'PAYSTACK_PUBLIC_TEST',
     defaultValue: '',
   );
 
-  static const String opayPublic = String.fromEnvironment(
-    'OPAY_PUBLIC_KEY',
+  static const String paystackPublicLive = String.fromEnvironment(
+    'PAYSTACK_PUBLIC_LIVE',
     defaultValue: '',
   );
 

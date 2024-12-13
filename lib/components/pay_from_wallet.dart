@@ -48,6 +48,7 @@ class PayFromWalletState extends State<PayFromWallet> {
 
   Future<void> checkBalance() async {
     await tryAsync("checkBalance", () async {
+      debugPrint("Wallet not gotten yet A");
       if(myStorage.user != null && myStorage.user!.id != null && influencerNotifier.influencerWalletCurrencyCode != null){
         if(mounted) {
           setState(() {
@@ -56,9 +57,11 @@ class PayFromWalletState extends State<PayFromWallet> {
           });
         }
         dynamic wallet;
+        debugPrint("Wallet not gotten yet");
         switch(widget.walletType){
           case WalletType.influencer: {
             wallet = await influencerNotifier.getWallet(myStorage.user!.id!);
+            debugPrint("Wallet gotten: $wallet");
           }
           case WalletType.bus: {}
           case WalletType.hotel: {}
@@ -72,6 +75,7 @@ class PayFromWalletState extends State<PayFromWallet> {
             quoteCode: influencerNotifier.influencerWalletCurrencyCode!,
             baseCode: widget.currencyCode,
           );
+          debugPrint("amtInWallet: $amtInWalletSelectedCurrency");
           setState(() {
             walletBalance = wallet.balance;
             hasCheckedWallet = true;
@@ -107,11 +111,11 @@ class PayFromWalletState extends State<PayFromWallet> {
             {
               WalletAction action = WalletAction(
                 amount: widget.amountInNaira,
-                affId: myStorage.user!.id!,
                 selectedCurrency: widget.currencyCode,
                 amtInSelectedCurrency: widget.amount,
                 channel: widget.forDesc,
-                isCreditAction: false
+                isCreditAction: false,
+                ownerId: myStorage.user!.id!,
               );
               WalletTransactionResult debited = await influencerNotifier.creditOrDebitWallet(action);
               if(debited.tran != null && debited.succeeded){
@@ -151,6 +155,7 @@ class PayFromWalletState extends State<PayFromWallet> {
   void initState(){
     Future.delayed(Duration.zero, () async {
       if(mounted) setState(() => loading = true);
+      debugPrint("Wallet not gotten yet B");
       await checkBalance();
     });
     super.initState();
@@ -191,8 +196,8 @@ class PayFromWalletState extends State<PayFromWallet> {
               children: [
                 spacer.height,
                 Translate(
-                  text: "This transaction will debit your wallet, the sum of ${tabData.getCurrencySymbol(widget.currencyCode)}${widget.amount} "
-                      "( ${tabData.getCurrencySymbol(influencerNotifier.influencerWalletCurrencyCode!)}$amountInWalletSelectedCurrency, ${tabData.getCurrencySymbol('NGN')}${widget.amountInNaira}) will be deducted. "
+                  text: "This transaction will debit your wallet, the sum of ${tabData.getCurrencySymbol(widget.currencyCode)}${currencyMath.roundDouble(widget.amount, 2)} "
+                      "( ${tabData.getCurrencySymbol(influencerNotifier.influencerWalletCurrencyCode!)}${currencyMath.roundDouble(amountInWalletSelectedCurrency, 2)}, ${tabData.getCurrencySymbol('NGN')}${currencyMath.roundDouble(widget.amountInNaira,2)}) will be deducted. "
                       " Should this transaction continue?",
                   style: prudWidgetStyle.tabTextStyle.copyWith(
                     fontSize: 15,

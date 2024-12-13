@@ -10,10 +10,14 @@ import 'package:prudapp/components/main_menu.dart';
 import 'package:prudapp/components/network_issue_component.dart';
 import 'package:prudapp/components/prud_showroom.dart';
 import 'package:prudapp/models/theme.dart';
-import 'package:prudapp/pages/giftcards/gift_cards.dart';
 import 'package:prudapp/pages/influencers/influencers.dart';
+import 'package:prudapp/pages/prudStreams/prud_streams.dart';
+import 'package:prudapp/pages/prudStreams/studio/prud_stream_studio.dart';
+import 'package:prudapp/pages/prudVid/prud_vid.dart';
+import 'package:prudapp/pages/prudVid/prud_vid_studio.dart';
+import 'package:prudapp/pages/prudVid/thrillers.dart';
 import 'package:prudapp/pages/shippers/shippers.dart';
-import 'package:prudapp/pages/shorteners/shortener.dart';
+// import 'package:prudapp/pages/shorteners/shortener.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:rate_my_app/rate_my_app.dart';
 import 'package:prudapp/singletons/tab_data.dart';
@@ -22,13 +26,10 @@ import 'package:flutter_fgbg/flutter_fgbg.dart';
 import '../../components/prud_container.dart';
 import '../../models/images.dart';
 import '../../singletons/shared_local_storage.dart';
-import '../account/my_account.dart';
 import '../ads/ads.dart';
-import '../recharge/recharge.dart';
 import '../settings/settings.dart';
 import '../switzstores/switz_stores.dart';
 import '../travels/switz_travels.dart';
-import '../viewsparks/view_spark.dart';
 import 'home_drawer.dart';
 
 
@@ -68,80 +69,65 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
   ];
   List<Menu> menus = [
     Menu(
-        title: 'Gift Cards',
-        page: const GiftCards(),
-        icon: prudImages.gift
+        title: 'PrudVid',
+        page: const PrudVid(),
+        icon: prudImages.prudVid
     ),
     Menu(
-      title: 'Airtime',
-      page: const Recharge(tab: 0,),
-      icon: prudImages.airtime
+        title: 'PrudStreams',
+        page: const PrudStreams(),
+        icon: prudImages.streamDark
     ),
     Menu(
-      title: 'Data Bundles',
-      page: const Recharge(tab: 1,),
-      icon: prudImages.dataBundle
+        title: 'Thrillers',
+        page: const Thrillers(),
+        icon: prudImages.thrillerDark
     ),
     Menu(
-      title: 'Bills & Utilities',
-      page: const Recharge(tab: 2,),
-      icon: prudImages.smartTv1
+        title: 'PrudVid Studio',
+        page: const PrudVidStudio(),
+        icon: prudImages.prudVidStudio
+    ),
+    Menu(
+        title: 'PrudStreams Studio',
+        page: const PrudStreamStudio(),
+        icon: prudImages.streamStudioDark
     ),
     Menu(
       title: 'SwitzTravels',
       page: const SwitzTravels(),
       icon: prudImages.travel1
     ),
-    Menu(
-      title: 'Flights',
-      page: const SwitzTravels(tab: 1,),
-      icon: prudImages.flight
-    ),
-    Menu(
-      title: 'Buses',
-      page: const SwitzTravels(tab: 0,),
-      icon: prudImages.transport
-    ),
-    Menu(
-      title: 'Hotels',
-      page: const SwitzTravels(tab: 2,),
-      icon: prudImages.resort
-    ),
-    Menu(
+    /*Menu(
       title: 'Switz Stores',
       page: const SwitzStores(),
       icon: prudImages.stores
-    ),
-    Menu(
-      title: 'View Sparks',
-      page: const ViewSpark(),
-      icon: prudImages.watchVideo
-    ),
+    ),*/
     Menu(
       title: 'Influencers',
       page: const Influencers(),
       icon: prudImages.influencerFemale
     ),
-    Menu(
+    /*Menu(
       title: 'Ads & Promotions',
       page: const Ads(),
       icon: prudImages.videoAd
-    ),
-    Menu(
+    ),*/
+    /*Menu(
       title: 'Shippers',
       page: const Shippers(),
       icon: prudImages.shipper
-    ),
-    Menu(
+    ),*/
+    /*Menu(
       title: 'Url Shortener',
       page: const Shortener(),
       icon: prudImages.shortener
-    ),
-    Menu(
+    ),*/
+    /*Menu(
       title: 'My Account',
       page: const MyAccount(),
       icon: prudImages.account
-    ),
+    ),*/
     Menu(
       title: 'Settings',
       page: const Settings(),
@@ -164,26 +150,6 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
     });
     carousels.shuffle();
     showroom = [
-      InkWell(
-        onTap: () => iCloud.goto(context, const ViewSpark()),
-        child: PrudContainer(
-            hasPadding: false,
-            child: Image.asset(
-                prudImages.front7
-            )
-        ),
-      ),
-      InkWell(
-        onTap: () => iCloud.goto(context, const ViewSpark()),
-        child: PrudContainer(
-          hasPadding: false,
-          hasTitle: true,
-          title: "Get Views/Sparks",
-          child: Image.asset(
-              prudImages.front4
-          ),
-        ),
-      ),
       InkWell(
         onTap: () => iCloud.goto(context, const Ads()),
         child: PrudContainer(
