@@ -44,21 +44,21 @@ class LoginState extends State<Login> {
       if(mounted) setState(() => loading = true);
       await messenger.getToken().then((String? token) async{
         if(token != null){
-          String deviceRegToken = token;
           if(email != null && password != null && pin != null){
             String url = "$prudApiUrl/affiliates/auth/login";
             Response res = await prudDio.get(url, queryParameters: {
               "email": email,
               "password": password,
-              "device_token": deviceRegToken,
+              "device_token": token,
               "is_renew": true,
             });
             if (res.statusCode == 200) {
+              debugPrint("Result: ${res.data}");
               if(res.data != null && res.data["user"] != null){
                 User user = User.fromJson(res.data["user"]);
                 user.password = password;
-                user.deviceRegToken = deviceRegToken;
-                iCloud.affAuthToken = 'PrudApp ${res.data["auth_token"]}';
+                user.deviceRegToken = token;
+                iCloud.affAuthToken = 'PrudApp ${res.data["authToken"]}';
                 prudDio.options.headers.addAll({
                   "Authorization": iCloud.affAuthToken,
                 });
@@ -95,7 +95,7 @@ class LoginState extends State<Login> {
           }else {
             if(mounted) {
               iCloud.showSnackBar(
-                  "Email and Password needed.",  context,
+                  "Pin/Email/Password needed.",  context,
                   title: "Authentication", type: 3
               );
             }
@@ -135,7 +135,8 @@ class LoginState extends State<Login> {
     await tryAsync("_forgotPassword", () async {
       if(email != null){
         if(mounted) setState(() => sendingCode = true);
-        String? code = await iCloud.sendCodeToEmail(email!);
+        String codeUrl = "$prudApiUrl/affiliates/send/code";
+        String? code = await iCloud.sendCodeToEmail(codeUrl, email!);
         if(code != null && code.isNotEmpty){
           if(mounted) iCloud.goto(context, PasswordReset(email: email!, code: code));
         }else{
@@ -154,12 +155,12 @@ class LoginState extends State<Login> {
   void initState() {
     super.initState();
     try{
-      User? user;
-      Future.delayed(Duration.zero, () async{
-        user = await myStorage.getFromStore(key: 'user');
-        if(mounted) {
+      Future.delayed(Duration.zero, () {
+        String? storedUser = myStorage.getFromStore(key: "user");
+        if(mounted && storedUser != null) {
+          User user = User.fromJson(jsonDecode(storedUser));
           setState(() {
-            existingUser.password = user?.password;
+            existingUser.password = user.password;
           });
         }
       });

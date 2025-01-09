@@ -98,6 +98,8 @@ class RegisteredState extends State<Register> {
       Future.delayed(Duration.zero, () async {
         if(mounted) setState(() => loading = true);
         var storedUser = myStorage.getFromStore(key: 'user');
+        referralCode = myStorage.getFromStore(key: 'install_referral_code');
+        pin = myStorage.getFromStore(key: 'pin');
         user = storedUser == null? User() : User.fromJson(jsonDecode(storedUser));
         iCloud.getRegisterStateFromStore();
         List<mc.Country> dCountries = await csc.getAllCountries();
@@ -160,14 +162,17 @@ class RegisteredState extends State<Register> {
 
   void register() async {
     try{
-      if (newUser.city != null && pin != null) {
+      newUser.referralCode = referralCode?? "PrudApp";
+      String? password = newUser.password;
+      if (newUser.city != null && pin != null && newUser.referralCode != null) {
         setState(() => loading = true);
         await saveUserLocally();
         String apiUrl = "$apiEndPoint/affiliates/";
         Response res = await iCloud.addAffiliate(apiUrl, newUser);
-        if(res.statusCode == 201 && res.data != null){
+        if(res.statusCode == 201 && res.data != false && res.data != null && res.data["id"] != null){
           newUser = User.fromJson(res.data);
           debugPrint("user_id: ${newUser.id}");
+          newUser.password = password;
           await saveUserLocally();
           iCloud.changeRegisterState(state: RegisterState.success);
         }else{
@@ -396,8 +401,9 @@ class RegisteredState extends State<Register> {
                             },
                             valueTransformer: (text) => num.tryParse(text!),
                             validator: FormBuilderValidators.compose([
-                              // FormBuilderValidators.minLength(3),
-                              FormBuilderValidators.maxLength(100),
+                              FormBuilderValidators.conditional((value){
+                                return value != null && value.isNotEmpty;
+                              }, FormBuilderValidators.minLength(6))
                             ]),
                           ),
                           spacer.height,
@@ -412,7 +418,7 @@ class RegisteredState extends State<Register> {
                             align: TextAlign.center,
                           ),
                           FormBuilderTextField(
-                            initialValue: "",
+                            initialValue: "$pin",
                             name: 'pin',
                             autofocus: true,
                             style: tabData.npStyle,
@@ -634,7 +640,7 @@ class RegisteredState extends State<Register> {
                                     setState(() {
                                       loadingCities = false;
                                       loadingStates = false;
-                                      newUser.country = ctry.name;
+                                      newUser.country = ctry.isoCode;
                                       states = dStates;
                                       cities = dCities;
                                     });
@@ -650,7 +656,7 @@ class RegisteredState extends State<Register> {
                                   List<City> dCities = await csc.getStateCities(st.countryCode, st.isoCode);
                                   if(mounted) {
                                     setState(() {
-                                      newUser.state = st.name;
+                                      newUser.state = st.isoCode;
                                       cities = dCities;
                                     });
                                   }
@@ -763,7 +769,7 @@ class RegisteredState extends State<Register> {
                                 prudWidgetStyle.getLongButton(
                                   onPressed: displayIntro,
                                   shape: 2,
-                                  text: "Verified Later",
+                                  text: "Verify Later",
                                   makeLight: true,
                                 ),
                                 spacer.height,

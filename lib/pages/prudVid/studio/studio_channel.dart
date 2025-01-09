@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:prudapp/pages/prudVid/studio/studioTabs/new_channel.dart';
+import 'package:prudapp/pages/prudVid/studio/studioTabs/promote_studio_channel.dart';
+import 'package:prudapp/pages/prudVid/studio/studioTabs/view_studio.dart';
+import 'package:prudapp/pages/prudVid/studio/studioTabs/view_studio_channels.dart';
 
+import '../../../components/inner_menu.dart';
 import '../../../components/translate_text.dart';
-import '../../../components/work_in_progress.dart';
+import '../../../models/images.dart';
 import '../../../models/theme.dart';
 
 class StudioChannel extends StatefulWidget {
@@ -13,6 +18,36 @@ class StudioChannel extends StatefulWidget {
 }
 
 class StudioChannelState extends State<StudioChannel> {
+
+  List<InnerMenuItem> tabMenus = [];
+  final GlobalKey<InnerMenuState> _key = GlobalKey();
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void moveTo(int index){
+    if(_key.currentState != null){
+      _key.currentState!.changeWidget(_key.currentState!.widget.menus[index].menu, index);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if(mounted){
+      setState(() {
+        tabMenus = [
+          InnerMenuItem(imageIcon: prudImages.studio, title: "Studio", menu: const ViewStudio()),
+          InnerMenuItem(imageIcon: prudImages.live, title: "New Channel", menu: const NewChannel()),
+          InnerMenuItem(imageIcon: prudImages.localVideoLibrary, title: "Channels", menu: const ViewStudioChannels()),
+          InnerMenuItem(imageIcon: prudImages.videoAd, title: "Promote Channel", menu:  const PromoteStudioChannel())
+        ];
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,7 +69,7 @@ class StudioChannelState extends State<StudioChannel> {
         actions: const [
         ],
       ),
-      body: const WorkInProgress(),
+      body: InnerMenu(key: _key, menus: tabMenus, type: 0, hasIcon: true,),
     );
   }
 }

@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:pinput/pinput.dart';
+import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 
 import '../../components/translate_text.dart';
@@ -26,6 +29,12 @@ class PasswordResetState extends State<PasswordReset> {
   String password = "";
   String confirm = "";
   bool confirmed = false;
+  bool failed = false;
+  bool showTimer = true;
+  int presentCount = 60;
+  String receivedCode = "";
+  bool resending = false;
+  Timer? _timer;
 
   Future<void> changePassword() async {
     await tryAsync("changePassword", () async {
@@ -42,6 +51,64 @@ class PasswordResetState extends State<PasswordReset> {
       if(mounted) setState(() => loading = false);
     }, error: (){
       if(mounted) setState(() => loading = false);
+    });
+  }
+
+  @override
+  void initState() {
+    tryOnly("initState", (){
+      if(mounted) setState(() => receivedCode = widget.code);
+      startTimer();
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void startTimer() {
+    const oneSecond = Duration(seconds: 1);
+    _timer = Timer.periodic(oneSecond, (Timer timer) {
+      if (presentCount <= 0) {
+        if(mounted) {
+          setState(() {
+            showTimer = false;
+            timer.cancel();
+          });
+        }
+      } else {
+        if(mounted) setState(() => presentCount = presentCount - 1);
+      }
+    });
+  }
+
+
+  Future<void> resendCode() async{
+    await tryAsync("resendCode", () async {
+      if(mounted) setState(() => resending = true);
+      String codeUrl = "$prudApiUrl/affiliates/send/code";
+      String? code = await iCloud.sendCodeToEmail(codeUrl, widget.email);
+      if(code != null && code.isNotEmpty){
+        if(mounted) {
+          setState(() {
+            presentCount = 60;
+            receivedCode = code;
+            showTimer = true;
+            resending = false;
+          });
+          startTimer();
+        }
+      }else{
+        if(mounted) {
+          setState(() => resending = false);
+          iCloud.showSnackBar("Email Not Found.", context, title: 'Email Failed');
+        }
+      }
+    }, error: (){
+      if(mounted) setState(() => resending = false);
     });
   }
 
@@ -109,8 +176,8 @@ class PasswordResetState extends State<PasswordReset> {
                                 if(!verified) Column(
                                   children: [
                                     Translate(
-                                      text: "A four digit pin is required for all transactions on Prudapp. Type what you "
-                                          "can easily remember.",
+                                      text: "A four digit code has been sent to your email. Verify the sent "
+                                          "code.",
                                       style: prudWidgetStyle.tabTextStyle.copyWith(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w500,
@@ -121,15 +188,32 @@ class PasswordResetState extends State<PasswordReset> {
                                     Pinput(
                                       obscureText: true,
                                       autofocus: true,
+                                      keyboardType: TextInputType.text,
                                       pinputAutovalidateMode: PinputAutovalidateMode.disabled,
                                       showCursor: true,
                                       onCompleted: (pin) {
                                         if(mounted) {
                                           setState(() {
                                             verified = pin == widget.code;
+                                            failed = !verified;
                                           });
                                         }
                                       },
+                                    ),
+                                    spacer.height,
+                                    if(failed) Translate(text: "Invalid Code", style: prudWidgetStyle.tabTextStyle.copyWith(
+                                      fontSize: 14, color: prudColorTheme.error
+                                    ),),
+                                    spacer.height,
+                                    if(showTimer) Translate(text: "Resend in $presentCount seconds", style: prudWidgetStyle.tabTextStyle.copyWith(
+                                        fontSize: 12, color: prudColorTheme.buttonA
+                                    ),),
+                                    if(!showTimer) resending? LoadingComponent(
+                                      isShimmer: false,
+                                      spinnerColor: prudColorTheme.primary,
+                                      size: 30,
+                                    ) : prudWidgetStyle.getLongButton(
+                                        onPressed: resendCode, text: "Resend Code", shape: 1
                                     ),
                                     spacer.height,
                                   ],

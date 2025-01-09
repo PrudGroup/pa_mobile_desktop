@@ -138,8 +138,7 @@ class ICloud extends ChangeNotifier{
     }
   }
 
-  Future<String?> sendCodeToEmail(String email) async {
-    String codeUrl = "$apiEndPoint/affiliates/send_code";
+  Future<String?> sendCodeToEmail(String codeUrl, String email) async {
     Response res = await prudDio.get(codeUrl, queryParameters: {"email": email});
     if (res.statusCode == 200) {
       return res.data;
@@ -149,7 +148,7 @@ class ICloud extends ChangeNotifier{
   }
 
   Future<bool> resetPassword(String email, String newPassword) async {
-    String codeUrl = "$apiEndPoint/affiliates/password/reset";
+    String codeUrl = "$prudApiUrl/affiliates/password/reset";
     Response res = await prudDio.get(codeUrl, queryParameters: {"email": email, "password": newPassword});
     if (res.statusCode == 200) {
       return res.data;
@@ -228,7 +227,7 @@ class ICloud extends ChangeNotifier{
       debugPrint("logged: $logged");
       loggedIn = logged[1];
       if(loggedIn){
-        affAuthToken = 'Bearer PrudApp ${logged[0]["auth_token"]}';
+        affAuthToken = 'Bearer PrudApp ${logged[0]["authToken"]}';
         lastAuthTokenGottenAt = DateTime.now();
       }
     }
@@ -366,6 +365,11 @@ class ICloud extends ChangeNotifier{
   Future<Response> addAffiliate(String url, User newUser) async => await prudDio.post(url, data: newUser.toJson());
 
   Future<Response> verifyAffiliateEmail(String url) async => await prudDio.get(url);
+
+  Future<Response> deleteAffiliate(String deleteUrl, String email) async {
+    String url = "$deleteUrl/$email";
+    return await prudDio.get(url);
+  }
 
   Future<bool> getMessengerPermissions() async{
     bool supported = false;
