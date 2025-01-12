@@ -251,7 +251,12 @@ flutter:
     - assets/images/stream.png
     - assets/images/stream-dark.png
     - assets/images/stream-studio.png
-    - assets/images/stream-studio-dark.png
+    - assets/images/comedy.png
+    - assets/images/movie.png
+    - assets/images/world-news.png
+    - assets/images/cuisine.png
+    - assets/images/music.png
+    - assets/images/learn.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

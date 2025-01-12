@@ -12,13 +12,18 @@ class ViewStudio extends StatefulWidget {
 
 class _ViewStudioState extends State<ViewStudio> {
 
-    @override
-    void initState() {
-      super.initState();
-    }
+  Future<void> getStudio() async {
 
-    @override
-     Widget build(BuildContext context) {
-      return WorkInProgress();
-     }
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WorkInProgress();
+  }
 }

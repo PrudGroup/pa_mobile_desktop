@@ -93,6 +93,12 @@ class PrudImages {
   String thriller;
   String thrillerDark;
   String operators;
+  String movie;
+  String music;
+  String news;
+  String learn;
+  String cuisine;
+  String comedy;
 
 
 
@@ -190,7 +196,13 @@ class PrudImages {
     required this.prudVidStudio,
     required this.prudVider,
     required this.thriller,
-    required this.thrillerDark
+    required this.thrillerDark,
+    required this.cuisine,
+    required this.movie,
+    required this.music,
+    required this.learn,
+    required this.news,
+    required this.comedy,
   });
 }
 
@@ -289,4 +301,10 @@ PrudImages prudImages = PrudImages(
   live: "assets/images/live.png",
   prudVider: "assets/images/prudVider.png",
   studio: "assets/images/studio.png",
+  music: "assets/images/music.png",
+  movie: "assets/images/movie.png",
+  comedy: "assets/images/comedy.png",
+  learn: "assets/images/learn.png",
+  news: "assets/images/world-news.png",
+  cuisine: "assets/images/cuisine.png",
 );

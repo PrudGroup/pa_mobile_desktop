@@ -6,7 +6,7 @@ enum WalletType {
   influencer,
   switzStore,
   shipper,
-  hotel,
+  studio,
   bus,
 }
 
@@ -127,13 +127,13 @@ class Wallet{
   Future<double> convertToInfluencersCurrency() async {
     double amtInWalletCur = await currencyMath.convert(
       amount: balance,
-      quoteCode: influencerNotifier.influencerWalletCurrencyCode?? "NGN",
-      baseCode: "NGN"
+      quoteCode: influencerNotifier.influencerWalletCurrencyCode?? "EUR",
+      baseCode: "EUR"
     );
     return currencyMath.roundDouble(amtInWalletCur, 2);
   }
 
-  bool checkIfSufficient(double amtInNaira) => balance >= amtInNaira;
+  bool checkIfSufficient(double amtInEuro) => balance >= amtInEuro;
 
   Map<String, dynamic> toJson(){
     return {

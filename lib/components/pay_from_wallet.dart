@@ -64,7 +64,7 @@ class PayFromWalletState extends State<PayFromWallet> {
             debugPrint("Wallet gotten: $wallet");
           }
           case WalletType.bus: {}
-          case WalletType.hotel: {}
+          case WalletType.studio: {}
           case WalletType.switzStore: {}
           case WalletType.shipper: {}
           default: {}
@@ -135,7 +135,7 @@ class PayFromWalletState extends State<PayFromWallet> {
             return "";
           case WalletType.switzStore:
             return "";
-          case WalletType.hotel:
+          case WalletType.studio:
             return "";
           case WalletType.bus:
             return "";

@@ -13,6 +13,11 @@ import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/pages/influencers/influencers.dart';
 import 'package:prudapp/pages/prudStreams/prud_streams.dart';
 import 'package:prudapp/pages/prudStreams/studio/prud_stream_studio.dart';
+import 'package:prudapp/pages/prudVid/prud_comedy.dart';
+import 'package:prudapp/pages/prudVid/prud_learn.dart';
+import 'package:prudapp/pages/prudVid/prud_movies.dart';
+import 'package:prudapp/pages/prudVid/prud_music.dart';
+import 'package:prudapp/pages/prudVid/prud_news.dart';
 import 'package:prudapp/pages/prudVid/prud_vid.dart';
 import 'package:prudapp/pages/prudVid/prud_vid_studio.dart';
 import 'package:prudapp/pages/prudVid/thrillers.dart';
@@ -27,6 +32,7 @@ import '../../components/prud_container.dart';
 import '../../models/images.dart';
 import '../../singletons/shared_local_storage.dart';
 import '../ads/ads.dart';
+import '../prudVid/prud_cuisine.dart';
 import '../settings/settings.dart';
 import '../switzstores/switz_stores.dart';
 import '../travels/switz_travels.dart';
@@ -74,6 +80,36 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
         icon: prudImages.prudVid
     ),
     Menu(
+        title: 'PrudMovies',
+        page: const PrudMovies(),
+        icon: prudImages.movie
+    ),
+    Menu(
+        title: 'PrudMusic',
+        page: const PrudMusic(),
+        icon: prudImages.music
+    ),
+    Menu(
+        title: 'PrudComedy',
+        page: const PrudComedy(),
+        icon: prudImages.comedy
+    ),
+    Menu(
+        title: 'PrudNews',
+        page: const PrudNews(),
+        icon: prudImages.news
+    ),
+    Menu(
+        title: 'PrudLearn',
+        page: const PrudLearn(),
+        icon: prudImages.learn
+    ),
+    Menu(
+        title: 'PrudCuisines',
+        page: const PrudCuisine(),
+        icon: prudImages.cuisine
+    ),
+    Menu(
         title: 'PrudStreams',
         page: const PrudStreams(),
         icon: prudImages.streamDark
@@ -98,11 +134,6 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
       page: const SwitzTravels(),
       icon: prudImages.travel1
     ),
-    /*Menu(
-      title: 'Switz Stores',
-      page: const SwitzStores(),
-      icon: prudImages.stores
-    ),*/
     Menu(
       title: 'Influencers',
       page: const Influencers(),
@@ -112,16 +143,6 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
       title: 'Ads & Promotions',
       page: const Ads(),
       icon: prudImages.videoAd
-    ),*/
-    /*Menu(
-      title: 'Shippers',
-      page: const Shippers(),
-      icon: prudImages.shipper
-    ),*/
-    /*Menu(
-      title: 'Url Shortener',
-      page: const Shortener(),
-      icon: prudImages.shortener
     ),*/
     /*Menu(
       title: 'My Account',
