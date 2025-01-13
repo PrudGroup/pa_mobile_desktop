@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:prudapp/models/wallet.dart';
@@ -7,7 +9,6 @@ import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
 import '../models/prud_vid.dart';
-import '../models/user.dart';
 import 'i_cloud.dart';
 
 
@@ -20,21 +21,43 @@ class PrudStudioNotifier extends ChangeNotifier {
   }
 
   String? prudStudioWalletCurrencyCode;
-  StudioWallet? myWallet;
-  List<WalletHistory>? myWalletHistory;
+  Studio? studio;
+  StudioWallet? wallet;
+  List<WalletHistory>? walletHistory;
 
   void updateWallet(StudioWallet wallet){
-    myWallet = wallet;
+    wallet = wallet;
     notifyListeners();
   }
 
-  Future<StudioWallet?> getWallet(String affId) async {
+  Future<void> getStudio() async {
+    studio = await tryAsync("getStudio", () async {
+      dynamic stud = myStorage.getFromStore(key: "studio");
+      if(stud != null){
+        return Studio.fromJson(jsonDecode(stud));
+      }else{
+        if(myStorage.user != null && myStorage.user!.id != null){
+          dynamic res = await makeRequest(path: "aff/${myStorage.user!.id}");
+          if (res != null) {
+            Studio st = Studio.fromJson(res);
+            await myStorage.addToStore(key: "studio", value: jsonEncode(st));
+            return st;
+          } else {
+            return null;
+          }
+        }else{
+          return null;
+        }
+      }
+    });
+    notifyListeners();
+  }
+
+  Future<StudioWallet?> getWallet(String studId) async {
     return await tryAsync("getWallet", () async {
-      dynamic res = await makeRequest(path: "wallets/aff/$affId");
+      dynamic res = await makeRequest(path: "wallets/studio/$studId");
       if (res != null) {
-        StudioWallet wt = StudioWallet.fromJson(res);
-        updateWallet(wt);
-        return wt;
+        return StudioWallet.fromJson(res);
       } else {
         return null;
       }
@@ -78,12 +101,11 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
-  Future<User?> getPrudStudioById(String id) async {
+  Future<Studio?> getPrudStudioById(String id) async {
     return await tryAsync("getPrudStudioById",() async{
       dynamic res = await makeRequest(path: id);
       if(res != null){
-        User foundUser = User.fromJson(res);
-        return foundUser;
+        return Studio.fromJson(res);
       }else{
         return null;
       }
@@ -96,7 +118,7 @@ class PrudStudioNotifier extends ChangeNotifier {
     currencyMath.loginAutomatically();
     if(iCloud.affAuthToken != null){
       setDioHeaders();
-      String url = "$prudApiUrl/affiliates/$path";
+      String url = "$prudApiUrl/studios/$path";
       Response res = isGet? (await prudStudioDio.get(url)) : (await prudStudioDio.post(url, data: data));
       debugPrint("prudStudio Request: $res");
       return res.data;
@@ -107,7 +129,11 @@ class PrudStudioNotifier extends ChangeNotifier {
 
   Future<void> initPrudStudio() async {
     try{
-      notifyListeners();
+      await getStudio();
+      if(studio != null && studio!.id != null){
+        wallet = await getWallet(studio!.id!);
+        notifyListeners();
+      }
     }catch(ex){
       debugPrint("PrudStudioNotifier_initPrudStudio Error: $ex");
     }

@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pdf/widgets.dart' as pdf;
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import '../components/page_transitions/scale.dart';
@@ -21,8 +22,17 @@ import '../models/images.dart';
 import '../models/shared_classes.dart';
 import '../models/user.dart';
 import '../pages/ads/ads.dart';
-import '../pages/shippers/shippers.dart';
-import '../pages/switzstores/switz_stores.dart';
+import '../pages/influencers/influencers.dart';
+import '../pages/prudStreams/studio/prud_stream_studio.dart';
+import '../pages/prudVid/prud_cuisine.dart';
+import '../pages/prudVid/prud_learn.dart';
+import '../pages/prudVid/prud_movies.dart';
+import '../pages/prudVid/prud_music.dart';
+import '../pages/prudVid/prud_news.dart';
+import '../pages/prudVid/prud_vid.dart';
+import '../pages/prudVid/prud_vid_studio.dart';
+import '../pages/prudVid/thrillers.dart';
+import '../pages/travels/switz_travels.dart';
 
 enum RegisterState{
   first,
@@ -229,6 +239,7 @@ class ICloud extends ChangeNotifier{
       if(loggedIn){
         affAuthToken = 'Bearer PrudApp ${logged[0]["authToken"]}';
         lastAuthTokenGottenAt = DateTime.now();
+        await prudStudioNotifier.initPrudStudio();
       }
     }
     prudDio.options.headers.clear();
@@ -242,7 +253,7 @@ class ICloud extends ChangeNotifier{
   List<Widget> getShowroom(BuildContext context, {int? showroomItems}){
     List<Widget> showroom = [
       InkWell(
-        onTap: () => iCloud.goto(context, const Ads()),
+        onTap: () => iCloud.goto(context, const PrudVidStudio()),
         child: PrudContainer(
             hasPadding: false,
             child: Image.asset(
@@ -260,18 +271,18 @@ class ICloud extends ChangeNotifier{
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const SwitzStores()),
+        onTap: () => iCloud.goto(context, const PrudCuisine()),
         child: PrudContainer(
           hasPadding: false,
           hasTitle: true,
-          title: "Best Marketplace",
+          title: "Cuisines",
           child: Image.asset(
               prudImages.front13
           ),
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const SwitzStores()),
+        onTap: () => iCloud.goto(context, const PrudLearn()),
         child: PrudContainer(
           hasPadding: false,
           child: Image.asset(
@@ -280,18 +291,18 @@ class ICloud extends ChangeNotifier{
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const Shippers()),
+        onTap: () => iCloud.goto(context, const SwitzTravels()),
         child: PrudContainer(
           hasPadding: false,
           hasTitle: true,
-          title: "Shippers",
+          title: "SwitzTravels",
           child: Image.asset(
               prudImages.front15
           ),
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const SwitzStores()),
+        onTap: () => iCloud.goto(context, const PrudNews()),
         child: PrudContainer(
           hasPadding: false,
           child: Image.asset(
@@ -300,18 +311,18 @@ class ICloud extends ChangeNotifier{
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const SwitzStores()),
+        onTap: () => iCloud.goto(context, const PrudStreamStudio()),
         child: PrudContainer(
           hasPadding: false,
           hasTitle: true,
-          title: "Switz Stores",
+          title: "PrudStream Studio",
           child: Image.asset(
               prudImages.front2
           ),
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const SwitzStores()),
+        onTap: () => iCloud.goto(context, const PrudMusic()),
         child: PrudContainer(
           hasPadding: false,
           child: Image.asset(
@@ -320,34 +331,74 @@ class ICloud extends ChangeNotifier{
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const Shippers()),
+        onTap: () => iCloud.goto(context, const SwitzTravels()),
         child: PrudContainer(
           hasPadding: false,
           hasTitle: true,
           titleAlignment: MainAxisAlignment.end,
-          title: "Shipping Easily",
+          title: "SwitzTravels",
           child: Image.asset(
               prudImages.front14
           ),
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const SwitzStores()),
+        onTap: () => iCloud.goto(context, const PrudMovies()),
         child: PrudContainer(
           hasPadding: false,
           hasTitle: true,
-          title: "Shopping",
+          title: "Latest Movies & Series",
           child: Image.asset(
               prudImages.front9
           ),
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const SwitzStores()),
+        onTap: () => iCloud.goto(context, const PrudNews()),
         child: PrudContainer(
           hasPadding: false,
           child: Image.asset(
               prudImages.front8
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const Thrillers()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          title: "Movie Thrillers",
+          child: Image.asset(
+              prudImages.front3
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const PrudVidStudio()),
+        child: PrudContainer(
+          hasPadding: false,
+          child: Image.asset(
+              prudImages.front4
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const Influencers()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          title: "Affiliate Marketing",
+          child: Image.asset(
+              prudImages.front5
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const PrudVid()),
+        child: PrudContainer(
+          hasPadding: false,
+          child: Image.asset(
+              prudImages.front7
           ),
         ),
       ),

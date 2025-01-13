@@ -21,8 +21,6 @@ import 'package:prudapp/pages/prudVid/prud_news.dart';
 import 'package:prudapp/pages/prudVid/prud_vid.dart';
 import 'package:prudapp/pages/prudVid/prud_vid_studio.dart';
 import 'package:prudapp/pages/prudVid/thrillers.dart';
-import 'package:prudapp/pages/shippers/shippers.dart';
-// import 'package:prudapp/pages/shorteners/shortener.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:rate_my_app/rate_my_app.dart';
 import 'package:prudapp/singletons/tab_data.dart';
@@ -30,11 +28,10 @@ import 'package:flutter_fgbg/flutter_fgbg.dart';
 
 import '../../components/prud_container.dart';
 import '../../models/images.dart';
+import '../../singletons/currency_math.dart';
 import '../../singletons/shared_local_storage.dart';
-import '../ads/ads.dart';
 import '../prudVid/prud_cuisine.dart';
 import '../settings/settings.dart';
-import '../switzstores/switz_stores.dart';
 import '../travels/switz_travels.dart';
 import 'home_drawer.dart';
 
@@ -155,12 +152,16 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
       icon: prudImages.settings
     ),
   ];
-  List<Widget> showroom = [];
   bool prudServiceIsAvailable = true;
 
   Future<void> changeConnectionStatus() async{
     bool ok = await iCloud.prudServiceIsAvailable();
     if(mounted) setState(() => prudServiceIsAvailable = ok);
+  }
+
+  Future<void> _refresh() async {
+    await currencyMath.loginAutomatically();
+    await changeConnectionStatus();
   }
 
 
@@ -170,118 +171,6 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
       await changeConnectionStatus();
     });
     carousels.shuffle();
-    showroom = [
-      InkWell(
-        onTap: () => iCloud.goto(context, const Ads()),
-        child: PrudContainer(
-            hasPadding: false,
-            child: Image.asset(
-                prudImages.front1
-            )
-        ),
-      ),
-      InkWell(
-        onTap: () => iCloud.goto(context, const Ads()),
-        child: PrudContainer(
-          hasPadding: false,
-          child: Image.asset(
-            prudImages.front6
-          ),
-        ),
-      ),
-      InkWell(
-        onTap: () => iCloud.goto(context, const SwitzStores()),
-        child: PrudContainer(
-          hasPadding: false,
-          hasTitle: true,
-          title: "Best Marketplace",
-          child: Image.asset(
-            prudImages.front13
-          ),
-        ),
-      ),
-      InkWell(
-        onTap: () => iCloud.goto(context, const SwitzStores()),
-        child: PrudContainer(
-          hasPadding: false,
-          child: Image.asset(
-            prudImages.front12
-          ),
-        ),
-      ),
-      InkWell(
-        onTap: () => iCloud.goto(context, const Shippers()),
-        child: PrudContainer(
-          hasPadding: false,
-          hasTitle: true,
-          title: "Shippers",
-          child: Image.asset(
-            prudImages.front15
-          ),
-        ),
-      ),
-      InkWell(
-        onTap: () => iCloud.goto(context, const SwitzStores()),
-        child: PrudContainer(
-          hasPadding: false,
-          child: Image.asset(
-            prudImages.front10
-          ),
-        ),
-      ),
-      InkWell(
-        onTap: () => iCloud.goto(context, const SwitzStores()),
-        child: PrudContainer(
-          hasPadding: false,
-          hasTitle: true,
-          title: "Switz Stores",
-          child: Image.asset(
-            prudImages.front2
-          ),
-        ),
-      ),
-      InkWell(
-        onTap: () => iCloud.goto(context, const SwitzStores()),
-        child: PrudContainer(
-          hasPadding: false,
-          child: Image.asset(
-            prudImages.front11
-          ),
-        ),
-      ),
-      InkWell(
-        onTap: () => iCloud.goto(context, const Shippers()),
-        child: PrudContainer(
-          hasPadding: false,
-          hasTitle: true,
-          titleAlignment: MainAxisAlignment.end,
-          title: "Shipping Easily",
-          child: Image.asset(
-            prudImages.front14
-          ),
-        ),
-      ),
-      InkWell(
-        onTap: () => iCloud.goto(context, const SwitzStores()),
-        child: PrudContainer(
-          hasPadding: false,
-          hasTitle: true,
-          title: "Shopping",
-          child: Image.asset(
-            prudImages.front9
-          ),
-        ),
-      ),
-      InkWell(
-        onTap: () => iCloud.goto(context, const SwitzStores()),
-        child: PrudContainer(
-          hasPadding: false,
-          child: Image.asset(
-            prudImages.front8
-          ),
-        ),
-      ),
-    ];
     super.initState();
     _rateMyApp.init();
     connectSub = ConnectionNotifierTools.onStatusChange.listen((_) async {
@@ -377,48 +266,51 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
           backgroundColor: prudTheme.primaryColor,
           foregroundColor: prudTheme.colorScheme.surface,
         ),
-        body: SizedBox(
-          height: height,
-          width: width,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.all(10.0),
-            child: Column(
-                children: [
-                  PrudContainer(
-                    hasPadding: false,
-                    child: GFCarousel(
-                      height: 137.0,
-                      autoPlay: true,
-                      aspectRatio: double.maxFinite,
-                      viewportFraction: 1.0,
-                      enlargeMainPage: true,
-                      enableInfiniteScroll: true,
-                      pauseAutoPlayOnTouch: const Duration(seconds: 10),
-                      autoPlayInterval: const Duration(seconds: 5),
-                      items: carousels
+        body: RefreshIndicator(
+          onRefresh: _refresh,
+          child: SizedBox(
+            height: height,
+            width: width,
+            child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  children: [
+                    PrudContainer(
+                      hasPadding: false,
+                      child: GFCarousel(
+                          height: 137.0,
+                          autoPlay: true,
+                          aspectRatio: double.maxFinite,
+                          viewportFraction: 1.0,
+                          enlargeMainPage: true,
+                          enableInfiniteScroll: true,
+                          pauseAutoPlayOnTouch: const Duration(seconds: 10),
+                          autoPlayInterval: const Duration(seconds: 5),
+                          items: carousels
+                      ),
                     ),
-                  ),
-                  spacer.height,
-                  if(!prudServiceIsAvailable) Column(
-                    children: [
-                      const NetworkIssueComponent(),
-                      spacer.height,
-                    ],
-                  ),
-                  PrudContainer(
-                    hasPadding: true,
-                    child: MainMenu(
-                      menus: menus,
-                      bgColor: prudColorTheme.bgC,
-                      useWrap: true,
-                    )
-                  ),
-                  spacer.height,
-                  PrudShowroom(items: iCloud.getShowroom(context)),
-                  largeSpacer.height,
-                ],
-              )
+                    spacer.height,
+                    if(!prudServiceIsAvailable) Column(
+                      children: [
+                        const NetworkIssueComponent(),
+                        spacer.height,
+                      ],
+                    ),
+                    PrudContainer(
+                        hasPadding: true,
+                        child: MainMenu(
+                          menus: menus,
+                          bgColor: prudColorTheme.bgC,
+                          useWrap: true,
+                        )
+                    ),
+                    spacer.height,
+                    PrudShowroom(items: iCloud.getShowroom(context)),
+                    largeSpacer.height,
+                  ],
+                )
+            ),
           ),
         ),
       ),
