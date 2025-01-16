@@ -11,8 +11,9 @@ class CountryPicker extends StatefulWidget {
   final String? selected;
   final List<String>? countries;
   final Function(mc.Country) onChange;
+  final Color? bgColor;
 
-  const CountryPicker({super.key, this.selected, this.countries, required this.onChange});
+  const CountryPicker({super.key, this.bgColor, this.selected, this.countries, required this.onChange});
 
   @override
   CountryPickerState createState() => CountryPickerState();
@@ -68,21 +69,22 @@ class CountryPickerState extends State<CountryPicker> {
     return InkWell(
       onTap: showCountryDialog,
       child: PrudPanel(
-          title: "Select Country",
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                widget.selected?? selectedCountry?.name?? "Select Country",
-                style: prudWidgetStyle.tabTextStyle.copyWith(
-                    fontSize: 16,
-                    color: prudColorTheme.textB
-                ),
+        bgColor: widget.bgColor,
+        title: "Select Country",
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              widget.selected?? selectedCountry?.name?? "Select Country",
+              style: prudWidgetStyle.tabTextStyle.copyWith(
+                  fontSize: 16,
+                  color: prudColorTheme.textB
               ),
-              loading?  SpinKitFadingCircle(size: 20, color: prudColorTheme.iconB,)
-                  : const Icon(Icons.keyboard_arrow_down)
-            ],
-          )
+            ),
+            loading?  SpinKitFadingCircle(size: 20, color: prudColorTheme.iconB,)
+                : const Icon(Icons.keyboard_arrow_down)
+          ],
+        )
       ),
     );
   }

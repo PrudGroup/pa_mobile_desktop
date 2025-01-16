@@ -24,6 +24,12 @@ class PrudStudioNotifier extends ChangeNotifier {
   Studio? studio;
   StudioWallet? wallet;
   List<WalletHistory>? walletHistory;
+  int selectedTab = 0;
+
+  void changeTab(int tab){
+    selectedTab = tab;
+    notifyListeners();
+  }
 
   void updateWallet(StudioWallet wallet){
     wallet = wallet;
@@ -38,7 +44,7 @@ class PrudStudioNotifier extends ChangeNotifier {
       }else{
         if(myStorage.user != null && myStorage.user!.id != null){
           dynamic res = await makeRequest(path: "aff/${myStorage.user!.id}");
-          if (res != null) {
+          if (res != null && res != false) {
             Studio st = Studio.fromJson(res);
             await myStorage.addToStore(key: "studio", value: jsonEncode(st));
             return st;
@@ -50,7 +56,19 @@ class PrudStudioNotifier extends ChangeNotifier {
         }
       }
     });
-    notifyListeners();
+  }
+
+  Future<Studio?> createStudio(Studio newStudio) async {
+    return await tryAsync("createStudio", () async {
+      dynamic res = await makeRequest(path: "", isGet: false, data: newStudio.toJson());
+      if (res != null) {
+        Studio st = Studio.fromJson(res);
+        await myStorage.addToStore(key: "studio", value: jsonEncode(st));
+        return st;
+      } else {
+        return null;
+      }
+    });
   }
 
   Future<StudioWallet?> getWallet(String studId) async {
@@ -162,3 +180,4 @@ Dio prudStudioDio = Dio(BaseOptions(
     }
 ));
 final prudStudioNotifier = PrudStudioNotifier();
+List<String> channelCategories = ["movie", "music", "learn", "news", "cuisines", "comedy"];

@@ -3,6 +3,7 @@ import 'package:prudapp/pages/prudVid/studio/studioTabs/new_channel.dart';
 import 'package:prudapp/pages/prudVid/studio/studioTabs/promote_studio_channel.dart';
 import 'package:prudapp/pages/prudVid/studio/studioTabs/view_studio.dart';
 import 'package:prudapp/pages/prudVid/studio/studioTabs/view_studio_channels.dart';
+import 'package:prudapp/singletons/prud_studio_notifier.dart';
 
 import '../../../components/inner_menu.dart';
 import '../../../components/translate_text.dart';
@@ -18,7 +19,7 @@ class StudioChannel extends StatefulWidget {
 }
 
 class StudioChannelState extends State<StudioChannel> {
-
+  int selectedTab = prudStudioNotifier.selectedTab;
   List<InnerMenuItem> tabMenus = [];
   final GlobalKey<InnerMenuState> _key = GlobalKey();
 
@@ -39,8 +40,8 @@ class StudioChannelState extends State<StudioChannel> {
     if(mounted){
       setState(() {
         tabMenus = [
-          InnerMenuItem(imageIcon: prudImages.studio, title: "Studio", menu: const ViewStudio()),
-          InnerMenuItem(imageIcon: prudImages.live, title: "New Channel", menu: const NewChannel()),
+          InnerMenuItem(imageIcon: prudImages.studio, title: "Studio", menu: ViewStudio(goToTab: (int index) => moveTo(index))),
+          InnerMenuItem(imageIcon: prudImages.live, title: "New Channel", menu: NewChannel(goToTab: (int index) => moveTo(index))),
           InnerMenuItem(imageIcon: prudImages.localVideoLibrary, title: "Channels", menu: const ViewStudioChannels()),
           InnerMenuItem(imageIcon: prudImages.videoAd, title: "Promote Channel", menu:  const PromoteStudioChannel())
         ];

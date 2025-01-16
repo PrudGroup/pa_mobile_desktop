@@ -120,7 +120,7 @@ class NewBeneficiaryState extends State<NewBeneficiary> {
             try{
               if(mounted) setState(() => adding = true);
               if(nextExisting){
-                await beneficiaryNotifier.addBeneficiary(newBen!, isSelected: false);
+                // await beneficiaryNotifier.addBeneficiary(newBen!, isSelected: false);
                 await beneficiaryNotifier.addBeneficiary(newBen!);
               }else{
                 await beneficiaryNotifier.addBeneficiary(newBen!, isSelected: false);

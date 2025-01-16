@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:prudapp/components/work_in_progress.dart';
 
 class ViewStudioChannels extends StatefulWidget {
+  const ViewStudioChannels({super.key});
 
-    const ViewStudioChannels({super.key});
-
-    @override
-    State<ViewStudioChannels> createState() => _ViewStudioChannelsState();
+  @override
+  State<ViewStudioChannels> createState() => _ViewStudioChannelsState();
 }
 
 class _ViewStudioChannelsState extends State<ViewStudioChannels> {

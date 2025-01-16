@@ -55,7 +55,7 @@ class VidChannel{
   bool verified;
   String logo;
   String displayScreen;
-  String category; // Movie, Music, Education, News, How_To, Comedy
+  String category; // Movie, Music, Learn, News, Cuisines, Comedy
   String subCategory; // Drama
   String countryCode;
   int miniTargetAge;
@@ -95,11 +95,11 @@ class VidChannel{
     required this.displayScreen,
     required this.studioId,
     required this.logo,
-    required this.subCategory,
     required this.countryCode,
     required this.maxTargetAge,
     required this.miniTargetAge,
     required this.category,
+    this.subCategory = "Any",
     this.verified = false,
     this.blocked = false,
     this.channelCurrency = "EUR",

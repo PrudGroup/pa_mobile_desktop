@@ -89,6 +89,7 @@ dependencies:
   paystack_for_flutter: ^1.0.2
   minio: ^3.5.7
   dpad_container: ^2.0.4
+  carousel_slider: ^4.2.1
 
 
 dev_dependencies:
