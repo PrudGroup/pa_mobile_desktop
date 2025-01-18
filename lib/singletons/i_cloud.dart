@@ -63,7 +63,6 @@ class ICloud extends ChangeNotifier{
   bool serviceEnabled = false;
   bool isRealTimeConnected = false;
   bool clearDigitInput = false;
-  String? apiEndPoint;
   bool showInnerTabsAndMenus = true;
 
 
@@ -171,12 +170,12 @@ class ICloud extends ChangeNotifier{
     String codeUrl = "$prudApiUrl/files/single/";
     var formData = FormData.fromMap({
       'upload': await MultipartFile.fromFile(file.path, filename: file.name),
-      "destination": destination,
+      "destination": "prudapp/$destination" ,
     });
     Response res = await prudDio.post(codeUrl, data: formData);
     if (res.statusCode == 201) {
-      if(res.data != null && res.data["url"] != null && res.data["uploaded"]){
-        return res.data["url"];
+      if(res.data != null && res.data["simple"] != null && res.data["uploaded"]){
+        return res.data["simple"];
       }else{
         return null;
       }
@@ -186,6 +185,9 @@ class ICloud extends ChangeNotifier{
     }
   }
 
+  String authorizeDownloadUrl(String url){
+    return b2DownloadToken != null? "$url?Authorization=$b2DownloadToken": url;
+  }
 
   Future<bool> deleteFileFromCloud(String url) async {
     String codeUrl = "$prudApiUrl/files/single/delete";
@@ -239,6 +241,7 @@ class ICloud extends ChangeNotifier{
       if(loggedIn){
         affAuthToken = 'Bearer PrudApp ${logged[0]["authToken"]}';
         lastAuthTokenGottenAt = DateTime.now();
+        await setB2Tokens();
         await prudStudioNotifier.initPrudStudio();
       }
     }
@@ -556,6 +559,26 @@ class ICloud extends ChangeNotifier{
     return hasAdded;
   }
 
+  Future<bool> setB2Tokens() async {
+    bool hasAdded = false;
+    try{
+      if(affAuthToken != null){
+        String apiUrl = "$apiEndPoint/files/download_token";
+        Response res = await prudDio.get(apiUrl);
+        debugPrint("Install Metric Result: $res : updated_data: ${res.data}");
+        if (res.data != null && res.data!["download_token"] != null) {
+          b2DownloadToken = res.data!["download_token"];
+          b2AccToken = res.data!["account_token"];
+          b2AuthKey = res.data!["auth_key"];
+          hasAdded = true;
+        }
+      }
+    }catch(ex){
+      debugPrint("setB2Tokens: $ex");
+    }
+    return hasAdded;
+  }
+
   void go(BuildContext context, String route, Map<String, dynamic>? qParam){
     GoRouter.of(context).go(Uri(path: route, queryParameters: qParam).toString());
   }
@@ -581,6 +604,9 @@ class ICloud extends ChangeNotifier{
   ICloud._internal();
 }
 
+String? b2DownloadToken;
+String? b2AccToken;
+String? b2AuthKey;
 const bool isProduction = Constants.envType=="production";
 const String prudApiUrl = Constants.prudApiUrl;
 const String localApiUrl = Constants.localApiUrl;

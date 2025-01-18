@@ -5,6 +5,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/models/theme.dart';
+import 'package:syncfusion_flutter_sliders/sliders.dart';
 
 import '../../../../components/country_picker.dart';
 import '../../../../components/prud_container.dart';
@@ -12,6 +13,7 @@ import '../../../../components/prud_image_picker.dart';
 import '../../../../components/prud_panel.dart';
 import '../../../../components/translate_text.dart';
 import '../../../../models/prud_vid.dart';
+import '../../../../singletons/currency_math.dart';
 import '../../../../singletons/prud_studio_notifier.dart';
 import '../../../../singletons/tab_data.dart';
 
@@ -24,6 +26,7 @@ enum CreateChannelSteps {
   step5,
   step6,
   step7,
+  step8,
   success,
   failed
 }
@@ -47,6 +50,14 @@ class _NewChannelState extends State<NewChannel> {
   String? logoUrl;
   String? displayScreenImage;
   bool shouldReset = false;
+  SfRangeValues ageTargets = SfRangeValues(18.0, 30.0);
+  double sharePerView = 45.0;
+  double sharePerMember = 45.0;
+  double memberCost = 0;
+  double streamServiceCost = 0;
+  double membershipCostInEuro = 0;
+  double streamServiceCostInEuro = 0;
+  String? description;
 
   void clearInput(){
     setState(() {
@@ -58,6 +69,17 @@ class _NewChannelState extends State<NewChannel> {
       countryCode = "NG";
       channelName = null;
       loading = false;
+      logoUrl = null;
+      displayScreenImage = null;
+      shouldReset = false;
+      ageTargets = SfRangeValues(18.0, 30.0);
+      sharePerView = 45.0;
+      sharePerMember = 45.0;
+      memberCost = 0;
+      streamServiceCost = 0;
+      streamServiceCostInEuro = 0;
+      membershipCostInEuro = 0;
+      description = null;
     });
   }
 
@@ -85,7 +107,35 @@ class _NewChannelState extends State<NewChannel> {
   }
 
   Future<bool> createChannel() async {
-    return false;
+    return await tryAsync("createChannel", () async {
+      bool created = false;
+      if(mounted) setState(() => loading = true);
+      VidChannel newChannel = VidChannel(
+        channelName: channelName!,
+        contentPercentageSharePerView: sharePerView,
+        monthlyMembershipCost: memberCost,
+        monthlyMembershipCostInEuro: membershipCostInEuro,
+        monthlyStreamingCost: streamServiceCost,
+        monthlyStreamingCostInEuro: streamServiceCostInEuro,
+        membershipPercentageSharePerMonth: sharePerMember,
+        description: description!,
+        displayScreen: displayScreenImage!,
+        studioId: studio!.id!,
+        logo: logoUrl!,
+        channelCurrency: selectedCurrency!.code,
+        countryCode: countryCode!,
+        maxTargetAge: int.parse(ageTargets.end.toString()),
+        miniTargetAge: int.parse(ageTargets.start.toString()),
+        category: category
+      );
+      VidChannel? result = await prudStudioNotifier.createVidChannel(newChannel);
+      created = result != null;
+      if(mounted) setState(() => loading = false);
+      return created;
+    }, error: (){
+      if(mounted) setState(() => loading = false);
+      return false;
+    });
   }
 
   Color getPreviousButtonColor() {
@@ -108,15 +158,67 @@ class _NewChannelState extends State<NewChannel> {
     return "Previous";
   }
 
-  bool validateStep(CreateChannelSteps step){
+  void createAnother() {
+    clearInput();
+    if(mounted) setState(() => presentStep = CreateChannelSteps.step1);
+  }
+
+  void addVideo() {
+    clearInput();
+    widget.goToTab(2);
+  }
+
+  Future<bool> validateStep(CreateChannelSteps step) async {
     switch(presentStep){
       case CreateChannelSteps.step1: return countryCode != null && channelName != null;
       case CreateChannelSteps.step2: return category.isNotEmpty && selectedCurrency != null;
       case CreateChannelSteps.step3: return logoUrl != null && displayScreenImage != null;
-      case CreateChannelSteps.step4: return false;
-      case CreateChannelSteps.step5: return false;
-      case CreateChannelSteps.step6: return false;
-      case CreateChannelSteps.step7: return false;
+      case CreateChannelSteps.step4: return ageTargets.start > 1.0 && ageTargets.end <= 50;
+      case CreateChannelSteps.step5: return sharePerView >= 40.0 && sharePerMember >= 40.0;
+      case CreateChannelSteps.step6: {
+        if(memberCost > 0){
+          if(selectedCurrency!.code.toUpperCase() == "EUR"){
+            if(mounted) setState(() => membershipCostInEuro = memberCost);
+            return memberCost >= 1.0 && memberCost <= 5.0;
+          }else{
+            double amount = await currencyMath.convert(
+              amount: memberCost,
+              quoteCode: "EUR",
+              baseCode: selectedCurrency!.code
+            );
+            if(mounted) setState(() => membershipCostInEuro = currencyMath.roundDouble(amount, 2));
+            return amount >= 1.0 && amount <= 5.0;
+          }
+        }else{
+          return false;
+        }
+      }
+      case CreateChannelSteps.step7: {
+        if(streamServiceCost > 0){
+          if(selectedCurrency!.code.toUpperCase() == "EUR"){
+            if(mounted) setState(() => streamServiceCostInEuro = streamServiceCost);
+            return streamServiceCost >= 4.0 && streamServiceCost <= 10.0;
+          }else{
+            double amount = await currencyMath.convert(
+                amount: streamServiceCost,
+                quoteCode: "EUR",
+                baseCode: selectedCurrency!.code
+            );
+            if(mounted) setState(() => streamServiceCostInEuro = currencyMath.roundDouble(amount, 2));
+            return amount >= 4.0 && amount <= 10.0;
+          }
+        }else{
+          return false;
+        }
+      }
+      case CreateChannelSteps.step8: {
+        if(description != null){
+          int totalWords = tabData.countWordsInString(description!);
+          return totalWords >= 30 && totalWords <= 100;
+        }else{
+          return false;
+        }
+      }
       default: return false;
     }
   }
@@ -125,31 +227,35 @@ class _NewChannelState extends State<NewChannel> {
     switch(presentStep){
       case CreateChannelSteps.policy: if(mounted) setState(() => presentStep = CreateChannelSteps.step1);
       case CreateChannelSteps.step1: {
-        bool validated = validateStep(CreateChannelSteps.step1);
+        bool validated = await validateStep(CreateChannelSteps.step1);
         if(mounted && validated) setState(() => presentStep = CreateChannelSteps.step2);
       }
       case CreateChannelSteps.step2: {
-        bool validated = validateStep(CreateChannelSteps.step2);
+        bool validated = await validateStep(CreateChannelSteps.step2);
         if(mounted && validated) setState(() => presentStep = CreateChannelSteps.step3);
       }
       case CreateChannelSteps.step3: {
-        bool validated = validateStep(CreateChannelSteps.step3);
+        bool validated = await validateStep(CreateChannelSteps.step3);
         if(mounted && validated) setState(() => presentStep = CreateChannelSteps.step4);
       }
       case CreateChannelSteps.step4: {
-        bool validated = validateStep(CreateChannelSteps.step4);
+        bool validated = await validateStep(CreateChannelSteps.step4);
         if(mounted && validated) setState(() => presentStep = CreateChannelSteps.step5);
       }
       case CreateChannelSteps.step5: {
-        bool validated = validateStep(CreateChannelSteps.step5);
+        bool validated = await validateStep(CreateChannelSteps.step5);
         if(mounted && validated) setState(() => presentStep = CreateChannelSteps.step6);
       }
       case CreateChannelSteps.step6: {
-        bool validated = validateStep(CreateChannelSteps.step6);
+        bool validated = await validateStep(CreateChannelSteps.step6);
         if(mounted && validated) setState(() => presentStep = CreateChannelSteps.step7);
       }
       case CreateChannelSteps.step7: {
-        bool validated = validateStep(CreateChannelSteps.step7);
+        bool validated = await validateStep(CreateChannelSteps.step7);
+        if(mounted && validated) setState(() => presentStep = CreateChannelSteps.step8);
+      }
+      case CreateChannelSteps.step8: {
+        bool validated = await validateStep(CreateChannelSteps.step8);
         if(validated) {
           bool created = await createChannel();
           if(mounted && created) {
@@ -175,7 +281,8 @@ class _NewChannelState extends State<NewChannel> {
       case CreateChannelSteps.step5: if(mounted) setState(() => presentStep = CreateChannelSteps.step4);
       case CreateChannelSteps.step6: if(mounted) setState(() => presentStep = CreateChannelSteps.step5);
       case CreateChannelSteps.step7: if(mounted) setState(() => presentStep = CreateChannelSteps.step6);
-      case CreateChannelSteps.failed: if(mounted) setState(() => presentStep = CreateChannelSteps.step7);
+      case CreateChannelSteps.step8: if(mounted) setState(() => presentStep = CreateChannelSteps.step7);
+      case CreateChannelSteps.failed: if(mounted) setState(() => presentStep = CreateChannelSteps.step8);
       default: {}
     }
   }
@@ -233,9 +340,9 @@ class _NewChannelState extends State<NewChannel> {
                         " Be sure to read our policies that guards owning a Channel on Prudapp. Creating "
                         "one automatically binds you to that agreement. Let's continue the excitements!",
                     style: prudWidgetStyle.tabTextStyle.copyWith(
-                      color: prudColorTheme.textB,
+                      color: prudColorTheme.textA,
                       fontSize: 15,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w400,
                     ),
                     align: TextAlign.center,
                   ),
@@ -262,9 +369,10 @@ class _NewChannelState extends State<NewChannel> {
                     children: [
                       spacer.height,
                       Translate(
-                        text: "What name would you like to call your channel. Make it exciting yet represents your brand.",
+                        text: "What name would you like to call your channel. Make it exciting yet represents your brand. "
+                            "Please note that name must not contain prudapp, prudVid, prudLearn, prudStreams, prudStudio, prudMusic, prudMovies, prudComedy",
                         style: prudWidgetStyle.tabTextStyle.copyWith(
-                          color: prudColorTheme.textB,
+                          color: prudColorTheme.textA,
                           fontSize: 14,
                         ),
                         align: TextAlign.center,
@@ -310,7 +418,7 @@ class _NewChannelState extends State<NewChannel> {
                             "not to imply that your content will only be used by only people from "
                             "selected country but they are prioritized.",
                         style: prudWidgetStyle.tabTextStyle.copyWith(
-                          color: prudColorTheme.textB,
+                          color: prudColorTheme.textA,
                           fontSize: 14,
                         ),
                         align: TextAlign.center,
@@ -353,9 +461,9 @@ class _NewChannelState extends State<NewChannel> {
                                 "of another type, your channel will be suspended for a month. So decide what niche your "
                                 "channel will be.",
                             style: prudWidgetStyle.tabTextStyle.copyWith(
-                              color: prudColorTheme.textB,
+                              color: prudColorTheme.textA,
                               fontSize: 15,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w400,
                             ),
                             align: TextAlign.center,
                           ),
@@ -471,9 +579,9 @@ class _NewChannelState extends State<NewChannel> {
                               Translate(
                                 text: "Upload your channel logo. The logo must represent your brand",
                                 style: prudWidgetStyle.tabTextStyle.copyWith(
-                                  color: prudColorTheme.textB,
+                                  color: prudColorTheme.textA,
                                   fontSize: 15,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w400,
                                 ),
                                 align: TextAlign.center,
                               ),
@@ -497,9 +605,9 @@ class _NewChannelState extends State<NewChannel> {
                                     "photo has landscape dimensions. The width has to be higher than the height. "
                                     "We recommend 2000x1000 dimensions.",
                                 style: prudWidgetStyle.tabTextStyle.copyWith(
-                                  color: prudColorTheme.textB,
+                                  color: prudColorTheme.textA,
                                   fontSize: 15,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w400,
                                 ),
                                 align: TextAlign.center,
                               ),
@@ -529,14 +637,40 @@ class _NewChannelState extends State<NewChannel> {
                                   Translate(
                                     text: "Your contents on this channel needs age restrictions. Kindly provide the age range.",
                                     style: prudWidgetStyle.tabTextStyle.copyWith(
-                                      color: prudColorTheme.textB,
+                                      color: prudColorTheme.textA,
                                       fontSize: 15,
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.w400,
                                     ),
                                     align: TextAlign.center,
                                   ),
                                   spacer.height,
-
+                                  PrudContainer(
+                                    hasTitle: true,
+                                    hasPadding: true,
+                                    title: "Age Targets",
+                                    titleBorderColor: prudColorTheme.bgC,
+                                    titleAlignment: MainAxisAlignment.end,
+                                    child: Column(
+                                      children: [
+                                        mediumSpacer.height,
+                                        SfRangeSlider(
+                                          min: 0.0,
+                                          max: 50.0,
+                                          values: ageTargets,
+                                          interval: 2,
+                                          showTicks: true,
+                                          showLabels: true,
+                                          enableTooltip: true,
+                                          minorTicksPerInterval: 1,
+                                          onChanged: (SfRangeValues values){
+                                            if(mounted) setState(() => ageTargets = values);
+                                          },
+                                        ),
+                                        spacer.height,
+                                      ],
+                                    )
+                                  ),
+                                  spacer.height,
                                 ],
                               )
                                   :
@@ -546,6 +680,92 @@ class _NewChannelState extends State<NewChannel> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
+                                      spacer.height,
+                                      Translate(
+                                        text: "Your channel can contract as many content creators as you desire. "
+                                            "These content creators will be responsible for creating contents for your "
+                                            "channel. You are responsible for them. Many content creators may contact you for "
+                                            "an opportunity, you will need to vet their skills before adding them to your channel. "
+                                            "This will also mean, they share from the funds generated by your channel. What percentage are "
+                                            "of your channel fund are you willing to share per view with content creators. Must be from 40 and above.",
+                                        style: prudWidgetStyle.tabTextStyle.copyWith(
+                                          color: prudColorTheme.textA,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                        align: TextAlign.center,
+                                      ),
+                                      spacer.height,
+                                      PrudContainer(
+                                        hasTitle: true,
+                                        hasPadding: true,
+                                        title: "Share Per View",
+                                        titleBorderColor: prudColorTheme.bgC,
+                                        titleAlignment: MainAxisAlignment.end,
+                                        child: Column(
+                                          children: [
+                                            mediumSpacer.height,
+                                            SfSlider(
+                                              min: 40.0,
+                                              max: 100.0,
+                                              value: sharePerView,
+                                              interval: 5,
+                                              showTicks: true,
+                                              showLabels: true,
+                                              enableTooltip: true,
+                                              minorTicksPerInterval: 1,
+                                              onChanged: (dynamic value){
+                                                setState(() {
+                                                  sharePerView = value;
+                                                });
+                                              },
+                                            ),
+                                            spacer.height,
+                                          ],
+                                        )
+                                      ),
+                                      spacer.height,
+                                      Translate(
+                                        text: "Your content creators also share every fund your channel generates from "
+                                            "monthly membership subscriptions. This means that all the creators you have on a channel "
+                                            "will all share a particular percentage. All could share 40% of your total membership revenue each month. what are "
+                                            "you willing to share?",
+                                        style: prudWidgetStyle.tabTextStyle.copyWith(
+                                          color: prudColorTheme.textA,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                        align: TextAlign.center,
+                                      ),
+                                      spacer.height,
+                                      PrudContainer(
+                                        hasTitle: true,
+                                        hasPadding: true,
+                                        title: "Share Per Membership",
+                                        titleBorderColor: prudColorTheme.bgC,
+                                        titleAlignment: MainAxisAlignment.end,
+                                        child: Column(
+                                          children: [
+                                            mediumSpacer.height,
+                                            SfSlider(
+                                              min: 40.0,
+                                              max: 100.0,
+                                              value: sharePerMember,
+                                              interval: 5,
+                                              showTicks: true,
+                                              showLabels: true,
+                                              enableTooltip: true,
+                                              minorTicksPerInterval: 1,
+                                              onChanged: (dynamic value){
+                                                setState(() {
+                                                  sharePerMember = value;
+                                                });
+                                              },
+                                            ),
+                                            spacer.height,
+                                          ],
+                                        )
+                                      ),
                                       spacer.height,
                                     ],
                                   )
@@ -557,6 +777,51 @@ class _NewChannelState extends State<NewChannel> {
                                         crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
                                           spacer.height,
+                                          Translate(
+                                            text: "How much would you charge for monthly membership subscription on "
+                                                "this channel? You must make sure that the amount is not less than 1(EURO) and not greater "
+                                                "than 5(Euro) in the currency of your channel.",
+                                            style: prudWidgetStyle.tabTextStyle.copyWith(
+                                              color: prudColorTheme.textA,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                            align: TextAlign.center,
+                                          ),
+                                          spacer.height,
+                                          PrudContainer(
+                                            hasTitle: true,
+                                            hasPadding: true,
+                                            title: "Membership Cost(${selectedCurrency!.code})",
+                                            titleBorderColor: prudColorTheme.bgC,
+                                            titleAlignment: MainAxisAlignment.end,
+                                            child: Column(
+                                              children: [
+                                                mediumSpacer.height,
+                                                FormBuilderTextField(
+                                                  initialValue: '$memberCost',
+                                                  name: 'membershipCost',
+                                                  autofocus: true,
+                                                  style: tabData.npStyle,
+                                                  keyboardType: TextInputType.number,
+                                                  decoration: getDeco(
+                                                    "How Much",
+                                                    onlyBottomBorder: true,
+                                                    borderColor: prudColorTheme.lineC
+                                                  ),
+                                                  onChanged: (String? value){
+                                                    if(mounted && value != null) setState(() => memberCost = currencyMath.roundDouble(double.parse(value.trim()), 2));
+                                                  },
+                                                  valueTransformer: (text) => num.tryParse(text!),
+                                                  validator: FormBuilderValidators.compose([
+                                                    FormBuilderValidators.required(),
+                                                  ]),
+                                                ),
+                                                spacer.height,
+                                              ],
+                                            )
+                                          ),
+                                          spacer.height,
                                         ],
                                       )
                                           :
@@ -567,25 +832,166 @@ class _NewChannelState extends State<NewChannel> {
                                             crossAxisAlignment: CrossAxisAlignment.center,
                                             children: [
                                               spacer.height,
+                                              Translate(
+                                                text: "How much would you charge for monthly streaming subscription on "
+                                                    "this channel? You must make sure that the amount is not less than 4(EURO) and not greater "
+                                                    "than 10(Euro) in the currency of your channel.",
+                                                style: prudWidgetStyle.tabTextStyle.copyWith(
+                                                  color: prudColorTheme.textA,
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                                align: TextAlign.center,
+                                              ),
+                                              spacer.height,
+                                              PrudContainer(
+                                                hasTitle: true,
+                                                hasPadding: true,
+                                                title: "Streaming Cost(${selectedCurrency!.code})",
+                                                titleBorderColor: prudColorTheme.bgC,
+                                                titleAlignment: MainAxisAlignment.end,
+                                                child: Column(
+                                                  children: [
+                                                    mediumSpacer.height,
+                                                    FormBuilderTextField(
+                                                      initialValue: '$streamServiceCost',
+                                                      name: 'streamServiceCost',
+                                                      autofocus: true,
+                                                      style: tabData.npStyle,
+                                                      keyboardType: TextInputType.number,
+                                                      decoration: getDeco(
+                                                        "How Much",
+                                                        onlyBottomBorder: true,
+                                                        borderColor: prudColorTheme.lineC
+                                                      ),
+                                                      onChanged: (String? value){
+                                                        if(mounted && value != null) setState(() => streamServiceCost = currencyMath.roundDouble(double.parse(value.trim()), 2));
+                                                      },
+                                                      valueTransformer: (text) => num.tryParse(text!),
+                                                      validator: FormBuilderValidators.compose([
+                                                        FormBuilderValidators.required(),
+                                                      ]),
+                                                    ),
+                                                    spacer.height,
+                                                  ],
+                                                )
+                                              ),
+                                              spacer.height,
                                             ],
                                           )
                                               :
                                           (
-                                              presentStep == CreateChannelSteps.success?
+                                              presentStep == CreateChannelSteps.step8?
                                               Column(
                                                 mainAxisAlignment: MainAxisAlignment.center,
                                                 crossAxisAlignment: CrossAxisAlignment.center,
                                                 children: [
+                                                  spacer.height,
+                                                  Translate(
+                                                    text: "In not less than 30 words and not more than 100 words, describe your channel and what"
+                                                        " your content on this channel will focus on. This could be your selling point to viewers.",
+                                                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                                                      color: prudColorTheme.textA,
+                                                      fontSize: 15,
+                                                      fontWeight: FontWeight.w400,
+                                                    ),
+                                                    align: TextAlign.center,
+                                                  ),
+                                                  spacer.height,
+                                                  PrudContainer(
+                                                    hasTitle: true,
+                                                    hasPadding: true,
+                                                    title: "Description",
+                                                    titleBorderColor: prudColorTheme.bgC,
+                                                    titleAlignment: MainAxisAlignment.end,
+                                                    child: Column(
+                                                      children: [
+                                                        mediumSpacer.height,
+                                                        FormBuilderTextField(
+                                                          initialValue: '$description',
+                                                          name: 'description',
+                                                          autofocus: true,
+                                                          minLines: 8,
+                                                          style: tabData.npStyle,
+                                                          keyboardType: TextInputType.text,
+                                                          decoration: getDeco(
+                                                            "About Channel",
+                                                            onlyBottomBorder: true,
+                                                            borderColor: prudColorTheme.lineC
+                                                          ),
+                                                          onChanged: (String? value){
+                                                            if(mounted && value != null) setState(() => description = value.trim());
+                                                          },
+                                                          valueTransformer: (text) => num.tryParse(text!),
+                                                          validator: FormBuilderValidators.compose([
+                                                            FormBuilderValidators.required(),
+                                                            FormBuilderValidators.minWordsCount(30),
+                                                            FormBuilderValidators.maxWordsCount(100),
+                                                          ]),
+                                                        ),
+                                                        spacer.height,
+                                                      ],
+                                                    )
+                                                  ),
                                                   spacer.height,
                                                 ],
                                               )
                                                   :
-                                              Column(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                crossAxisAlignment: CrossAxisAlignment.center,
-                                                children: [
-                                                  spacer.height,
-                                                ],
+                                              (
+                                                  presentStep == CreateChannelSteps.success?
+                                                  Column(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: [
+                                                      spacer.height,
+                                                      Translate(
+                                                        text: "You have successfully created a channel in your studio. What will "
+                                                            "you like to do next.",
+                                                        style: prudWidgetStyle.tabTextStyle.copyWith(
+                                                          color: prudColorTheme.textA,
+                                                          fontSize: 15,
+                                                          fontWeight: FontWeight.w400,
+                                                        ),
+                                                        align: TextAlign.center,
+                                                      ),
+                                                      spacer.height,
+                                                      Flex(
+                                                          direction: Axis.horizontal,
+                                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                          children: [
+                                                            prudWidgetStyle.getShortButton(
+                                                                onPressed: createAnother,
+                                                                text: "Create Another Channel",
+                                                                isPill: false,
+                                                                makeLight: true
+                                                            ),
+                                                            prudWidgetStyle.getShortButton(
+                                                              onPressed: addVideo,
+                                                              text: "Add A Video",
+                                                              isPill: false,
+                                                            )
+                                                          ]
+                                                      )
+                                                    ],
+                                                  )
+                                                      :
+                                                  Column(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: [
+                                                      spacer.height,
+                                                      Translate(
+                                                        text: "Oops! We are unable to create this channel. Kindly check your networks and try again.",
+                                                        style: prudWidgetStyle.tabTextStyle.copyWith(
+                                                          color: prudColorTheme.error,
+                                                          fontSize: 15,
+                                                          fontWeight: FontWeight.w400,
+                                                        ),
+                                                        align: TextAlign.center,
+                                                      ),
+                                                      spacer.height,
+                                                    ],
+                                                  )
                                               )
                                           )
                                       )

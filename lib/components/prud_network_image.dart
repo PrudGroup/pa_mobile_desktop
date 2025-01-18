@@ -4,8 +4,11 @@ import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/models/images.dart';
 import 'package:prudapp/models/theme.dart';
 
+import '../singletons/i_cloud.dart';
+
 class PrudNetworkImage extends StatelessWidget {
   final dynamic url;
+  final bool authorizeUrl;
   final Widget? errorWidget;
   final BoxFit? fit;
   final double? width;
@@ -13,13 +16,14 @@ class PrudNetworkImage extends StatelessWidget {
 
   const PrudNetworkImage({
     super.key, required this.url, this.errorWidget,
-    this.fit = BoxFit.cover, this.width, this.height
+    this.fit = BoxFit.cover, this.width, this.height,
+    this.authorizeUrl = false
   });
 
   @override
   Widget build(BuildContext context) {
     return FastCachedImage(
-      url: url,
+      url: authorizeUrl? iCloud.authorizeDownloadUrl(url) : url,
       fit: fit,
       width: width,
       height: height,

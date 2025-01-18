@@ -87,9 +87,9 @@ dependencies:
   socket_io_client: ^3.0.1
   camerawesome: ^2.0.1
   paystack_for_flutter: ^1.0.2
-  minio: ^3.5.7
   dpad_container: ^2.0.4
   carousel_slider: ^4.2.1
+  syncfusion_flutter_sliders: ^28.1.39
 
 
 dev_dependencies:

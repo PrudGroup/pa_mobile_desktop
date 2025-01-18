@@ -79,7 +79,10 @@ class _ViewStudioState extends State<ViewStudio> {
         child: Column(
           children: [
             spacer.height,
-            const NetworkIssueComponent(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: const NetworkIssueComponent(),
+            ),
             spacer.height,
           ],
         ),

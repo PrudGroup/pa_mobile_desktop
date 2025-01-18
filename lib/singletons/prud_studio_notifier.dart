@@ -71,6 +71,17 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
+  Future<VidChannel?> createVidChannel(VidChannel newChannel) async {
+    return await tryAsync("createVidChannel", () async {
+      dynamic res = await makeRequest(path: "/channels/", isGet: false, data: newChannel.toJson());
+      if (res != null) {
+        return VidChannel.fromJson(res);
+      } else {
+        return null;
+      }
+    });
+  }
+
   Future<StudioWallet?> getWallet(String studId) async {
     return await tryAsync("getWallet", () async {
       dynamic res = await makeRequest(path: "wallets/studio/$studId");

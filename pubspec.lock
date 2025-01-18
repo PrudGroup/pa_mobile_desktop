@@ -110,14 +110,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
-  buffer:
-    dependency: transitive
-    description:
-      name: buffer
-      sha256: "389da2ec2c16283c8787e0adaede82b1842102f8c8aae2f49003a766c5c6b3d1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.3"
   build:
     dependency: transitive
     description:
@@ -1098,14 +1090,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.6"
-  minio:
-    dependency: "direct main"
-    description:
-      name: minio
-      sha256: "9fa3d041237d3a0dabfd14c11f6adbefe71f6973d64192f6f1fc3e174013001e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.5.7"
   mockito:
     dependency: "direct dev"
     description:
@@ -1511,6 +1495,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  syncfusion_flutter_core:
+    dependency: transitive
+    description:
+      name: syncfusion_flutter_core
+      sha256: "794870919ca73e29c6cb25392a097cdfe58da4d6f3f3d3eccc529ecf52f78752"
+      url: "https://pub.dev"
+    source: hosted
+    version: "28.1.39"
+  syncfusion_flutter_sliders:
+    dependency: "direct main"
+    description:
+      name: syncfusion_flutter_sliders
+      sha256: "79b6904fac9111634847bf4e4dcccbd220f6ab0fd916645d11cdb0d0ad1e7f10"
+      url: "https://pub.dev"
+    source: hosted
+    version: "28.1.39"
   term_glyph:
     dependency: transitive
     description:

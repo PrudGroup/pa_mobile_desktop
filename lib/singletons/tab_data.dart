@@ -313,6 +313,11 @@ class TabData extends ChangeNotifier {
     return newStr.length > length? '${newStr.substring(0,length)}...': newStr;
   }
 
+  int countWordsInString(String text){
+    var regExp = RegExp(r"[\w-]+");
+    return regExp.allMatches(text).length;
+  }
+
   String encryptString(String str) => encrypter.encrypt(str, iv: enIV).base64;
 
   String decryptString(String str) => encrypter.decrypt64(str, iv: enIV);

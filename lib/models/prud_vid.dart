@@ -11,6 +11,7 @@ class Studio{
   StudioWallet? wallet;
   List<VidStream>? streams;
 
+
   Studio({
     required this.ownedBy,
     required this.studioName,
