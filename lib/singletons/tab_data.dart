@@ -28,7 +28,7 @@ class TabData extends ChangeNotifier {
     decoration: TextDecoration.none,
     shadows: [
       Shadow(
-        color: Colors.black.withOpacity(0.2),
+        color: Colors.black.withValues(alpha: 0.2),
         offset: const Offset(0.5, 0.5),
         blurRadius: 0.3,
       ),
@@ -63,7 +63,7 @@ class TabData extends ChangeNotifier {
     decoration: TextDecoration.none,
     shadows: [
       Shadow(
-        color: Colors.black.withOpacity(0.2),
+        color: Colors.black.withValues(alpha: 0.2),
         offset: const Offset(0.5, 0.5),
         blurRadius: 0.5,
       ),

@@ -100,7 +100,7 @@ class SliderContainer extends StatelessWidget {
               child: Container(
                 padding: EdgeInsets.only(top: 40),
                 decoration: BoxDecoration(
-                  color: prudColorTheme.bgA.withOpacity(0.6),
+                  color: prudColorTheme.bgA.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.only(
                     topRight: Radius.elliptical(width/4.5, height/4.5),
                     topLeft: Radius.elliptical(width/4.5, height/4.5),
@@ -131,7 +131,7 @@ class SliderContainer extends StatelessWidget {
                 iconSize: 30,
                 onPressed: () => carouselController.previousPage(),
                 hoverColor: prudColorTheme.primary,
-                splashColor: prudColorTheme.primary.withOpacity(0.4),
+                splashColor: prudColorTheme.primary.withValues(alpha: 0.4),
                 tooltip: 'Previous Photo',
               ),
               IconButton(
@@ -140,7 +140,7 @@ class SliderContainer extends StatelessWidget {
                 onPressed: () => carouselController.nextPage(),
                 tooltip: 'Next Photo',
                 hoverColor: prudColorTheme.primary,
-                splashColor: prudColorTheme.primary.withOpacity(0.4),
+                splashColor: prudColorTheme.primary.withValues(alpha: 0.4),
               )
             ],
           ),

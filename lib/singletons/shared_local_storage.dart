@@ -294,7 +294,7 @@ ThemeData prudTheme = ThemeData(
   floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: prudColorTheme.iconB,
       foregroundColor: prudColorTheme.bgD,
-      focusColor:prudColorTheme.iconB.withOpacity(0.5)
+      focusColor:prudColorTheme.iconB.withValues(alpha: 0.5)
   ),
   inputDecorationTheme: InputDecorationTheme(
     filled: false,

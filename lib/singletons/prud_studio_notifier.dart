@@ -25,6 +25,9 @@ class PrudStudioNotifier extends ChangeNotifier {
   StudioWallet? wallet;
   List<WalletHistory>? walletHistory;
   int selectedTab = 0;
+  List<VidChannel> myChannels = [];
+  ContentCreator? amACreator;
+  List<VidChannel> affiliatedChannels = [];
 
   void changeTab(int tab){
     selectedTab = tab;
@@ -54,6 +57,66 @@ class PrudStudioNotifier extends ChangeNotifier {
         }else{
           return null;
         }
+      }
+    });
+  }
+
+  Future<void> getAmACreator() async {
+    amACreator = await tryAsync("getAmACreator", () async {
+      dynamic crt = myStorage.getFromStore(key: "amACreator");
+      if(crt != null){
+        return ContentCreator.fromJson(jsonDecode(crt));
+      }else{
+        if(myStorage.user != null && myStorage.user!.id != null){
+          dynamic res = await makeRequest(path: "creators/aff/${myStorage.user!.id}");
+          if (res != null && res != false) {
+            ContentCreator cc = ContentCreator.fromJson(res);
+            await myStorage.addToStore(key: "amACreator", value: jsonEncode(cc));
+            return cc;
+          } else {
+            return null;
+          }
+        }else{
+          return null;
+        }
+      }
+    });
+  }
+
+  Future<void> getMyChannels() async {
+    myChannels = await tryAsync("getMyChannels", () async {
+      if(studio != null && studio!.id != null){
+        dynamic res = await makeRequest(path: "channels/studio/${studio!.id}");
+        if (res != null && res != [] && res != false && res.length > 0) {
+          List<VidChannel> chas = [];
+          for (var item in res){
+            chas.add(VidChannel.fromJson(item));
+          }
+          return chas;
+        } else {
+          return [];
+        }
+      }else{
+        return [];
+      }
+    });
+  }
+
+  Future<void> getAffiliatedChannels() async {
+    affiliatedChannels = await tryAsync("getAffiliatedChannels", () async {
+      if(amACreator != null && amACreator!.id != null){
+        dynamic res = await makeRequest(path: "channels/affiliated/${amACreator!.id}");
+        if (res != null && res != [] && res != false && res.length > 0) {
+          List<VidChannel> chas = [];
+          for (var item in res){
+            chas.add(VidChannel.fromJson(item));
+          }
+          return chas;
+        } else {
+          return [];
+        }
+      }else{
+        return [];
       }
     });
   }
@@ -161,6 +224,9 @@ class PrudStudioNotifier extends ChangeNotifier {
       await getStudio();
       if(studio != null && studio!.id != null){
         wallet = await getWallet(studio!.id!);
+        await getAmACreator();
+        await getMyChannels();
+        await getAffiliatedChannels();
         notifyListeners();
       }
     }catch(ex){

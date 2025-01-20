@@ -83,8 +83,8 @@ class InnerMenuState extends State<InnerMenu> {
               onPressed: () => changeWidget(widget.menus[index].menu, index),
               padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
               color: widget.type == 0? highLev : lowLev,
-              hoverColor: widget.type == 0? lowLev.withOpacity(0.7) : highLev.withOpacity(0.7),
-              splashColor: widget.type == 0? lowLev.withOpacity(0.7) : highLev.withOpacity(0.7),
+              hoverColor: widget.type == 0? lowLev.withValues(alpha: 0.7) : highLev.withValues(alpha: 0.7),
+              splashColor: widget.type == 0? lowLev.withValues(alpha: 0.7) : highLev.withValues(alpha: 0.7),
               shape: GFButtonShape.square,
               elevation: 0.0,
               icon: widget.hasIcon? (

@@ -139,7 +139,7 @@ class WidgetStyle{
     int shape = 0,
   }){
     Color btnColor = makeLight? prudColorTheme.buttonD : prudColorTheme.primary;
-    Color lightColor = btnColor.withOpacity(0.7);
+    Color lightColor = btnColor.withValues(alpha: 0.7);
     Color textColor = makeLight? prudColorTheme.error : prudColorTheme.textC;
     GFButtonShape btShape = GFButtonShape.pills;
     switch(shape){
@@ -174,7 +174,7 @@ class WidgetStyle{
     bool makeLight = false,
   }){
     Color btnColor = makeLight? prudColorTheme.buttonD : prudColorTheme.primary;
-    Color lightColor = btnColor.withOpacity(0.7);
+    Color lightColor = btnColor.withValues(alpha: 0.7);
     Color textColor = makeLight? prudColorTheme.error : prudColorTheme.textC;
     return InkWell(
       onTap: () => onPressed(),
@@ -194,7 +194,7 @@ class WidgetStyle{
 
   Widget getShortButton({required Function onPressed, required String text, bool makeLight = false, bool isPill = true, bool isSmall = false}){
     Color btnColor = makeLight? prudColorTheme.buttonD : prudColorTheme.primary;
-    Color lightColor = btnColor.withOpacity(0.7);
+    Color lightColor = btnColor.withValues(alpha: 0.7);
     Color textColor = makeLight? prudColorTheme.error : prudColorTheme.textC;
     return GFButton(
       onPressed: () => onPressed(),
@@ -292,7 +292,7 @@ WidgetStyle prudWidgetStyle = WidgetStyle(
     decoration: TextDecoration.none,
     shadows: [
       Shadow(
-        color: Colors.black.withOpacity(0.2),
+        color: Colors.black.withValues(alpha: 0.2),
         offset: const Offset(0.5, 0.5),
         blurRadius: 0.3,
       ),
@@ -328,13 +328,13 @@ PrudSpacer xLargeSpacer = const PrudSpacer(
 
 List<BoxShadow> prudShadows = [
   BoxShadow(
-    color: prudColorTheme.secondary.withOpacity(0.3),
+    color: prudColorTheme.secondary.withValues(alpha: 0.3),
     spreadRadius: -3,
     blurRadius: 6,
     offset: const Offset(2, 2),
   ),
   BoxShadow(
-    color: prudColorTheme.secondary.withOpacity(0.3),
+    color: prudColorTheme.secondary.withValues(alpha: 0.3),
     spreadRadius: -3,
     blurRadius: 10,
     offset: const Offset(0, 6),

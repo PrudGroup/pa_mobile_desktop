@@ -54,7 +54,7 @@ class RegisteredState extends State<Register> {
   List<String> strCountries = [];
   List<mc.Country> countries = [];
   Color primary = prudColorTheme.primary;
-  Color primaryShade = prudColorTheme.primary.withOpacity(0.5);
+  Color primaryShade = prudColorTheme.primary.withValues(alpha: 0.5);
   bool signingIn = false;
   bool isRegistering = true;
   String? errorMsg;

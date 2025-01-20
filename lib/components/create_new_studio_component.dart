@@ -95,7 +95,7 @@ class _CreateNewStudioComponentState extends State<CreateNewStudioComponent> {
         CustomContainer(
           height: screen.height,
           width: screen.width,
-          color: prudColorTheme.primary.withOpacity(0.7),
+          color: prudColorTheme.primary.withValues(alpha: 0.7),
           frontColor: prudColorTheme.primary,
           arcHeight: 0.7,
           space: 0.04,
@@ -135,7 +135,7 @@ class _CreateNewStudioComponentState extends State<CreateNewStudioComponent> {
         CustomContainer(
           height: screen.height,
           width: screen.width,
-          color: prudColorTheme.primary.withOpacity(0.7),
+          color: prudColorTheme.primary.withValues(alpha: 0.7),
           frontColor: prudColorTheme.primary,
           arcHeight: 0.7,
           space: 0.04,

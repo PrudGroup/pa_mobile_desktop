@@ -41,8 +41,8 @@ class GridMenuComponent extends StatelessWidget{
         alignment: WrapAlignment.spaceBetween,
         children: menus.map((menu) => InkWell(
           onTap: () => Navigator.push(context, ScaleRoute(page: menu.page)),
-          splashColor: bgColor.withOpacity(0.7),
-          hoverColor: bgColor.withOpacity(0.7),
+          splashColor: bgColor.withValues(alpha: 0.7),
+          hoverColor: bgColor.withValues(alpha: 0.7),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -51,7 +51,7 @@ class GridMenuComponent extends StatelessWidget{
                 height: 70,
                 width: 70,
                 decoration: BoxDecoration(
-                  color: bgColor.withOpacity(0.6),
+                  color: bgColor.withValues(alpha: 0.6),
                   border: Border.all(color: bgColor, width: 5),
                   borderRadius: BorderRadius.circular(bRadius),
                 ),
@@ -59,15 +59,15 @@ class GridMenuComponent extends StatelessWidget{
               ),
               const SizedBox(height: 3,),
               Translate(
-                  text: menu.field,
-                  align: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontFamily: "Party LET",
-                      color: fgColor,
-                      fontWeight: FontWeight.w600,
-                      decoration: TextDecoration.none
-                  )
+                text: menu.field,
+                align: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontFamily: "Party LET",
+                  color: fgColor,
+                  fontWeight: FontWeight.w600,
+                  decoration: TextDecoration.none
+                )
               ),
             ],
           ),

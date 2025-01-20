@@ -207,7 +207,7 @@ class LoginState extends State<Login> {
                 bottom: sideSize,
               ),
               decoration: BoxDecoration(
-                color: prudColorTheme.bgC.withOpacity(0.3),
+                color: prudColorTheme.bgC.withValues(alpha: 0.3),
                 borderRadius: rad,
               ),
               child: Container(

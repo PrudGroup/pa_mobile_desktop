@@ -83,8 +83,8 @@ class MiddleMenuViewState extends State<MiddleMenuView> {
               onPressed: () => changeTopWidget(widget.topMenus[index].menu, index),
               padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
               color: widget.type == 0? prudTheme.cardColor : prudTheme.colorScheme.onSurface,
-              hoverColor: widget.type == 0? prudTheme.colorScheme.onSurface.withOpacity(0.7) : prudTheme.cardColor.withOpacity(0.7),
-              splashColor: widget.type == 0? prudTheme.colorScheme.onSurface.withOpacity(0.7) : prudTheme.cardColor.withOpacity(0.7),
+              hoverColor: widget.type == 0? prudTheme.colorScheme.onSurface.withValues(alpha: 0.7) : prudTheme.cardColor.withValues(alpha: 0.7),
+              splashColor: widget.type == 0? prudTheme.colorScheme.onSurface.withValues(alpha: 0.7) : prudTheme.cardColor.withValues(alpha: 0.7),
               shape: GFButtonShape.square,
               elevation: 0.0,
               icon: widget.hasIcon? (
@@ -125,8 +125,8 @@ class MiddleMenuViewState extends State<MiddleMenuView> {
               onPressed: () => changeBottomWidget(widget.bottomMenus[index].menu, index),
               padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
               color: widget.type == 0? prudTheme.cardColor : prudTheme.colorScheme.onSurface,
-              hoverColor: widget.type == 0? prudTheme.colorScheme.onSurface.withOpacity(0.7) : prudTheme.cardColor.withOpacity(0.7),
-              splashColor: widget.type == 0? prudTheme.colorScheme.onSurface.withOpacity(0.7) : prudTheme.cardColor.withOpacity(0.7),
+              hoverColor: widget.type == 0? prudTheme.colorScheme.onSurface.withValues(alpha: 0.7) : prudTheme.cardColor.withValues(alpha: 0.7),
+              splashColor: widget.type == 0? prudTheme.colorScheme.onSurface.withValues(alpha: 0.7) : prudTheme.cardColor.withValues(alpha: 0.7),
               shape: GFButtonShape.square,
               elevation: 0.0,
               icon: widget.hasIcon? (

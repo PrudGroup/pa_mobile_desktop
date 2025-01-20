@@ -218,7 +218,7 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [prudColorTheme.bgA, prudColorTheme.bgA.withOpacity(0.2)],
+            colors: [prudColorTheme.bgA, prudColorTheme.bgA.withValues(alpha: 0.2)],
           ),
         ),
       ),
@@ -272,44 +272,44 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
             height: height,
             width: width,
             child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  children: [
-                    PrudContainer(
-                      hasPadding: false,
-                      child: GFCarousel(
-                          height: 137.0,
-                          autoPlay: true,
-                          aspectRatio: double.maxFinite,
-                          viewportFraction: 1.0,
-                          enlargeMainPage: true,
-                          enableInfiniteScroll: true,
-                          pauseAutoPlayOnTouch: const Duration(seconds: 10),
-                          autoPlayInterval: const Duration(seconds: 5),
-                          items: carousels
-                      ),
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                children: [
+                  PrudContainer(
+                    hasPadding: false,
+                    child: GFCarousel(
+                        height: 137.0,
+                        autoPlay: true,
+                        aspectRatio: double.maxFinite,
+                        viewportFraction: 1.0,
+                        enlargeMainPage: true,
+                        enableInfiniteScroll: true,
+                        pauseAutoPlayOnTouch: const Duration(seconds: 10),
+                        autoPlayInterval: const Duration(seconds: 5),
+                        items: carousels
                     ),
-                    spacer.height,
-                    if(!prudServiceIsAvailable) Column(
-                      children: [
-                        const NetworkIssueComponent(),
-                        spacer.height,
-                      ],
-                    ),
-                    PrudContainer(
-                        hasPadding: true,
-                        child: MainMenu(
-                          menus: menus,
-                          bgColor: prudColorTheme.bgC,
-                          useWrap: true,
-                        )
-                    ),
-                    spacer.height,
-                    PrudShowroom(items: iCloud.getShowroom(context)),
-                    largeSpacer.height,
-                  ],
-                )
+                  ),
+                  spacer.height,
+                  if(!prudServiceIsAvailable) Column(
+                    children: [
+                      const NetworkIssueComponent(),
+                      spacer.height,
+                    ],
+                  ),
+                  PrudContainer(
+                      hasPadding: true,
+                      child: MainMenu(
+                        menus: menus,
+                        bgColor: prudColorTheme.bgC,
+                        useWrap: true,
+                      )
+                  ),
+                  spacer.height,
+                  PrudShowroom(items: iCloud.getShowroom(context)),
+                  largeSpacer.height,
+                ],
+              )
             ),
           ),
         ),
