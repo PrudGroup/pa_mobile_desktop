@@ -67,7 +67,6 @@ class PayFromWalletState extends State<PayFromWallet> {
           case WalletType.studio: {}
           case WalletType.switzStore: {}
           case WalletType.shipper: {}
-          default: {}
         }
         if(wallet != null && mounted){
           double amtInWalletSelectedCurrency = await currencyMath.convert(
@@ -138,8 +137,6 @@ class PayFromWalletState extends State<PayFromWallet> {
           case WalletType.studio:
             return "";
           case WalletType.bus:
-            return "";
-          default:
             return "";
         }
       }else{

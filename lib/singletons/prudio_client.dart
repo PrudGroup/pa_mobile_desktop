@@ -25,7 +25,7 @@ class PrudioNotifier extends ChangeNotifier {
   PrudioNotifier._internal();
 }
 
-Socket prudSocket = io(prudApiUrl,
+Socket prudSocket = io("$prudApiUrl/prudio",
     OptionBuilder()
         .setTransports(['websocket']) // for Flutter or Dart VM
         .disableAutoConnect()  // disable auto-connection

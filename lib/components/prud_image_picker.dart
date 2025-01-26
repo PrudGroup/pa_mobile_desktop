@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:getwidget/components/avatar/gf_avatar.dart';
+import 'package:getwidget/shape/gf_avatar_shape.dart';
 import 'package:getwidget/size/gf_size.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:prudapp/components/prud_container.dart';
+import 'package:prudapp/components/prud_network_image.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
@@ -18,6 +20,7 @@ class PrudImagePicker extends StatefulWidget {
   final Function(String?)? onSaveToCloud;
   final Function(dynamic)? onError;
   final bool reset;
+  final String? existingUrl;
   
   const PrudImagePicker({
     super.key, 
@@ -27,6 +30,7 @@ class PrudImagePicker extends StatefulWidget {
     this.onSaveToCloud,
     this.onError,
     this.onPickedMemory,
+    this.existingUrl,
     required this.destination,
   });
 
@@ -38,12 +42,14 @@ class PrudImagePickerState extends State<PrudImagePicker> {
   bool picking = false;
   final ImagePicker picker = ImagePicker();
   Uint8List? photo;
+  String? existingUrl;
 
   @override
   void initState() {
     if(mounted){
       setState(() {
         if(widget.reset) photo = null;
+        existingUrl = widget.existingUrl;
       });
     }
     super.initState();
@@ -53,6 +59,7 @@ class PrudImagePickerState extends State<PrudImagePicker> {
     await tryAsync("Picker save", () async {
       String? url = await iCloud.saveFileToCloud(file, widget.destination);
       if(widget.onSaveToCloud != null) widget.onSaveToCloud!(url);
+      if(mounted) setState(() => existingUrl = url);
     }, error: (){
       if(mounted) setState(() => picking = false);
     });
@@ -60,7 +67,12 @@ class PrudImagePickerState extends State<PrudImagePicker> {
   
   Future<void> pickImage() async {
     try{
-      if(mounted) setState(() => picking = true);
+      if(mounted) {
+        setState(() {
+          picking = true;
+          existingUrl = null;
+        });
+      }
       final XFile? image = await picker.pickImage(source: ImageSource.gallery);
       if(image != null) {
         Uint8List pickedPhoto = await image.readAsBytes();
@@ -73,9 +85,21 @@ class PrudImagePickerState extends State<PrudImagePicker> {
             picking = false;
           });
         }
+      }else{
+        if(mounted) {
+          setState(() {
+            picking = false;
+            existingUrl = widget.existingUrl;
+          });
+        }
       }
     }catch(ex){
-      if(mounted) setState(() => picking = false);
+      if(mounted) {
+        setState(() {
+          picking = false;
+          existingUrl = widget.existingUrl;
+        });
+      }
       debugPrint("Picker Error: $ex");
       if(widget.onError != null) widget.onError!(ex);
     }
@@ -94,6 +118,19 @@ class PrudImagePickerState extends State<PrudImagePicker> {
               direction: Axis.horizontal,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                if(existingUrl != null && photo == null) GFAvatar(
+                  size: GFSize.LARGE,
+                  shape: GFAvatarShape.circle,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(GFSize.LARGE),
+                    child: PrudNetworkImage(
+                      url: existingUrl,
+                      authorizeUrl: true,
+                      height: GFSize.LARGE,
+                      width: GFSize.LARGE,
+                    ),
+                  )
+                ),
                 if(photo != null) GFAvatar(
                   backgroundImage: MemoryImage(photo!),
                   size: GFSize.LARGE,

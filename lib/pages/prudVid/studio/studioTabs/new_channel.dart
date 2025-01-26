@@ -40,52 +40,58 @@ class NewChannel extends StatefulWidget {
 }
 
 class _NewChannelState extends State<NewChannel> {
-  CreateChannelSteps presentStep = CreateChannelSteps.policy;
+  CreateChannelSteps presentStep = prudStudioNotifier.newChannelData.step;
   bool loading = false;
-  String? channelName;
-  String? countryCode = "NG";
-  String category = channelCategories[0];
-  Currency? selectedCurrency;
   Studio? studio = prudStudioNotifier.studio;
-  String? logoUrl;
-  String? displayScreenImage;
   bool shouldReset = false;
-  SfRangeValues ageTargets = SfRangeValues(18.0, 30.0);
-  double sharePerView = 45.0;
-  double sharePerMember = 45.0;
-  double memberCost = 0;
-  double streamServiceCost = 0;
-  double membershipCostInEuro = 0;
-  double streamServiceCostInEuro = 0;
-  String? description;
+  TextEditingController txtCtrl = TextEditingController();
+  TextEditingController txtCtrl1 = TextEditingController();
+  TextEditingController txtCtrl2 = TextEditingController();
+  final GlobalKey _key1 = GlobalKey();
+  final GlobalKey _key2 = GlobalKey();
+  final GlobalKey _key3 = GlobalKey();
+  final GlobalKey _key4 = GlobalKey();
+  FocusNode fNode = FocusNode();
+  final int maxWords = 100;
+  final int minWords = 30;
+  int presentWords = tabData.countWordsInString(prudStudioNotifier.newChannelData.description?? "");
+
 
   void clearInput(){
+    prudStudioNotifier.newChannelData = NewChannelData(
+      ageTargets: SfRangeValues(18, 30),
+      category: channelCategories[0],
+      selectedCurrency: tabData.getCurrency("EUR"),
+    );
+    prudStudioNotifier.saveNewChannelData();
     setState(() {
       shouldReset = true;
-      displayScreenImage = null;
-      logoUrl = null;
-      selectedCurrency = null;
-      category = channelCategories[0];
-      countryCode = "NG";
-      channelName = null;
       loading = false;
-      logoUrl = null;
-      displayScreenImage = null;
       shouldReset = false;
-      ageTargets = SfRangeValues(18.0, 30.0);
-      sharePerView = 45.0;
-      sharePerMember = 45.0;
-      memberCost = 0;
-      streamServiceCost = 0;
-      streamServiceCostInEuro = 0;
-      membershipCostInEuro = 0;
-      description = null;
     });
+    txtCtrl.text = "0";
+    txtCtrl1.text = "0";
+    txtCtrl2.text = "";
   }
 
   @override
   void initState() {
     super.initState();
+    if(mounted){
+      txtCtrl.text = "${prudStudioNotifier.newChannelData.memberCost}";
+      txtCtrl1.text = "${prudStudioNotifier.newChannelData.streamServiceCost}";
+      txtCtrl2.text = "${prudStudioNotifier.newChannelData.description}";
+    }
+  }
+
+  @override
+  void dispose() {
+    txtCtrl.dispose();
+    txtCtrl1.dispose();
+    txtCtrl2.dispose();
+    fNode.dispose();
+    FocusManager.instance.primaryFocus?.unfocus();
+    super.dispose();
   }
 
   void getCurrency(){
@@ -96,7 +102,7 @@ class _NewChannelState extends State<NewChannel> {
         try{
           if(mounted) {
             setState(() {
-              selectedCurrency = cur;
+              prudStudioNotifier.newChannelData.selectedCurrency = cur;
             });
           }
         }catch(ex){
@@ -110,26 +116,11 @@ class _NewChannelState extends State<NewChannel> {
     return await tryAsync("createChannel", () async {
       bool created = false;
       if(mounted) setState(() => loading = true);
-      VidChannel newChannel = VidChannel(
-        channelName: channelName!,
-        contentPercentageSharePerView: sharePerView,
-        monthlyMembershipCost: memberCost,
-        monthlyMembershipCostInEuro: membershipCostInEuro,
-        monthlyStreamingCost: streamServiceCost,
-        monthlyStreamingCostInEuro: streamServiceCostInEuro,
-        membershipPercentageSharePerMonth: sharePerMember,
-        description: description!,
-        displayScreen: displayScreenImage!,
-        studioId: studio!.id!,
-        logo: logoUrl!,
-        channelCurrency: selectedCurrency!.code,
-        countryCode: countryCode!,
-        maxTargetAge: int.parse(ageTargets.end.toString()),
-        miniTargetAge: int.parse(ageTargets.start.toString()),
-        category: category
-      );
+      prudStudioNotifier.newChannelData.studioId = studio!.id;
+      VidChannel newChannel = prudStudioNotifier.newChannelData.toVidChannel()!;
       VidChannel? result = await prudStudioNotifier.createVidChannel(newChannel);
       created = result != null;
+      if(created) prudStudioNotifier.updateMyChannel(result);
       if(mounted) setState(() => loading = false);
       return created;
     }, error: (){
@@ -170,51 +161,58 @@ class _NewChannelState extends State<NewChannel> {
 
   Future<bool> validateStep(CreateChannelSteps step) async {
     switch(presentStep){
-      case CreateChannelSteps.step1: return countryCode != null && channelName != null;
-      case CreateChannelSteps.step2: return category.isNotEmpty && selectedCurrency != null;
-      case CreateChannelSteps.step3: return logoUrl != null && displayScreenImage != null;
-      case CreateChannelSteps.step4: return ageTargets.start > 1.0 && ageTargets.end <= 50;
-      case CreateChannelSteps.step5: return sharePerView >= 40.0 && sharePerMember >= 40.0;
-      case CreateChannelSteps.step6: {
-        if(memberCost > 0){
-          if(selectedCurrency!.code.toUpperCase() == "EUR"){
-            if(mounted) setState(() => membershipCostInEuro = memberCost);
-            return memberCost >= 1.0 && memberCost <= 5.0;
+      case CreateChannelSteps.step1: return prudStudioNotifier.newChannelData.category!.isNotEmpty && prudStudioNotifier.newChannelData.selectedCurrency != null;
+      case CreateChannelSteps.step2: {
+        if(mounted) setState(() => loading = true);
+        if(prudStudioNotifier.newChannelData.memberCost > 0){
+          if(prudStudioNotifier.newChannelData.selectedCurrency!.code.toUpperCase() == "EUR"){
+            prudStudioNotifier.newChannelData.membershipCostInEuro = prudStudioNotifier.newChannelData.memberCost;
+            if(mounted) setState(() => loading = false);
+            return prudStudioNotifier.newChannelData.memberCost >= 1.0 && prudStudioNotifier.newChannelData.memberCost <= 5.0;
           }else{
             double amount = await currencyMath.convert(
-              amount: memberCost,
-              quoteCode: "EUR",
-              baseCode: selectedCurrency!.code
+                amount: prudStudioNotifier.newChannelData.memberCost,
+                quoteCode: "EUR",
+                baseCode: prudStudioNotifier.newChannelData.selectedCurrency!.code
             );
-            if(mounted) setState(() => membershipCostInEuro = currencyMath.roundDouble(amount, 2));
+            prudStudioNotifier.newChannelData.membershipCostInEuro = currencyMath.roundDouble(amount, 2);
+            if(mounted) setState(() => loading = false);
             return amount >= 1.0 && amount <= 5.0;
           }
         }else{
+          if(mounted) setState(() => loading = false);
           return false;
         }
       }
-      case CreateChannelSteps.step7: {
-        if(streamServiceCost > 0){
-          if(selectedCurrency!.code.toUpperCase() == "EUR"){
-            if(mounted) setState(() => streamServiceCostInEuro = streamServiceCost);
-            return streamServiceCost >= 4.0 && streamServiceCost <= 10.0;
+      case CreateChannelSteps.step3: return prudStudioNotifier.newChannelData.countryCode != null && prudStudioNotifier.newChannelData.channelName != null;
+      case CreateChannelSteps.step4: {
+        if(mounted) setState(() => loading = true);
+        if(prudStudioNotifier.newChannelData.streamServiceCost > 0){
+          if(prudStudioNotifier.newChannelData.selectedCurrency!.code.toUpperCase() == "EUR"){
+            prudStudioNotifier.newChannelData.streamServiceCostInEuro = prudStudioNotifier.newChannelData.streamServiceCost;
+            if(mounted) setState(() => loading = false);
+            return prudStudioNotifier.newChannelData.streamServiceCost >= 4.0 && prudStudioNotifier.newChannelData.streamServiceCost <= 10.0;
           }else{
             double amount = await currencyMath.convert(
-                amount: streamServiceCost,
+                amount: prudStudioNotifier.newChannelData.streamServiceCost,
                 quoteCode: "EUR",
-                baseCode: selectedCurrency!.code
+                baseCode: prudStudioNotifier.newChannelData.selectedCurrency!.code
             );
-            if(mounted) setState(() => streamServiceCostInEuro = currencyMath.roundDouble(amount, 2));
+            prudStudioNotifier.newChannelData.streamServiceCostInEuro = currencyMath.roundDouble(amount, 2);
+            if(mounted) setState(() => loading = false);
             return amount >= 4.0 && amount <= 10.0;
           }
         }else{
+          if(mounted) setState(() => loading = false);
           return false;
         }
       }
+      case CreateChannelSteps.step5: return prudStudioNotifier.newChannelData.sharePerView >= 40.0 && prudStudioNotifier.newChannelData.sharePerMember >= 40.0;
+      case CreateChannelSteps.step6: return prudStudioNotifier.newChannelData.logoUrl != null && prudStudioNotifier.newChannelData.displayScreenImage != null;
+      case CreateChannelSteps.step7: return prudStudioNotifier.newChannelData.ageTargets!.start > 1.0 && prudStudioNotifier.newChannelData.ageTargets!.end <= 50;
       case CreateChannelSteps.step8: {
-        if(description != null){
-          int totalWords = tabData.countWordsInString(description!);
-          return totalWords >= 30 && totalWords <= 100;
+        if(prudStudioNotifier.newChannelData.description != null){
+          return presentWords >= minWords && presentWords <= maxWords;
         }else{
           return false;
         }
@@ -266,10 +264,14 @@ class _NewChannelState extends State<NewChannel> {
         }
       }
       case CreateChannelSteps.success: {
+        clearInput();
         widget.goToTab(2);
       }
       default: if(mounted) setState(() => presentStep = CreateChannelSteps.step7);
     }
+    if(mounted) setState(() => prudStudioNotifier.newChannelData.step = presentStep);
+    if(presentStep != CreateChannelSteps.success) prudStudioNotifier.saveNewChannelData();
+    FocusManager.instance.primaryFocus?.unfocus();
   }
 
   Future<void> previous() async {
@@ -285,13 +287,15 @@ class _NewChannelState extends State<NewChannel> {
       case CreateChannelSteps.failed: if(mounted) setState(() => presentStep = CreateChannelSteps.step8);
       default: {}
     }
+    if(mounted) setState(() => prudStudioNotifier.newChannelData.step = presentStep);
+    FocusManager.instance.primaryFocus?.unfocus();
   }
 
   @override
   Widget build(BuildContext context) {
-    Size screen = MediaQuery.of(context).size;
+    // Size screen = MediaQuery.of(context).size;
     return SizedBox(
-      height: screen.height,
+      // height: screen.height,
       child: Column(
         children: [
           Padding(
@@ -308,7 +312,7 @@ class _NewChannelState extends State<NewChannel> {
                 loading? LoadingComponent(
                   isShimmer: false,
                   defaultSpinnerType: false,
-                  size: 20,
+                  size: 15,
                   spinnerColor: getNextButtonColor(),
                 ) : getTextButton(
                   title: getNextButtonTitle(),
@@ -369,11 +373,14 @@ class _NewChannelState extends State<NewChannel> {
                     children: [
                       spacer.height,
                       Translate(
-                        text: "What name would you like to call your channel. Make it exciting yet represents your brand. "
-                            "Please note that name must not contain prudapp, prudVid, prudLearn, prudStreams, prudStudio, prudMusic, prudMovies, prudComedy",
+                        text: "Select a category for your channel. This will mean that every video you upload "
+                            "to this channel must be of this category type. If you upload a video with contents "
+                            "of another type, your channel will be suspended for a month. So decide what niche your "
+                            "channel will be.",
                         style: prudWidgetStyle.tabTextStyle.copyWith(
                           color: prudColorTheme.textA,
-                          fontSize: 14,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w400,
                         ),
                         align: TextAlign.center,
                       ),
@@ -381,70 +388,101 @@ class _NewChannelState extends State<NewChannel> {
                       PrudContainer(
                           hasTitle: true,
                           hasPadding: true,
-                          title: "Channel Name",
+                          title: "Category",
                           titleBorderColor: prudColorTheme.bgC,
                           titleAlignment: MainAxisAlignment.end,
                           child: Column(
                             children: [
                               mediumSpacer.height,
-                              FormBuilderTextField(
-                                initialValue: channelName?? '',
-                                name: 'channelName',
-                                autofocus: true,
-                                style: tabData.npStyle,
-                                keyboardType: TextInputType.text,
-                                decoration: getDeco(
-                                    "Channel Name",
-                                    onlyBottomBorder: true,
-                                    borderColor: prudColorTheme.lineC
+                              FormBuilder(
+                                child: FormBuilderChoiceChip(
+                                  decoration: getDeco("Category"),
+                                  backgroundColor: prudColorTheme.bgA,
+                                  disabledColor: prudColorTheme.bgD,
+                                  spacing: spacer.width.width!,
+                                  shape: prudWidgetStyle.choiceChipShape,
+                                  selectedColor: prudColorTheme.primary,
+                                  onChanged: (String? selected){
+                                    tryOnly("CategorySelector", (){
+                                      if(mounted && selected != null){
+                                        setState(() {
+                                          prudStudioNotifier.newChannelData.category = selected;
+                                        });
+                                      }
+                                    });
+                                  },
+                                  name: "category",
+                                  initialValue: prudStudioNotifier.newChannelData.category,
+                                  options: channelCategories.map((String ele) {
+                                    return FormBuilderChipOption(
+                                      value: ele,
+                                      child: Translate(
+                                        text: ele,
+                                        style: prudWidgetStyle.btnTextStyle.copyWith(
+                                            color: ele == prudStudioNotifier.newChannelData.category?
+                                            prudColorTheme.bgA : prudColorTheme.primary
+                                        ),
+                                        align: TextAlign.center,
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
-                                onChanged: (String? value){
-                                  if(mounted && value != null) setState(() => channelName = value.trim());
-                                },
-                                valueTransformer: (text) => num.tryParse(text!),
-                                validator: FormBuilderValidators.compose([
-                                  FormBuilderValidators.minLength(3),
-                                  FormBuilderValidators.maxLength(30),
-                                  FormBuilderValidators.required(),
-                                ]),
                               ),
                               spacer.height,
                             ],
                           )
                       ),
                       spacer.height,
-                      Translate(
-                        text: "Which country is your primary target for your content. This is "
-                            "not to imply that your content will only be used by only people from "
-                            "selected country but they are prioritized.",
-                        style: prudWidgetStyle.tabTextStyle.copyWith(
-                          color: prudColorTheme.textA,
-                          fontSize: 14,
-                        ),
-                        align: TextAlign.center,
-                      ),
                       spacer.height,
                       PrudContainer(
-                        hasTitle: true,
-                        hasPadding: true,
-                        title: "Country",
-                        titleBorderColor: prudColorTheme.bgC,
-                        titleAlignment: MainAxisAlignment.end,
-                        child: Column(
-                          children: [
-                            mediumSpacer.height,
-                            CountryPicker(
-                              bgColor: prudColorTheme.bgA,
-                              selected: countryCode?? "NG",
-                              onChange: (Country ctry) async {
-                                if(mounted) setState(() => countryCode = ctry.isoCode);
-                              },
-                            ),
-                            spacer.height,
-                          ],
-                        )
+                          hasTitle: true,
+                          hasPadding: true,
+                          title: "Currency",
+                          titleBorderColor: prudColorTheme.bgC,
+                          titleAlignment: MainAxisAlignment.end,
+                          child: Column(
+                            children: [
+                              mediumSpacer.height,
+                              InkWell(
+                                onTap: getCurrency,
+                                child: PrudPanel(
+                                  title: "Currency",
+                                  titleColor: prudColorTheme.iconB,
+                                  bgColor: prudColorTheme.bgA,
+                                  child: Flex(
+                                    direction: Axis.horizontal,
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      FittedBox(
+                                        child: Row(
+                                          children: [
+                                            if(prudStudioNotifier.newChannelData.selectedCurrency != null) Text(
+                                              "${prudStudioNotifier.newChannelData.selectedCurrency!.flag}",
+                                              style: prudWidgetStyle.tabTextStyle.copyWith(
+                                                  fontSize: 18.0
+                                              ),
+                                            ),
+                                            spacer.width,
+                                            Translate(
+                                              text: prudStudioNotifier.newChannelData.selectedCurrency != null? prudStudioNotifier.newChannelData.selectedCurrency!.name : "Select Currency",
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.keyboard_arrow_down_sharp,
+                                        size: 20,
+                                        color: prudColorTheme.lineB,
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              spacer.height,
+                            ],
+                          )
                       ),
-                      spacer.height,
+                      xLargeSpacer.height,
                     ],
                   )
                       :
@@ -456,10 +494,9 @@ class _NewChannelState extends State<NewChannel> {
                         children: [
                           spacer.height,
                           Translate(
-                            text: "Select a category for your channel. This will mean that every video you upload "
-                                "to this channel must be of this category type. If you upload a video with contents "
-                                "of another type, your channel will be suspended for a month. So decide what niche your "
-                                "channel will be.",
+                            text: "How much would you charge for monthly membership subscription on "
+                                "this channel? You must make sure that the amount is not less than 1(EURO) and not greater "
+                                "than 5(Euro) in the currency of your channel.",
                             style: prudWidgetStyle.tabTextStyle.copyWith(
                               color: prudColorTheme.textA,
                               fontSize: 15,
@@ -469,103 +506,44 @@ class _NewChannelState extends State<NewChannel> {
                           ),
                           spacer.height,
                           PrudContainer(
-                            hasTitle: true,
-                            hasPadding: true,
-                            title: "Category",
-                            titleBorderColor: prudColorTheme.bgC,
-                            titleAlignment: MainAxisAlignment.end,
-                            child: Column(
-                              children: [
-                                mediumSpacer.height,
-                                FormBuilder(
-                                  child: FormBuilderChoiceChip(
-                                    decoration: getDeco("Category"),
-                                    backgroundColor: prudColorTheme.bgA,
-                                    disabledColor: prudColorTheme.bgD,
-                                    spacing: spacer.width.width!,
-                                    shape: prudWidgetStyle.choiceChipShape,
-                                    selectedColor: prudColorTheme.primary,
-                                    onChanged: (String? selected){
-                                      tryOnly("CategorySelector", (){
-                                        if(mounted && selected != null){
-                                          setState(() {
-                                            category = selected;
-                                          });
-                                        }
-                                      });
-                                    },
-                                    name: "category",
-                                    initialValue: category,
-                                    options: channelCategories.map((String ele) {
-                                      return FormBuilderChipOption(
-                                        value: ele,
-                                        child: Translate(
-                                          text: ele,
-                                          style: prudWidgetStyle.btnTextStyle.copyWith(
-                                              color: ele == category?
-                                              prudColorTheme.bgA : prudColorTheme.primary
-                                          ),
-                                          align: TextAlign.center,
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                                spacer.height,
-                              ],
-                            )
-                          ),
-                          spacer.height,
-                          spacer.height,
-                          PrudContainer(
-                            hasTitle: true,
-                            hasPadding: true,
-                            title: "Currency",
-                            titleBorderColor: prudColorTheme.bgC,
-                            titleAlignment: MainAxisAlignment.end,
-                            child: Column(
-                              children: [
-                                mediumSpacer.height,
-                                InkWell(
-                                  onTap: getCurrency,
-                                  child: PrudPanel(
-                                    title: "Currency",
-                                    titleColor: prudColorTheme.iconB,
-                                    bgColor: prudColorTheme.bgA,
-                                    child: Flex(
-                                      direction: Axis.horizontal,
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        FittedBox(
-                                          child: Row(
-                                            children: [
-                                              if(selectedCurrency != null) Text(
-                                                "${selectedCurrency!.flag}",
-                                                style: prudWidgetStyle.tabTextStyle.copyWith(
-                                                    fontSize: 18.0
-                                                ),
-                                              ),
-                                              spacer.width,
-                                              Translate(
-                                                text: selectedCurrency != null? selectedCurrency!.name : "Select Currency",
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Icon(
-                                          Icons.keyboard_arrow_down_sharp,
-                                          size: 20,
-                                          color: prudColorTheme.lineB,
-                                        )
-                                      ],
+                              hasTitle: true,
+                              hasPadding: true,
+                              title: "Membership Cost(${prudStudioNotifier.newChannelData.selectedCurrency!.code})",
+                              titleBorderColor: prudColorTheme.bgC,
+                              titleAlignment: MainAxisAlignment.end,
+                              child: Column(
+                                children: [
+                                  mediumSpacer.height,
+                                  FormBuilder(
+                                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                                    child: FormBuilderTextField(
+                                      controller: txtCtrl,
+                                      key: _key1,
+                                      autofocus: true,
+                                      name: 'membershipCost',
+                                      style: tabData.npStyle,
+                                      keyboardType: TextInputType.number,
+                                      decoration: getDeco(
+                                          "How Much",
+                                          onlyBottomBorder: true,
+                                          borderColor: prudColorTheme.lineC
+                                      ),
+                                      onChanged: (String? value){
+                                        tryOnly("onChange", (){
+                                          if(mounted && value != null && value.isNotEmpty) setState(() => prudStudioNotifier.newChannelData.memberCost = currencyMath.roundDouble(double.parse(value.trim()), 2));
+                                        });
+                                      },
+                                      valueTransformer: (text) => num.tryParse(text!),
+                                      validator: FormBuilderValidators.compose([
+                                        FormBuilderValidators.required(),
+                                      ]),
                                     ),
                                   ),
-                                ),
-                                spacer.height,
-                              ],
-                            )
+                                  spacer.height,
+                                ],
+                              )
                           ),
-                          spacer.height,
+                          xLargeSpacer.height,
                         ],
                       )
                           :
@@ -577,53 +555,83 @@ class _NewChannelState extends State<NewChannel> {
                             children: [
                               spacer.height,
                               Translate(
-                                text: "Upload your channel logo. The logo must represent your brand",
+                                text: "What name would you like to call your channel. Make it exciting yet represents your brand. "
+                                    "Please note that name must not contain prudapp, prudVid, prudLearn, prudStreams, prudStudio, prudMusic, prudMovies, prudComedy",
                                 style: prudWidgetStyle.tabTextStyle.copyWith(
                                   color: prudColorTheme.textA,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w400,
+                                  fontSize: 14,
                                 ),
                                 align: TextAlign.center,
                               ),
-                              if(studio != null && channelName != null) PrudImagePicker(
-                                destination: "studio/${studio!.id}/channels/$channelName/images",
-                                saveToCloud: true,
-                                reset: shouldReset,
-                                onSaveToCloud: (String? url){
-                                  tryOnly("Picker onSaveToCloud", (){
-                                    debugPrint("PhotoUrl: $url");
-                                    if(mounted && url != null) setState(() => logoUrl = url);
-                                  });
-                                },
-                                onError: (err){
-                                  debugPrint("Picker Error: $err");
-                                },
+                              spacer.height,
+                              PrudContainer(
+                                  hasTitle: true,
+                                  hasPadding: true,
+                                  title: "Channel Name",
+                                  titleBorderColor: prudColorTheme.bgC,
+                                  titleAlignment: MainAxisAlignment.end,
+                                  child: Column(
+                                    children: [
+                                      mediumSpacer.height,
+                                      FormBuilderTextField(
+                                        initialValue: prudStudioNotifier.newChannelData.channelName?? '',
+                                        name: 'channelName',
+                                        key: _key4,
+                                        autofocus: true,
+                                        style: tabData.npStyle,
+                                        keyboardType: TextInputType.text,
+                                        decoration: getDeco(
+                                            "Channel Name",
+                                            onlyBottomBorder: true,
+                                            borderColor: prudColorTheme.lineC
+                                        ),
+                                        onChanged: (String? value){
+                                          if(mounted && value != null) setState(() => prudStudioNotifier.newChannelData.channelName = value.trim());
+                                        },
+                                        valueTransformer: (text) => num.tryParse(text!),
+                                        validator: FormBuilderValidators.compose([
+                                          FormBuilderValidators.minLength(3),
+                                          FormBuilderValidators.maxLength(30),
+                                          FormBuilderValidators.required(),
+                                        ]),
+                                      ),
+                                      spacer.height,
+                                    ],
+                                  )
                               ),
                               spacer.height,
                               Translate(
-                                text: "What Photo will you use for your channel background. Be sure that the "
-                                    "photo has landscape dimensions. The width has to be higher than the height. "
-                                    "We recommend 2000x1000 dimensions.",
+                                text: "Which country is your primary target for your content. This is "
+                                    "not to imply that your content will only be used by only people from "
+                                    "selected country but they are prioritized.",
                                 style: prudWidgetStyle.tabTextStyle.copyWith(
                                   color: prudColorTheme.textA,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w400,
+                                  fontSize: 14,
                                 ),
                                 align: TextAlign.center,
                               ),
-                              if(studio != null && channelName != null) PrudImagePicker(
-                                destination: "studio/${studio!.id}/channels/$channelName/images",
-                                saveToCloud: true,
-                                reset: shouldReset,
-                                onSaveToCloud: (String? url){
-                                  tryOnly("Picker onSaveToCloud", (){
-                                    if(mounted && url != null) setState(() => displayScreenImage = url);
-                                  });
-                                },
-                                onError: (err){
-                                  debugPrint("Picker Error: $err");
-                                },
+                              spacer.height,
+                              PrudContainer(
+                                  hasTitle: true,
+                                  hasPadding: true,
+                                  title: "Country",
+                                  titleBorderColor: prudColorTheme.bgC,
+                                  titleAlignment: MainAxisAlignment.end,
+                                  child: Column(
+                                    children: [
+                                      mediumSpacer.height,
+                                      CountryPicker(
+                                        bgColor: prudColorTheme.bgA,
+                                        selected: prudStudioNotifier.newChannelData.countryCode?? "NG",
+                                        onChange: (Country ctry) async {
+                                          if(mounted) setState(() => prudStudioNotifier.newChannelData.countryCode = ctry.isoCode);
+                                        },
+                                      ),
+                                      spacer.height,
+                                    ],
+                                  )
                               ),
+                              xLargeSpacer.height,
                             ],
                           )
                               :
@@ -635,7 +643,9 @@ class _NewChannelState extends State<NewChannel> {
                                 children: [
                                   spacer.height,
                                   Translate(
-                                    text: "Your contents on this channel needs age restrictions. Kindly provide the age range.",
+                                    text: "How much would you charge for monthly streaming subscription on "
+                                        "this channel? You must make sure that the amount is not less than 4(EURO) and not greater "
+                                        "than 10(Euro) in the currency of your channel.",
                                     style: prudWidgetStyle.tabTextStyle.copyWith(
                                       color: prudColorTheme.textA,
                                       fontSize: 15,
@@ -645,32 +655,46 @@ class _NewChannelState extends State<NewChannel> {
                                   ),
                                   spacer.height,
                                   PrudContainer(
-                                    hasTitle: true,
-                                    hasPadding: true,
-                                    title: "Age Targets",
-                                    titleBorderColor: prudColorTheme.bgC,
-                                    titleAlignment: MainAxisAlignment.end,
-                                    child: Column(
-                                      children: [
-                                        mediumSpacer.height,
-                                        SfRangeSlider(
-                                          min: 0.0,
-                                          max: 50.0,
-                                          values: ageTargets,
-                                          interval: 2,
-                                          showTicks: true,
-                                          showLabels: true,
-                                          enableTooltip: true,
-                                          minorTicksPerInterval: 1,
-                                          onChanged: (SfRangeValues values){
-                                            if(mounted) setState(() => ageTargets = values);
-                                          },
-                                        ),
-                                        spacer.height,
-                                      ],
-                                    )
+                                      hasTitle: true,
+                                      hasPadding: true,
+                                      title: "Streaming Cost(${prudStudioNotifier.newChannelData.selectedCurrency!.code})",
+                                      titleBorderColor: prudColorTheme.bgC,
+                                      titleAlignment: MainAxisAlignment.end,
+                                      child: Column(
+                                        children: [
+                                          mediumSpacer.height,
+                                          FormBuilder(
+                                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                                            child: FormBuilderTextField(
+                                              onChanged: (String? value){
+                                                debugPrint("before: $value ");
+                                                tryOnly("onChange", (){
+                                                  if(mounted && value != null && value.isNotEmpty) setState(() => prudStudioNotifier.newChannelData.streamServiceCost = currencyMath.roundDouble(double.parse(value.trim()), 2));
+                                                });
+                                                debugPrint("streamed: $value | ${prudStudioNotifier.newChannelData.streamServiceCost}");
+                                              },
+                                              autofocus: true,
+                                              name: 'streamServiceCost',
+                                              controller: txtCtrl1,
+                                              key: _key2,
+                                              style: tabData.npStyle,
+                                              keyboardType: TextInputType.number,
+                                              decoration: getDeco(
+                                                  "How Much",
+                                                  onlyBottomBorder: true,
+                                                  borderColor: prudColorTheme.lineC
+                                              ),
+                                              valueTransformer: (text) => num.tryParse(text!),
+                                              validator: FormBuilderValidators.compose([
+                                                FormBuilderValidators.required(),
+                                              ]),
+                                            ),
+                                          ),
+                                          spacer.height,
+                                        ],
+                                      )
                                   ),
-                                  spacer.height,
+                                  xLargeSpacer.height,
                                 ],
                               )
                                   :
@@ -708,15 +732,15 @@ class _NewChannelState extends State<NewChannel> {
                                             SfSlider(
                                               min: 40.0,
                                               max: 100.0,
-                                              value: sharePerView,
-                                              interval: 5,
+                                              value: prudStudioNotifier.newChannelData.sharePerView,
+                                              interval: 10,
                                               showTicks: true,
                                               showLabels: true,
                                               enableTooltip: true,
                                               minorTicksPerInterval: 1,
                                               onChanged: (dynamic value){
                                                 setState(() {
-                                                  sharePerView = value;
+                                                  prudStudioNotifier.newChannelData.sharePerView = value;
                                                 });
                                               },
                                             ),
@@ -750,15 +774,15 @@ class _NewChannelState extends State<NewChannel> {
                                             SfSlider(
                                               min: 40.0,
                                               max: 100.0,
-                                              value: sharePerMember,
-                                              interval: 5,
+                                              value: prudStudioNotifier.newChannelData.sharePerMember,
+                                              interval: 10,
                                               showTicks: true,
                                               showLabels: true,
                                               enableTooltip: true,
                                               minorTicksPerInterval: 1,
                                               onChanged: (dynamic value){
                                                 setState(() {
-                                                  sharePerMember = value;
+                                                  prudStudioNotifier.newChannelData.sharePerMember = value;
                                                 });
                                               },
                                             ),
@@ -766,7 +790,7 @@ class _NewChannelState extends State<NewChannel> {
                                           ],
                                         )
                                       ),
-                                      spacer.height,
+                                      xLargeSpacer.height,
                                     ],
                                   )
                                       :
@@ -778,9 +802,7 @@ class _NewChannelState extends State<NewChannel> {
                                         children: [
                                           spacer.height,
                                           Translate(
-                                            text: "How much would you charge for monthly membership subscription on "
-                                                "this channel? You must make sure that the amount is not less than 1(EURO) and not greater "
-                                                "than 5(Euro) in the currency of your channel.",
+                                            text: "Upload your channel logo. The logo must represent your brand",
                                             style: prudWidgetStyle.tabTextStyle.copyWith(
                                               color: prudColorTheme.textA,
                                               fontSize: 15,
@@ -788,40 +810,48 @@ class _NewChannelState extends State<NewChannel> {
                                             ),
                                             align: TextAlign.center,
                                           ),
-                                          spacer.height,
-                                          PrudContainer(
-                                            hasTitle: true,
-                                            hasPadding: true,
-                                            title: "Membership Cost(${selectedCurrency!.code})",
-                                            titleBorderColor: prudColorTheme.bgC,
-                                            titleAlignment: MainAxisAlignment.end,
-                                            child: Column(
-                                              children: [
-                                                mediumSpacer.height,
-                                                FormBuilderTextField(
-                                                  initialValue: '$memberCost',
-                                                  name: 'membershipCost',
-                                                  autofocus: true,
-                                                  style: tabData.npStyle,
-                                                  keyboardType: TextInputType.number,
-                                                  decoration: getDeco(
-                                                    "How Much",
-                                                    onlyBottomBorder: true,
-                                                    borderColor: prudColorTheme.lineC
-                                                  ),
-                                                  onChanged: (String? value){
-                                                    if(mounted && value != null) setState(() => memberCost = currencyMath.roundDouble(double.parse(value.trim()), 2));
-                                                  },
-                                                  valueTransformer: (text) => num.tryParse(text!),
-                                                  validator: FormBuilderValidators.compose([
-                                                    FormBuilderValidators.required(),
-                                                  ]),
-                                                ),
-                                                spacer.height,
-                                              ],
-                                            )
+                                          if(studio != null && prudStudioNotifier.newChannelData.channelName != null) PrudImagePicker(
+                                            destination: "studio/${studio!.id}/images",
+                                            existingUrl: prudStudioNotifier.newChannelData.logoUrl,
+                                            saveToCloud: true,
+                                            reset: shouldReset,
+                                            onSaveToCloud: (String? url){
+                                              tryOnly("Picker onSaveToCloud", (){
+                                                debugPrint("PhotoUrl: $url");
+                                                if(mounted && url != null) setState(() => prudStudioNotifier.newChannelData.logoUrl = url);
+                                              });
+                                            },
+                                            onError: (err){
+                                              debugPrint("Picker Error: $err");
+                                            },
                                           ),
                                           spacer.height,
+                                          Translate(
+                                            text: "What Photo will you use for your channel background. Be sure that the "
+                                                "photo has landscape dimensions. The width has to be higher than the height. "
+                                                "We recommend 2000x1000 dimensions.",
+                                            style: prudWidgetStyle.tabTextStyle.copyWith(
+                                              color: prudColorTheme.textA,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                            align: TextAlign.center,
+                                          ),
+                                          if(studio != null && prudStudioNotifier.newChannelData.channelName != null) PrudImagePicker(
+                                            destination: "studio/${studio!.id}/images",
+                                            saveToCloud: true,
+                                            existingUrl: prudStudioNotifier.newChannelData.displayScreenImage,
+                                            reset: shouldReset,
+                                            onSaveToCloud: (String? url){
+                                              tryOnly("Picker onSaveToCloud", (){
+                                                if(mounted && url != null) setState(() => prudStudioNotifier.newChannelData.displayScreenImage = url);
+                                              });
+                                            },
+                                            onError: (err){
+                                              debugPrint("Picker Error: $err");
+                                            },
+                                          ),
+                                          xLargeSpacer.height,
                                         ],
                                       )
                                           :
@@ -833,9 +863,7 @@ class _NewChannelState extends State<NewChannel> {
                                             children: [
                                               spacer.height,
                                               Translate(
-                                                text: "How much would you charge for monthly streaming subscription on "
-                                                    "this channel? You must make sure that the amount is not less than 4(EURO) and not greater "
-                                                    "than 10(Euro) in the currency of your channel.",
+                                                text: "Your contents on this channel needs age restrictions. Kindly provide the age range.",
                                                 style: prudWidgetStyle.tabTextStyle.copyWith(
                                                   color: prudColorTheme.textA,
                                                   fontSize: 15,
@@ -845,38 +873,32 @@ class _NewChannelState extends State<NewChannel> {
                                               ),
                                               spacer.height,
                                               PrudContainer(
-                                                hasTitle: true,
-                                                hasPadding: true,
-                                                title: "Streaming Cost(${selectedCurrency!.code})",
-                                                titleBorderColor: prudColorTheme.bgC,
-                                                titleAlignment: MainAxisAlignment.end,
-                                                child: Column(
-                                                  children: [
-                                                    mediumSpacer.height,
-                                                    FormBuilderTextField(
-                                                      initialValue: '$streamServiceCost',
-                                                      name: 'streamServiceCost',
-                                                      autofocus: true,
-                                                      style: tabData.npStyle,
-                                                      keyboardType: TextInputType.number,
-                                                      decoration: getDeco(
-                                                        "How Much",
-                                                        onlyBottomBorder: true,
-                                                        borderColor: prudColorTheme.lineC
+                                                  hasTitle: true,
+                                                  hasPadding: true,
+                                                  title: "Age Targets",
+                                                  titleBorderColor: prudColorTheme.bgC,
+                                                  titleAlignment: MainAxisAlignment.end,
+                                                  child: Column(
+                                                    children: [
+                                                      mediumSpacer.height,
+                                                      SfRangeSlider(
+                                                        min: 1,
+                                                        max: 50,
+                                                        values: prudStudioNotifier.newChannelData.ageTargets!,
+                                                        interval: 5,
+                                                        showTicks: true,
+                                                        showLabels: true,
+                                                        enableTooltip: true,
+                                                        minorTicksPerInterval: 1,
+                                                        onChanged: (SfRangeValues values){
+                                                          if(mounted) setState(() => prudStudioNotifier.newChannelData.ageTargets = values);
+                                                        },
                                                       ),
-                                                      onChanged: (String? value){
-                                                        if(mounted && value != null) setState(() => streamServiceCost = currencyMath.roundDouble(double.parse(value.trim()), 2));
-                                                      },
-                                                      valueTransformer: (text) => num.tryParse(text!),
-                                                      validator: FormBuilderValidators.compose([
-                                                        FormBuilderValidators.required(),
-                                                      ]),
-                                                    ),
-                                                    spacer.height,
-                                                  ],
-                                                )
+                                                      spacer.height,
+                                                    ],
+                                                  )
                                               ),
-                                              spacer.height,
+                                              xLargeSpacer.height,
                                             ],
                                           )
                                               :
@@ -907,33 +929,52 @@ class _NewChannelState extends State<NewChannel> {
                                                     child: Column(
                                                       children: [
                                                         mediumSpacer.height,
-                                                        FormBuilderTextField(
-                                                          initialValue: '$description',
-                                                          name: 'description',
-                                                          autofocus: true,
-                                                          minLines: 8,
-                                                          style: tabData.npStyle,
-                                                          keyboardType: TextInputType.text,
-                                                          decoration: getDeco(
-                                                            "About Channel",
-                                                            onlyBottomBorder: true,
-                                                            borderColor: prudColorTheme.lineC
+                                                        Align(
+                                                          alignment: Alignment.centerRight,
+                                                          child: Text("$presentWords/$maxWords"),
+                                                        ),
+                                                        FormBuilder(
+                                                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                                                          child: FormBuilderTextField(
+                                                            controller: txtCtrl2,
+                                                            key: _key3,
+                                                            name: 'description',
+                                                            minLines: 8,
+                                                            maxLines: 12,
+                                                            focusNode: fNode,
+                                                            enableInteractiveSelection: true,
+                                                            onTap: (){
+                                                              fNode.requestFocus();
+                                                            },
+                                                            autofocus: true,
+                                                            style: tabData.npStyle,
+                                                            keyboardType: TextInputType.text,
+                                                            decoration: getDeco(
+                                                              "About Channel",
+                                                              onlyBottomBorder: true,
+                                                              borderColor: prudColorTheme.lineC
+                                                            ),
+                                                            onChanged: (String? valueDesc){
+                                                              if(mounted && valueDesc != null) {
+                                                                setState(() {
+                                                                  prudStudioNotifier.newChannelData.description = valueDesc.trim();
+                                                                  presentWords = tabData.countWordsInString(prudStudioNotifier.newChannelData.description!);
+                                                                });
+                                                              }
+                                                            },
+                                                            valueTransformer: (text) => num.tryParse(text!),
+                                                            validator: FormBuilderValidators.compose([
+                                                              FormBuilderValidators.required(),
+                                                              FormBuilderValidators.minWordsCount(30),
+                                                              FormBuilderValidators.maxWordsCount(100),
+                                                            ]),
                                                           ),
-                                                          onChanged: (String? value){
-                                                            if(mounted && value != null) setState(() => description = value.trim());
-                                                          },
-                                                          valueTransformer: (text) => num.tryParse(text!),
-                                                          validator: FormBuilderValidators.compose([
-                                                            FormBuilderValidators.required(),
-                                                            FormBuilderValidators.minWordsCount(30),
-                                                            FormBuilderValidators.maxWordsCount(100),
-                                                          ]),
                                                         ),
                                                         spacer.height,
                                                       ],
                                                     )
                                                   ),
-                                                  spacer.height,
+                                                  xLargeSpacer.height,
                                                 ],
                                               )
                                                   :
@@ -971,7 +1012,8 @@ class _NewChannelState extends State<NewChannel> {
                                                               isPill: false,
                                                             )
                                                           ]
-                                                      )
+                                                      ),
+                                                      xLargeSpacer.height,
                                                     ],
                                                   )
                                                       :
@@ -989,7 +1031,7 @@ class _NewChannelState extends State<NewChannel> {
                                                         ),
                                                         align: TextAlign.center,
                                                       ),
-                                                      spacer.height,
+                                                      xLargeSpacer.height,
                                                     ],
                                                   )
                                               )

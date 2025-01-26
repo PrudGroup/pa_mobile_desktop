@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:prudapp/components/work_in_progress.dart';
 
 import '../../../../../components/prud_showroom.dart';
 import '../../../../../components/studio_channel_list_component.dart';

@@ -1,5 +1,11 @@
+import 'package:currency_picker/currency_picker.dart';
 import 'package:prudapp/models/user.dart';
 import 'package:prudapp/models/wallet.dart';
+import 'package:prudapp/singletons/currency_math.dart';
+import 'package:syncfusion_flutter_sliders/sliders.dart';
+
+import '../pages/prudVid/studio/studioTabs/new_channel.dart';
+import '../singletons/tab_data.dart';
 
 class Studio{
   String? id;
@@ -46,6 +52,152 @@ class Studio{
       affiliate: json["affiliate"] != null? User.fromJson(json["affiliate"]) : null,
       channels: json["channels"]?.map<VidChannel>((cha) => VidChannel.fromJson(cha)).toList(),
       streams: json["streams"]?.map<VidStream>((cha) => VidStream.fromJson(cha)).toList(),
+    );
+  }
+}
+
+class NewChannelData{
+  CreateChannelSteps step;
+  String? channelName;
+  String? logoUrl;
+  String? displayScreenImage;
+  String? category; // Movie, Music, Learn, News, Cuisines, Comedy
+  String? countryCode;
+  SfRangeValues? ageTargets;
+  double sharePerView;
+  double memberCost;
+  double membershipCostInEuro;
+  double streamServiceCost;
+  double streamServiceCostInEuro;
+  double sharePerMember;
+  Currency? selectedCurrency;
+  String? description;
+  String? studioId;
+
+  NewChannelData({
+    this.description = "",
+    this.selectedCurrency,
+    this.countryCode = "NG",
+    this.memberCost = 0,
+    this.ageTargets,
+    this.category,
+    this.channelName = '',
+    this.displayScreenImage,
+    this.logoUrl,
+    this.membershipCostInEuro = 0,
+    this.sharePerMember = 45.0,
+    this.sharePerView = 45.0,
+    this.step = CreateChannelSteps.policy,
+    this.streamServiceCost = 0,
+    this.streamServiceCostInEuro = 0,
+    this.studioId
+  });
+
+  CreateChannelSteps convertStringToStep(String str){
+    switch(str.toLowerCase()){
+      case "policy": return CreateChannelSteps.policy;
+      case "step1": return CreateChannelSteps.step1;
+      case "step2": return CreateChannelSteps.step2;
+      case "step3": return CreateChannelSteps.step3;
+      case "step4": return CreateChannelSteps.step4;
+      case "step5": return CreateChannelSteps.step5;
+      case "step6": return CreateChannelSteps.step6;
+      case "step7": return CreateChannelSteps.step7;
+      case "step8": return CreateChannelSteps.step8;
+      case "success": return CreateChannelSteps.success;
+      default: return CreateChannelSteps.failed;
+    }
+  }
+
+  String convertStepToString(){
+    switch(step){
+      case CreateChannelSteps.policy: return "policy";
+      case CreateChannelSteps.step1: return "step1";
+      case CreateChannelSteps.step2: return "step2";
+      case CreateChannelSteps.step3: return "step3";
+      case CreateChannelSteps.step4: return "step4";
+      case CreateChannelSteps.step5: return "step5";
+      case CreateChannelSteps.step6: return "step6";
+      case CreateChannelSteps.step7: return "step7";
+      case CreateChannelSteps.step8: return "step8";
+      case CreateChannelSteps.success: return "success";
+      default: return "failed";
+    }
+  }
+
+  SfRangeValues convertValuesToAge(String? values){
+    if(values == null || values.isNotEmpty) return SfRangeValues(16.0, 30.0);
+    List<String> strs = values.split(",");
+    return SfRangeValues(double.parse(strs[0]), double.parse(strs[1]));
+  }
+
+  List<double> convertAgesToValues(){
+    if(ageTargets == null) return [16.0, 30.0];
+    return [
+      currencyMath.roundDouble(ageTargets!.start.toDouble(), 1),
+      currencyMath.roundDouble(ageTargets!.end.toDouble(), 1), 
+    ];
+  }
+
+  Map<String, dynamic> toJson(){
+    return {
+      "step": convertStepToString(),
+      "ageTargets": convertAgesToValues().join(","),
+      if(description != null) "description": description,
+      if(channelName != null) "channelName": channelName,
+      if(logoUrl != null) "logoUrl": logoUrl,
+      if(displayScreenImage != null) "displayScreenImage": displayScreenImage,
+      if(category != null) "category": category,
+      if(countryCode != null) "countryCode": countryCode,
+      "sharePerView": sharePerView,
+      "memberCost": memberCost,
+      "membershipCostInEuro": membershipCostInEuro,
+      "streamServiceCost": streamServiceCost,
+      "streamServiceCostInEuro": streamServiceCostInEuro,
+      "sharePerMember": sharePerMember,
+      if(selectedCurrency != null) "selectedCurrency": selectedCurrency!.code,
+      if(studioId != null) "studioId": studioId,
+    };
+  }
+
+  factory NewChannelData.fromJson(Map<String, dynamic> json){
+    return NewChannelData(
+      step: NewChannelData().convertStringToStep(json["step"]),
+      channelName: json["channelName"],
+      logoUrl: json["logoUrl"],
+      displayScreenImage: json["displayScreenImage"],
+      category: json["category"],
+      countryCode: json["countryCode"],
+      sharePerView: json["sharePerView"],
+      memberCost: json["memberCost"],
+      membershipCostInEuro: json["membershipCostInEuro"],
+      streamServiceCost: json["streamServiceCost"],
+      streamServiceCostInEuro: json["streamServiceCostInEuro"],
+      sharePerMember: json["sharePerMember"],
+      description: json["description"],
+      studioId: json["studioId"],
+      selectedCurrency: json["selectedCurrency"] != null? tabData.getCurrency(json["selectedCurrency"]) : null,
+      ageTargets: NewChannelData().convertValuesToAge(json["ageTargets"])
+    );
+  }
+
+  VidChannel? toVidChannel(){
+    return VidChannel(
+      channelName: channelName!,
+      contentPercentageSharePerView: sharePerView,
+      monthlyMembershipCost: memberCost,
+      monthlyMembershipCostInEuro: membershipCostInEuro,
+      monthlyStreamingCost: streamServiceCost,
+      monthlyStreamingCostInEuro: streamServiceCostInEuro,
+      membershipPercentageSharePerMonth: sharePerMember,
+      description: description!,
+      displayScreen: displayScreenImage!,
+      studioId: studioId!,
+      logo: logoUrl!,
+      countryCode: countryCode!,
+      maxTargetAge: ageTargets!.end.toInt(),
+      miniTargetAge: ageTargets!.start.toInt(),
+      category: category!
     );
   }
 }

@@ -7,6 +7,7 @@ import 'package:prudapp/models/wallet.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
+import 'package:syncfusion_flutter_sliders/sliders.dart';
 
 import '../models/prud_vid.dart';
 import 'i_cloud.dart';
@@ -28,14 +29,35 @@ class PrudStudioNotifier extends ChangeNotifier {
   List<VidChannel> myChannels = [];
   ContentCreator? amACreator;
   List<VidChannel> affiliatedChannels = [];
+  NewChannelData newChannelData = NewChannelData(
+    ageTargets: SfRangeValues(18.0, 30.0),
+    category: channelCategories[0],
+    selectedCurrency: tabData.getCurrency("EUR"),
+  );
 
   void changeTab(int tab){
     selectedTab = tab;
     notifyListeners();
   }
 
+  Future<void> saveNewChannelData() async {
+    await myStorage.addToStore(key: "unfinishedNewChannel", value: newChannelData.toJson());
+  }
+
+  void retrieveUnfinishedNewChannelData(){
+    Map<String, dynamic>? unfinishedNewChannel = myStorage.getFromStore(key: "unfinishedNewChannel");
+    if(unfinishedNewChannel != null){
+      newChannelData = NewChannelData.fromJson(unfinishedNewChannel);
+    }
+  }
+
   void updateWallet(StudioWallet wallet){
     wallet = wallet;
+    notifyListeners();
+  }
+
+  void updateMyChannel(VidChannel cha){
+    myChannels.add(cha);
     notifyListeners();
   }
 
@@ -94,10 +116,10 @@ class PrudStudioNotifier extends ChangeNotifier {
           }
           return chas;
         } else {
-          return [];
+          return List<VidChannel>.empty();
         }
       }else{
-        return [];
+        return List<VidChannel>.empty();
       }
     });
   }
@@ -113,10 +135,10 @@ class PrudStudioNotifier extends ChangeNotifier {
           }
           return chas;
         } else {
-          return [];
+          return List<VidChannel>.empty();
         }
       }else{
-        return [];
+        return List<VidChannel>.empty();
       }
     });
   }
@@ -136,8 +158,8 @@ class PrudStudioNotifier extends ChangeNotifier {
 
   Future<VidChannel?> createVidChannel(VidChannel newChannel) async {
     return await tryAsync("createVidChannel", () async {
-      dynamic res = await makeRequest(path: "/channels/", isGet: false, data: newChannel.toJson());
-      if (res != null) {
+      dynamic res = await makeRequest(path: "channels/", isGet: false, data: newChannel.toJson());
+      if (res != null && res != false) {
         return VidChannel.fromJson(res);
       } else {
         return null;
@@ -222,13 +244,14 @@ class PrudStudioNotifier extends ChangeNotifier {
   Future<void> initPrudStudio() async {
     try{
       await getStudio();
+      retrieveUnfinishedNewChannelData();
       if(studio != null && studio!.id != null){
         wallet = await getWallet(studio!.id!);
         await getAmACreator();
         await getMyChannels();
         await getAffiliatedChannels();
-        notifyListeners();
       }
+      notifyListeners();
     }catch(ex){
       debugPrint("PrudStudioNotifier_initPrudStudio Error: $ex");
     }
@@ -257,4 +280,4 @@ Dio prudStudioDio = Dio(BaseOptions(
     }
 ));
 final prudStudioNotifier = PrudStudioNotifier();
-List<String> channelCategories = ["movie", "music", "learn", "news", "cuisines", "comedy"];
+List<String> channelCategories = ["movies", "music", "learn", "news", "cuisines", "comedy"];

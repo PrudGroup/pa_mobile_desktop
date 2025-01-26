@@ -32,8 +32,8 @@ class PrudNetworkImage extends StatelessWidget {
         return LoadingComponent(
           isShimmer: false,
           defaultSpinnerType: false,
-          spinnerColor: prudColorTheme.lineB,
-          size: 20,
+          spinnerColor: prudColorTheme.textD,
+          size: 10,
         );
       },
       errorBuilder: (context, exception, stacktrace){
