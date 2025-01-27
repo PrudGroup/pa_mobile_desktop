@@ -127,10 +127,6 @@ class PrudCarouselItem extends StatelessWidget{
                           iCloud.authorizeDownloadUrl(displayUrl!),
                         ),
                         fit: BoxFit.cover,
-                        colorFilter: ColorFilter.mode(
-                          prudColorTheme.secondary.withValues(alpha: 0.7), 
-                          BlendMode.darken
-                        ),
                       ),
                     ),
                   ),
@@ -142,11 +138,11 @@ class PrudCarouselItem extends StatelessWidget{
                       borderRadius: BorderRadius.circular(20),
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
-                        end: Alignment.topRight,
-                        stops: [0.0, 0.5],
+                        end: Alignment.bottomLeft,
+                        stops: [0.0, 0.7],
                         colors: [
-                          prudColorTheme.primary.withValues(alpha: 0.6),
-                          prudColorTheme.primary.withValues(alpha: 0.05),
+                          prudColorTheme.bgA.withValues(alpha: 0.05),
+                          prudColorTheme.bgA.withValues(alpha: 0.9),
                         ],
                       ),
                     ),
@@ -175,12 +171,12 @@ class PrudCarouselItem extends StatelessWidget{
                                 FittedBox(
                                   child: SizedBox(
                                     child: Text(
-                                      softWrap: false,
+                                      softWrap: true,
                                       tabData.shortenStringWithPeriod(title, length: 50),
                                       style: prudWidgetStyle.hintStyle.copyWith(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 13,
-                                        color: prudColorTheme.bgA,
+                                        color: prudColorTheme.secondary,
                                       ),
                                       textAlign: TextAlign.left,
                                     ),

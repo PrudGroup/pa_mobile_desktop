@@ -110,22 +110,31 @@ class AddCreatorToChannelState extends State<AddCreatorToChannel>{
                   PrudPanel(
                     title: "Select Channel",
                     titleColor: prudColorTheme.iconB,
+                    hasPadding: false,
                     bgColor: prudColorTheme.bgA,
-                    child: SizedBox(
-                      height: 120,
-                      child: ListView.builder(
-                        itemCount: prudStudioNotifier.myChannels.length,
-                        itemBuilder: (context, index){
-                          VidChannel cha = prudStudioNotifier.myChannels[index];
-                          return InkWell(
-                            onTap: () => selectChannel(cha, index),
-                            child: SelectableChannelComponent(
-                              borderColor: selectedChannelIndex == index? prudColorTheme.primary : prudColorTheme.bgD,
-                              channel: cha,
-                            ),
-                          );
-                        }
-                      ),
+                    child: Column(
+                      children: [
+                        mediumSpacer.height,
+                        SizedBox(
+                          height: 120,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.all(5),
+                            scrollDirection: Axis.horizontal,
+                            itemCount: prudStudioNotifier.myChannels.length,
+                            itemBuilder: (context, index){
+                              VidChannel cha = prudStudioNotifier.myChannels[index];
+                              return InkWell(
+                                onTap: () => selectChannel(cha, index),
+                                child: SelectableChannelComponent(
+                                  borderColor: selectedChannelIndex == index? prudColorTheme.primary : prudColorTheme.bgD,
+                                  channel: cha,
+                                ),
+                              );
+                            }
+                          ),
+                        ),
+                        spacer.height
+                      ],
                     ),
                   ),
                   spacer.height,
@@ -153,49 +162,6 @@ class AddCreatorToChannelState extends State<AddCreatorToChannel>{
               child: Column(
                 children: [
                   mediumSpacer.height,
-                  FormBuilderTextField(
-                    initialValue: '',
-                    name: 'creatorId',
-                    autofocus: true,
-                    style: tabData.npStyle,
-                    keyboardType: TextInputType.text,
-                    decoration: getDeco(
-                      "Creator's Id",
-                      onlyBottomBorder: true,
-                      borderColor: prudColorTheme.lineC
-                    ),
-                    onChanged: (String? value){
-                      if(mounted && value != null) setState(() => creatorId = value.trim());
-                    },
-                    valueTransformer: (text) => num.tryParse(text!),
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.minLength(3),
-                      FormBuilderValidators.maxLength(30),
-                      FormBuilderValidators.required(),
-                    ]),
-                  ),
-                  spacer.height,
-                  PrudPanel(
-                    title: "Select Channel",
-                    titleColor: prudColorTheme.iconB,
-                    bgColor: prudColorTheme.bgA,
-                    child: SizedBox(
-                      height: 120,
-                      child: ListView.builder(
-                        itemCount: prudStudioNotifier.myChannels.length,
-                        itemBuilder: (context, index){
-                          VidChannel cha = prudStudioNotifier.myChannels[index];
-                          return InkWell(
-                            onTap: () => selectChannel(cha, index),
-                            child: SelectableChannelComponent(
-                              borderColor: selectedChannelIndex == index? prudColorTheme.primary : prudColorTheme.bgD,
-                              channel: cha,
-                            ),
-                          );
-                        }
-                      ),
-                    ),
-                  ),
                   spacer.height,
                   creatorId != null && selectedChannel != null? (
                     adding? LoadingComponent(

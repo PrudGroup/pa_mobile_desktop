@@ -27,7 +27,7 @@ class SelectableChannelComponent extends StatelessWidget{
           ),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            prudColorTheme.primary.withValues(alpha: 0.4), 
+            prudColorTheme.secondary.withValues(alpha: 0.1), 
             BlendMode.srcOver
           ),
         ),
