@@ -167,6 +167,32 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
+  Future<ContentCreator?> createNewCreator(ContentCreator newCreator) async {
+    return await tryAsync("createNewCreator", () async {
+      dynamic res = await makeRequest(path: "creators/", isGet: false, data: newCreator.toJson());
+      if (res != null && res != false) {
+        ContentCreator added = ContentCreator.fromJson(res);
+        amACreator = added;
+        notifyListeners();
+        await myStorage.addToStore(key: "amACreator", value: jsonEncode(amACreator));
+        return added;
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<bool> addCreatorToChannel(String  creatorId, String channelId) async {
+    return await tryAsync("createNewCreator", () async {
+      dynamic res = await makeRequest(path: "channels/$channelId/add_creator/$creatorId");
+      if (res == true) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
+
   Future<StudioWallet?> getWallet(String studId) async {
     return await tryAsync("getWallet", () async {
       dynamic res = await makeRequest(path: "wallets/studio/$studId");

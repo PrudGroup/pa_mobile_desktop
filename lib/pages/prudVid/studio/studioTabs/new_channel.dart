@@ -565,39 +565,39 @@ class _NewChannelState extends State<NewChannel> {
                               ),
                               spacer.height,
                               PrudContainer(
-                                  hasTitle: true,
-                                  hasPadding: true,
-                                  title: "Channel Name",
-                                  titleBorderColor: prudColorTheme.bgC,
-                                  titleAlignment: MainAxisAlignment.end,
-                                  child: Column(
-                                    children: [
-                                      mediumSpacer.height,
-                                      FormBuilderTextField(
-                                        initialValue: prudStudioNotifier.newChannelData.channelName?? '',
-                                        name: 'channelName',
-                                        key: _key4,
-                                        autofocus: true,
-                                        style: tabData.npStyle,
-                                        keyboardType: TextInputType.text,
-                                        decoration: getDeco(
-                                            "Channel Name",
-                                            onlyBottomBorder: true,
-                                            borderColor: prudColorTheme.lineC
-                                        ),
-                                        onChanged: (String? value){
-                                          if(mounted && value != null) setState(() => prudStudioNotifier.newChannelData.channelName = value.trim());
-                                        },
-                                        valueTransformer: (text) => num.tryParse(text!),
-                                        validator: FormBuilderValidators.compose([
-                                          FormBuilderValidators.minLength(3),
-                                          FormBuilderValidators.maxLength(30),
-                                          FormBuilderValidators.required(),
-                                        ]),
+                                hasTitle: true,
+                                hasPadding: true,
+                                title: "Channel Name",
+                                titleBorderColor: prudColorTheme.bgC,
+                                titleAlignment: MainAxisAlignment.end,
+                                child: Column(
+                                  children: [
+                                    mediumSpacer.height,
+                                    FormBuilderTextField(
+                                      initialValue: prudStudioNotifier.newChannelData.channelName?? '',
+                                      name: 'channelName',
+                                      key: _key4,
+                                      autofocus: true,
+                                      style: tabData.npStyle,
+                                      keyboardType: TextInputType.text,
+                                      decoration: getDeco(
+                                          "Channel Name",
+                                          onlyBottomBorder: true,
+                                          borderColor: prudColorTheme.lineC
                                       ),
-                                      spacer.height,
-                                    ],
-                                  )
+                                      onChanged: (String? value){
+                                        if(mounted && value != null) setState(() => prudStudioNotifier.newChannelData.channelName = value.trim());
+                                      },
+                                      valueTransformer: (text) => num.tryParse(text!),
+                                      validator: FormBuilderValidators.compose([
+                                        FormBuilderValidators.minLength(3),
+                                        FormBuilderValidators.maxLength(30),
+                                        FormBuilderValidators.required(),
+                                      ]),
+                                    ),
+                                    spacer.height,
+                                  ],
+                                )
                               ),
                               spacer.height,
                               Translate(

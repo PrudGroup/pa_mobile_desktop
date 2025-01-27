@@ -50,15 +50,20 @@ class _AffiliatedChannelsState extends State<AffiliatedChannels> {
         height: screen.height,
         child: SingleChildScrollView(
           physics: BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 5),
           child: Column(
             spacing: 10,
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              PrudShowroom(items: iCloud.getShowroom(context, showroomItems: 1)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                child: PrudShowroom(items: iCloud.getShowroom(context, showroomItems: 3)),
+              ),
               affChannels.isNotEmpty? StudioChannelListComponent(channels: affChannels, isOwner: false) : notFound,
-              PrudShowroom(items: iCloud.getShowroom(context, showroomItems: 2)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                child: PrudShowroom(items: iCloud.getShowroom(context, showroomItems: 1)),
+              ),
             ],
           ),
         )

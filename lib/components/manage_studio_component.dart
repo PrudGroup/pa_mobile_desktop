@@ -19,18 +19,11 @@ class ManageStudioComponent extends StatefulWidget {
 class _ManageStudioComponentState extends State<ManageStudioComponent> {
 
   Studio? studio = prudStudioNotifier.studio;
+  int totalChannels = prudStudioNotifier.myChannels.length;
 
   @override
   void initState() {
     super.initState();
-  }
-
-  int getTotalChannels() {
-    if(studio!.channels == null) {
-      return 0;
-    } else {
-      return studio!.channels!.length;
-    }
   }
 
   int getTotalStreams() {
@@ -75,7 +68,7 @@ class _ManageStudioComponentState extends State<ManageStudioComponent> {
                   spacer.width,
                   PrudDataViewer(
                     field: "Channels",
-                    value: "${getTotalChannels()}",
+                    value: "$totalChannels",
                   ),
                   spacer.width,
                   PrudDataViewer(
