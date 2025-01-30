@@ -15,45 +15,73 @@ class SelectableChannelComponent extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 90,
-      width: 90,
-      decoration: BoxDecoration(
-        border: Border.all(width: 4, color: borderColor),
-        borderRadius: BorderRadius.circular(25),
-        image: DecorationImage(
-          image: FastCachedImageProvider(
-            iCloud.authorizeDownloadUrl(channel.logo),
+    BorderSide bSide = BorderSide(width: 4, color: borderColor);
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: Stack(
+        children: [
+          Container(
+            height: 90,
+            width: 90,
+            decoration: BoxDecoration(
+              border: Border.all(width: 4, color: borderColor),
+              borderRadius: BorderRadius.circular(25),
+              image: DecorationImage(
+                image: FastCachedImageProvider(
+                  iCloud.authorizeDownloadUrl(channel.logo),
+                ),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-          fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(
-            prudColorTheme.secondary.withValues(alpha: 0.1), 
-            BlendMode.srcOver
-          ),
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(25),
-        child: Align(
-          alignment: Alignment.bottomLeft,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 30),
-            child: FittedBox(
-              child: SizedBox(
-                width: 40,
-                child: Text(
-                  tabData.shortenStringWithPeriod(channel.channelName),
-                  style: prudWidgetStyle.tabTextStyle.copyWith(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: borderColor.withValues(alpha: 0.7)
+          Padding(
+            padding: const EdgeInsets.only(top: 50),
+            child: Container(
+              height: 40,
+              width: 90,
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: bSide,
+                  left: bSide,
+                  right: bSide
+                ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(25),
+                  bottomRight: Radius.circular(25),
+                ),
+                gradient: LinearGradient(
+                  colors: [
+                    borderColor.withValues(alpha: 0.8),
+                    borderColor.withValues(alpha: 0.9)
+                  ]
+                )
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(25),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    child: FittedBox(
+                      child: SizedBox(
+                        width: 70,
+                        child: Text(
+                          tabData.shortenStringWithPeriod(channel.channelName),
+                          style: prudWidgetStyle.tabTextStyle.copyWith(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: borderColor == prudColorTheme.primary? prudColorTheme.bgA : prudColorTheme.secondary,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                    ),
                   ),
-                  textAlign: TextAlign.left,
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

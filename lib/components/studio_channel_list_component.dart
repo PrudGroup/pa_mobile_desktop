@@ -27,7 +27,7 @@ class StudioChannelListComponent extends StatelessWidget {
       height: 180,
       child: CarouselView.weighted(
         backgroundColor: prudColorTheme.bgE,
-        padding: EdgeInsets.zero,
+        padding: const EdgeInsets.only(left: 5),
         // shrinkExtent: 50.0,
         key: coKey,
         itemSnapping: true,

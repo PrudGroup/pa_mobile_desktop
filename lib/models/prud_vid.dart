@@ -217,6 +217,7 @@ class VidChannel{
   Studio? studio;
   String description;
   bool blocked;
+  bool presentlySeekingCreators;
   DateTime? createdOn;
   DateTime? updatedOn;
   double contentPercentageSharePerView;
@@ -235,6 +236,7 @@ class VidChannel{
   List<ChannelVideo>? videos;
   List<StudioWalletHistory>? paymentHistories;
   List<StreamChannel>? streamServices;
+  List<ContentCreatorRequest>? creatorRequests;
 
   VidChannel({
     required this.channelName,
@@ -255,6 +257,7 @@ class VidChannel{
     this.subCategory = "Any",
     this.verified = false,
     this.blocked = false,
+    this.presentlySeekingCreators = false,
     this.channelCurrency = "EUR",
     this.totalSubscribers = 0,
     this.totalMembers = 0,
@@ -267,6 +270,7 @@ class VidChannel{
     this.videos,
     this.paymentHistories,
     this.streamServices,
+    this.creatorRequests,
     this.createdOn,
     this.updatedOn
   });
@@ -327,6 +331,7 @@ class VidChannel{
       createdOn: json["createdOn"] != null? DateTime.parse(json["createdOn"]) : null,
       updatedOn: json["updatedOn"] != null? DateTime.parse(json["updatedOn"]) : null,
       streamServices: json["streamServices"]?.map<StreamChannel>((cha) => StreamChannel.fromJson(cha)).toList(),
+      creatorRequests: json["creatorRequests"]?.map<ContentCreatorRequest>((cha) => ContentCreatorRequest.fromJson(cha)).toList(),
       paymentHistories: json["paymentHistories"]?.map<StudioWalletHistory>((cha) => StudioWalletHistory.fromJson(cha)).toList(),
       videos: json["videos"]?.map<ChannelVideo>((cha) => ChannelVideo.fromJson(cha)).toList(),
       membershipMatrix: json["membershipMatrix"]?.map<ChannelMembershipMatrix>((cha) => ChannelMembershipMatrix.fromJson(cha)).toList(),
@@ -477,6 +482,7 @@ class ContentCreator{
   DateTime? createdOn;
   DateTime? updatedOn;
   List<ChannelVideo>? videos;
+  List<ContentCreatorRequest>? requests;
 
   ContentCreator({
     required this.affId,
@@ -487,6 +493,7 @@ class ContentCreator{
     this.affiliate,
     this.videos,
     this.channels,
+    this.requests
   });
 
   Map<String, dynamic> toJson(){
@@ -509,6 +516,7 @@ class ContentCreator{
       affiliate: json["affiliate"] != null? User.fromJson(json["affiliate"]) : null,
       videos: json["videos"]?.map<ChannelVideo>((cha) => ChannelVideo.fromJson(cha)).toList(),
       channels: json["channels"]?.map<VidChannel>((cha) => VidChannel.fromJson(cha)).toList(),
+      requests: json["requests"]?.map<ContentCreatorRequest>((req) => ContentCreatorRequest.fromJson(req)).toList(),
     );
   }
 }
@@ -1660,6 +1668,61 @@ class VideoMovieCast{
       castPhotoUrl: json["castPhotoUrl"],
       id: json["id"],
       movieDetail: json["movieDetail"] != null? VideoMovieDetail.fromJson(json["movieDetail"]) : null,
+    );
+  }
+}
+
+
+class ContentCreatorRequest{
+  String? id;
+  String creatorId;
+  ContentCreator? creator;
+  String channelId;
+  VidChannel? channel;
+  String status;
+  String requestMessage;
+  DateTime? requestedOn;
+  DateTime? updatedOn;
+  String? meetingLink;
+
+  ContentCreatorRequest({
+    required this.channelId,
+    required this.creatorId,
+    required this.requestMessage,
+    this.id,
+    this.status = "PENDING",
+    this.meetingLink,
+    this.requestedOn,
+    this.updatedOn,
+    this.channel,
+    this.creator,
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      if(id != null) "id": id,
+      "status": status,
+      if(meetingLink != null) "meetingLink": meetingLink,
+      if(requestedOn != null) "requestedOn": requestedOn.toString(),
+      if(updatedOn != null) "updatedOn": updatedOn.toString(),
+      "channelId": channelId,
+      "creatorId": creatorId,
+      "requestMessage": requestMessage,
+    };
+  }
+
+  factory ContentCreatorRequest.fromJson(Map<String, dynamic> json){
+    return ContentCreatorRequest(
+      channelId: json["channelId"], 
+      creatorId: json["creatorId"], 
+      requestMessage: json["requestMessage"],
+      updatedOn: json["updatedOn"] != null? DateTime.parse(json["updatedOn"]) : null,
+      requestedOn: json["requestedOn"] != null? DateTime.parse(json["requestedOn"]) : null,
+      meetingLink: json["meetingLink"],
+      id: json["id"],
+      status: json["status"],
+      creator: json["creator"] != null? ContentCreator.fromJson(json["creator"]) : null,
+      channel: json["channel"] != null? VidChannel.fromJson(json["channel"]) : null,
     );
   }
 }

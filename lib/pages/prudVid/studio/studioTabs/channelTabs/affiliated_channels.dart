@@ -57,12 +57,12 @@ class _AffiliatedChannelsState extends State<AffiliatedChannels> {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 5),
-                child: PrudShowroom(items: iCloud.getShowroom(context, showroomItems: 3)),
+                child: PrudShowroom(items: iCloud.getShowroom(context, showroomItems: 1)),
               ),
               affChannels.isNotEmpty? StudioChannelListComponent(channels: affChannels, isOwner: false) : notFound,
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 5),
-                child: PrudShowroom(items: iCloud.getShowroom(context, showroomItems: 1)),
+                child: PrudShowroom(items: iCloud.getShowroom(context, showroomItems: 3)),
               ),
             ],
           ),

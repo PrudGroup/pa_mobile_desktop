@@ -139,9 +139,9 @@ class PrudCarouselItem extends StatelessWidget{
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomLeft,
-                        stops: [0.0, 0.7],
+                        stops: [0.0, 0.3],
                         colors: [
-                          prudColorTheme.bgA.withValues(alpha: 0.05),
+                          prudColorTheme.bgA.withValues(alpha: 0.01),
                           prudColorTheme.bgA.withValues(alpha: 0.9),
                         ],
                       ),
@@ -153,10 +153,10 @@ class PrudCarouselItem extends StatelessWidget{
                         Align(
                           alignment: Alignment.topLeft,
                           child: Padding(
-                            padding: const EdgeInsets.only(left: 10, right: 5),
+                            padding: const EdgeInsets.only(left: 10, right: 10),
                             child: Wrap(
-                              runSpacing: -5.0,
-                              spacing: -5.0,
+                              runSpacing: -3.0,
+                              spacing: -3.0,
                               direction: Axis.vertical,
                               children: [
                                 if(moreTitle != null) Text(
@@ -170,31 +170,33 @@ class PrudCarouselItem extends StatelessWidget{
                                 ),
                                 FittedBox(
                                   child: SizedBox(
-                                    child: Text(
-                                      softWrap: true,
-                                      tabData.shortenStringWithPeriod(title, length: 50),
-                                      style: prudWidgetStyle.hintStyle.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 13,
-                                        color: prudColorTheme.secondary,
+                                    child: ClipRRect(
+                                      child: Text(
+                                        overflow: TextOverflow.fade,
+                                        softWrap: true,
+                                        tabData.shortenStringWithPeriod(title, length: 30),
+                                        style: prudWidgetStyle.hintStyle.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 13,
+                                          height: 0.9,
+                                          color: prudColorTheme.secondary,
+                                        ),
+                                        textAlign: TextAlign.left,
                                       ),
-                                      textAlign: TextAlign.left,
                                     ),
                                   )
                                 ),
                                 if(subtitle != null) FittedBox(
-                                  child: SizedBox(
-                                    child: Text(
-                                      softWrap: false,
-                                      tabData.shortenStringWithPeriod(subtitle!, length: 20),
-                                      style: prudWidgetStyle.btnTextStyle.copyWith(
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 11,
-                                        color: prudColorTheme.iconB,
-                                      ),
-                                      textAlign: TextAlign.left,
+                                  child: Text(
+                                    softWrap: false,
+                                    tabData.shortenStringWithPeriod(subtitle!, length: 20),
+                                    style: prudWidgetStyle.btnTextStyle.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 11,
+                                      color: prudColorTheme.iconB,
                                     ),
-                                  )
+                                    textAlign: TextAlign.left,
+                                  ),
                                 ),
                               ],
                             ),
@@ -207,7 +209,7 @@ class PrudCarouselItem extends StatelessWidget{
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 30),
+              padding: const EdgeInsets.only(left: 10, top: 30),
               child: Container(
                 width: 40,
                 height: 40,

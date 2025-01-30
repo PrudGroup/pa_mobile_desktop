@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/components/prud_showroom.dart';
 import 'package:prudapp/components/translate_text.dart';
@@ -10,6 +11,7 @@ import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
+import 'package:share_plus/share_plus.dart';
 
 class AddAsCreator extends StatefulWidget{
 
@@ -31,6 +33,26 @@ class AddAsCreatorState extends State<AddAsCreator>{
       if(mounted) setState(() => creator = prudStudioNotifier.amACreator);
     });
   } 
+
+  void copyToClipboard() async {
+    if(creator != null && creator!.id != null){
+      await Clipboard.setData(ClipboardData(text: "${creator!.id}"));
+      if(mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("ID Copied To Clipboard"),
+        ));
+      }
+    }
+  }
+
+  void share() async {
+    final result = await Share.share('I am a content creator on Prudapp with creator id ${creator!.id}', subject: "CreatorID");
+    if (result.status == ShareResultStatus.success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("CreatorID Shared"),
+      ));
+    }
+  }
 
   @override
   void dispose() {
@@ -89,6 +111,37 @@ class AddAsCreatorState extends State<AddAsCreator>{
                   ),
                   align: TextAlign.center,
                 ),
+                spacer.height,
+                Row(
+                  children: [
+                    FittedBox(
+                      child: Text(
+                        "${creator?.id}",
+                        style: prudWidgetStyle.btnTextStyle.copyWith(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: prudColorTheme.textA,
+                        ),
+                      ),
+                    ),
+                    spacer.width,
+                    IconButton(
+                      tooltip: "Copy To Clipboard",
+                      onPressed: copyToClipboard, 
+                      icon: Icon(Icons.copy_sharp,),
+                      color: prudColorTheme.primary,
+                      iconSize: 30,
+                    ),
+                    spacer.width,
+                    IconButton(
+                      tooltip: "Share Via Social",
+                      onPressed: share, 
+                      icon: Icon(Icons.share,),
+                      color: prudColorTheme.primary,
+                      iconSize: 30,
+                    )
+                  ],
+                )
               ],
             ) 
             : 

@@ -34,10 +34,28 @@ class PrudStudioNotifier extends ChangeNotifier {
     category: channelCategories[0],
     selectedCurrency: tabData.getCurrency("EUR"),
   );
+  List<String> searchedTerms4Channel = [];
 
   void changeTab(int tab){
     selectedTab = tab;
     notifyListeners();
+  }
+
+  Future<void> updateSearchedTerms4Channel(String searchedTerm) async {
+    if(searchedTerms4Channel.contains(searchedTerm) == false){
+      searchedTerms4Channel.add(searchedTerm);
+      await myStorage.addToStore(key: "searchedTerms4Channel", value: searchedTerms4Channel);
+      notifyListeners();
+    }
+  }
+
+  void getSearchedTearm4ChannelFromCache(){
+    List<dynamic>? searchTerms = myStorage.getFromStore(key: "searchedTerms4Channel");
+    if(searchTerms != null){
+      for(var item in searchTerms){
+        if(searchedTerms4Channel.contains(item) == false) searchedTerms4Channel.add(item);
+      }
+    }
   }
 
   Future<void> saveNewChannelData() async {
@@ -183,9 +201,9 @@ class PrudStudioNotifier extends ChangeNotifier {
   }
 
   Future<bool> addCreatorToChannel(String  creatorId, String channelId) async {
-    return await tryAsync("createNewCreator", () async {
+    return await tryAsync("addCreatorToChannel", () async {
       dynamic res = await makeRequest(path: "channels/$channelId/add_creator/$creatorId");
-      if (res == true) {
+      if (res != null && res == true) {
         return true;
       } else {
         return false;
@@ -201,6 +219,25 @@ class PrudStudioNotifier extends ChangeNotifier {
       } else {
         return null;
       }
+    });
+  }
+
+  Future<List<VidChannel>> searchForChannels(String filter, String? filterValue, int limit, int? offset) async {
+    return await tryAsync("searchForChannels", () async {
+      String path = "";
+      List<VidChannel> results = [];
+      switch(filter.toLowerCase()){
+        case "country": path = "channels/search/country/$filterValue";
+        case "channelname": path = "channels/search/$filterValue";
+        default: path = "channels/search/category/$filter";
+      }
+      dynamic res = await makeRequest(path: path);
+      if (res != null && res.isNotEmpty) {
+        for(var re in res){
+          results.add(VidChannel.fromJson(re));
+        }
+      }
+      return results;
     });
   }
 
@@ -261,7 +298,7 @@ class PrudStudioNotifier extends ChangeNotifier {
       String url = "$prudApiUrl/studios/$path";
       Response res = isGet? (await prudStudioDio.get(url)) : (await prudStudioDio.post(url, data: data));
       debugPrint("prudStudio Request: $res");
-      return res.data;
+      return res.data ;
     }else{
       return null;
     }
@@ -271,6 +308,7 @@ class PrudStudioNotifier extends ChangeNotifier {
     try{
       await getStudio();
       retrieveUnfinishedNewChannelData();
+      getSearchedTearm4ChannelFromCache();
       if(studio != null && studio!.id != null){
         wallet = await getWallet(studio!.id!);
         await getAmACreator();
