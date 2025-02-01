@@ -265,11 +265,44 @@ class TabData extends ChangeNotifier {
     return arr.join();
   }
 
-  Widget getNotFoundWidget({required String title, required String desc}){
+  Widget getNotFoundWidget({required String title, required String desc, bool isRow = false}){
     return Center(
       child: Container(
         padding: const EdgeInsets.all(20),
-        child: Column(
+        child: isRow? 
+        Row(
+          children: [
+            Image.asset(
+              prudImages.prudIcon,
+              width: 50,
+              fit: BoxFit.contain,
+            ),
+            spacer.width,
+            Expanded(
+              child:SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Translate(
+                      text: title,
+                      style: tabData.cStyle.copyWith(color: Colors.black87, fontSize: 16.0),
+                      align: TextAlign.left,
+                    ),
+                    Translate(
+                      text: desc,
+                      style: tabData.nRStyle.copyWith(color: Colors.black45, fontSize: 14.0),
+                      align: TextAlign.left,
+                    ),
+                  ],
+                )
+              ),
+            ),
+          ],
+        ) 
+        : 
+        Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(

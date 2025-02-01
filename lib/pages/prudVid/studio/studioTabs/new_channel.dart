@@ -5,6 +5,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 
 import '../../../../components/country_picker.dart';
@@ -120,7 +121,10 @@ class _NewChannelState extends State<NewChannel> {
       VidChannel newChannel = prudStudioNotifier.newChannelData.toVidChannel()!;
       VidChannel? result = await prudStudioNotifier.createVidChannel(newChannel);
       created = result != null;
-      if(created) prudStudioNotifier.updateMyChannel(result);
+      if(created) {
+        if(result.id != null) await messenger.subscribeToTopic(result.id!);
+        prudStudioNotifier.updateMyChannel(result);
+      }
       if(mounted) setState(() => loading = false);
       return created;
     }, error: (){

@@ -5,6 +5,7 @@ import 'package:prudapp/components/channel_search_component.dart';
 import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/components/prud_container.dart';
 import 'package:prudapp/components/prud_panel.dart';
+import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/components/vid_channel_component.dart';
 import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/theme.dart';
@@ -30,15 +31,31 @@ class AddCreatorToChannelState extends State<AddCreatorToChannel>{
   VidChannel? selectedChannel;
   int selectedChannelIndex = 0;
   int selectedRequestChannelIndex = 0;
+  int selectedSeekingChannelIndex = 0;
   List<VidChannel> searchResults = [];
+  List<VidChannel> seekingSearchResults = [];
   TextEditingController txtCtrl = TextEditingController();
   Widget notFound = tabData.getNotFoundWidget(
-    title: "Channels Not Found", desc: "Your search got no results. Change your keyword and try again."
+    title: "Channels Not Found", desc: "Your search got no results. Change your keyword and try again.",
+    isRow: true
   );
-  String filterValue = "";
-  String searchTerm = "";
+  Widget notSuggestFound = tabData.getNotFoundWidget(
+    title: "No Suggestions", desc: "No channel(s) is/are presently seeking creators.", isRow: true
+  );
+  String? filterValue;
+  String? searchTerm;
   int offset = 0;
+  int seekingOffset = 0;
   bool loading = false;
+  bool seeking = false;
+
+  @override
+  void initState() {
+    Future.delayed(Duration.zero, () async {
+      await getMoreSeekingSearchResults();
+    });
+    super.initState();
+  }
 
   void refreshData(){
     if(mounted){
@@ -52,7 +69,7 @@ class AddCreatorToChannelState extends State<AddCreatorToChannel>{
     }
   }
 
-  void setResult(List<VidChannel> result, String filterValue, String searchText){
+  void setResult(List<VidChannel> result, List<VidChannel> seekingResult, String filterValue, String searchText){
     List<VidChannel> channels = [];
     if(result.isNotEmpty && mounted){
       channels.addAll(result);
@@ -62,6 +79,7 @@ class AddCreatorToChannelState extends State<AddCreatorToChannel>{
         filterValue = filterValue;
       });
     }
+    if(seekingResult.isNotEmpty && mounted) setState(() => seekingSearchResults = seekingResult);
   }
 
 
@@ -71,13 +89,13 @@ class AddCreatorToChannelState extends State<AddCreatorToChannel>{
       bool added = await prudStudioNotifier.addCreatorToChannel(creatorId!, selectedChannel!.id!);
       if(mounted && added){
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("Added Successfully"),
+          content: Translate(text: "Added Successfully"),
         ));
         refreshData();
       }else{
         if(mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text("Task failed", style: prudWidgetStyle.btnTextStyle.copyWith(
+            content: Translate(text: "Task failed", style: prudWidgetStyle.btnTextStyle.copyWith(
               color: prudColorTheme.bgA,
             ),),
             backgroundColor: prudColorTheme.primary,
@@ -100,12 +118,13 @@ class AddCreatorToChannelState extends State<AddCreatorToChannel>{
     }
   }
 
+
   Future<void> getMoreSearchResults() async {
-    if(searchTerm != "" && filterValue != ""){
+    if(searchTerm != null && filterValue != null){
       await tryAsync("getMoreSearchResults", () async {
         if(mounted) setState(() => loading = true);
         List<VidChannel> results = await prudStudioNotifier.searchForChannels(
-          filterValue, searchTerm, 20, offset
+          filterValue!, searchTerm, 20, offset
         );
         if(results.isNotEmpty) {
           setState(() { 
@@ -121,6 +140,29 @@ class AddCreatorToChannelState extends State<AddCreatorToChannel>{
         if(mounted) setState(() => loading = false);
       });
     }
+  }
+
+  Future<void> getMoreSeekingSearchResults() async {
+    String dFilterValue = filterValue?? "any";
+    String dSearchTerm = searchTerm?? "any";
+    await tryAsync("getMoreSeekingSearchResults", () async {
+      if(mounted) setState(() => seeking = true);
+      List<VidChannel> results = await prudStudioNotifier.searchForChannels(
+        dFilterValue, dSearchTerm, 20, seekingOffset, onlySeeking: true
+      );
+      if(results.isNotEmpty) {
+        setState(() { 
+          seekingOffset += results.length;
+          seekingSearchResults.addAll(results);
+          seeking = false;
+        });
+      }else{
+        if(mounted) setState(() => seeking = false);
+      }
+    }, 
+    error: (){
+      if(mounted) setState(() => seeking = false);
+    });
   }
 
   void openChannel(VidChannel channel, int index){
@@ -224,6 +266,56 @@ class AddCreatorToChannelState extends State<AddCreatorToChannel>{
             PrudContainer(
               hasTitle: true,
               hasPadding: true,
+              title: "Suggested Channels",
+              titleBorderColor: prudColorTheme.bgC,
+              titleAlignment: MainAxisAlignment.end,
+              child: Column(
+                children: [
+                  mediumSpacer.height,
+                  seekingSearchResults.isNotEmpty? 
+                  PrudPanel(
+                    title: "Select Channel",
+                    titleColor: prudColorTheme.iconB,
+                    hasPadding: false,
+                    bgColor: prudColorTheme.bgA,
+                    child: Column(
+                      children: [
+                        mediumSpacer.height,
+                        SizedBox(
+                          height: 120,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 5),
+                            scrollDirection: Axis.horizontal,
+                            itemCount: seekingSearchResults.length,
+                            itemBuilder: (context, index) {
+                              VidChannel cha = seekingSearchResults[index];
+                              return InkWell(
+                                onTap: () => openChannel(cha, index),
+                                child: SelectableChannelComponent(
+                                  borderColor: selectedSeekingChannelIndex == index? prudColorTheme.primary : prudColorTheme.bgD,
+                                  channel: cha,
+                                ),
+                              );
+                            }
+                          ),
+                        ),
+                        spacer.height
+                      ],
+                    ),
+                  ) 
+                  : 
+                  seeking? LoadingComponent(
+                    isShimmer: false,
+                    defaultSpinnerType: false,
+                    spinnerColor: prudColorTheme.lineC,
+                    size: 20,
+                  ) : notSuggestFound,
+                ],
+              )
+            ),
+            PrudContainer(
+              hasTitle: true,
+              hasPadding: true,
               title: "Send Creator Request",
               titleBorderColor: prudColorTheme.bgC,
               titleAlignment: MainAxisAlignment.end,
@@ -247,9 +339,6 @@ class AddCreatorToChannelState extends State<AddCreatorToChannel>{
                             scrollDirection: Axis.horizontal,
                             itemCount: searchResults.length,
                             itemBuilder: (context, index) {
-                              if(index == (searchResults.length -1)){
-                                getMoreSearchResults();
-                              }
                               VidChannel cha = searchResults[index];
                               return InkWell(
                                 onTap: () => openChannel(cha, index),
@@ -265,10 +354,10 @@ class AddCreatorToChannelState extends State<AddCreatorToChannel>{
                       ],
                     ),
                   ) : notFound,
-                  xLargeSpacer.height
                 ],
               )
             ),
+            xLargeSpacer.height,
           ],
         ),
       ),

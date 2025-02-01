@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/components/translate_text.dart';
+import 'package:prudapp/models/images.dart';
 import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/tab_data.dart';
     
 class ChannelSearchComponent extends StatefulWidget {
-  final Function(List<VidChannel>, String, String) onResultReady;
+  final Function(List<VidChannel>, List<VidChannel>, String, String) onResultReady;
 
   const ChannelSearchComponent({super.key, required this.onResultReady});
 
@@ -58,7 +59,10 @@ class ChannelSearchComponentState extends State<ChannelSearchComponent> {
           filterValue, searchTerm, 20, 0
         );
         if(results.isNotEmpty && filterValue == "ChannelName") prudStudioNotifier.updateSearchedTerms4Channel(searchTerm!);
-        widget.onResultReady(results, filterValue, searchTerm!);
+        List<VidChannel> seekingResults = await prudStudioNotifier.searchForChannels(
+          filterValue, searchTerm, 20, 0, onlySeeking: true
+        );
+        widget.onResultReady(results, seekingResults, filterValue, searchTerm!);
         if(mounted) setState(() => loading = false);
       }, 
       error: (){
@@ -100,7 +104,11 @@ class ChannelSearchComponentState extends State<ChannelSearchComponent> {
               defaultSpinnerType: false,
               size: 15,
               spinnerColor: prudColorTheme.primary,
-            ) : IconButton(onPressed: toggleFilter, icon: Icon(Icons.filter), color: prudColorTheme.primary,),
+            ) : IconButton(
+              onPressed: toggleFilter, 
+              icon: ImageIcon(AssetImage(prudImages.settings)), 
+              color: prudColorTheme.primary,
+            ),
             spacer.width,
             Expanded(
               child: filterValue.toLowerCase() == "country"? 

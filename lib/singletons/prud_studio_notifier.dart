@@ -35,9 +35,15 @@ class PrudStudioNotifier extends ChangeNotifier {
     selectedCurrency: tabData.getCurrency("EUR"),
   );
   List<String> searchedTerms4Channel = [];
+  List<CachedChannelCreator> channelCreators = [];
 
   void changeTab(int tab){
     selectedTab = tab;
+    notifyListeners();
+  }
+
+  void addToCachedChannelCreators(CachedChannelCreator ccc){
+    channelCreators.add(ccc);
     notifyListeners();
   }
 
@@ -161,6 +167,21 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
+  Future<List<ContentCreator>> getChannelCreators(String channelId) async {
+    return await tryAsync("getChannelCreators", () async {
+      dynamic res = await makeRequest(path: "channels/$channelId/creators");
+      if (res != null && res != [] && res != false && res.length > 0) {
+        List<ContentCreator> chas = [];
+        for (var item in res){
+          chas.add(ContentCreator.fromJson(item));
+        }
+        return chas;
+      } else {
+        return List<ContentCreator>.empty();
+      }
+    }, error: () => List<ContentCreator>.empty());
+  }
+
   Future<Studio?> createStudio(Studio newStudio) async {
     return await tryAsync("createStudio", () async {
       dynamic res = await makeRequest(path: "", isGet: false, data: newStudio.toJson());
@@ -211,6 +232,17 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
+  Future<bool> removeCreatorFromChannel(String  creatorId, String channelId) async {
+    return await tryAsync("removeCreatorFromChannel", () async {
+      dynamic res = await makeRequest(path: "channels/$channelId/remove_creator/$creatorId");
+      if (res != null && res == true) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
+
   Future<StudioWallet?> getWallet(String studId) async {
     return await tryAsync("getWallet", () async {
       dynamic res = await makeRequest(path: "wallets/studio/$studId");
@@ -222,16 +254,19 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
-  Future<List<VidChannel>> searchForChannels(String filter, String? filterValue, int limit, int? offset) async {
+  Future<List<VidChannel>> searchForChannels(String filter, String? filterValue, int limit, int? offset, {bool onlySeeking = false}) async {
     return await tryAsync("searchForChannels", () async {
       String path = "";
       List<VidChannel> results = [];
       switch(filter.toLowerCase()){
-        case "country": path = "channels/search/country/$filterValue";
-        case "channelname": path = "channels/search/$filterValue";
-        default: path = "channels/search/category/$filter";
+        case "country": path = onlySeeking? "channels/search/country/$filterValue/request" : "channels/search/country/$filterValue";
+        case "channelname": path = onlySeeking? "channels/search/$filterValue/request" : "channels/search/$filterValue";
+        default: path = onlySeeking? "channels/search/category/$filter/request" : "channels/search/category/$filter";
       }
-      dynamic res = await makeRequest(path: path);
+      dynamic res = await makeRequest(path: path, qParam: {
+        "limit": limit,
+        "offset": offset,
+      });
       if (res != null && res.isNotEmpty) {
         for(var re in res){
           results.add(VidChannel.fromJson(re));
@@ -291,12 +326,12 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
-  Future<dynamic> makeRequest({required String path, bool isGet = true, Map<String, dynamic>? data}) async {
+  Future<dynamic> makeRequest({required String path, bool isGet = true, Map<String, dynamic>? data, Map<String, dynamic>? qParam}) async {
     currencyMath.loginAutomatically();
     if(iCloud.affAuthToken != null){
       setDioHeaders();
       String url = "$prudApiUrl/studios/$path";
-      Response res = isGet? (await prudStudioDio.get(url)) : (await prudStudioDio.post(url, data: data));
+      Response res = isGet? (await prudStudioDio.get(url, queryParameters: qParam)) : (await prudStudioDio.post(url, data: data));
       debugPrint("prudStudio Request: $res");
       return res.data ;
     }else{
@@ -345,3 +380,4 @@ Dio prudStudioDio = Dio(BaseOptions(
 ));
 final prudStudioNotifier = PrudStudioNotifier();
 List<String> channelCategories = ["movies", "music", "learn", "news", "cuisines", "comedy"];
+List<String> channelRequestStatuses = ["PENDING", "SEEN", "REJECTED", "ACCEPTED"];

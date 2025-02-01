@@ -62,6 +62,7 @@ class _CreateNewStudioComponentState extends State<CreateNewStudioComponent> {
         Studio newStudio = Studio(ownedBy: myStorage.user!.id!, studioName: studioName!);
         Studio? stud = await prudStudioNotifier.createStudio(newStudio);
         if(stud != null){
+          if(stud.id != null) await messenger.subscribeToTopic(stud.id!);
           if(mounted){
             setState(() {
               addedStudio = stud;

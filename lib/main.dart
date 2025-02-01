@@ -4,7 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/pages/register/register.dart';
 import 'package:prudapp/router.dart';
@@ -132,9 +132,11 @@ class MyApp extends StatelessWidget {
                       )),
                     child: Padding(
                       padding: const EdgeInsets.only(top: 500.0),
-                      child: SpinKitFadingCircle(
-                        size: 40.0,
-                        color: prudColorTheme.bgA,
+                      child: LoadingComponent(
+                        size: 15.0,
+                        isShimmer: false,
+                        defaultSpinnerType: false,
+                        spinnerColor: prudColorTheme.bgA,
                       ),
                     ),
                   ),
