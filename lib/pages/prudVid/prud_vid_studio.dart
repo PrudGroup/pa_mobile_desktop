@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prudapp/pages/prudVid/studio/studio_channel.dart';
 import 'package:prudapp/pages/prudVid/studio/studio_creators.dart';
-import 'package:prudapp/pages/prudVid/studio/studio_playlist.dart';
-import 'package:prudapp/pages/prudVid/studio/studio_video.dart';
 import 'package:prudapp/pages/prudVid/studio/studio_wallet.dart';
 
 import '../../models/images.dart';
@@ -19,7 +17,7 @@ class PrudVidStudio extends StatefulWidget {
 
 class PrudVidStudioState extends State<PrudVidStudio> with TickerProviderStateMixin {
   late TabController tabCtrl = TabController(
-      length: 5, vsync: this
+      length: 3, vsync: this
   );
 
   @override
@@ -42,15 +40,13 @@ class PrudVidStudioState extends State<PrudVidStudio> with TickerProviderStateMi
         children: [
           StudioChannel(goToTab: (int index) => tabCtrl.animateTo(index)),
           StudioCreators(goToTab: (int index) => tabCtrl.animateTo(index)),
-          StudioVideo(goToTab: (int index) => tabCtrl.animateTo(index)),
-          StudioPlaylist(goToTab: (int index) => tabCtrl.animateTo(index)),
           StudioWallet(goToTab: (int index) => tabCtrl.animateTo(index)),
         ],
       ),
       bottomNavigationBar: TabBar(
         controller: tabCtrl,
-        isScrollable: true,
-        tabAlignment: TabAlignment.start,
+        // isScrollable: true,
+        // tabAlignment: TabAlignment.start,
         splashFactory: NoSplash.splashFactory,
         tabs: [
           Tab(
@@ -60,14 +56,6 @@ class PrudVidStudioState extends State<PrudVidStudio> with TickerProviderStateMi
           Tab(
             icon: Image.asset(prudImages.prudVider, width: 30,),
             text: "Creators",
-          ),
-          Tab(
-            icon: Image.asset(prudImages.live, width: 30,),
-            text: "Videos & Live",
-          ),
-          Tab(
-            icon: Image.asset(prudImages.playlist, width: 30,),
-            text: "Playlist",
           ),
           Tab(
             icon: Image.asset(prudImages.wallet, width: 30,),

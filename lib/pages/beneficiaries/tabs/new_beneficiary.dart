@@ -100,8 +100,8 @@ class NewBeneficiaryState extends State<NewBeneficiary> {
             onPressed: () => Navigator.pop(context),
             color: prudColorTheme.primary,
             radius: BorderRadius.zero,
-            child: const Text(
-              "Okay",
+            child: const Translate(
+              text:"Okay",
               style: TextStyle(color: Colors.white, fontSize: 20),
             ),
           ),

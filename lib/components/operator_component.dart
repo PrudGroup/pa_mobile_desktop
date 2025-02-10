@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/components/avatar/gf_avatar.dart';
 import 'package:getwidget/size/gf_size.dart';
 import 'package:prudapp/components/loading_component.dart';
+import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/models/bus_models.dart';
 import 'package:prudapp/models/images.dart';
 import 'package:prudapp/models/user.dart';
@@ -322,8 +323,8 @@ class OperatorComponentState extends State<OperatorComponent> {
                             onPressed: unblock,
                             color: prudColorTheme.primary,
                             radius: BorderRadius.zero,
-                            child: const Text(
-                              "Unblock",
+                            child: const Translate(
+                              text:"Unblock",
                               style: TextStyle(color: Colors.white, fontSize: 20),
                             ),
                           ),
@@ -331,8 +332,8 @@ class OperatorComponentState extends State<OperatorComponent> {
                             onPressed: () => Navigator.pop(context),
                             color: prudColorTheme.primary,
                             radius: BorderRadius.zero,
-                            child: const Text(
-                              "Cancel",
+                            child: const Translate(
+                              text:"Cancel",
                               style: TextStyle(color: Colors.white, fontSize: 20),
                             ),
                           ),
@@ -362,8 +363,8 @@ class OperatorComponentState extends State<OperatorComponent> {
                               onPressed: block,
                               color: prudColorTheme.primary,
                               radius: BorderRadius.zero,
-                              child: const Text(
-                                "Block",
+                              child: const Translate(
+                                text:"Block",
                                 style: TextStyle(color: Colors.white, fontSize: 20),
                               ),
                             ),
@@ -371,8 +372,8 @@ class OperatorComponentState extends State<OperatorComponent> {
                               onPressed: () => Navigator.pop(context),
                               color: prudColorTheme.primary,
                               radius: BorderRadius.zero,
-                              child: const Text(
-                                "Cancel",
+                              child: const Translate(
+                                text: "Cancel",
                                 style: TextStyle(color: Colors.white, fontSize: 20),
                               ),
                             ),
@@ -401,8 +402,8 @@ class OperatorComponentState extends State<OperatorComponent> {
                           onPressed: delete,
                           color: prudColorTheme.primary,
                           radius: BorderRadius.zero,
-                          child: const Text(
-                            "Delete",
+                          child: const Translate(
+                            text: "Delete",
                             style: TextStyle(color: Colors.white, fontSize: 20),
                           ),
                         ),
@@ -410,8 +411,8 @@ class OperatorComponentState extends State<OperatorComponent> {
                           onPressed: () => Navigator.pop(context),
                           color: prudColorTheme.primary,
                           radius: BorderRadius.zero,
-                          child: const Text(
-                            "Cancel",
+                          child: const Translate(
+                            text: "Cancel",
                             style: TextStyle(color: Colors.white, fontSize: 20),
                           ),
                         ),

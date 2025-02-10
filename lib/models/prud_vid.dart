@@ -259,6 +259,8 @@ class VidChannel {
   String channelCurrency;
   int totalSubscribers;
   int totalMembers;
+  int votes;
+  int voters;
   List<ContentCreator>? creators;
   List<ChannelSubscriber>? subscriberLinks;
   List<ChannelMembership>? memberLinks;
@@ -293,6 +295,8 @@ class VidChannel {
       this.channelCurrency = "EUR",
       this.totalSubscribers = 0,
       this.totalMembers = 0,
+      this.votes = 0,
+      this.voters = 0,
       this.id,
       this.creators,
       this.studio,
@@ -306,6 +310,11 @@ class VidChannel {
       this.sponsored,
       this.createdOn,
       this.updatedOn});
+
+  double getRating() {
+    if (voters > 0 && votes > 0) return votes / voters;
+    return 0;
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -331,6 +340,8 @@ class VidChannel {
       "channelCurrency": channelCurrency,
       "totalSubscribers": totalSubscribers,
       "totalMembers": totalMembers,
+      "votes": votes,
+      "voters": voters,
       if (createdOn != null) "createdOn": createdOn.toString(),
       if (updatedOn != null) "updatedOn": updatedOn.toString(),
       if (id != null) "id": id,
@@ -363,6 +374,8 @@ class VidChannel {
       totalSubscribers: json["totalSubscribers"],
       totalMembers: json["totalMembers"],
       category: json["category"],
+      votes: json["votes"],
+      voters: json["voters"],
       createdOn:
           json["createdOn"] != null ? DateTime.parse(json["createdOn"]) : null,
       updatedOn:
@@ -639,14 +652,15 @@ class ChannelMembership {
   VidChannel? channel;
   User? member;
 
-  ChannelMembership(
-      {required this.channelId,
-      required this.affId,
-      this.appInstallReferral,
-      this.channelReferral,
-      this.joinedOn,
-      this.channel,
-      this.member});
+  ChannelMembership({
+    required this.channelId,
+    required this.affId,
+    this.appInstallReferral,
+    this.channelReferral,
+    this.joinedOn,
+    this.channel,
+    this.member,
+  });
 
   Map<String, dynamic> toJson() {
     return {
@@ -854,6 +868,11 @@ class ChannelVideo {
     this.comments,
     this.sponsored,
   });
+
+  double getRating() {
+    if (voters > 0 && votes > 0) return votes / voters;
+    return 0;
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -1787,6 +1806,11 @@ class VideoMovieCast {
       this.rolePlot,
       this.movieDetail});
 
+  double getRating() {
+    if (voters > 0 && votes > 0) return votes / voters;
+    return 0;
+  }
+
   Map<String, dynamic> toJson() {
     return {
       if (id != null) "id": id,
@@ -1916,7 +1940,9 @@ class CachedChannelCreator {
   factory CachedChannelCreator.fromJson(Map<String, dynamic> json) {
     return CachedChannelCreator(
       channel: VidChannel.fromJson(json["channel"]),
-      creators: json["creators"].map<CreatorDetail>((cha) => CreatorDetail.fromJson(cha)).toList(),
+      creators: json["creators"]
+          .map<CreatorDetail>((cha) => CreatorDetail.fromJson(cha))
+          .toList(),
     );
   }
 }
@@ -1959,10 +1985,16 @@ class PromoteChannel {
       mediaType: json["mediaType"],
       mediaUrl: json["mediaUrl"],
       id: json["id"],
-      createdOn: json["createdOn"] != null ? DateTime.parse(json["createdOn"]) : null,
-      updatedOn: json["updatedOn"] != null ? DateTime.parse(json["updatedOn"]) : null,
-      channel: json["channel"] != null ? VidChannel.fromJson(json["channel"]) : null,
-      metrics: json["metrics"].map<PromoteChannelMetric>((pcm) => PromoteChannelMetric.fromJson(pcm)).toList(),
+      createdOn:
+          json["createdOn"] != null ? DateTime.parse(json["createdOn"]) : null,
+      updatedOn:
+          json["updatedOn"] != null ? DateTime.parse(json["updatedOn"]) : null,
+      channel:
+          json["channel"] != null ? VidChannel.fromJson(json["channel"]) : null,
+      metrics: json["metrics"]
+          .map<PromoteChannelMetric>(
+              (pcm) => PromoteChannelMetric.fromJson(pcm))
+          .toList(),
     );
   }
 }
@@ -1997,10 +2029,15 @@ class PromoteVideo {
     return PromoteVideo(
       videoId: json["videoId"],
       id: json["id"],
-      createdOn: json["createdOn"] != null ? DateTime.parse(json["createdOn"]) : null,
-      updatedOn: json["updatedOn"] != null ? DateTime.parse(json["updatedOn"]) : null,
-      video: json["video"] != null ? ChannelVideo.fromJson(json["video"]) : null,
-      metrics: json["metrics"].map<PromoteVideoMetric>((pvm) => PromoteVideoMetric.fromJson(pvm)).toList(),
+      createdOn:
+          json["createdOn"] != null ? DateTime.parse(json["createdOn"]) : null,
+      updatedOn:
+          json["updatedOn"] != null ? DateTime.parse(json["updatedOn"]) : null,
+      video:
+          json["video"] != null ? ChannelVideo.fromJson(json["video"]) : null,
+      metrics: json["metrics"]
+          .map<PromoteVideoMetric>((pvm) => PromoteVideoMetric.fromJson(pvm))
+          .toList(),
     );
   }
 }
@@ -2051,11 +2088,9 @@ class PromoteVideoMetric {
       impressions: json["impressions"],
       createdOn: DateTime.parse(json["createdOn"]),
       updatedOn: DateTime.parse(json["updatedOn"]),
-      pro: json["pro"] != null ? PromoteVideo.fromJson(json["pro"]) : null,
     );
   }
 }
-
 
 class PromoteChannelMetric {
   String id;
@@ -2106,4 +2141,62 @@ class PromoteChannelMetric {
       pro: json["pro"] != null ? PromoteChannel.fromJson(json["pro"]) : null,
     );
   }
+}
+
+class RatedChannel {
+  String id;
+  int vote;
+  int monthRated;
+  int yearRated;
+
+  RatedChannel({
+    required this.id,
+    required this.vote,
+    required this.monthRated,
+    required this.yearRated,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      "id": id,
+      "vote": vote,
+      "monthRated": monthRated,
+      "yearRated": yearRated,
+    };
+  }
+
+  Map<String, dynamic> toRateSchema(int current) {
+    return {
+      "hasRated": true,
+      "lastRate": vote,
+      "currentRate": current,
+    };
+  }
+
+  void updateRating(int current) {
+    vote = current;
+    monthRated = DateTime.now().month;
+    yearRated = DateTime.now().year;
+  }
+
+  factory RatedChannel.fromJson(Map<String, dynamic> json) {
+    return RatedChannel(
+      id: json["id"],
+      vote: json["vote"],
+      monthRated: json["monthRated"],
+      yearRated: json["yearRated"],
+    );
+  }
+}
+
+class RatingSearchResult {
+  int index;
+  RatedChannel? ratedChannel;
+  bool canVote;
+
+  RatingSearchResult({
+    required this.index,
+    this.ratedChannel,
+    this.canVote = false,
+  });
 }

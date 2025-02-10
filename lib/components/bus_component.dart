@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/components/avatar/gf_avatar.dart';
 import 'package:getwidget/components/rating/gf_rating.dart';
 import 'package:getwidget/size/gf_size.dart';
+import 'package:prudapp/components/translate_text.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import '../models/bus_models.dart';
@@ -248,8 +249,8 @@ class BusComponentState extends State<BusComponent> {
                           onPressed: delete,
                           color: prudColorTheme.primary,
                           radius: BorderRadius.zero,
-                          child: const Text(
-                            "Delete",
+                          child: const Translate(
+                            text: "Delete",
                             style: TextStyle(color: Colors.white, fontSize: 20),
                           ),
                         ),
@@ -257,8 +258,8 @@ class BusComponentState extends State<BusComponent> {
                           onPressed: () => Navigator.pop(context),
                           color: prudColorTheme.primary,
                           radius: BorderRadius.zero,
-                          child: const Text(
-                            "Cancel",
+                          child: const Translate(
+                            text: "Cancel",
                             style: TextStyle(color: Colors.white, fontSize: 20),
                           ),
                         ),

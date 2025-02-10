@@ -24,12 +24,6 @@ import 'models/images.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await iCloud.setFirebase(
-      Constants.fireApiKey,
-      Platform.isAndroid? Constants.fireAndroidAppID :
-      (Platform.isIOS? Constants.fireIOSAppID : Constants.fireAppID),
-      Constants.fireMessageID
-  );
   iCloud.addPushMessages(message);
 }
 
@@ -47,6 +41,7 @@ void main() async {
       Constants.fireMessageID
   );
   iCloud.setDioHeaders();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await GetStorage.init();
   await myStorage.initializeValues();
   await currencyMath.init();
@@ -133,10 +128,10 @@ class MyApp extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 500.0),
                       child: LoadingComponent(
-                        size: 15.0,
+                        size: 10.0,
                         isShimmer: false,
                         defaultSpinnerType: false,
-                        spinnerColor: prudColorTheme.bgA,
+                        spinnerColor: prudColorTheme.textD,
                       ),
                     ),
                   ),

@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:prudapp/models/prud_vid.dart';
 
-import '../../../components/translate_text.dart';
-import '../../../components/work_in_progress.dart';
-import '../../../models/theme.dart';
+import '../../../../../components/translate_text.dart';
+import '../../../../../components/work_in_progress.dart';
+import '../../../../../models/theme.dart';
 
-class StudioVideo extends StatefulWidget {
-  final Function(int)? goToTab;
-  const StudioVideo({super.key, this.goToTab});
+class ChannelVideos extends StatefulWidget {
+
+  final VidChannel channel;
+  final bool isOwner;
+  const ChannelVideos({super.key, required this.channel, required this.isOwner});
 
   @override
-  StudioVideoState createState() => StudioVideoState();
+  ChannelVideosState createState() => ChannelVideosState();
 }
 
-class StudioVideoState extends State<StudioVideo> {
+class ChannelVideosState extends State<ChannelVideos> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

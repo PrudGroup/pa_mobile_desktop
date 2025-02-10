@@ -35,7 +35,6 @@ import '../settings/settings.dart';
 import '../travels/switz_travels.dart';
 import 'home_drawer.dart';
 
-
 // ignore: must_be_immutable
 class MyHomePage extends StatefulWidget {
   String title;
@@ -46,12 +45,13 @@ class MyHomePage extends StatefulWidget {
   MyHomePageState createState() => MyHomePageState();
 }
 
-class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
+class MyHomePageState extends State<MyHomePage>
+    with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
   final _advDrawerController = AdvancedDrawerController();
   bool hasCartContent = false;
   final MethodChannel platform =
-  const MethodChannel('reactivestreams.io/resourceResolver');
+      const MethodChannel('reactivestreams.io/resourceResolver');
   final RateMyApp _rateMyApp = RateMyApp(
     preferencesPrefix: 'eLib_',
     minDays: 7,
@@ -71,71 +71,41 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
     Image.asset(prudImages.front5),
   ];
   List<Menu> menus = [
+    Menu(title: 'PrudVid', page: const PrudVid(), icon: prudImages.prudVid),
+    Menu(title: 'PrudMovies', page: const PrudMovies(), icon: prudImages.movie),
+    Menu(title: 'PrudMusic', page: const PrudMusic(), icon: prudImages.music),
     Menu(
-        title: 'PrudVid',
-        page: const PrudVid(),
-        icon: prudImages.prudVid
-    ),
-    Menu(
-        title: 'PrudMovies',
-        page: const PrudMovies(),
-        icon: prudImages.movie
-    ),
-    Menu(
-        title: 'PrudMusic',
-        page: const PrudMusic(),
-        icon: prudImages.music
-    ),
-    Menu(
-        title: 'PrudComedy',
-        page: const PrudComedy(),
-        icon: prudImages.comedy
-    ),
-    Menu(
-        title: 'PrudNews',
-        page: const PrudNews(),
-        icon: prudImages.news
-    ),
-    Menu(
-        title: 'PrudLearn',
-        page: const PrudLearn(),
-        icon: prudImages.learn
-    ),
+        title: 'PrudComedy', page: const PrudComedy(), icon: prudImages.comedy),
+    Menu(title: 'PrudNews', page: const PrudNews(), icon: prudImages.news),
+    Menu(title: 'PrudLearn', page: const PrudLearn(), icon: prudImages.learn),
     Menu(
         title: 'PrudCuisines',
         page: const PrudCuisine(),
-        icon: prudImages.cuisine
-    ),
+        icon: prudImages.cuisine),
     Menu(
         title: 'PrudStreams',
         page: const PrudStreams(),
-        icon: prudImages.streamDark
-    ),
+        icon: prudImages.streamDark),
     Menu(
         title: 'Thrillers',
         page: const Thrillers(),
-        icon: prudImages.thrillerDark
-    ),
+        icon: prudImages.thrillerDark),
     Menu(
         title: 'PrudVid Studio',
         page: const PrudVidStudio(),
-        icon: prudImages.prudVidStudio
-    ),
+        icon: prudImages.prudVidStudio),
     Menu(
         title: 'PrudStreams Studio',
         page: const PrudStreamStudio(),
-        icon: prudImages.streamStudioDark
-    ),
+        icon: prudImages.streamStudioDark),
     Menu(
-      title: 'SwitzTravels',
-      page: const SwitzTravels(),
-      icon: prudImages.travel1
-    ),
+        title: 'SwitzTravels',
+        page: const SwitzTravels(),
+        icon: prudImages.travel1),
     Menu(
-      title: 'Influencers',
-      page: const Influencers(),
-      icon: prudImages.influencerFemale
-    ),
+        title: 'Influencers',
+        page: const Influencers(),
+        icon: prudImages.influencerFemale),
     /*Menu(
       title: 'Ads & Promotions',
       page: const Ads(),
@@ -146,17 +116,13 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
       page: const MyAccount(),
       icon: prudImages.account
     ),*/
-    Menu(
-      title: 'Settings',
-      page: const Settings(),
-      icon: prudImages.settings
-    ),
+    Menu(title: 'Settings', page: const Settings(), icon: prudImages.settings),
   ];
   bool prudServiceIsAvailable = true;
 
-  Future<void> changeConnectionStatus() async{
+  Future<void> changeConnectionStatus() async {
     bool ok = await iCloud.prudServiceIsAvailable();
-    if(mounted) setState(() => prudServiceIsAvailable = ok);
+    if (mounted) setState(() => prudServiceIsAvailable = ok);
   }
 
   Future<void> _refresh() async {
@@ -164,9 +130,9 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
     await changeConnectionStatus();
   }
 
-
   @override
-  void initState(){
+  void initState() {
+    debugPrint("DeviceToken: ${myStorage.user?.deviceRegToken}");
     Future.delayed(Duration.zero, () async {
       await changeConnectionStatus();
     });
@@ -178,8 +144,8 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
     });
     FGBGEvents fgbg = FGBGEvents.instance;
     subscription = fgbg.stream.listen((event) {
-      if(event == FGBGType.background) {
-
+      if (event == FGBGType.background) {
+        listenForMessages();
       } else {
         listenForMessages();
       }
@@ -188,15 +154,17 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
 
   void listenForMessages() async {
     bool hasPermissions = await iCloud.getMessengerPermissions();
-    if(hasPermissions){
-      messageStream = FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    if (hasPermissions) {
+      messageStream =
+          FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         iCloud.addPushMessages(message);
+        debugPrint("PUSH NOTICE: $message");
       });
     }
   }
 
   @override
-  void dispose(){
+  void dispose() {
     subscription?.cancel();
     messageStream?.cancel();
     connectSub?.cancel();
@@ -218,7 +186,10 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [prudColorTheme.bgA, prudColorTheme.bgA.withValues(alpha: 0.2)],
+            colors: [
+              prudColorTheme.bgA,
+              prudColorTheme.bgA.withValues(alpha: 0.2)
+            ],
           ),
         ),
       ),
@@ -240,23 +211,22 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
           elevation: 0,
           leading: Center(
             child: IconButton(
-              icon: ValueListenableBuilder<AdvancedDrawerValue>(
-                valueListenable: _advDrawerController,
-                builder: (_, value, __){
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 250),
-                    child: Icon(
-                      value.visible? Icons.clear : Icons.notes,
-                      key: ValueKey<bool>(value.visible),
-                      color: Colors.white,
-                    ),
-                  );
-                },
-              ),
-              color: prudTheme.cardColor,
-              splashRadius: 20,
-              onPressed: _handleDrawer
-            ),
+                icon: ValueListenableBuilder<AdvancedDrawerValue>(
+                  valueListenable: _advDrawerController,
+                  builder: (_, value, __) {
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      child: Icon(
+                        value.visible ? Icons.clear : Icons.notes,
+                        key: ValueKey<bool>(value.visible),
+                        color: Colors.white,
+                      ),
+                    );
+                  },
+                ),
+                color: prudTheme.cardColor,
+                splashRadius: 20,
+                onPressed: _handleDrawer),
           ),
           title: Text(
             widget.title,
@@ -272,49 +242,46 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
             height: height,
             width: width,
             child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                children: [
-                  PrudContainer(
-                    hasPadding: false,
-                    child: GFCarousel(
-                        height: 137.0,
-                        autoPlay: true,
-                        aspectRatio: double.maxFinite,
-                        viewportFraction: 1.0,
-                        enlargeMainPage: true,
-                        enableInfiniteScroll: true,
-                        pauseAutoPlayOnTouch: const Duration(seconds: 10),
-                        autoPlayInterval: const Duration(seconds: 5),
-                        items: carousels
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  children: [
+                    PrudContainer(
+                      hasPadding: false,
+                      child: GFCarousel(
+                          height: 137.0,
+                          autoPlay: true,
+                          aspectRatio: double.maxFinite,
+                          viewportFraction: 1.0,
+                          enlargeMainPage: true,
+                          enableInfiniteScroll: true,
+                          pauseAutoPlayOnTouch: const Duration(seconds: 10),
+                          autoPlayInterval: const Duration(seconds: 5),
+                          items: carousels),
                     ),
-                  ),
-                  spacer.height,
-                  if(!prudServiceIsAvailable) Column(
-                    children: [
-                      const NetworkIssueComponent(),
-                      spacer.height,
-                    ],
-                  ),
-                  PrudContainer(
-                      hasPadding: true,
-                      child: MainMenu(
-                        menus: menus,
-                        bgColor: prudColorTheme.bgC,
-                        useWrap: true,
-                      )
-                  ),
-                  spacer.height,
-                  PrudShowroom(items: iCloud.getShowroom(context)),
-                  largeSpacer.height,
-                ],
-              )
-            ),
+                    spacer.height,
+                    if (!prudServiceIsAvailable)
+                      Column(
+                        children: [
+                          const NetworkIssueComponent(),
+                          spacer.height,
+                        ],
+                      ),
+                    PrudContainer(
+                        hasPadding: true,
+                        child: MainMenu(
+                          menus: menus,
+                          bgColor: prudColorTheme.bgC,
+                          useWrap: true,
+                        )),
+                    spacer.height,
+                    PrudShowroom(items: iCloud.getShowroom(context)),
+                    largeSpacer.height,
+                  ],
+                )),
           ),
         ),
       ),
     );
   }
-
 }

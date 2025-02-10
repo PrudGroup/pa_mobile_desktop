@@ -14,19 +14,19 @@ class WorkInProgress extends StatelessWidget {
     return SizedBox(
       height: double.maxFinite,
       child: Column(
+        spacing: 20.0,
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(20),
             child: Image.asset(
               prudImages.prudIcon,
-              height: 100,
-              width: 100,
+              height: 60,
+              width: 60,
               fit: BoxFit.contain,
             ),
           ),
-          const SizedBox(height: 20,),
           Wrap(
             spacing: 5,
             direction: Axis.horizontal,

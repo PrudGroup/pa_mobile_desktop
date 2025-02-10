@@ -106,15 +106,14 @@ class RemoveCreatorFromChannelState extends State<RemoveCreatorFromChannel> {
       style: myStorage.alertStyle,
       type: AlertType.warning,
       title: "Remove Creator",
-      desc:
-          "You are about to remove a creator (${selectedCreator!.creator.id}) ${selectedCreator!.detail.fullName} from your channel(${selectedChannel!.channelName}).",
+      desc:"You are about to remove a creator (${selectedCreator!.creator.id}) ${selectedCreator!.detail.fullName} from your channel(${selectedChannel!.channelName}).",
       buttons: [
         DialogButton(
           onPressed: remove,
           color: prudColorTheme.primary,
           radius: BorderRadius.zero,
-          child: const Text(
-            "Remove",
+          child: const Translate(
+            text: "Remove",
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),
         ),
@@ -122,8 +121,8 @@ class RemoveCreatorFromChannelState extends State<RemoveCreatorFromChannel> {
           onPressed: () => Navigator.pop(context),
           color: prudColorTheme.primary,
           radius: BorderRadius.zero,
-          child: const Text(
-            "Cancel",
+          child: const Translate(
+            text: "Cancel",
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),
         ),
@@ -191,92 +190,93 @@ class RemoveCreatorFromChannelState extends State<RemoveCreatorFromChannel> {
           children: [
             if (prudStudioNotifier.myChannels.isNotEmpty)
               PrudContainer(
-                  hasTitle: true,
-                  hasPadding: true,
-                  title: "Remove Creator From Channel",
-                  titleBorderColor: prudColorTheme.bgC,
-                  titleAlignment: MainAxisAlignment.end,
-                  child: Column(
-                    children: [
-                      mediumSpacer.height,
-                      PrudPanel(
-                        title: "Select Channel",
-                        titleColor: prudColorTheme.iconB,
-                        hasPadding: false,
-                        bgColor: prudColorTheme.bgA,
-                        child: Column(
-                          children: [
-                            mediumSpacer.height,
-                            SizedBox(
-                              height: 120,
-                              child: ListView.builder(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 5),
-                                scrollDirection: Axis.horizontal,
-                                itemCount:
-                                    prudStudioNotifier.myChannels.length,
-                                itemBuilder: (context, index) {
-                                  VidChannel cha = prudStudioNotifier
-                                      .myChannels[index];
-                                  return InkWell(
-                                    onTap: () async =>
-                                        await selectChannel(cha, index),
-                                    child: SelectableChannelComponent(
-                                      borderColor:
-                                          selectedChannelIndex == index
-                                              ? prudColorTheme.primary
-                                              : prudColorTheme.bgD,
-                                      channel: cha,
-                                    ),
-                                  );
-                                }
-                              ),
+                hasTitle: true,
+                hasPadding: true,
+                title: "Remove Creator From Channel",
+                titleBorderColor: prudColorTheme.bgC,
+                titleAlignment: MainAxisAlignment.end,
+                child: Column(
+                  children: [
+                    mediumSpacer.height,
+                    PrudPanel(
+                      title: "Select Channel",
+                      titleColor: prudColorTheme.iconB,
+                      hasPadding: false,
+                      bgColor: prudColorTheme.bgA,
+                      child: Column(
+                        children: [
+                          mediumSpacer.height,
+                          SizedBox(
+                            height: 120,
+                            child: ListView.builder(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 5),
+                              scrollDirection: Axis.horizontal,
+                              itemCount:
+                                  prudStudioNotifier.myChannels.length,
+                              itemBuilder: (context, index) {
+                                VidChannel cha = prudStudioNotifier
+                                    .myChannels[index];
+                                return InkWell(
+                                  onTap: () async =>
+                                      await selectChannel(cha, index),
+                                  child: SelectableChannelComponent(
+                                    borderColor:
+                                        selectedChannelIndex == index
+                                            ? prudColorTheme.primary
+                                            : prudColorTheme.bgD,
+                                    channel: cha,
+                                  ),
+                                );
+                              }
                             ),
-                            spacer.height
-                          ],
-                        ),
+                          ),
+                          spacer.height
+                        ],
                       ),
-                      spacer.height,
-                      PrudPanel(
-                        title: "Select Creator",
-                        titleColor: prudColorTheme.iconB,
-                        hasPadding: false,
-                        bgColor: prudColorTheme.bgA,
-                        child: Column(
-                          children: [
-                            mediumSpacer.height,
-                            creatorsAndDetails.isNotEmpty? 
-                            SizedBox(
-                              height: 120,
-                              child: ListView.builder(
-                                padding: const EdgeInsets.symmetric(horizontal: 5),
-                                scrollDirection: Axis.horizontal,
-                                itemCount: creatorsAndDetails.length,
-                                itemBuilder: (context, index) {
-                                  CreatorDetail cha = creatorsAndDetails[index];
-                                  return InkWell(
-                                    onTap: () => selectCreator(cha, index),
-                                    child:SelectableCreatorComponent(
-                                      borderColor: selectedCreatorIndex == index? prudColorTheme.primary : prudColorTheme.bgD,
-                                      creator: cha,
-                                    ),
-                                  );
-                                }
-                              ),
-                            )
-                            : loading? LoadingComponent(
-                              isShimmer: false,
-                              size: 20,
-                              defaultSpinnerType: false,
-                              spinnerColor: prudColorTheme.lineC,
-                            ) : notFound,
-                            spacer.height
-                          ],
-                        ),
+                    ),
+                    spacer.height,
+                    PrudPanel(
+                      title: "Select Creator",
+                      titleColor: prudColorTheme.iconB,
+                      hasPadding: false,
+                      bgColor: prudColorTheme.bgA,
+                      child: Column(
+                        children: [
+                          mediumSpacer.height,
+                          creatorsAndDetails.isNotEmpty? 
+                          SizedBox(
+                            height: 120,
+                            child: ListView.builder(
+                              padding: const EdgeInsets.symmetric(horizontal: 5),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: creatorsAndDetails.length,
+                              itemBuilder: (context, index) {
+                                CreatorDetail cha = creatorsAndDetails[index];
+                                return InkWell(
+                                  onTap: () => selectCreator(cha, index),
+                                  child:SelectableCreatorComponent(
+                                    borderColor: selectedCreatorIndex == index? prudColorTheme.primary : prudColorTheme.bgD,
+                                    creator: cha,
+                                  ),
+                                );
+                              }
+                            ),
+                          )
+                          : loading? LoadingComponent(
+                            isShimmer: false,
+                            size: 20,
+                            defaultSpinnerType: false,
+                            spinnerColor: prudColorTheme.lineC,
+                          ) : notFound,
+                          spacer.height
+                        ],
                       ),
-                      spacer.height,
-                    ],
-                  )),
+                    ),
+                    spacer.height,
+                  ],
+                )
+              ),
             xLargeSpacer.height,
           ],
         ),
