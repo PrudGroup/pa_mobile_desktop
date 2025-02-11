@@ -2200,3 +2200,27 @@ class RatingSearchResult {
     this.canVote = false,
   });
 }
+
+class ChannelRefferal {
+  String channelId;
+  String referrerId;
+
+  ChannelRefferal({
+    required this.channelId,
+    required this.referrerId,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      "channelId": channelId,
+      "referrerId": referrerId,
+    };
+  }
+
+  factory ChannelRefferal.fromJson(Map<String, dynamic> json) {
+    return ChannelRefferal(
+      channelId: json["channelId"],
+      referrerId: json["referrerId"],
+    );
+  }
+}

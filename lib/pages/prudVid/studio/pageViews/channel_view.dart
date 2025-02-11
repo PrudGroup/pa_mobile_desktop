@@ -73,9 +73,11 @@ class _ChannelViewState extends State<ChannelView> {
             loading = false;
             channel = result;
           });
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Translate(text: "Rated Successfully"),
-          ));
+          if(mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Translate(text: "Rated Successfully"),
+            ));
+          }
         }
       } else {
         if (mounted) {
@@ -190,7 +192,7 @@ class _ChannelViewState extends State<ChannelView> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Stack(
-                            // alignment: Alignment.center,
+                            alignment: Alignment.center,
                             children: [
                               loading
                                   ? LoadingComponent(
@@ -229,7 +231,7 @@ class _ChannelViewState extends State<ChannelView> {
                                                 fontSize: 40),
                                       ),
                                       Row(
-                                        spacing: 5,
+                                        spacing: 2,
                                         children: [
                                           Text(
                                             "${tabData.getFormattedNumber(widget.channel.voters)}",

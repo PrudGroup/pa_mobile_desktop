@@ -36,6 +36,26 @@ class PrudStudioNotifier extends ChangeNotifier {
   List<String> searchedTerms4Channel = [];
   List<CachedChannelCreator> channelCreators = [];
   List<RatedChannel> channelsRated = [];
+  List<ChannelMembership> affJoined = [];
+  List<ChannelSubscriber> affSubscribed = [];
+  List<ChannelRefferal> channelRefferals = [];
+
+  Future<void> updateChannelRefferals(ChannelRefferal ref, bool isAdd) async {
+    if(isAdd){
+      channelRefferals.add(ref);
+    }else{
+      channelRefferals.remove(ref);
+    }
+    await myStorage.addToStore(key: "channelRefferals", value: channelRefferals.map((reff) => reff.toJson()).toList());
+  }
+
+  void getChannelRefferalsFromCache(){
+    List<dynamic>? cacheRefs = myStorage.getFromStore(key: "channelRefferals");
+    if (cacheRefs != null && cacheRefs.isNotEmpty) {
+      channelRefferals = cacheRefs.map((ref) => ChannelRefferal.fromJson(ref)).toList();
+      notifyListeners();
+    }
+  }
 
   void changeTab(int tab) {
     selectedTab = tab;
@@ -336,6 +356,216 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
+  Future<void> addJoinedToCache(ChannelMembership memb) async {
+    await tryAsync("updateJoinedToCache", () async {
+      affJoined.add(memb);
+      await myStorage.addToStore(
+          key: "joined", value: affJoined.map((mem) => mem.toJson()).toList());
+      notifyListeners();
+    });
+  }
+
+  Future<void> removeJoinedFromCache(ChannelMembership memb) async {
+    await tryAsync("updateJoinedToCache", () async {
+      affJoined.removeWhere((item) => item.affId == memb.affId && item.channelId == memb.channelId);
+      await myStorage.addToStore(
+          key: "joined", value: affJoined.map((mem) => mem.toJson()).toList());
+      notifyListeners();
+    });
+  }
+
+  Future<void> addSubscribedToCache(ChannelSubscriber sub) async {
+    await tryAsync("addSubscribedToCache", () async {
+      affSubscribed.add(sub);
+      await myStorage.addToStore(
+          key: "subscribed",
+          value: affSubscribed.map((mem) => mem.toJson()).toList());
+      notifyListeners();
+    });
+  }
+
+  Future<void> removeSubscribedFromCache(ChannelSubscriber sub) async {
+    await tryAsync("removeSubscribedFromCache", () async {
+      affSubscribed.removeWhere((item) => item.channelId == sub.channelId && item.affId == sub.affId);
+      await myStorage.addToStore(
+          key: "subscribed",
+          value: affSubscribed.map((mem) => mem.toJson()).toList());
+      notifyListeners();
+    });
+  }
+
+  Future<void> getChannelsJoinedFromCache() async {
+    List<dynamic>? cacheJoined = myStorage.getFromStore(key: "joined");
+    if (cacheJoined != null) {
+      affJoined = cacheJoined
+          .map((dynamic mem) => ChannelMembership.fromJson(mem))
+          .toList();
+    } else {
+      if (myStorage.user != null && myStorage.user!.id != null) {
+        List<ChannelMembership> cloudJoined =
+            await getChannelsMembered(myStorage.user!.id!);
+        if (cloudJoined.isNotEmpty) {
+          affJoined = cloudJoined;
+        } else {
+          affJoined = List<ChannelMembership>.empty();
+        }
+      } else {
+        affJoined = List<ChannelMembership>.empty();
+      }
+    }
+    notifyListeners();
+  }
+
+  Future<void> getChannelsSubscribedFromCache() async {
+    List<dynamic>? cacheSubscribed = myStorage.getFromStore(key: "subscribed");
+    if (cacheSubscribed != null) {
+      affSubscribed = cacheSubscribed
+          .map((dynamic mem) => ChannelSubscriber.fromJson(mem))
+          .toList();
+    } else {
+      if (myStorage.user != null && myStorage.user!.id != null) {
+        List<ChannelSubscriber> cloudSubscribed =
+            await getChannelsSubscribed(myStorage.user!.id!);
+        if (cloudSubscribed.isNotEmpty) {
+          affSubscribed = cloudSubscribed;
+        } else {
+          affSubscribed = List<ChannelSubscriber>.empty();
+        }
+      } else {
+        affSubscribed = List<ChannelSubscriber>.empty();
+      }
+    }
+    notifyListeners();
+  }
+
+  Future<List<ChannelMembership>> getChannelsMembered(String affId) async {
+    List<ChannelMembership> result = [];
+    return await tryAsync("getChannelsMembered", () async {
+      dynamic res = await makeRequest(
+        path: "channels/members/aff/$affId",
+        isGet: true,
+      );
+      if (res != null && res != false) {
+        result =
+            res.map((dynamic mem) => ChannelMembership.fromJson(mem)).toList();
+        return result;
+      } else {
+        return result;
+      }
+    }, error: () {
+      return result;
+    });
+  }
+
+  Future<List<ChannelSubscriber>> getChannelsSubscribed(String affId) async {
+    List<ChannelSubscriber> result = [];
+    return await tryAsync("getChannelsSubscribed", () async {
+      dynamic res = await makeRequest(
+        path: "channels/subscribers/aff/$affId",
+        isGet: true,
+      );
+      if (res != null && res != false) {
+        result =
+            res.map((dynamic mem) => ChannelSubscriber.fromJson(mem)).toList();
+        return result;
+      } else {
+        return result;
+      }
+    }, error: () {
+      return result;
+    });
+  }
+
+  Future<ChannelSubscriber>? subscribeToChannel(String channelId) async {
+    return await tryAsync("subscribeToChannel", () async {
+      if(myStorage.user != null && myStorage.user!.id != null) {
+        ChannelSubscriber sub = ChannelSubscriber(
+          affId: myStorage.user!.id!, channelId: channelId
+        );
+        dynamic res = await makeRequest(
+          path: "channels/subscribers/",
+          isGet: false,
+          data: sub.toJson()
+        );
+        if (res != null && res != false) {
+          return ChannelSubscriber.fromJson(res);
+        } else {
+          return null;
+        }
+      }else{
+        return null;
+      }
+    });
+  }
+
+  ChannelRefferal? getChannelRefferal(String channelId){
+    return tryOnly("getChannelRefferal", (){
+      if(channelRefferals.isNotEmpty){
+        return channelRefferals.firstWhere((ref) => ref.channelId == channelId);
+      }else{
+        return null;
+      }
+    }, error: (){
+      return null;
+    });
+  }
+
+  Future<ChannelMembership?> joinAChannel(String channelId) async {
+    if(myStorage.user != null && myStorage.user!.id != null) {
+      ChannelMembership data = ChannelMembership(
+        channelId: channelId,
+        affId: myStorage.user!.id!,
+        appInstallReferral: myStorage.installReferralCode,
+        channelReferral: getChannelRefferal(channelId)?.referrerId,
+      );
+      return await tryAsync("joinAChannel", () async {
+        dynamic res = await makeRequest(
+          path: "channels/members/", 
+          isGet: false, data: data.toJson()
+        );
+        if (res != null && res != false) {
+          return ChannelMembership.fromJson(res);
+        } else {
+          return null;
+        }
+      }, error: (){
+        return null;
+      });
+    }else{
+      return null;
+    }
+  }
+
+  Future<bool> leaveAChannel(String channelId) async {
+    return await tryAsync("leaveAChannel", () async {
+      if (myStorage.user != null && myStorage.user!.id != null) {
+        dynamic res = await makeRequest(
+          path: "channels/members/channel/$channelId/aff/${myStorage.user!.id!}",
+          isGet: false,
+          isDelete: true,
+        );
+        return res;
+      } else {
+        return false;
+      }
+    });
+  }
+
+  Future<bool> unsubscribeFromAChannel(String channelId) async {
+    return await tryAsync("unsubscribeFromAChannel", () async {
+      if (myStorage.user != null && myStorage.user!.id != null) {
+        dynamic res = await makeRequest(
+          path: "channels/subscribers/channel/$channelId/aff/${myStorage.user!.id!}",
+          isGet: false,
+          isDelete: true,
+        );
+        return res;
+      } else {
+        return false;
+      }
+    });
+  }
+
   Future<VidChannel?> createVidChannel(VidChannel newChannel) async {
     return await tryAsync("createVidChannel", () async {
       dynamic res = await makeRequest(
@@ -494,6 +724,7 @@ class PrudStudioNotifier extends ChangeNotifier {
       {required String path,
       bool isGet = true,
       bool isPut = false,
+      bool isDelete = false,
       Map<String, dynamic>? data,
       Map<String, dynamic>? qParam}) async {
     currencyMath.loginAutomatically();
@@ -504,7 +735,9 @@ class PrudStudioNotifier extends ChangeNotifier {
           ? (await prudStudioDio.get(url, queryParameters: qParam))
           : (isPut
               ? await prudStudioDio.put(url, data: data)
-              : await prudStudioDio.post(url, data: data));
+              : (isDelete
+                  ? await prudStudioDio.delete(url, data: data)
+                  : await prudStudioDio.post(url, data: data)));
       debugPrint("prudStudio Request: $res");
       return res.data;
     } else {
@@ -518,6 +751,9 @@ class PrudStudioNotifier extends ChangeNotifier {
       retrieveUnfinishedNewChannelData();
       getSearchedTearm4ChannelFromCache();
       retrieveChannelRatingFromCache();
+      await getChannelsJoinedFromCache();
+      await getChannelsSubscribedFromCache();
+      getChannelRefferalsFromCache();
       if (studio != null && studio!.id != null) {
         wallet = await getWallet(studio!.id!);
         await getAmACreator();
