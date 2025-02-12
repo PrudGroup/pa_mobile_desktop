@@ -39,6 +39,7 @@ class PrudStudioNotifier extends ChangeNotifier {
   List<ChannelMembership> affJoined = [];
   List<ChannelSubscriber> affSubscribed = [];
   List<ChannelRefferal> channelRefferals = [];
+  
 
   
   Future<ChannelStreamServiceFigure> getChannelStreamFigures(String channelId) async {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prudapp/components/loading_component.dart';
+import 'package:prudapp/components/modals/edit_channel_modal_sheet.dart';
 import 'package:prudapp/components/prud_data_viewer.dart';
 import 'package:prudapp/components/prud_panel.dart';
 import 'package:prudapp/components/translate_text.dart';
@@ -38,6 +39,30 @@ class ChannelInfoState extends State<ChannelInfo> {
   int totalStreamActiveServices = 0;
   double totalIncomeFromStream = 0;
   bool gettingStreamFigures = false;
+
+
+  void openEditSheet(String editor, double height){
+    showModalBottomSheet(
+      context: context,
+      useSafeArea: true,
+      enableDrag: true,
+      showDragHandle: true,
+      backgroundColor: prudColorTheme.bgC,
+      elevation: 10,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: prudRad,
+      ),
+      builder: (BuildContext context) {
+        return EditChannelModalSheet(
+          editType: editor,
+          radius: prudRad,
+          height: height,
+          channel: widget.channel,
+        );
+      },
+    );
+  }
 
   Future<void> setStreamServicesFigures() async {
     if(widget.channel.streamServices != null){
@@ -520,7 +545,19 @@ class ChannelInfoState extends State<ChannelInfo> {
                       size: PrudSize.smaller,
                       subValue:
                           "${tabData.getCurrencyName(widget.channel.channelCurrency)}"),
-                ])),
+                ],
+              ),
+            ),
+            if(widget.isOwner) spacer.height,
+            if(widget.isOwner) Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: prudWidgetStyle.getLongButton(
+                onPressed: () => openEditSheet("membership_cost", screen.height),
+                text: "Change Membership Fee",
+                shape: 1,
+              ),
+            ),
+            if(widget.isOwner) spacer.height,
             Divider(
               color: prudColorTheme.lineC,
               thickness: 1,
@@ -580,6 +617,25 @@ class ChannelInfoState extends State<ChannelInfo> {
                 ),
               ),
             ),
+            if(widget.isOwner) Divider(
+              color: prudColorTheme.lineC,
+              thickness: 1,
+              height: 2,
+            ),
+            if(widget.isOwner) Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: prudWidgetStyle.getLongButton(
+                onPressed: () => openEditSheet("creator_membership_share", screen.height),
+                text: "Change Creator's Share",
+                shape: 1,
+              ),
+            ),
+            if(widget.isOwner) Divider(
+              color: prudColorTheme.lineC,
+              thickness: 1,
+              height: 2,
+            ),
+            spacer.height,
             FittedBox(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -609,6 +665,25 @@ class ChannelInfoState extends State<ChannelInfo> {
                 ],
               ),
             ),
+            if(widget.isOwner) Divider(
+              color: prudColorTheme.lineC,
+              thickness: 1,
+              height: 2,
+            ),
+            if(widget.isOwner) Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: prudWidgetStyle.getLongButton(
+                onPressed: () => openEditSheet("streaming_cost", screen.height),
+                text: "Change Streaming Fee",
+                shape: 1,
+              ),
+            ),
+            if(widget.isOwner) Divider(
+              color: prudColorTheme.lineC,
+              thickness: 1,
+              height: 2,
+            ),
+            spacer.height,
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: PrudPanel(
@@ -621,7 +696,7 @@ class ChannelInfoState extends State<ChannelInfo> {
                       gettingStreamFigures? LoadingComponent(
                         isShimmer:false,
                         defaultSpinnerType: false,
-                        size: 15,
+                        size: 10,
                         spinnerColor: prudColorTheme.lineC,
                       ) : PrudDataViewer(
                         field: "Services",
@@ -633,7 +708,7 @@ class ChannelInfoState extends State<ChannelInfo> {
                       gettingStreamFigures? LoadingComponent(
                         isShimmer:false,
                         defaultSpinnerType: false,
-                        size: 15,
+                        size: 10,
                         spinnerColor: prudColorTheme.lineC,
                       ) : PrudDataViewer(
                         field: "Services",
@@ -646,7 +721,7 @@ class ChannelInfoState extends State<ChannelInfo> {
                         gettingStreamFigures? LoadingComponent(
                         isShimmer:false,
                         defaultSpinnerType: false,
-                        size: 15,
+                        size: 10,
                         spinnerColor: prudColorTheme.lineC,
                       ) : PrudDataViewer(
                         field: "Month's Income",
@@ -661,82 +736,87 @@ class ChannelInfoState extends State<ChannelInfo> {
                 ),
               ),
             ),
+            spacer.height,
             Divider(
               color: prudColorTheme.lineC,
               thickness: 1,
               height: 2,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children:[
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Icon(
-                      widget.channel.verified? Icons.check : Icons.access_alarm_sharp,
-                      color: widget.channel.verified? prudColorTheme.success : prudColorTheme.warning,
-                      size: 25,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 30),
-                      child: Translate(
-                        text: "VERIFIED",
-                        style: prudWidgetStyle.tabTextStyle.copyWith(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
-                          color: prudColorTheme.iconC
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children:[
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Icon(
+                        widget.channel.verified? Icons.check : Icons.access_alarm_sharp,
+                        color: widget.channel.verified? prudColorTheme.success : prudColorTheme.warning,
+                        size: 25,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 40),
+                        child: Translate(
+                          text: "VERIFIED",
+                          style: prudWidgetStyle.tabTextStyle.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                            color: prudColorTheme.iconC
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Icon(
-                      widget.channel.promoted? Icons.check : Icons.access_alarm_sharp,
-                      color: widget.channel.promoted? prudColorTheme.success : prudColorTheme.warning,
-                      size: 25,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 30),
-                      child: Translate(
-                        text: "SPONSORED",
-                        style: prudWidgetStyle.tabTextStyle.copyWith(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
-                          color: prudColorTheme.iconC
+                    ],
+                  ),
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Icon(
+                        widget.channel.promoted? Icons.check : Icons.access_alarm_sharp,
+                        color: widget.channel.promoted? prudColorTheme.success : prudColorTheme.warning,
+                        size: 25,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 40),
+                        child: Translate(
+                          text: "SPONSORED",
+                          style: prudWidgetStyle.tabTextStyle.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                            color: prudColorTheme.iconC
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Icon(
-                      widget.channel.blocked? Icons.check : Icons.access_alarm_sharp,
-                      color: widget.channel.blocked? prudColorTheme.primary : prudColorTheme.success,
-                      size: 25,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 30),
-                      child: Translate(
-                        text: "BLOCKED",
-                        style: prudWidgetStyle.tabTextStyle.copyWith(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
-                          color: prudColorTheme.iconC
+                    ],
+                  ),
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Icon(
+                        widget.channel.blocked? Icons.check : Icons.access_alarm_sharp,
+                        color: widget.channel.blocked? prudColorTheme.primary : prudColorTheme.success,
+                        size: 25,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 40),
+                        child: Translate(
+                          text: "BLOCKED",
+                          style: prudWidgetStyle.tabTextStyle.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                            color: prudColorTheme.iconC
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
+            
             Divider(
               color: prudColorTheme.lineC,
               thickness: 1,

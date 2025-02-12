@@ -55,10 +55,6 @@ class _AffiliatedChannelsState extends State<AffiliatedChannels> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                child: PrudShowroom(items: iCloud.getShowroom(context, showroomItems: 1)),
-              ),
               affChannels.isNotEmpty? StudioChannelListComponent(channels: affChannels, isOwner: false) : notFound,
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 5),

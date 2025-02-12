@@ -55,14 +55,10 @@ class _MyChannelsState extends State<MyChannels> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                child: PrudShowroom(items: iCloud.getShowroom(context, showroomItems: 1)),
-              ),
               myChannels.isNotEmpty? StudioChannelListComponent(channels: myChannels) : notFound,
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 5),
-                child: PrudShowroom(items: iCloud.getShowroom(context, showroomItems: 2)),
+                child: PrudShowroom(items: iCloud.getShowroom(context, showroomItems: 3)),
               ),
             ],
           ),

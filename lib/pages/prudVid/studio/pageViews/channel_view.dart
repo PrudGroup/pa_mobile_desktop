@@ -269,13 +269,29 @@ class _ChannelViewState extends State<ChannelView> {
                             ],
                           ),
                           FittedBox(
-                            child: Text(
-                              "$rating",
-                              style: prudWidgetStyle.hintStyle.copyWith(
-                                fontSize: 40,
-                                fontWeight: FontWeight.w700,
-                                color: prudColorTheme.secondary,
-                              ),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Text(
+                                  "$rating",
+                                  style: prudWidgetStyle.hintStyle.copyWith(
+                                    fontSize: 35,
+                                    fontWeight: FontWeight.w700,
+                                    color: prudColorTheme.secondary,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 40),
+                                  child: Text(
+                                    tabData.toTitleCase(channel.category),
+                                    style: prudWidgetStyle.hintStyle.copyWith(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: prudColorTheme.iconB,
+                                    ),
+                                  ),
+                                )
+                              ]
                             ),
                           )
                         ],
