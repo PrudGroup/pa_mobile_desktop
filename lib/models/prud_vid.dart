@@ -2224,3 +2224,27 @@ class ChannelRefferal {
     );
   }
 }
+
+class ChannelStreamServiceFigure{
+  int total;
+  int active;
+
+  ChannelStreamServiceFigure({
+    required this.total,
+    required this.active,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      "total": total,
+      "active": active,
+    };
+  }
+
+  factory ChannelStreamServiceFigure.fromJson(Map<String, dynamic> json) {
+    return ChannelStreamServiceFigure(
+      total: json["total"],
+      active: json["active"],
+    );
+  }
+}

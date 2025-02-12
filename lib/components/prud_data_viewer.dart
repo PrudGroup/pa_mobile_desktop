@@ -48,7 +48,7 @@ class PrudDataViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double height = getSize();
-    double spa = fontSize + 5;
+    double spa = fontSize + 3;
     return Container(
       height: height,
       constraints: BoxConstraints(minWidth: removeWidth? 50 : 120),
@@ -73,7 +73,7 @@ class PrudDataViewer extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             if(subValue != null) Padding(
-              padding: EdgeInsets.only(top: spa + 5),
+              padding: EdgeInsets.only(top: spa + 3),
               child: Text(
                 "$subValue",
                 style: prudWidgetStyle.typedTextStyle.copyWith(
@@ -88,7 +88,7 @@ class PrudDataViewer extends StatelessWidget {
                 child: Text(
                   field.toUpperCase(),
                   style: prudWidgetStyle.typedTextStyle.copyWith(
-                    color: inverseColor? prudColorTheme.textHeader : prudColorTheme.textB,
+                    color: inverseColor? prudColorTheme.textHeader : prudColorTheme.iconC,
                     fontSize: fontSize - 15,
                   ),
                   textAlign: TextAlign.center,

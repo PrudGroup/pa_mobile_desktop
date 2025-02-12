@@ -8,8 +8,10 @@ import 'package:prudapp/components/vid_channel_component.dart';
 import 'package:prudapp/models/images.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/broadcasts.dart';
+import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/channel_ads.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/channel_info.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/channel_memberships.dart';
+import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/creator_channel_requests.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/lives.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/playlists.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/videos.dart';
@@ -137,6 +139,16 @@ class _ChannelViewState extends State<ChannelView> {
               imageIcon: prudImages.live,
               title: "Live",
               menu: ChannelLives(
+                  channel: widget.channel, isOwner: widget.isOwner)),
+          InnerMenuItem(
+              imageIcon: prudImages.operators,
+              title: "Requests",
+              menu: CreatorChannelRequests(
+                  channel: widget.channel, isOwner: widget.isOwner)),
+          InnerMenuItem(
+              imageIcon: prudImages.announceMsgMega,
+              title: "Ads & Analysis",
+              menu: ChannelAds(
                   channel: widget.channel, isOwner: widget.isOwner)),
         ];
       });

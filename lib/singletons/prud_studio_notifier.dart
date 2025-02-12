@@ -40,6 +40,25 @@ class PrudStudioNotifier extends ChangeNotifier {
   List<ChannelSubscriber> affSubscribed = [];
   List<ChannelRefferal> channelRefferals = [];
 
+  
+  Future<ChannelStreamServiceFigure> getChannelStreamFigures(String channelId) async {
+    ChannelStreamServiceFigure result = ChannelStreamServiceFigure(active: 0, total: 0);
+    return await tryAsync("getChannelStreamFigures", () async {
+      dynamic res = await makeRequest(
+        path: "channels/$channelId/services/figure",
+        isGet: true,
+      );
+      if (res != null && res != false) {
+        result = ChannelStreamServiceFigure.fromJson(res);
+        return result;
+      } else {
+        return result;
+      }
+    }, error: () {
+      return result;
+    });
+  }
+  
   Future<void> updateChannelRefferals(ChannelRefferal ref, bool isAdd) async {
     if(isAdd){
       channelRefferals.add(ref);
@@ -412,6 +431,9 @@ class PrudStudioNotifier extends ChangeNotifier {
       } else {
         affJoined = List<ChannelMembership>.empty();
       }
+      await myStorage.addToStore(
+          key: "joined",
+          value: affJoined.map((mem) => mem.toJson()).toList());
     }
     notifyListeners();
   }
@@ -434,6 +456,9 @@ class PrudStudioNotifier extends ChangeNotifier {
       } else {
         affSubscribed = List<ChannelSubscriber>.empty();
       }
+      await myStorage.addToStore(
+          key: "subscribed",
+          value: affSubscribed.map((mem) => mem.toJson()).toList());
     }
     notifyListeners();
   }
@@ -445,9 +470,9 @@ class PrudStudioNotifier extends ChangeNotifier {
         path: "channels/members/aff/$affId",
         isGet: true,
       );
-      if (res != null && res != false) {
+      if (res != null && res != false && res.isNotEmpty) {
         result =
-            res.map((dynamic mem) => ChannelMembership.fromJson(mem)).toList();
+            res.map<ChannelMembership>((dynamic mem) => ChannelMembership.fromJson(mem)).toList();
         return result;
       } else {
         return result;
@@ -464,9 +489,8 @@ class PrudStudioNotifier extends ChangeNotifier {
         path: "channels/subscribers/aff/$affId",
         isGet: true,
       );
-      if (res != null && res != false) {
-        result =
-            res.map((dynamic mem) => ChannelSubscriber.fromJson(mem)).toList();
+      if (res != null && res != false && res.isNotEmpty) {
+        result = res.map<ChannelSubscriber>((dynamic mem) => ChannelSubscriber.fromJson(mem)).toList();
         return result;
       } else {
         return result;

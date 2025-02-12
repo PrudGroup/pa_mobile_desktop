@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/components/prud_data_viewer.dart';
+import 'package:prudapp/components/prud_panel.dart';
 import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/theme.dart';
@@ -33,12 +34,46 @@ class ChannelInfoState extends State<ChannelInfo> {
   bool unsubscribing = false;
   bool joining = false;
   bool leaving = false;
+  int totalStreamServices = 0;
+  int totalStreamActiveServices = 0;
+  double totalIncomeFromStream = 0;
+  bool gettingStreamFigures = false;
+
+  Future<void> setStreamServicesFigures() async {
+    if(widget.channel.streamServices != null){
+      int totalServices = widget.channel.streamServices!.length;
+      int active = widget.channel.streamServices!.where((sm) => sm.active).length;
+      double income = widget.channel.monthlyStreamingCost * active;
+      if(mounted){
+        setState((){
+          totalStreamServices = totalServices;
+          totalStreamActiveServices = active;
+          totalIncomeFromStream = income;
+        });
+      }
+    }else{
+      await tryAsync("setStreamServicesFigures", () async {
+        if(mounted) setState(() => gettingStreamFigures = true);
+        ChannelStreamServiceFigure figure = await prudStudioNotifier.getChannelStreamFigures(widget.channel.id!);
+        if(mounted){
+          setState((){
+            totalStreamServices = figure.total;
+            totalStreamActiveServices = figure.active;
+            totalIncomeFromStream = widget.channel.monthlyStreamingCost * figure.active;
+          });
+        }
+      }, error: (){
+        if(mounted) setState(() => gettingStreamFigures = false);
+      });
+    }
+  }
 
   @override
   void initState() {
     Future.delayed(Duration.zero, () async {
       await getSubscribersCount();
       await getMembersCount();
+      await setStreamServicesFigures();
       checkIfSubscribed();
       checkIfMembered();
     });
@@ -510,6 +545,204 @@ class ChannelInfoState extends State<ChannelInfo> {
               height: 2,
             ),
             spacer.height,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: PrudPanel(
+                title: "Creators",
+                bgColor: prudColorTheme.bgC,
+                titleSize: 14,
+                child: FittedBox(
+                  child: Row(
+                    children:[
+                      PrudDataViewer(
+                        field: "Status",
+                        value: widget.channel.presentlySeekingCreators? "Presently": "Not",
+                        makeTransparent: true,
+                        size: PrudSize.smaller,
+                        subValue: "Seeking",
+                      ),
+                      PrudDataViewer(
+                        field: "Creators",
+                        value: widget.channel.creators?.length?? 0,
+                        makeTransparent: true,
+                        size: PrudSize.smaller,
+                        subValue: "Expert"
+                      ),
+                      PrudDataViewer(
+                        field: "Videos",
+                        value: widget.channel.videos?.length?? 0,
+                        makeTransparent: true,
+                        size: PrudSize.smaller,
+                        subValue: "Uploaded"
+                      ),
+                    ]
+                  ),
+                ),
+              ),
+            ),
+            FittedBox(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  PrudDataViewer(
+                    field: "Streaming Fee",
+                    value: "${tabData.getCurrencySymbol(widget.channel.channelCurrency)}${widget.channel.monthlyStreamingCost}",
+                    makeTransparent: true,
+                    valueIsMoney: true,
+                    subValue: "${tabData.getCurrencyName(widget.channel.channelCurrency)}",
+                    size: PrudSize.smaller,
+                  ),
+                  PrudDataViewer(
+                    field: "Membership Share",
+                    value: "${widget.channel.membershipPercentageSharePerMonth}%",
+                    makeTransparent: true,
+                    subValue: "Creators",
+                    size: PrudSize.smaller,
+                  ),
+                  PrudDataViewer(
+                    field: "View Share",
+                    value: "${widget.channel.contentPercentageSharePerView}%",
+                    makeTransparent: true,
+                    size: PrudSize.smaller,
+                    subValue: "Creators"
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: PrudPanel(
+                title: "Streaming",
+                bgColor: prudColorTheme.bgC,
+                titleSize: 14,
+                child: FittedBox(
+                  child: Row(
+                    children:[
+                      gettingStreamFigures? LoadingComponent(
+                        isShimmer:false,
+                        defaultSpinnerType: false,
+                        size: 15,
+                        spinnerColor: prudColorTheme.lineC,
+                      ) : PrudDataViewer(
+                        field: "Services",
+                        value: totalStreamServices,
+                        makeTransparent: true,
+                        size: PrudSize.smaller,
+                        subValue: "Total",
+                      ),
+                      gettingStreamFigures? LoadingComponent(
+                        isShimmer:false,
+                        defaultSpinnerType: false,
+                        size: 15,
+                        spinnerColor: prudColorTheme.lineC,
+                      ) : PrudDataViewer(
+                        field: "Services",
+                        value: totalStreamActiveServices,
+                        makeTransparent: true,
+                        size: PrudSize.smaller,
+                        subValue: "Active"
+                      ),
+                      if(widget.isOwner) (
+                        gettingStreamFigures? LoadingComponent(
+                        isShimmer:false,
+                        defaultSpinnerType: false,
+                        size: 15,
+                        spinnerColor: prudColorTheme.lineC,
+                      ) : PrudDataViewer(
+                        field: "Month's Income",
+                        value: "${tabData.getCurrencySymbol(widget.channel.channelCurrency)}${tabData.getFormattedNumber(totalIncomeFromStream)}",
+                        makeTransparent: true,
+                        valueIsMoney: true,
+                        size: PrudSize.smaller,
+                        subValue: "${tabData.getCurrencyName(widget.channel.channelCurrency)}"
+                      )),
+                    ]
+                  ),
+                ),
+              ),
+            ),
+            Divider(
+              color: prudColorTheme.lineC,
+              thickness: 1,
+              height: 2,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children:[
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Icon(
+                      widget.channel.verified? Icons.check : Icons.access_alarm_sharp,
+                      color: widget.channel.verified? prudColorTheme.success : prudColorTheme.warning,
+                      size: 25,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 30),
+                      child: Translate(
+                        text: "VERIFIED",
+                        style: prudWidgetStyle.tabTextStyle.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                          color: prudColorTheme.iconC
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Icon(
+                      widget.channel.promoted? Icons.check : Icons.access_alarm_sharp,
+                      color: widget.channel.promoted? prudColorTheme.success : prudColorTheme.warning,
+                      size: 25,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 30),
+                      child: Translate(
+                        text: "SPONSORED",
+                        style: prudWidgetStyle.tabTextStyle.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                          color: prudColorTheme.iconC
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Icon(
+                      widget.channel.blocked? Icons.check : Icons.access_alarm_sharp,
+                      color: widget.channel.blocked? prudColorTheme.primary : prudColorTheme.success,
+                      size: 25,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 30),
+                      child: Translate(
+                        text: "BLOCKED",
+                        style: prudWidgetStyle.tabTextStyle.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                          color: prudColorTheme.iconC
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Divider(
+              color: prudColorTheme.lineC,
+              thickness: 1,
+              height: 2,
+            ),
+            xLargeSpacer.height,
           ],
         ),
       ),

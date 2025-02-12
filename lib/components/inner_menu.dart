@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_swipe_detector/flutter_swipe_detector.dart';
 import 'package:getwidget/components/button/gf_button.dart';
 import 'package:getwidget/shape/gf_button_shape.dart';
 import 'package:getwidget/size/gf_size.dart';
@@ -110,7 +111,22 @@ class InnerMenuState extends State<InnerMenu> {
         ),
         Expanded(
           child: widget.canSwipe?
-          Listener(
+          SwipeDetector(
+            onSwipeLeft: (offset) {
+              int newIndex = selectedIndex + 1;
+              if(newIndex < widget.menus.length){
+                changeWidget(widget.menus[newIndex].menu, newIndex);
+              }
+            },
+            onSwipeRight: (offset){
+              int newIndex = selectedIndex - 1;
+              if(newIndex >= 0){
+                changeWidget(widget.menus[newIndex].menu, newIndex);
+              }
+            },
+            child: _widget?? const SizedBox(),
+          )
+          /* Listener(
             onPointerMove: (moveEvent){
               if(moveEvent.delta.dx > 0) {
                 int newIndex = selectedIndex - 1;
@@ -126,7 +142,7 @@ class InnerMenuState extends State<InnerMenu> {
               }
             },
             child: _widget?? const SizedBox() // or any other widget
-          )
+          ) */
               :
           _widget?? const SizedBox()
         ),
