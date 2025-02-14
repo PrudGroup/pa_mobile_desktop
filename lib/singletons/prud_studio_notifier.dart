@@ -39,8 +39,34 @@ class PrudStudioNotifier extends ChangeNotifier {
   List<ChannelMembership> affJoined = [];
   List<ChannelSubscriber> affSubscribed = [];
   List<ChannelRefferal> channelRefferals = [];
+  String? changedDescription;
+  double? changedMembershipCost;
+  double? changedStreamingCost;
+  double? changedViewShare;
+  double? changedMembershipShare;
+  String? selectedChannelId;
+  double lastScrollPointChannelVideos = 0;
+  int lastOffsetChannelVideos = 0;
+  List<ChannelVideo> selectedChannelVideos = [];
 
 
+  void channelChangesOccurred(VidChannel cha){
+    changedMembershipCost = cha.monthlyMembershipCost;
+    changedDescription = cha.description;
+    changedStreamingCost = cha.monthlyStreamingCost;
+    changedViewShare = cha.contentPercentageSharePerView;
+    changedMembershipShare = cha.membershipPercentageSharePerMonth;
+    notifyListeners();
+  }
+
+  void clearChannelChanges(){
+    changedMembershipCost = null;
+    changedDescription = null;
+    changedStreamingCost = null;
+    changedViewShare = null;
+    changedMembershipShare = null;
+    // notifyListeners();
+  }
   
   Future<ChannelStreamServiceFigure> getChannelStreamFigures(String channelId) async {
     ChannelStreamServiceFigure result = ChannelStreamServiceFigure(active: 0, total: 0);
@@ -259,6 +285,24 @@ class PrudStudioNotifier extends ChangeNotifier {
         } else {
           return null;
         }
+      }
+    });
+  }
+
+  Future<List<ChannelVideo>?> getChannelVideos({required String channelId, int limit = 100, int? offset}) async {
+    return await tryAsync("getChannelVideos", () async {
+      dynamic res = await makeRequest(path: "channels/$channelId/videos", qParam: {
+        "limit": limit,
+        if(offset != null) "offset": offset
+      });
+      if (res != null && res != false && res.length > 0) {
+        List<ChannelVideo> chas = [];
+        for (var item in res) {
+          chas.add(ChannelVideo.fromJson(item));
+        }
+        return chas;
+      } else {
+        return null;
       }
     });
   }

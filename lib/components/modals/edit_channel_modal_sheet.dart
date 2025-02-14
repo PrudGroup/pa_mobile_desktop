@@ -46,7 +46,16 @@ class EditChannelModalSheetState extends State<EditChannelModalSheet> {
   final int maxWords = 100;
   final int minWords = 30;
   int presentWords = 0;
-  FocusNode fNode = FocusNode();
+  final GlobalKey _key1 = GlobalKey();
+  final GlobalKey _key2 = GlobalKey();
+  final GlobalKey _key3 = GlobalKey();
+  final GlobalKey _key4 = GlobalKey();
+  final GlobalKey _key5 = GlobalKey();
+  FocusNode fNode1 = FocusNode();
+  FocusNode fNode2 = FocusNode();
+  FocusNode fNode3 = FocusNode();
+  FocusNode fNode4 = FocusNode();
+  FocusNode fNode5 = FocusNode();
   TextEditingController txtCtrl2 = TextEditingController();
 
   Future<bool> validateMemberCost() async {
@@ -72,24 +81,21 @@ class EditChannelModalSheetState extends State<EditChannelModalSheet> {
 
   bool validateDescription() => description.isNotEmpty && presentWords >= minWords && presentWords <= maxWords;
 
-  Future<bool> validateStreamingCost() async {
-    if(str > 0){
-      if(prudStudioNotifier.newChannelData.selectedCurrency!.code.toUpperCase() == "EUR"){
-        prudStudioNotifier.newChannelData.streamServiceCostInEuro = prudStudioNotifier.newChannelData.streamServiceCost;
-        if(mounted) setState(() => loading = false);
-        return prudStudioNotifier.newChannelData.streamServiceCost >= 4.0 && prudStudioNotifier.newChannelData.streamServiceCost <= 10.0;
+  Future<bool> validateStreamingCost(double cost) async {
+    if(cost > 0){
+      if(widget.channel.channelCurrency.toUpperCase() == "EUR"){
+        streamingCostInEuro = cost;
+        return cost >= 4.0 && cost <= 10.0;
       }else{
         double amount = await currencyMath.convert(
-            amount: prudStudioNotifier.newChannelData.streamServiceCost,
-            quoteCode: "EUR",
-            baseCode: prudStudioNotifier.newChannelData.selectedCurrency!.code
+          amount: cost,
+          quoteCode: "EUR",
+          baseCode: widget.channel.channelCurrency
         );
-        prudStudioNotifier.newChannelData.streamServiceCostInEuro = currencyMath.roundDouble(amount, 2);
-        if(mounted) setState(() => loading = false);
+        streamingCostInEuro = currencyMath.roundDouble(amount, 2);
         return amount >= 4.0 && amount <= 10.0;
       }
     }else{
-      if(mounted) setState(() => loading = false);
       return false;
     }
   }
@@ -117,12 +123,21 @@ class EditChannelModalSheetState extends State<EditChannelModalSheet> {
     await save(newUpdate);
   }
 
+   Future<void> saveStreamingCost() async {
+    ChannelUpdate newUpdate = ChannelUpdate(
+      monthlyStreamingCost: streamingCost,
+      monthlyStreamingCostInEuro: streamingCostInEuro,
+    );
+    await save(newUpdate);
+  }
+
   Future<void> save(ChannelUpdate newUpdate) async{
     await tryAsync("saveMembershipCost", () async {
       if(mounted) setState(() => saving = true);
       VidChannel? updated = await prudStudioNotifier.updateChannelInCloud(widget.channel.id!, newUpdate);
       if(updated != null){
         prudStudioNotifier.updateAChannelInMyChannels(updated);
+        prudStudioNotifier.channelChangesOccurred(updated);
         if(mounted) {
           setState(() => saving = false);
           Navigator.pop(context);
@@ -159,6 +174,7 @@ class EditChannelModalSheetState extends State<EditChannelModalSheet> {
         membershipShare = widget.channel.membershipPercentageSharePerMonth;
         description = widget.channel.description;
         presentWords = tabData.countWordsInString(widget.channel.description);
+        streamingCost = widget.channel.monthlyStreamingCost;
       });
     }
     super.initState();
@@ -169,18 +185,26 @@ class EditChannelModalSheetState extends State<EditChannelModalSheet> {
   @override
   void dispose() {
     txtCtrl.dispose();
+    txtCtrl2.dispose();
+    fNode1.dispose();
+    fNode2.dispose();
+    fNode3.dispose();
+    fNode4.dispose();
+    fNode5.dispose();
+    FocusManager.instance.primaryFocus?.unfocus();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     BorderRadiusGeometry rad = widget.radius;
-    double height = widget.height * 0.6;
+    double height = widget.height * 0.8;
+    double minHeight = widget.height * 0.4;
     return ClipRRect(
       borderRadius: rad,
       child: Container(
-        height: height,
-        constraints: BoxConstraints(maxHeight: height),
+        // height: height,
+        constraints: BoxConstraints(maxHeight: height, minHeight: minHeight),
         decoration: BoxDecoration(
           borderRadius: rad,
           color: prudColorTheme.bgC
@@ -224,6 +248,11 @@ class EditChannelModalSheetState extends State<EditChannelModalSheet> {
                             autofocus: true,
                             name: 'membershipCost',
                             style: tabData.npStyle,
+                            key: _key1,
+                            focusNode: fNode1,
+                            onTap: (){
+                              fNode1.requestFocus();
+                            },
                             keyboardType: TextInputType.number,
                             decoration: getDeco(
                               "How Much",
@@ -291,6 +320,11 @@ class EditChannelModalSheetState extends State<EditChannelModalSheet> {
                           initialValue: "$membershipShare",
                           name: 'membershipShare',
                           autofocus: true,
+                          key: _key2,
+                          focusNode: fNode2,
+                          onTap: (){
+                            fNode2.requestFocus();
+                          },
                           style: tabData.npStyle,
                           keyboardType: TextInputType.number,
                           decoration: getDeco(
@@ -317,6 +351,11 @@ class EditChannelModalSheetState extends State<EditChannelModalSheet> {
                         FormBuilderTextField(
                           initialValue: "$viewShare",
                           name: 'viewShare',
+                          key: _key3,
+                          focusNode: fNode3,
+                          onTap: (){
+                            fNode3.requestFocus();
+                          },
                           autofocus: true,
                           style: tabData.npStyle,
                           keyboardType: TextInputType.number,
@@ -356,11 +395,83 @@ class EditChannelModalSheetState extends State<EditChannelModalSheet> {
                 ],
               )
               ),
-              if(widget.editType == "streaming_cost") FormBuilder(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                child: Column(
-                  children: [],
-                ),
+              if(widget.editType == "streaming_cost") Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  spacer.height,
+                  Translate(
+                    text: "How much would you charge for monthly streaming subscription on "
+                        "this channel? You must make sure that the amount is not less than 4(EURO) and not greater "
+                        "than 10(Euro) in the currency of your channel.",
+                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                      color: prudColorTheme.textA,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    align: TextAlign.center,
+                  ),
+                  spacer.height,
+                  PrudContainer(
+                    hasTitle: true,
+                    hasPadding: true,
+                    title: "Streaming Cost(${prudStudioNotifier.newChannelData.selectedCurrency!.code})",
+                    titleBorderColor: prudColorTheme.bgC,
+                    titleAlignment: MainAxisAlignment.end,
+                    child: Column(
+                      children: [
+                        mediumSpacer.height,
+                        FormBuilder(
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          child: FormBuilderTextField(
+                            onChanged: (String? value) async {
+                              await tryAsync("onChange", () async {
+                                if(mounted && value != null && value.isNotEmpty) {
+                                  double cost = currencyMath.roundDouble(double.parse(value.trim()), 2);
+                                  bool cleared = await validateStreamingCost(cost);
+                                  setState(() {
+                                    streamingCost = cost;
+                                    validated = cleared;
+                                  });
+                                }
+                              });
+                            },
+                            autofocus: true,
+                            name: 'streamingCost',
+                            initialValue: "$streamingCost",
+                            style: tabData.npStyle,
+                            focusNode: fNode4,
+                            key: _key4,
+                            onTap: (){
+                              fNode4.requestFocus();
+                            },
+                            keyboardType: TextInputType.number,
+                            decoration: getDeco(
+                              "How Much",
+                              onlyBottomBorder: true,
+                              borderColor: prudColorTheme.lineC
+                            ),
+                            valueTransformer: (text) => num.tryParse(text!),
+                            validator: FormBuilderValidators.compose([
+                              FormBuilderValidators.required(),
+                            ]),
+                          ),
+                        ),
+                        spacer.height,
+                      ],
+                    ),
+                  ),
+                  spacer.height,
+                  saving? LoadingComponent(
+                    isShimmer: false,
+                    defaultSpinnerType: false,
+                    size: 15,
+                    spinnerColor: prudColorTheme.primary,
+                  ) : (validated? prudWidgetStyle.getLongButton(
+                    onPressed: saveStreamingCost, 
+                    text: "Save Changes"
+                  ) : SizedBox()),
+                ],
               ),
               if(widget.editType == "description") FormBuilder(
                 autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -399,11 +510,12 @@ class EditChannelModalSheetState extends State<EditChannelModalSheet> {
                               controller: txtCtrl2,
                               name: 'description',
                               minLines: 8,
+                              key: _key5,
                               maxLines: 12,
-                              focusNode: fNode,
+                              focusNode: fNode5,
                               enableInteractiveSelection: true,
                               onTap: (){
-                                fNode.requestFocus();
+                                fNode5.requestFocus();
                               },
                               autofocus: true,
                               style: tabData.npStyle,
@@ -447,6 +559,7 @@ class EditChannelModalSheetState extends State<EditChannelModalSheet> {
                   ],
                 ),
               ),
+              xLargeSpacer.height,
               xLargeSpacer.height,
             ],
           ),

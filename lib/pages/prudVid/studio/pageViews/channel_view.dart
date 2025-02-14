@@ -7,6 +7,7 @@ import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/components/vid_channel_component.dart';
 import 'package:prudapp/models/images.dart';
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/pages/prudVid/studio/pageViews/AddVideo.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/broadcasts.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/channel_ads.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/channel_info.dart';
@@ -15,6 +16,7 @@ import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/creator_chan
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/lives.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/playlists.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/videos.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
@@ -36,6 +38,7 @@ class _ChannelViewState extends State<ChannelView> {
   bool loading = false;
   final GlobalKey<InnerMenuState> _key = GlobalKey();
   RatingSearchResult hasVotedB4 = RatingSearchResult(index: -1);
+  bool isCreator = false;
 
   void moveTo(int index) {
     if (_key.currentState != null) {
@@ -153,10 +156,34 @@ class _ChannelViewState extends State<ChannelView> {
     }
   }
 
+  Future<void> checkIfIsChannelCreator() async {
+    if(prudStudioNotifier.amACreator != null){
+      if(prudStudioNotifier.affiliatedChannels.isNotEmpty){
+        if(mounted) {
+          setState(() {
+            isCreator = prudStudioNotifier.affiliatedChannels.any((ch) => ch.id == widget.channel.id);
+          });
+        }
+      }else{
+        await prudStudioNotifier.getAffiliatedChannels();
+        if(prudStudioNotifier.affiliatedChannels.isNotEmpty){
+          if(mounted) {
+            setState(() {
+              isCreator = prudStudioNotifier.affiliatedChannels.any((ch) => ch.id == widget.channel.id);
+            });
+          }
+        }
+      }
+    }
+  }
+
   @override
   void initState() {
     setMenu(widget.channel);
     super.initState();
+    Future.delayed(Duration.zero, () async {
+      await checkIfIsChannelCreator();
+    });
     prudStudioNotifier.addListener(() {
       int index = prudStudioNotifier.myChannels.indexWhere((ch) => ch.id == channel.id);
       if (index != -1) setMenu(prudStudioNotifier.myChannels[index]);
@@ -174,6 +201,12 @@ class _ChannelViewState extends State<ChannelView> {
     super.dispose();
   }
 
+  void openAddVideo(){
+    if(mounted){
+      iCloud.goto(context, AddVideo(channelId: widget.channel.id!, creatorId: prudStudioNotifier.amACreator?.id,));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double rating = channel.getRating();
@@ -184,13 +217,29 @@ class _ChannelViewState extends State<ChannelView> {
         children: [
           Stack(
             children: [
-              SizedBox(
-                height: 150,
-                child: PrudNetworkImage(
-                  width: double.maxFinite,
-                  url: channel.displayScreen,
-                  authorizeUrl: true,
-                ),
+              Stack(
+                children: [
+                  SizedBox(
+                    height: 150,
+                    child: PrudNetworkImage(
+                      width: double.maxFinite,
+                      url: channel.displayScreen,
+                      authorizeUrl: true,
+                    ),
+                  ),
+                  if(widget.isOwner || isCreator) Align(
+                    alignment: Alignment.bottomRight,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: IconButton.filled(
+                        onPressed: openAddVideo, 
+                        iconSize: 30,
+                        tooltip: "Add Video",
+                        icon: Icon(Icons.personal_video_rounded)
+                      ),
+                    ),
+                  ),
+                ]
               ),
               Row(
                 spacing: 15,

@@ -1,24 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:prudapp/components/translate_text.dart';
+import 'package:prudapp/components/work_in_progress.dart';
 import 'package:prudapp/models/theme.dart';
-
-import '../../components/work_in_progress.dart';
-
-class PrudMusic extends StatefulWidget {
-
-  const PrudMusic({super.key});
+    
+class AddVideo extends StatefulWidget {
+  final String channelId;
+  final String? creatorId;
+  const AddVideo({super.key, required this.channelId, this.creatorId});
 
   @override
-  State<PrudMusic> createState() => _PrudMusicState();
+  AddVideoState createState() => AddVideoState();
 }
 
-class _PrudMusicState extends State<PrudMusic> {
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
+class AddVideoState extends State<AddVideo> {
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +26,7 @@ class _PrudMusicState extends State<PrudMusic> {
           splashRadius: 20,
         ),
         title: Translate(
-          text: "PrudMusic",
+          text: "New Video",
           style: prudWidgetStyle.tabTextStyle.copyWith(
             fontSize: 16,
             color: prudColorTheme.bgA

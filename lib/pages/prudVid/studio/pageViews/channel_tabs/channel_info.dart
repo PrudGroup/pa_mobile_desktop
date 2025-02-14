@@ -20,7 +20,7 @@ class ChannelInfo extends StatefulWidget {
   ChannelInfoState createState() => ChannelInfoState();
 }
 
-class ChannelInfoState extends State<ChannelInfo> with SingleTickerProviderStateMixin {
+class ChannelInfoState extends State<ChannelInfo> {
   bool gettingSubscribers = false;
   bool gettingMembers = false;
   int subscribers = 0;
@@ -39,7 +39,12 @@ class ChannelInfoState extends State<ChannelInfo> with SingleTickerProviderState
   int totalStreamActiveServices = 0;
   double totalIncomeFromStream = 0;
   bool gettingStreamFigures = false;
-  late AnimationController _animationController; 
+  String? changedDescription;
+  double? changedMembershipCost;
+  double? changedStreamingCost;
+  double? changedViewShare;
+  double? changedMembershipShare;
+
 
 
   void openEditSheet(String editor, double height){
@@ -69,7 +74,7 @@ class ChannelInfoState extends State<ChannelInfo> with SingleTickerProviderState
     if(widget.channel.streamServices != null){
       int totalServices = widget.channel.streamServices!.length;
       int active = widget.channel.streamServices!.where((sm) => sm.active).length;
-      double income = widget.channel.monthlyStreamingCost * active;
+      double income = (changedStreamingCost?? widget.channel.monthlyStreamingCost) * active;
       if(mounted){
         setState((){
           totalStreamServices = totalServices;
@@ -85,7 +90,8 @@ class ChannelInfoState extends State<ChannelInfo> with SingleTickerProviderState
           setState((){
             totalStreamServices = figure.total;
             totalStreamActiveServices = figure.active;
-            totalIncomeFromStream = widget.channel.monthlyStreamingCost * figure.active;
+            totalIncomeFromStream = (changedStreamingCost?? widget.channel.monthlyStreamingCost) * figure.active;
+            gettingStreamFigures = false;
           });
         }
       }, error: (){
@@ -96,7 +102,6 @@ class ChannelInfoState extends State<ChannelInfo> with SingleTickerProviderState
 
   @override
   void initState() {
-    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 300));
     Future.delayed(Duration.zero, () async {
       await getSubscribersCount();
       await getMembersCount();
@@ -108,6 +113,11 @@ class ChannelInfoState extends State<ChannelInfo> with SingleTickerProviderState
     prudStudioNotifier.addListener(() async {
       if (mounted) {
         setState(() {
+          changedMembershipShare = prudStudioNotifier.changedMembershipShare;
+          changedViewShare = prudStudioNotifier.changedViewShare;
+          changedStreamingCost = prudStudioNotifier.changedStreamingCost;
+          changedMembershipCost = prudStudioNotifier.changedMembershipCost;
+          changedDescription = prudStudioNotifier.changedDescription;
           channelsMembered = prudStudioNotifier.affJoined;
           channelsSubscribed = prudStudioNotifier.affSubscribed;
         });
@@ -336,7 +346,9 @@ class ChannelInfoState extends State<ChannelInfo> with SingleTickerProviderState
 
   @override
   void dispose() {
-    prudStudioNotifier.removeListener(() {});
+    prudStudioNotifier.removeListener(() {
+      prudStudioNotifier.clearChannelChanges();
+    });
     super.dispose();
   }
 
@@ -541,7 +553,7 @@ class ChannelInfoState extends State<ChannelInfo> with SingleTickerProviderState
                   PrudDataViewer(
                       field: "Membership",
                       value:
-                          "${tabData.getCurrencySymbol(widget.channel.channelCurrency)}${widget.channel.monthlyMembershipCost}",
+                          "${tabData.getCurrencySymbol(widget.channel.channelCurrency)}${changedMembershipCost?? widget.channel.monthlyMembershipCost}",
                       makeTransparent: true,
                       valueIsMoney: true,
                       size: PrudSize.smaller,
@@ -572,7 +584,7 @@ class ChannelInfoState extends State<ChannelInfo> with SingleTickerProviderState
                 alignment: Alignment.center,
                 children: [
                   Translate(
-                    text: widget.channel.description,
+                    text: changedDescription?? widget.channel.description,
                     style: prudWidgetStyle.tabTextStyle.copyWith(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -582,26 +594,12 @@ class ChannelInfoState extends State<ChannelInfo> with SingleTickerProviderState
                     align: TextAlign.center,
                   ),
                   Align(
-                    alignment: Alignment.bottomRight,
+                    alignment: Alignment.topRight,
                     child: IconButton(
                       iconSize: 25,
                       color: prudColorTheme.primary,
-                      onPressed: (){
-                        if(mounted) {
-                          setState(() {
-                            if (_animationController.isAnimating) {
-                              _animationController.reverse();
-                            } else {
-                              _animationController.forward();
-                            }
-                          });
-                        }
-                        openEditSheet("description", screen.height);
-                      }, 
-                      icon: AnimatedIcon(
-                        icon: AnimatedIcons.event_add,
-                        progress: _animationController,
-                      ),
+                      onPressed: () => openEditSheet("description", screen.height),
+                      icon: Icon(Icons.edit),
                     ),
                   )
                 ],
@@ -674,7 +672,7 @@ class ChannelInfoState extends State<ChannelInfo> with SingleTickerProviderState
                 children: [
                   PrudDataViewer(
                     field: "Streaming Fee",
-                    value: "${tabData.getCurrencySymbol(widget.channel.channelCurrency)}${widget.channel.monthlyStreamingCost}",
+                    value: "${tabData.getCurrencySymbol(widget.channel.channelCurrency)}${changedStreamingCost?? widget.channel.monthlyStreamingCost}",
                     makeTransparent: true,
                     valueIsMoney: true,
                     subValue: "${tabData.getCurrencyName(widget.channel.channelCurrency)}",
@@ -682,14 +680,14 @@ class ChannelInfoState extends State<ChannelInfo> with SingleTickerProviderState
                   ),
                   PrudDataViewer(
                     field: "Membership Share",
-                    value: "${widget.channel.membershipPercentageSharePerMonth}%",
+                    value: "${changedMembershipShare?? widget.channel.membershipPercentageSharePerMonth}%",
                     makeTransparent: true,
                     subValue: "Creators",
                     size: PrudSize.smaller,
                   ),
                   PrudDataViewer(
                     field: "View Share",
-                    value: "${widget.channel.contentPercentageSharePerView}%",
+                    value: "${changedViewShare?? widget.channel.contentPercentageSharePerView}%",
                     makeTransparent: true,
                     size: PrudSize.smaller,
                     subValue: "Creators"
