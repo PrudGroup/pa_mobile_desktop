@@ -20,7 +20,7 @@ class ChannelInfo extends StatefulWidget {
   ChannelInfoState createState() => ChannelInfoState();
 }
 
-class ChannelInfoState extends State<ChannelInfo> {
+class ChannelInfoState extends State<ChannelInfo> with SingleTickerProviderStateMixin {
   bool gettingSubscribers = false;
   bool gettingMembers = false;
   int subscribers = 0;
@@ -39,6 +39,7 @@ class ChannelInfoState extends State<ChannelInfo> {
   int totalStreamActiveServices = 0;
   double totalIncomeFromStream = 0;
   bool gettingStreamFigures = false;
+  late AnimationController _animationController; 
 
 
   void openEditSheet(String editor, double height){
@@ -95,6 +96,7 @@ class ChannelInfoState extends State<ChannelInfo> {
 
   @override
   void initState() {
+    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 300));
     Future.delayed(Duration.zero, () async {
       await getSubscribersCount();
       await getMembersCount();
@@ -566,14 +568,43 @@ class ChannelInfoState extends State<ChannelInfo> {
             spacer.height,
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Translate(
-                text: widget.channel.description,
-                style: prudWidgetStyle.tabTextStyle.copyWith(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.5,
-                    color: prudColorTheme.textB),
-                align: TextAlign.center,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Translate(
+                    text: widget.channel.description,
+                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.5,
+                      color: prudColorTheme.textB
+                    ),
+                    align: TextAlign.center,
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: IconButton(
+                      iconSize: 25,
+                      color: prudColorTheme.primary,
+                      onPressed: (){
+                        if(mounted) {
+                          setState(() {
+                            if (_animationController.isAnimating) {
+                              _animationController.reverse();
+                            } else {
+                              _animationController.forward();
+                            }
+                          });
+                        }
+                        openEditSheet("description", screen.height);
+                      }, 
+                      icon: AnimatedIcon(
+                        icon: AnimatedIcons.event_add,
+                        progress: _animationController,
+                      ),
+                    ),
+                  )
+                ],
               ),
             ),
             Divider(
@@ -617,6 +648,7 @@ class ChannelInfoState extends State<ChannelInfo> {
                 ),
               ),
             ),
+            if(widget.isOwner) spacer.height,
             if(widget.isOwner) Divider(
               color: prudColorTheme.lineC,
               thickness: 1,
@@ -760,7 +792,7 @@ class ChannelInfoState extends State<ChannelInfo> {
                         child: Translate(
                           text: "VERIFIED",
                           style: prudWidgetStyle.tabTextStyle.copyWith(
-                            fontSize: 14,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.5,
                             color: prudColorTheme.iconC
@@ -782,7 +814,7 @@ class ChannelInfoState extends State<ChannelInfo> {
                         child: Translate(
                           text: "SPONSORED",
                           style: prudWidgetStyle.tabTextStyle.copyWith(
-                            fontSize: 14,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.5,
                             color: prudColorTheme.iconC
@@ -804,7 +836,7 @@ class ChannelInfoState extends State<ChannelInfo> {
                         child: Translate(
                           text: "BLOCKED",
                           style: prudWidgetStyle.tabTextStyle.copyWith(
-                            fontSize: 14,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.5,
                             color: prudColorTheme.iconC

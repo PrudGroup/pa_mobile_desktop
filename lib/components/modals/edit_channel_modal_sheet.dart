@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/components/prud_container.dart';
 import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/singletons/currency_math.dart';
+import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
 import '../../models/theme.dart';
@@ -34,8 +36,18 @@ class EditChannelModalSheetState extends State<EditChannelModalSheet> {
   TextEditingController txtCtrl = TextEditingController();
   double memberCost = 0;
   double membershipCostInEuro = 0;
+  double streamingCost = 0;
+  double streamingCostInEuro = 0;
   bool validated = false;
   bool saving = false;
+  double viewShare = 0;
+  double membershipShare = 0;
+  String description = "";
+  final int maxWords = 100;
+  final int minWords = 30;
+  int presentWords = 0;
+  FocusNode fNode = FocusNode();
+  TextEditingController txtCtrl2 = TextEditingController();
 
   Future<bool> validateMemberCost() async {
     if(memberCost > 0){
@@ -56,20 +68,102 @@ class EditChannelModalSheetState extends State<EditChannelModalSheet> {
     }
   }
 
-  Future<void> saveMembershipCost() async{
+  bool validateShares() => viewShare >= 40.0 && membershipShare >= 40.0;
+
+  bool validateDescription() => description.isNotEmpty && presentWords >= minWords && presentWords <= maxWords;
+
+  Future<bool> validateStreamingCost() async {
+    if(str > 0){
+      if(prudStudioNotifier.newChannelData.selectedCurrency!.code.toUpperCase() == "EUR"){
+        prudStudioNotifier.newChannelData.streamServiceCostInEuro = prudStudioNotifier.newChannelData.streamServiceCost;
+        if(mounted) setState(() => loading = false);
+        return prudStudioNotifier.newChannelData.streamServiceCost >= 4.0 && prudStudioNotifier.newChannelData.streamServiceCost <= 10.0;
+      }else{
+        double amount = await currencyMath.convert(
+            amount: prudStudioNotifier.newChannelData.streamServiceCost,
+            quoteCode: "EUR",
+            baseCode: prudStudioNotifier.newChannelData.selectedCurrency!.code
+        );
+        prudStudioNotifier.newChannelData.streamServiceCostInEuro = currencyMath.roundDouble(amount, 2);
+        if(mounted) setState(() => loading = false);
+        return amount >= 4.0 && amount <= 10.0;
+      }
+    }else{
+      if(mounted) setState(() => loading = false);
+      return false;
+    }
+  }
+
+  Future<void> saveMembershipCost() async {
+    ChannelUpdate newUpdate = ChannelUpdate(
+      monthlyMembershipCost: memberCost,
+      monthlyMembershipCostInEuro: membershipCostInEuro
+    );
+    await save(newUpdate);
+  }
+
+  Future<void> saveShares() async {
+    ChannelUpdate newUpdate = ChannelUpdate(
+      contentPercentageSharePerView: viewShare,
+      membershipPercentageSharePerMonth: membershipShare
+    );
+    await save(newUpdate);
+  }
+
+  Future<void> saveDescription() async {
+    ChannelUpdate newUpdate = ChannelUpdate(
+      description: description,
+    );
+    await save(newUpdate);
+  }
+
+  Future<void> save(ChannelUpdate newUpdate) async{
     await tryAsync("saveMembershipCost", () async {
       if(mounted) setState(() => saving = true);
-      
+      VidChannel? updated = await prudStudioNotifier.updateChannelInCloud(widget.channel.id!, newUpdate);
+      if(updated != null){
+        prudStudioNotifier.updateAChannelInMyChannels(updated);
+        if(mounted) {
+          setState(() => saving = false);
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Translate(text: "Changes Saved.",),
+          ));
+        }
+      }else{
+        if(mounted) {
+          setState(() => saving = false);
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Translate(text: "Failed to save changes.",),
+            backgroundColor: prudColorTheme.primary,
+          ));
+        }
+      }
     }, error: (){
-      if(mounted) setState(() => saving = false);
+      if(mounted) {
+        setState(() => saving = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Translate(text: "Failed to save changes.",),
+          backgroundColor: prudColorTheme.primary,
+        ));
+      }
     });
   }
 
 
   @override
   void initState() {
+    if(mounted){
+      setState(() {
+        viewShare = widget.channel.contentPercentageSharePerView;
+        membershipShare = widget.channel.membershipPercentageSharePerMonth;
+        description = widget.channel.description;
+        presentWords = tabData.countWordsInString(widget.channel.description);
+      });
+    }
     super.initState();
     txtCtrl.text = widget.channel.monthlyMembershipCost.toString();
+    txtCtrl2.text = description;
   }
 
   @override
@@ -154,14 +248,205 @@ class EditChannelModalSheetState extends State<EditChannelModalSheet> {
                     )
                   ),
                   spacer.height,
-                  if(validated) prudWidgetStyle.getLongButton(
-                    onPressed: saveMembershipCost, 
-                    text: "Save Changes"
-                  )
+                  saving? LoadingComponent(
+                    isShimmer: false,
+                    defaultSpinnerType: false,
+                    size: 15,
+                    spinnerColor: prudColorTheme.primary,
+                  ) : (
+                    validated? prudWidgetStyle.getLongButton(
+                      onPressed: saveMembershipCost, 
+                      text: "Save Changes"
+                    ) : SizedBox()
+                  ),
                 ],
               ),
-              if(widget.editType == "creator_membership_share") Column(),
-              if(widget.editType == "streaming_cost") Column(),
+              if(widget.editType == "creator_membership_share") FormBuilder(
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                child: Column(
+                children: [
+                  spacer.height,
+                  Translate(
+                    text: "Your channel can contract as many content creators as you desire. "
+                        "This will also mean that they share from the funds generated by your channel. What percentage are "
+                        "of your channel funds are you willing to share per view/membership with content creators. Must be from 40 and above.",
+                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                      color: prudColorTheme.textA,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    align: TextAlign.center,
+                  ),
+                  spacer.height,
+                  PrudContainer(
+                    hasTitle: true,
+                    hasPadding: true,
+                    title: "Creator Percentage Share",
+                    titleBorderColor: prudColorTheme.bgC,
+                    titleAlignment: MainAxisAlignment.end,
+                    child: Column(
+                      children: [
+                        mediumSpacer.height,
+                        FormBuilderTextField(
+                          initialValue: "$membershipShare",
+                          name: 'membershipShare',
+                          autofocus: true,
+                          style: tabData.npStyle,
+                          keyboardType: TextInputType.number,
+                          decoration: getDeco(
+                            "Membership Share",
+                            onlyBottomBorder: true,
+                            borderColor: prudColorTheme.lineC
+                          ),
+                          onChanged: (String? value){
+                            if(mounted && value != null) {
+                              setState(() {
+                                membershipShare = double.parse(value.trim());
+                                validated = validateShares();
+                              });
+                            }
+                          },
+                          valueTransformer: (text) => num.tryParse(text!),
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.min(40),
+                            FormBuilderValidators.max(80),
+                            FormBuilderValidators.required(),
+                          ]),
+                        ),
+                        spacer.height,
+                        FormBuilderTextField(
+                          initialValue: "$viewShare",
+                          name: 'viewShare',
+                          autofocus: true,
+                          style: tabData.npStyle,
+                          keyboardType: TextInputType.number,
+                          decoration: getDeco(
+                            "View Share",
+                            onlyBottomBorder: true,
+                            borderColor: prudColorTheme.lineC
+                          ),
+                          onChanged: (String? value){
+                            if(mounted && value != null) {
+                              setState(() {
+                                viewShare = double.parse(value.trim());
+                                validated = validateShares();
+                              });
+                            }
+                          },
+                          valueTransformer: (text) => num.tryParse(text!),
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.min(40),
+                            FormBuilderValidators.max(80),
+                            FormBuilderValidators.required(),
+                          ]),
+                        ),
+                      ],
+                    ),
+                  ),
+                  spacer.height,
+                  saving? LoadingComponent(
+                    isShimmer: false,
+                    defaultSpinnerType: false,
+                    size: 15,
+                    spinnerColor: prudColorTheme.primary,
+                  ) : (validated? prudWidgetStyle.getLongButton(
+                    onPressed: saveShares, 
+                    text: "Save Changes"
+                  ) : SizedBox()),
+                ],
+              )
+              ),
+              if(widget.editType == "streaming_cost") FormBuilder(
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                child: Column(
+                  children: [],
+                ),
+              ),
+              if(widget.editType == "description") FormBuilder(
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    spacer.height,
+                    Translate(
+                      text: "In not less than 30 words and not more than 100 words, describe your channel and what"
+                          " your content on this channel will focus on. This could be your selling point to viewers.",
+                      style: prudWidgetStyle.tabTextStyle.copyWith(
+                        color: prudColorTheme.textA,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      align: TextAlign.center,
+                    ),
+                    spacer.height,
+                    PrudContainer(
+                      hasTitle: true,
+                      hasPadding: true,
+                      title: "Description",
+                      titleBorderColor: prudColorTheme.bgC,
+                      titleAlignment: MainAxisAlignment.end,
+                      child: Column(
+                        children: [
+                          mediumSpacer.height,
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text("$presentWords/$maxWords"),
+                          ),
+                          FormBuilder(
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            child: FormBuilderTextField(
+                              controller: txtCtrl2,
+                              name: 'description',
+                              minLines: 8,
+                              maxLines: 12,
+                              focusNode: fNode,
+                              enableInteractiveSelection: true,
+                              onTap: (){
+                                fNode.requestFocus();
+                              },
+                              autofocus: true,
+                              style: tabData.npStyle,
+                              keyboardType: TextInputType.text,
+                              decoration: getDeco(
+                                "About Channel",
+                                onlyBottomBorder: true,
+                                borderColor: prudColorTheme.lineC
+                              ),
+                              onChanged: (String? valueDesc){
+                                if(mounted && valueDesc != null) {
+                                  setState(() {
+                                    description = valueDesc.trim();
+                                    presentWords = tabData.countWordsInString(description);
+                                    validated = validateDescription();
+                                  });
+                                }
+                              },
+                              valueTransformer: (text) => num.tryParse(text!),
+                              validator: FormBuilderValidators.compose([
+                                FormBuilderValidators.required(),
+                                FormBuilderValidators.minWordsCount(30),
+                                FormBuilderValidators.maxWordsCount(100),
+                              ]),
+                            ),
+                          ),
+                          spacer.height,
+                        ],
+                      )
+                    ),
+                    spacer.height,
+                    saving? LoadingComponent(
+                      isShimmer: false,
+                      defaultSpinnerType: false,
+                      size: 15,
+                      spinnerColor: prudColorTheme.primary,
+                    ) : (validated? prudWidgetStyle.getLongButton(
+                      onPressed: saveDescription, 
+                      text: "Save Changes"
+                    ) : SizedBox()),
+                  ],
+                ),
+              ),
               xLargeSpacer.height,
             ],
           ),

@@ -102,62 +102,67 @@ class _ChannelViewState extends State<ChannelView> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
+  void setMenu(VidChannel cha){
     if (mounted) {
       setState(() {
-        channel = widget.channel;
+        channel = cha;
         hasVotedB4 = prudStudioNotifier.checkIfVotedChannel(widget.channel.id!);
         tabMenus = [
           InnerMenuItem(
             icon: Icons.info_sharp,
             title: "Info",
-            menu: ChannelInfo(channel: widget.channel, isOwner: widget.isOwner),
+            menu: ChannelInfo(channel: channel, isOwner: widget.isOwner),
           ),
           InnerMenuItem(
               imageIcon: prudImages.movie,
               title: "Videos",
               menu: ChannelVideos(
-                  channel: widget.channel, isOwner: widget.isOwner)),
+                  channel: channel, isOwner: widget.isOwner)),
           InnerMenuItem(
               imageIcon: prudImages.playlist,
               title: "Playlist",
               menu: ChannelPlaylists(
-                  channel: widget.channel, isOwner: widget.isOwner)),
+                  channel: channel, isOwner: widget.isOwner)),
           InnerMenuItem(
               imageIcon: prudImages.videoMembership,
               title: "Membership",
               menu: ChannelMemberships(
-                  channel: widget.channel, isOwner: widget.isOwner)),
+                  channel: channel, isOwner: widget.isOwner)),
           InnerMenuItem(
               imageIcon: prudImages.announceMsg,
               title: "Broadcast",
               menu: ChannelBroadcasts(
-                  channel: widget.channel, isOwner: widget.isOwner)),
+                  channel: channel, isOwner: widget.isOwner)),
           InnerMenuItem(
               imageIcon: prudImages.live,
               title: "Live",
               menu: ChannelLives(
-                  channel: widget.channel, isOwner: widget.isOwner)),
+                  channel: channel, isOwner: widget.isOwner)),
           InnerMenuItem(
               imageIcon: prudImages.operators,
               title: "Requests",
               menu: CreatorChannelRequests(
-                  channel: widget.channel, isOwner: widget.isOwner)),
+                  channel: channel, isOwner: widget.isOwner)),
           InnerMenuItem(
               imageIcon: prudImages.announceMsgMega,
               title: "Ads & Analysis",
               menu: ChannelAds(
-                  channel: widget.channel, isOwner: widget.isOwner)),
+                  channel: channel, isOwner: widget.isOwner)),
         ];
       });
     }
+  }
+
+  @override
+  void initState() {
+    setMenu(widget.channel);
+    super.initState();
     prudStudioNotifier.addListener(() {
+      int index = prudStudioNotifier.myChannels.indexWhere((ch) => ch.id == channel.id);
+      if (index != -1) setMenu(prudStudioNotifier.myChannels[index]);
       if (mounted) {
         setState(() {
-          hasVotedB4 =
-              prudStudioNotifier.checkIfVotedChannel(widget.channel.id!);
+          hasVotedB4 = prudStudioNotifier.checkIfVotedChannel(channel.id!);
         });
       }
     });

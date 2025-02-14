@@ -39,7 +39,7 @@ class PrudStudioNotifier extends ChangeNotifier {
   List<ChannelMembership> affJoined = [];
   List<ChannelSubscriber> affSubscribed = [];
   List<ChannelRefferal> channelRefferals = [];
-  
+
 
   
   Future<ChannelStreamServiceFigure> getChannelStreamFigures(String channelId) async {
@@ -182,6 +182,14 @@ class PrudStudioNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateAChannelInMyChannels(VidChannel cha) {
+    int index = myChannels.indexWhere((ch) => ch.id == cha.id);
+    if (index != -1) {
+      myChannels[index] = cha;
+      notifyListeners();
+    }
+  }
+
   Future<bool> promoteChannel(VidChannel channel, bool promote,
       String? fileType, String? fileUrl) async {
     if (promote) {
@@ -292,6 +300,19 @@ class PrudStudioNotifier extends ChangeNotifier {
         return List<VidChannel>.empty();
       }
     });
+  }
+
+  Future<VidChannel?> updateChannelInCloud(String channelId, ChannelUpdate newUpdate) async {
+    return await tryAsync("updateChannelInCloud", () async {
+      dynamic res = await makeRequest(
+        path: "channels/$channelId", isGet: false, isPut: true, data: newUpdate.toJson()
+      );
+      if (res != null && res != false) {
+        return VidChannel.fromJson(res);
+      } else {
+        return null;
+      }
+    }, error: () => null);
   }
 
   Future<List<ContentCreator>> getChannelCreators(String channelId) async {

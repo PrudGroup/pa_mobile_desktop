@@ -2248,3 +2248,43 @@ class ChannelStreamServiceFigure{
     );
   }
 }
+
+
+class ChannelUpdate{
+  String? description;
+  bool? blocked;
+  double? contentPercentageSharePerView;
+  double? monthlyMembershipCost;
+  double? monthlyMembershipCostInEuro;
+  double? monthlyStreamingCost;
+  double? monthlyStreamingCostInEuro;
+  double? membershipPercentageSharePerMonth;
+  DateTime? updatedOn;
+
+  ChannelUpdate({
+    this.description,
+    this.blocked,
+    this.contentPercentageSharePerView,
+    this.monthlyMembershipCost,
+    this.monthlyMembershipCostInEuro,
+    this.monthlyStreamingCost,
+    this.monthlyStreamingCostInEuro,
+    this.membershipPercentageSharePerMonth,
+    this.updatedOn,
+  });
+
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (description!= null) "description": description,
+      if (blocked!= null) "blocked": blocked,
+      if (contentPercentageSharePerView!= null) "contentPercentageSharePerView": contentPercentageSharePerView,
+      if (monthlyMembershipCost!= null) "monthlyMembershipCost": monthlyMembershipCost,
+      if (monthlyMembershipCostInEuro!= null) "monthlyMembershipCostInEuro": monthlyMembershipCostInEuro,
+      if (monthlyStreamingCost!= null) "monthlyStreamingCost": monthlyStreamingCost,
+      if (monthlyStreamingCostInEuro!= null) "monthlyStreamingCostInEuro": monthlyStreamingCostInEuro,
+      if (membershipPercentageSharePerMonth!= null) "membershipPercentageSharePerMonth": membershipPercentageSharePerMonth,
+      if (updatedOn!= null) "updatedOn": updatedOn!.toString(),
+    };
+  }
+}
