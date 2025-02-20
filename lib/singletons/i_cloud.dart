@@ -218,10 +218,22 @@ class ICloud extends ChangeNotifier {
     });
     Response res = await prudDio.post(codeUrl, data: formData);
     if (res.statusCode == 201) {
-      if (res.data != null &&
-          res.data["simple"] != null &&
-          res.data["uploaded"]) {
+      if (res.data != null && res.data["simple"] != null && res.data["uploaded"]) {
         return res.data["simple"];
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
+
+  Future<String?> getFileDownloadUrl(String fileName) async {
+    String codeUrl = "$prudApiUrl/files/download_url";
+    Response res = await prudDio.get(codeUrl, queryParameters: {"file_name": fileName});
+    if (res.statusCode == 200) {
+      if (res.data != null && res.data != false) {
+        return res.data;
       } else {
         return null;
       }
@@ -602,11 +614,11 @@ class ICloud extends ChangeNotifier {
       if (affAuthToken != null) {
         String apiUrl = "$apiEndPoint/files/download_token";
         Response res = await prudDio.get(apiUrl);
-        debugPrint("Install Metric Result: $res : updated_data: ${res.data}");
         if (res.data != null && res.data!["download_token"] != null) {
           b2DownloadToken = res.data!["download_token"];
           b2AccToken = res.data!["account_token"];
           b2AuthKey = res.data!["auth_key"];
+          b2ApiUrl = res.data!["api_url"];
           hasAdded = true;
         }
       }
@@ -646,13 +658,11 @@ class ICloud extends ChangeNotifier {
 String? b2DownloadToken;
 String? b2AccToken;
 String? b2AuthKey;
+String? b2ApiUrl;
 const bool isProduction = Constants.envType == "production";
 const String prudApiUrl = Constants.prudApiUrl;
 const String localApiUrl = Constants.localApiUrl;
 const String prudApiKey = Constants.prudApiKey;
-const String wasabiPublicKey = Constants.wasabiPublicKey;
-const String wasabiSecretKey = Constants.wasabiSecretKey;
-const String wasabiEndpoint = Constants.wasabiEndPoint;
 const String apiEndPoint = isProduction ? prudApiUrl : localApiUrl;
 const String waveApiUrl = "https://api.flutterwave.com/v3";
 const String paystackSecret = Constants.apiStatues == 'production'
@@ -712,5 +722,4 @@ Dio prudDio = Dio(BaseOptions(
         return false;
       }
     }));
-
 final iCloud = ICloud();

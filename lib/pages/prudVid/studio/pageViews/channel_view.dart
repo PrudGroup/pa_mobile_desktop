@@ -7,7 +7,7 @@ import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/components/vid_channel_component.dart';
 import 'package:prudapp/models/images.dart';
 import 'package:prudapp/models/theme.dart';
-import 'package:prudapp/pages/prudVid/studio/pageViews/AddVideo.dart';
+import 'package:prudapp/pages/prudVid/studio/pageViews/add_video.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/broadcasts.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/channel_ads.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/channel_info.dart';

@@ -17,6 +17,7 @@ import 'package:prudapp/singletons/prudio_client.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:video_player_media_kit/video_player_media_kit.dart';
 
 import 'constants.dart';
 import 'models/images.dart';
@@ -34,6 +35,13 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: WidgetsBinding.instance);
+  VideoPlayerMediaKit.ensureInitialized(
+    android: true,          // default: false    -    dependency: media_kit_libs_android_video
+    iOS: true,              // default: false    -    dependency: media_kit_libs_ios_video
+    macOS: true,            // default: false    -    dependency: media_kit_libs_macos_video
+    windows: true,          // default: false    -    dependency: media_kit_libs_windows_video
+    linux: true,            // default: false    -    dependency: media_kit_libs_linux
+  );
   await iCloud.setFirebase(
       Constants.fireApiKey,
       Platform.isAndroid? Constants.fireAndroidAppID :

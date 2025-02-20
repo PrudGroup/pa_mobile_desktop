@@ -48,6 +48,7 @@ class PrudStudioNotifier extends ChangeNotifier {
   double lastScrollPointChannelVideos = 0;
   int lastOffsetChannelVideos = 0;
   List<ChannelVideo> selectedChannelVideos = [];
+  PendingNewVideo newVideo = PendingNewVideo();
 
 
   void channelChangesOccurred(VidChannel cha){
@@ -190,11 +191,22 @@ class PrudStudioNotifier extends ChangeNotifier {
         key: "unfinishedNewChannel", value: newChannelData.toJson());
   }
 
+  Future<void> saveNewVideoData() async {
+    await myStorage.addToStore(
+        key: "unfinishedNewVideo", value: newVideo.toJson());
+  }
+
   void retrieveUnfinishedNewChannelData() {
-    Map<String, dynamic>? unfinishedNewChannel =
-        myStorage.getFromStore(key: "unfinishedNewChannel");
+    Map<String, dynamic>? unfinishedNewChannel = myStorage.getFromStore(key: "unfinishedNewChannel");
     if (unfinishedNewChannel != null) {
       newChannelData = NewChannelData.fromJson(unfinishedNewChannel);
+    }
+  }
+
+  void retrieveUnfinishedNewVideoData() {
+    Map<String, dynamic>? unfinishedNewVideo = myStorage.getFromStore(key: "unfinishedNewVideo");
+    if (unfinishedNewVideo != null) {
+      newVideo = PendingNewVideo.fromJson(unfinishedNewVideo);
     }
   }
 
@@ -839,6 +851,7 @@ class PrudStudioNotifier extends ChangeNotifier {
     try {
       await getStudio();
       retrieveUnfinishedNewChannelData();
+      retrieveUnfinishedNewVideoData();
       getSearchedTearm4ChannelFromCache();
       retrieveChannelRatingFromCache();
       await getChannelsJoinedFromCache();

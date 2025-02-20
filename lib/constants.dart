@@ -45,19 +45,9 @@ abstract class Constants {
     defaultValue: '',
   );
 
-  static const String wasabiPublicKey = String.fromEnvironment(
-    'WASABI_PUBLIC_KEY',
+  static const String b2Key = String.fromEnvironment(
+    'BACKBLAZE_KEY',
     defaultValue: '',
-  );
-
-  static const String wasabiSecretKey = String.fromEnvironment(
-    'WASABI_SECRET_KEY',
-    defaultValue: '',
-  );
-
-  static const String wasabiEndPoint = String.fromEnvironment(
-    'WASABI_ENDPOINT',
-    defaultValue: ""
   );
 
   static const String apiStatues = String.fromEnvironment(

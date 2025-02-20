@@ -1,4 +1,5 @@
 import 'package:currency_picker/currency_picker.dart';
+import 'package:prudapp/models/backblaze.dart';
 import 'package:prudapp/models/user.dart';
 import 'package:prudapp/models/wallet.dart';
 import 'package:prudapp/singletons/currency_math.dart';
@@ -786,7 +787,7 @@ class ChannelVideo {
   String uploadedBy; // content_creator_id
   ContentCreator? creator;
   String videoUrl;
-  String videoType; // movie, music, news, party, education
+  String videoType; // movie, music, news, learn, cuisines
   bool isLive;
   DateTime? liveStartsOn;
   DateTime? liveEndedOn;
@@ -1454,19 +1455,20 @@ class VideoThriller {
   int shared;
   List<VideoThrillerComment>? comments;
 
-  VideoThriller(
-      {required this.videoId,
-      required this.videoUrl,
-      this.likes = 0,
-      this.impressions = 0,
-      this.dislikes = 0,
-      this.shared = 0,
-      this.durationInMinutes,
-      this.id,
-      this.video,
-      this.tags,
-      this.comments,
-      this.durationInSeconds});
+  VideoThriller({
+    required this.videoId,
+    required this.videoUrl,
+    this.likes = 0,
+    this.impressions = 0,
+    this.dislikes = 0,
+    this.shared = 0,
+    this.durationInMinutes,
+    this.id,
+    this.video,
+    this.tags,
+    this.comments,
+    this.durationInSeconds
+  });
 
   Map<String, dynamic> toJson() {
     return {
@@ -2286,5 +2288,172 @@ class ChannelUpdate{
       if (membershipPercentageSharePerMonth!= null) "membershipPercentageSharePerMonth": membershipPercentageSharePerMonth,
       if (updatedOn!= null) "updatedOn": updatedOn!.toString(),
     };
+  }
+}
+
+
+enum AddVideoStep {
+  policy,
+  declaration, // iDeclared
+  category, // select either Live or prepared (isLive)
+  live, // liveStartsOn
+  uploads, // videoUrl, thrillerVideoUrl, videoThumbnail
+  titles, // title, description,
+  target, // targetAudience, tags,
+  publishType, // select either scheduled or published_now
+  scheduled, // scheduledFor, timezone, 
+  snippets,
+  movie,
+  music,
+  result
+}
+
+
+class PendingNewVideo {
+  AddVideoStep lastStep;
+  String? channelId;
+  bool? promoted;
+  String? targetAudience; //  Adult, Youth, Teenage, Kids, General
+  String? description;
+  List<String>? tags;
+  String? videoThumbnail;
+  String? title;
+  SaveVideoResponse? saveVideoProgress;
+  SaveVideoResponse? saveThrillerProgress;
+  String? videoUrl;
+  String? videoType; // movies, music, news, learn, cuisines
+  bool isLive;
+  DateTime? liveStartsOn;
+  DateTime? scheduledFor;
+  String? timezone;
+  double? costPerNonMemberView;
+  bool? iDeclared;
+  Map<String, dynamic>? videoDuration;
+  List<VideoSnippet>? snippets;
+  VideoThriller? thriller;
+  String? movieDetailId;
+  String? musicDetailId;
+  VideoMovieDetail? movieDetail;
+  VideoMusicDetail? musicDetail;
+  PromoteVideo? sponsored;
+  bool hasSavedVideo;
+  ChannelVideo? savedVideo;
+  bool hasSavedSnippets;
+  bool hasSavedMovieDetails;
+  bool hasSavedMusicDetails;
+  bool hasSaveThriller;
+  bool hasSavedSponsored;
+  
+
+  PendingNewVideo({
+    this.channelId,
+    this.targetAudience,
+    this.description,
+    this.videoThumbnail,
+    this.title,
+    this.videoUrl,
+    this.videoType,
+    this.timezone,
+    this.costPerNonMemberView,
+    this.iDeclared,
+    this.videoDuration,
+    this.movieDetailId,
+    this.musicDetailId,
+    this.movieDetail,
+    this.musicDetail,
+    this.scheduledFor,
+    this.thriller,
+    this.snippets,
+    this.sponsored,
+    this.savedVideo,
+    this.hasSaveThriller = false,
+    this.hasSavedMovieDetails = false,
+    this.hasSavedMusicDetails = false,
+    this.hasSavedSnippets = false,
+    this.hasSavedSponsored = false,
+    this.hasSavedVideo = false,
+    this.isLive = false,
+    this.lastStep = AddVideoStep.policy,
+    this.liveStartsOn,
+    this.promoted,
+    this.tags,
+    this.saveVideoProgress,
+    this.saveThrillerProgress
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      "lastStep": lastStep.index,
+      "tags": tags,
+      "scheduledFor": scheduledFor?.toString(),
+      "liveStartsOn": liveStartsOn?.toString(),
+      "targetAudience": targetAudience,
+      "channelId": channelId,
+      "promoted": promoted,
+      "description": description,
+      "videoThumbnail": videoThumbnail,
+      "title": title,
+      "videoUrl": videoUrl,
+      "videoType": videoType,
+      "isLive": isLive,
+      "timezone": timezone,
+      "costPerNonMemberView": costPerNonMemberView,
+      "iDeclared": iDeclared,
+      "videoDuration": videoDuration,
+      "movieDetailId": movieDetailId,
+      "musicDetailId": musicDetailId,
+      "snippets": snippets?.map((snap) => snap.toJson()).toList(),
+      "thriller": thriller?.toJson(),
+      "movieDetail": movieDetail?.toJson(),
+      "musicDetail": musicDetail?.toJson(),
+      "saveVideoProgress": saveVideoProgress?.toJson(),
+      "saveThrillerProgress": saveThrillerProgress?.toJson(),
+      "sponsored": sponsored?.toJson(),
+      "hasSavedVideo": hasSavedVideo,
+      "savedVideo": savedVideo?.toJson(),
+      "hasSavedSnippets": hasSavedSnippets,
+      "hasSavedMovieDetails": hasSavedMovieDetails,
+      "hasSavedMusicDetails": hasSavedMusicDetails,
+      "hasSaveThriller": hasSaveThriller,
+      "hasSavedSponsored": hasSavedSponsored,
+    };
+  }
+
+  factory PendingNewVideo.fromJson(Map<String, dynamic> json) {
+    return PendingNewVideo(
+      lastStep: AddVideoStep.values.elementAt(json["lastStep"]),
+      channelId: json["channelId"],
+      targetAudience: json["targetAudience"],
+      description: json["description"],
+      videoThumbnail: json["videoThumbnail"],
+      title: json["title"],
+      videoUrl: json["videoUrl"],
+      liveStartsOn: json["liveStartsOn"] != null? DateTime.parse(json["liveStartsOn"]) : null,
+      promoted: json["promoted"],
+      videoType: json["videoType"],
+      timezone: json["timezone"],
+      costPerNonMemberView: json["costPerNonMemberView"],
+      iDeclared: json["iDeclared"],
+      videoDuration: json["videoDuration"],
+      movieDetailId: json["movieDetailId"],
+      musicDetailId: json["musicDetailId"],
+      saveVideoProgress: json["saveVideoProgress"],
+      saveThrillerProgress: json["saveThrillerProgress"],
+      tags: json["tags"],
+      scheduledFor: json["scheduledFor"] != null? DateTime.parse(json["scheduledFor"]) : null,
+      snippets: json["snippets"]?.map((itm) => VideoSnippet.fromJson(itm)).toList(),
+      thriller: json["thriller"] != null? VideoThriller.fromJson(json["thriller"]) : null,
+      movieDetail: json["movieDetail"] != null? VideoMovieDetail.fromJson(json["movieDetail"]) : null,
+      musicDetail: json["musicDetail"] != null? VideoMusicDetail.fromJson(json["musicDetail"]) : null,
+      isLive: json["isLive"],
+      sponsored: json["sponsored"] != null? PromoteVideo.fromJson(json["sponsored"]) : null,
+      hasSavedVideo: json["hasSavedVideo"],
+      savedVideo: json["savedVideo"] != null? ChannelVideo.fromJson(json["savedVideo"]) : null,
+      hasSavedSnippets: json["hasSavedSnippets"],
+      hasSavedMovieDetails: json["hasSavedMovieDetails"],
+      hasSavedMusicDetails: json["hasSavedMusicDetails"],
+      hasSaveThriller: json["hasSaveThriller"],
+      hasSavedSponsored: json["hasSavedSponsored"],
+    );
   }
 }
