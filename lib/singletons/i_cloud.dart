@@ -614,6 +614,7 @@ class ICloud extends ChangeNotifier {
       if (affAuthToken != null) {
         String apiUrl = "$apiEndPoint/files/download_token";
         Response res = await prudDio.get(apiUrl);
+        debugPrint("Result Token: ${res.data["api_url"]}");
         if (res.data != null && res.data!["download_token"] != null) {
           b2DownloadToken = res.data!["download_token"];
           b2AccToken = res.data!["account_token"];

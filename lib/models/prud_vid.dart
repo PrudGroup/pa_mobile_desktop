@@ -2328,7 +2328,7 @@ class PendingNewVideo {
   String? timezone;
   double? costPerNonMemberView;
   bool? iDeclared;
-  Map<String, dynamic>? videoDuration;
+  PrudVidDuration? videoDuration;
   List<VideoSnippet>? snippets;
   VideoThriller? thriller;
   String? movieDetailId;
@@ -2399,7 +2399,7 @@ class PendingNewVideo {
       "timezone": timezone,
       "costPerNonMemberView": costPerNonMemberView,
       "iDeclared": iDeclared,
-      "videoDuration": videoDuration,
+      "videoDuration": videoDuration?.toJson(),
       "movieDetailId": movieDetailId,
       "musicDetailId": musicDetailId,
       "snippets": snippets?.map((snap) => snap.toJson()).toList(),
@@ -2434,7 +2434,7 @@ class PendingNewVideo {
       timezone: json["timezone"],
       costPerNonMemberView: json["costPerNonMemberView"],
       iDeclared: json["iDeclared"],
-      videoDuration: json["videoDuration"],
+      videoDuration: json["videoDuration"] != null? PrudVidDuration.fromJson(json["videoDuration"]) : null,
       movieDetailId: json["movieDetailId"],
       musicDetailId: json["musicDetailId"],
       saveVideoProgress: json["saveVideoProgress"],
@@ -2454,6 +2454,34 @@ class PendingNewVideo {
       hasSavedMusicDetails: json["hasSavedMusicDetails"],
       hasSaveThriller: json["hasSaveThriller"],
       hasSavedSponsored: json["hasSavedSponsored"],
+    );
+  }
+}
+
+class PrudVidDuration{
+  String hours;
+  String minutes;
+  String seconds;
+
+  PrudVidDuration({
+    required this.hours,
+    required this.minutes,
+    required this.seconds,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      "hours": hours,
+      "minutes": minutes,
+      "seconds": seconds,
+    };
+  }
+
+  factory PrudVidDuration.fromJson(Map<String, dynamic> json) {
+    return PrudVidDuration(
+      hours: json["hours"],
+      minutes: json["minutes"],
+      seconds: json["seconds"],
     );
   }
 }

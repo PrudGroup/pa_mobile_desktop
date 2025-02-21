@@ -3,6 +3,7 @@ import 'package:prudapp/components/prud_image_picker.dart';
 import 'package:prudapp/components/prud_video_picker.dart';
 import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/models/backblaze.dart';
+import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/tab_data.dart';
@@ -33,6 +34,25 @@ class VideoUploadsState extends State<VideoUploads> {
     if(mounted){
       setState(() {
         prudStudioNotifier.newVideo.saveThrillerProgress = progress;
+      });
+      prudStudioNotifier.saveNewVideoData();
+    }
+  }
+
+  void setThrillerDurationGotten(PrudVidDuration duration){
+    if(mounted){
+      setState(() {
+        prudStudioNotifier.newVideo.thriller?.durationInMinutes = int.parse(duration.minutes);
+        prudStudioNotifier.newVideo.thriller?.durationInSeconds = int.parse(duration.seconds);
+      });
+      prudStudioNotifier.saveNewVideoData();
+    }
+  }
+
+  void setVideoDurationGotten(PrudVidDuration duration){
+    if(mounted){
+      setState(() {
+        prudStudioNotifier.newVideo.videoDuration = duration;
       });
       prudStudioNotifier.saveNewVideoData();
     }
@@ -103,6 +123,7 @@ class VideoUploadsState extends State<VideoUploads> {
             ),
             spacer.height,
             PrudVideoPicker(
+              onDurationGotten: setVideoDurationGotten,
               onSaveToCloud: setVideoSavedFinished,
               onProgressChanged: setVideoProgressChanged,
               destination: "channels/${prudStudioNotifier.newVideo.channelId}/videos",
@@ -126,6 +147,8 @@ class VideoUploadsState extends State<VideoUploads> {
             ),
             spacer.height,
             PrudVideoPicker(
+              isShort: true,
+              onDurationGotten: setThrillerDurationGotten,
               onSaveToCloud: setThrillerUrl,
               onProgressChanged: setThrillerProgressChanged,
               destination: "channels/${prudStudioNotifier.newVideo.channelId}/thrillers",

@@ -48,7 +48,11 @@ class PrudStudioNotifier extends ChangeNotifier {
   double lastScrollPointChannelVideos = 0;
   int lastOffsetChannelVideos = 0;
   List<ChannelVideo> selectedChannelVideos = [];
-  PendingNewVideo newVideo = PendingNewVideo();
+  PendingNewVideo newVideo = PendingNewVideo(
+    thriller: VideoThriller(
+      videoId: "", videoUrl: ""
+    )
+  );
 
 
   void channelChangesOccurred(VidChannel cha){

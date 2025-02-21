@@ -1,0 +1,2 @@
+C:/development/PrudGroup/pa_mobile_desktop/android/app/.cxx/Debug/65w2l6i4/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/development/PrudGroup/pa_mobile_desktop/android/app/.cxx/Debug/65w2l6i4/arm64-v8a/CMakeFiles/rebuild_cache.dir

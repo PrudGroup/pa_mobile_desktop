@@ -145,7 +145,7 @@ class ChannelVideosState extends State<ChannelVideos> {
           ],
         ) : Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [noVideos],
         )
       ),

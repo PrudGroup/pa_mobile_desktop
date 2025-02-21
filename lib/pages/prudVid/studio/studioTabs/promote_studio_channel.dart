@@ -7,6 +7,7 @@ import 'package:prudapp/components/prud_panel.dart';
 import 'package:prudapp/components/prud_video_picker.dart';
 import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/components/vid_channel_component.dart';
+import 'package:prudapp/models/backblaze.dart';
 import 'package:prudapp/models/images.dart';
 import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/theme.dart';
@@ -57,10 +58,8 @@ class _PromoteStudioChannelState extends State<PromoteStudioChannel> {
   }
 
   void setValues() {
-    List<VidChannel> proChas =
-        myChannels.where((VidChannel ele) => ele.promoted == true).toList();
-    List<VidChannel> unproChas =
-        myChannels.where((VidChannel ele) => ele.promoted == false).toList();
+    List<VidChannel> proChas = myChannels.where((VidChannel ele) => ele.promoted == true).toList();
+    List<VidChannel> unproChas = myChannels.where((VidChannel ele) => ele.promoted == false).toList();
     if (mounted) {
       setState(() {
         if (proChas.isNotEmpty) promoted = proChas;
@@ -69,7 +68,19 @@ class _PromoteStudioChannelState extends State<PromoteStudioChannel> {
     }
   }
 
-  void setVideoFile(String? url) {}
+  void onDurationGotten(PrudVidDuration duration){
+    debugPrint("Video Duration: ${duration.toJson()}");
+  }
+
+  void setVideoFile(String? url) {
+    if (mounted && url != null) {
+      setState(() => fileUrl = url);
+    }
+  }
+
+  void setVideoProgress(SaveVideoResponse progress){
+    debugPrint("Video Upload Progress: ${progress.toJson()}");
+  }
 
   void segmentChanged(Set<String> value) {
     if (mounted) {
@@ -151,8 +162,7 @@ class _PromoteStudioChannelState extends State<PromoteStudioChannel> {
   Future<void> startProcess(VidChannel channel, bool promote) async {
     if (mounted) setState(() => promoting = true);
     await tryAsync("startProcess", () async {
-      bool succeeded = await prudStudioNotifier.promoteChannel(
-          channel, promote, fileType, fileUrl);
+      bool succeeded = await prudStudioNotifier.promoteChannel(channel, promote, fileType, fileUrl);
       if (succeeded) {
         prudStudioNotifier.updateChannelPromoteStatus(channel, promote);
         if (mounted) {
@@ -254,7 +264,7 @@ class _PromoteStudioChannelState extends State<PromoteStudioChannel> {
                               " pay for ads downtime? You can promote your channel and only pay when you"
                               " actually get conversions in terms of video viewing and membership. We"
                               " only charge 30% of what you make from promoting your channel. Promoted channels are"
-                              " excluded from other charges. Promote your channel(s) today.",
+                              " excluded from other charges. Promote your channel(s) today. If the file is a video, it must not be more than 3 minutes long.",
                           style: prudWidgetStyle.tabTextStyle.copyWith(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
@@ -307,21 +317,19 @@ class _PromoteStudioChannelState extends State<PromoteStudioChannel> {
                                 ),
                                 spacer.height,
                               ],
-                            )),
-                        if (prudStudioNotifier.studio != null &&
-                            fileType != "Image")
-                          PrudVideoPicker(
-                            onUrlChanged: setVideoFile,
-                            destination:
-                                "studio/${prudStudioNotifier.studio!.id}/images/ads",
+                            ),
+                          ),
+                          if(prudStudioNotifier.studio != null && fileType != "Image") PrudVideoPicker(
+                            onDurationGotten: onDurationGotten,
+                            isShort: true,
+                            onSaveToCloud: setVideoFile,
+                            onProgressChanged: setVideoProgress,
+                            destination: "studio/${prudStudioNotifier.studio!.id}/images/ads",
                             saveToCloud: true,
                             reset: shouldReset,
                           ),
-                        if (prudStudioNotifier.studio != null &&
-                            fileType == "Image")
-                          PrudImagePicker(
-                            destination:
-                                "studio/${prudStudioNotifier.studio!.id}/images/ads",
+                          if(prudStudioNotifier.studio != null && fileType == "Image") PrudImagePicker(
+                            destination: "studio/${prudStudioNotifier.studio!.id}/images/ads",
                             saveToCloud: true,
                             reset: shouldReset,
                             onSaveToCloud: (String? url) {

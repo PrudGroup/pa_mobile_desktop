@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:buffer/buffer.dart';
@@ -5,7 +6,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
-import 'package:flutter_video_info/flutter_video_info.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:prudapp/components/loading_component.dart';
@@ -13,22 +13,28 @@ import 'package:prudapp/components/prud_container.dart';
 import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/isolates.dart';
 import 'package:prudapp/models/backblaze.dart';
+import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/backblaze_notifier.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
+import 'package:video_player/video_player.dart';
 
 class PrudVideoPicker extends StatefulWidget {
   final Function(SaveVideoResponse) onProgressChanged;
   final Function(String)? onSaveToCloud;
+  final Function(PrudVidDuration) onDurationGotten;
   final Function(dynamic)? onError;
   final String destination;
   final bool saveToCloud;
   final bool reset;
+  final bool isShort;
 
   const PrudVideoPicker({
     super.key, 
     required this.onProgressChanged, 
     required this.destination, 
+    required this.onDurationGotten,
+    this.isShort = false,
     this.saveToCloud = true, 
     this.reset = false, 
     this.onSaveToCloud, 
@@ -48,6 +54,7 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
   final receivePort = ReceivePort();
   bool showProgress = false;
   bool saving = false;
+  int durationLimitInMinutes = 300;
 
   int getChunkSize(int fileSize){
     int chunkSize = (fileSize/100).toInt();
@@ -158,6 +165,16 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
   }
 
   @override
+  void initState(){
+    if(mounted) {
+      setState(() {
+        durationLimitInMinutes = widget.isShort? 3 : 300;
+      });
+    }
+    super.initState();
+  }
+
+  @override
   void dispose(){
     receivePort.close();
     FlutterIsolate.killAll();
@@ -181,41 +198,40 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
           String? filePath = file.path;
           int chunkSize = getChunkSize(file.size);
           if(filePath != null){
-            VideoData? videoInfo = await FlutterVideoInfo().getVideoInfo(filePath);
-            if(videoInfo != null && videoInfo.duration != null){
-              if(Duration(milliseconds: videoInfo.duration!.toInt()).inMinutes <= 300){
-                String? mimeType = lookupMimeType(filePath);
-                MediaType? contentType = mimeType != null? MediaType.parse(mimeType) : null;
-                Stream<List<int>>?  fileReadStream = file.readStream;
-                if (fileReadStream != null && contentType != null) {
-                  Stream<Uint8List> chunkedStream = sliceStream(fileReadStream, chunkSize);
-                  await save(chunkedStream, contentType.mimeType);
-                }else{
-                  if(mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Translate(text: "Failed to read file"),
-                    ));
-                    setState(() => picking = false);
-                  }
-                  return;
-                }
+            VideoPlayerController controller = VideoPlayerController.file(File(filePath));
+            await controller.initialize();
+            Duration duration = controller.value.duration;
+            if(duration.inMinutes <= durationLimitInMinutes){
+              List<String> durationList = duration.toString().split(":");
+              if(durationList.length >= 3){
+                PrudVidDuration dur = PrudVidDuration(
+                  hours: durationList[0],
+                  minutes: durationList[1],
+                  seconds: durationList[2].split(".")[0],
+                );
+                widget.onDurationGotten(dur);
+              }
+              String? mimeType = lookupMimeType(filePath);
+              MediaType? contentType = mimeType != null? MediaType.parse(mimeType) : null;
+              Stream<List<int>>?  fileReadStream = file.readStream;
+              if (fileReadStream != null && contentType != null) {
+                Stream<Uint8List> chunkedStream = sliceStream(fileReadStream, chunkSize);
+                await save(chunkedStream, contentType.mimeType);
               }else{
                 if(mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Translate(text: "Video duration exceeds 5 hours"),
+                    content: Translate(text: "Failed to read file"),
                   ));
                   setState(() => picking = false);
                 }
-                return;
               }
             }else{
               if(mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Translate(text: "Failed to get video metadata"),
+                  content: Translate(text: "Video duration exceeds 5 hours"),
                 ));
                 setState(() => picking = false);
               }
-              return;
             }
           }else{
             if(mounted) {
@@ -224,7 +240,6 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
               ));
               setState(() => picking = false);
             }
-            return;
           }
         }else{
           if(mounted) {
