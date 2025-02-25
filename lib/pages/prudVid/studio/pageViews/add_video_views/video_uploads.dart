@@ -6,8 +6,7 @@ import 'package:prudapp/models/backblaze.dart';
 import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
-import 'package:prudapp/singletons/tab_data.dart';
-    
+
 class VideoUploads extends StatefulWidget {
   final Function(dynamic) onCompleted;
   final Function onPrevious;
@@ -62,6 +61,8 @@ class VideoUploadsState extends State<VideoUploads> {
     if(mounted){
       setState(() {
         prudStudioNotifier.newVideo.videoUrl = url;
+        result ??= {};
+        result!["videoUrl"] = url;
       });
       prudStudioNotifier.saveNewVideoData();
     }
@@ -71,6 +72,8 @@ class VideoUploadsState extends State<VideoUploads> {
     if(mounted){
       setState(() {
         prudStudioNotifier.newVideo.thriller!.videoUrl = url;
+        result ??= {};
+        result!["thrillerVideoUrl"] = url;
       });
       prudStudioNotifier.saveNewVideoData();
     }
@@ -80,6 +83,8 @@ class VideoUploadsState extends State<VideoUploads> {
     if(mounted){
       setState(() {
         prudStudioNotifier.newVideo.videoThumbnail = url;
+        result ??= {};
+        result!["videoThumbnail"] = url;
       });
       prudStudioNotifier.saveNewVideoData();
     }
@@ -128,7 +133,7 @@ class VideoUploadsState extends State<VideoUploads> {
               onProgressChanged: setVideoProgressChanged,
               destination: "channels/${prudStudioNotifier.newVideo.channelId}/videos",
               saveToCloud: true,
-              reset: shouldReset,
+              alreadyUploaded: prudStudioNotifier.newVideo.videoUrl != null,
             ),
             Divider(
               color: prudColorTheme.lineC,
@@ -153,7 +158,7 @@ class VideoUploadsState extends State<VideoUploads> {
               onProgressChanged: setThrillerProgressChanged,
               destination: "channels/${prudStudioNotifier.newVideo.channelId}/thrillers",
               saveToCloud: true,
-              reset: shouldReset,
+              alreadyUploaded: prudStudioNotifier.newVideo.thriller?.videoUrl != null,
             ),
             Divider(
               color: prudColorTheme.lineC,

@@ -326,7 +326,7 @@ class _PromoteStudioChannelState extends State<PromoteStudioChannel> {
                             onProgressChanged: setVideoProgress,
                             destination: "studio/${prudStudioNotifier.studio!.id}/images/ads",
                             saveToCloud: true,
-                            reset: shouldReset,
+                            alreadyUploaded: fileUrl != null,
                           ),
                           if(prudStudioNotifier.studio != null && fileType == "Image") PrudImagePicker(
                             destination: "studio/${prudStudioNotifier.studio!.id}/images/ads",

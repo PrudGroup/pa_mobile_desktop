@@ -88,7 +88,7 @@ class VideoCategoryState extends State<VideoCategory> {
                           child: Translate(
                             text: ele,
                             style: prudWidgetStyle.btnTextStyle.copyWith(
-                                color: ele == prudStudioNotifier.newChannelData.category?
+                                color: ele == category?
                                 prudColorTheme.bgA : prudColorTheme.primary
                             ),
                             align: TextAlign.center,

@@ -227,17 +227,20 @@ class _ChannelViewState extends State<ChannelView> {
                       authorizeUrl: true,
                     ),
                   ),
-                  if(widget.isOwner || isCreator) Align(
-                    alignment: Alignment.bottomRight,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: IconButton.filled(
-                        onPressed: openAddVideo, 
-                        iconSize: 30,
-                        tooltip: "Add Video",
-                        icon: Icon(Icons.personal_video_rounded)
-                      ),
-                    ),
+                  if(widget.isOwner || isCreator) Padding(
+                    padding: const EdgeInsets.only(top: 100, bottom: 20, right: 10),
+                    child: Flex(
+                      direction: Axis.horizontal,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton.filled(
+                          onPressed: openAddVideo, 
+                          iconSize: 25,
+                          tooltip: "Add Video",
+                          icon: Icon(Icons.add)
+                        ),
+                      ]
+                    )
                   ),
                 ]
               ),

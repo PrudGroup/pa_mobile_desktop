@@ -26,8 +26,8 @@ class PrudVideoPicker extends StatefulWidget {
   final Function(dynamic)? onError;
   final String destination;
   final bool saveToCloud;
-  final bool reset;
   final bool isShort;
+  final bool alreadyUploaded;
 
   const PrudVideoPicker({
     super.key, 
@@ -35,10 +35,10 @@ class PrudVideoPicker extends StatefulWidget {
     required this.destination, 
     required this.onDurationGotten,
     this.isShort = false,
-    this.saveToCloud = true, 
-    this.reset = false, 
+    this.saveToCloud = true,
     this.onSaveToCloud, 
     this.onError,
+    this.alreadyUploaded = false,
   });
 
   @override
@@ -83,7 +83,6 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
       String? downloadUrl = await iCloud.getFileDownloadUrl(res.fileName);
       if(downloadUrl != null){
         widget.onSaveToCloud?.call(downloadUrl);
-        receivePort.close();
       }else{
         widget.onError?.call('Failed to get downloadUrl');
       }
@@ -266,9 +265,33 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
       title: "Select Video",
       child: Column(
         children: [
-          mediumSpacer.height,
+          spacer.height,
           Center(
-            child: Flex(
+            child: widget.alreadyUploaded? Flex(
+              direction: Axis.horizontal,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(
+                  width: 130,
+                  child: LinearProgressIndicator(
+                    value: 1.0,
+                    color: prudColorTheme.buttonB,
+                    minHeight: 3,
+                    backgroundColor: prudColorTheme.lineC,
+                    valueColor: AlwaysStoppedAnimation<Color>(prudColorTheme.buttonB),
+                  ),
+                ),
+                Translate(
+                  text: "Uploaded 100%",
+                  style: prudWidgetStyle.tabTextStyle.copyWith(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: prudColorTheme.textB,
+                  ),
+                  align: TextAlign.right,
+                )
+              ],
+            ) : Flex(
               direction: Axis.horizontal,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -376,7 +399,7 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
                   ),
                 ),
                 picking? LoadingComponent(
-                  size: 40,
+                  size: 20,
                   isShimmer: false,
                   defaultSpinnerType: false,
                   spinnerColor: prudColorTheme.primary,

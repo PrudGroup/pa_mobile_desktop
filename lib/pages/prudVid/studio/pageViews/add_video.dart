@@ -125,24 +125,45 @@ class AddVideoState extends State<AddVideo> {
         break;
       }
       case AddVideoStep.uploads: {
-        if(returnedData != null){
+        if(returnedData != null && returnedData["videoUrl"] != null  && returnedData["thrillerVideoUrl"] != null  && returnedData["videoThumbnail"] != null){
           prudStudioNotifier.newVideo.videoUrl = returnedData["videoUrl"];
           prudStudioNotifier.newVideo.thriller = VideoThriller(videoId: "", videoUrl: returnedData["thrillerVideoUrl"]);
           prudStudioNotifier.newVideo.videoThumbnail = returnedData["videoThumbnail"];
+          step = AddVideoStep.titles;
         }
-        step = AddVideoStep.titles;
         break;
       }
       case AddVideoStep.titles: {
+        if(returnedData != null && returnedData["title"] != null && returnedData["description"] != null) {
+          prudStudioNotifier.newVideo.title = returnedData["title"];
+          prudStudioNotifier.newVideo.description = returnedData["description"];
+          step = AddVideoStep.target;
+        }
         break;
       }
       case AddVideoStep.target: {
+        if(
+          returnedData != null && returnedData["target"] != null && 
+          returnedData["videoTags"] != null && returnedData["videoTags"]!.isNotEmpty && 
+          returnedData["thrillerTags"] != null && returnedData["thrillerTags"]!.isNotEmpty
+        ) {
+          prudStudioNotifier.newVideo.targetAudience = returnedData["target"];
+          prudStudioNotifier.newVideo.tags = returnedData["videoTags"];
+          prudStudioNotifier.newVideo.thriller!.tags = returnedData["thrillerTags"];
+          step = AddVideoStep.publishType;
+        }
         break;
       }
       case AddVideoStep.publishType: {
+        step = returnedData == true? AddVideoStep.scheduled : AddVideoStep.snippets;
         break;
       }
       case AddVideoStep.scheduled: {
+        if(returnedData != null && returnedData["scheduledFor"] != null && returnedData["timezone"] != null) {
+          prudStudioNotifier.newVideo.scheduledFor = returnedData["scheduledFor"];
+          prudStudioNotifier.newVideo.timezone = returnedData["timezone"];
+          step = AddVideoStep.snippets;
+        }
         break;
       }
       case AddVideoStep.snippets: {

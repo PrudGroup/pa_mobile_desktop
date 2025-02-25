@@ -83,23 +83,24 @@ class NewChannelData {
   String? description;
   String? studioId;
 
-  NewChannelData(
-      {this.description = "",
-      this.selectedCurrency,
-      this.countryCode = "NG",
-      this.memberCost = 0,
-      this.ageTargets,
-      this.category,
-      this.channelName = '',
-      this.displayScreenImage,
-      this.logoUrl,
-      this.membershipCostInEuro = 0,
-      this.sharePerMember = 45.0,
-      this.sharePerView = 45.0,
-      this.step = CreateChannelSteps.policy,
-      this.streamServiceCost = 0,
-      this.streamServiceCostInEuro = 0,
-      this.studioId});
+  NewChannelData({
+    this.description = "",
+    this.selectedCurrency,
+    this.countryCode = "NG",
+    this.memberCost = 0,
+    this.ageTargets,
+    this.category,
+    this.channelName = '',
+    this.displayScreenImage,
+    this.logoUrl,
+    this.membershipCostInEuro = 0,
+    this.sharePerMember = 45.0,
+    this.sharePerView = 45.0,
+    this.step = CreateChannelSteps.policy,
+    this.streamServiceCost = 0,
+    this.streamServiceCostInEuro = 0,
+    this.studioId
+  });
 
   CreateChannelSteps convertStringToStep(String str) {
     switch (str.toLowerCase()) {
@@ -2305,7 +2306,7 @@ enum AddVideoStep {
   snippets,
   movie,
   music,
-  result
+  result // promote
 }
 
 
