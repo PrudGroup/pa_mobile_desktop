@@ -5,14 +5,14 @@ import 'package:prudapp/models/theme.dart';
 import '../../components/work_in_progress.dart';
 
 class PrudCuisine extends StatefulWidget {
-
-  const PrudCuisine({super.key});
+  final String? affLinkId;
+  const PrudCuisine({super.key, this.affLinkId});
 
   @override
-  State<PrudCuisine> createState() => _PrudCuisineState();
+  State<PrudCuisine> createState() => PrudCuisineState();
 }
 
-class _PrudCuisineState extends State<PrudCuisine> {
+class PrudCuisineState extends State<PrudCuisine> {
 
   @override
   void initState() {

@@ -22,7 +22,7 @@ class SliderContainer extends StatelessWidget {
   final double space;
   final List<String> images;
 
-  caro.CarouselController carouselController = caro.CarouselController();
+  caro.CarouselSliderController carouselController = caro.CarouselSliderController();
 
   SliderContainer({
     super.key,

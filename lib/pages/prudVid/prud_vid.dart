@@ -15,8 +15,9 @@ import '../../models/theme.dart';
 
 class PrudVid extends StatefulWidget {
   final String? affLinkId;
+  final bool viewByChannels;
   final int? tab;
-  const PrudVid({super.key, this.affLinkId, this.tab,});
+  const PrudVid({super.key, this.affLinkId, this.tab, this.viewByChannels = false,});
 
   @override
   PrudVidState createState() => PrudVidState();
@@ -45,7 +46,7 @@ class PrudVidState extends State<PrudVid> with TickerProviderStateMixin {
       body: TabBarView(
         controller: tabCtrl,
         children: [
-          VidView(goToTab: (int index) => tabCtrl.animateTo(index)),
+          VidView(goToTab: (int index) => tabCtrl.animateTo(index), includeChannels: widget.viewByChannels),
           SearchPrudVid(goToTab: (int index) => tabCtrl.animateTo(index)),
           VidMembership(goToTab: (int index) => tabCtrl.animateTo(index)),
           VidSubscribe(goToTab: (int index) => tabCtrl.animateTo(index)),

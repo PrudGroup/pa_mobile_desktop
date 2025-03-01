@@ -28,6 +28,7 @@ class PrudVideoPicker extends StatefulWidget {
   final bool saveToCloud;
   final bool isShort;
   final bool alreadyUploaded;
+  final Function(String)? onVideoPicked;
 
   const PrudVideoPicker({
     super.key, 
@@ -38,6 +39,7 @@ class PrudVideoPicker extends StatefulWidget {
     this.saveToCloud = true,
     this.onSaveToCloud, 
     this.onError,
+    this.onVideoPicked,
     this.alreadyUploaded = false,
   });
 
@@ -197,6 +199,7 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
           String? filePath = file.path;
           int chunkSize = getChunkSize(file.size);
           if(filePath != null){
+            if(widget.onVideoPicked != null) widget.onVideoPicked!(filePath);
             VideoPlayerController controller = VideoPlayerController.file(File(filePath));
             await controller.initialize();
             Duration duration = controller.value.duration;

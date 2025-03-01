@@ -5,14 +5,14 @@ import 'package:prudapp/models/theme.dart';
 import '../../components/work_in_progress.dart';
 
 class PrudLearn extends StatefulWidget {
+  final String? affLinkId;
+  const PrudLearn({super.key, this.affLinkId});
 
-    const PrudLearn({super.key});
-
-    @override
-    State<PrudLearn> createState() => _PrudLearnState();
+  @override
+  State<PrudLearn> createState() => PrudLearnState();
 }
 
-class _PrudLearnState extends State<PrudLearn> {
+class PrudLearnState extends State<PrudLearn> {
 
   @override
   void initState() {

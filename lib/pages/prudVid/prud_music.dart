@@ -5,8 +5,9 @@ import 'package:prudapp/models/theme.dart';
 import '../../components/work_in_progress.dart';
 
 class PrudMusic extends StatefulWidget {
-
-  const PrudMusic({super.key});
+  final String? affLinkId;
+  
+  const PrudMusic({super.key, this.affLinkId});
 
   @override
   State<PrudMusic> createState() => _PrudMusicState();

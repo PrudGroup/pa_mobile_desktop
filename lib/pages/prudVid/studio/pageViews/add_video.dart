@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/add_video_views/video_category.dart';
+import 'package:prudapp/pages/prudVid/studio/pageViews/add_video_views/video_cost.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/add_video_views/video_declare.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/add_video_views/video_live.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/add_video_views/video_movie.dart';
@@ -17,9 +18,14 @@ import 'package:prudapp/singletons/prud_studio_notifier.dart';
 
     
 class AddVideo extends StatefulWidget {
-  final String channelId;
-  final String? creatorId;
-  const AddVideo({super.key, required this.channelId, this.creatorId});
+  final VidChannel channel;
+  final String creatorId;
+
+  const AddVideo({
+    super.key, 
+    required this.channel, 
+    required this.creatorId
+  });
 
   @override
   AddVideoState createState() => AddVideoState();
@@ -29,6 +35,16 @@ class AddVideoState extends State<AddVideo> {
   AddVideoStep presentStep = prudStudioNotifier.newVideo.lastStep;
   bool succeeded = false;
   String? errorMsg;
+
+  @override
+  void initState() {
+    if(mounted) {
+      setState(() {
+        prudStudioNotifier.newVideo.videoType = widget.channel.category;
+      });
+    }
+    super.initState();
+  }
 
   void handlePreviousEvents() async {
     AddVideoStep lastStep = AddVideoStep.policy;
@@ -84,10 +100,14 @@ class AddVideoState extends State<AddVideo> {
         lastStep = AddVideoStep.snippets;
         break;
       }
-      default: {
+      case AddVideoStep.cost: {
         lastStep = AddVideoStep.snippets;
         if(prudStudioNotifier.newVideo.videoType?.toLowerCase() == "movies") lastStep = AddVideoStep.movie;
         if(prudStudioNotifier.newVideo.videoType?.toLowerCase() == "music") lastStep = AddVideoStep.music;
+        break;
+      }
+      default: {
+        lastStep = AddVideoStep.cost;
         break;
       }
     }
@@ -129,6 +149,7 @@ class AddVideoState extends State<AddVideo> {
           prudStudioNotifier.newVideo.videoUrl = returnedData["videoUrl"];
           prudStudioNotifier.newVideo.thriller = VideoThriller(videoId: "", videoUrl: returnedData["thrillerVideoUrl"]);
           prudStudioNotifier.newVideo.videoThumbnail = returnedData["videoThumbnail"];
+          prudStudioNotifier.newVideo.videoLocalFile = returnedData["videoLocalFile"];
           step = AddVideoStep.titles;
         }
         break;
@@ -167,19 +188,57 @@ class AddVideoState extends State<AddVideo> {
         break;
       }
       case AddVideoStep.snippets: {
+        if(returnedData["snippets"] != null){
+          prudStudioNotifier.newVideo.snippets = returnedData["snippets"];
+          if(["movies", "music"].contains(widget.channel.category.toLowerCase())){
+            step = widget.channel.category.toLowerCase() == "movies"? AddVideoStep.movie : AddVideoStep.music;
+          }else{
+            step = AddVideoStep.cost;
+          }
+        }
         break;
       }
       case AddVideoStep.movie: {
+        if(returnedData != null && returnedData["detail"] != null) {
+          VideoMovieDetail mov = returnedData["detail"];
+          prudStudioNotifier.newVideo.movieDetailId = mov.id;
+          prudStudioNotifier.newVideo.movieDetail = mov;
+          prudStudioNotifier.newVideo.hasSavedMovieDetails = true;
+          step = AddVideoStep.cost;
+        }
         break;
       }
       case AddVideoStep.music: {
+        if(returnedData != null && returnedData["detail"] != null) {
+          VideoMusicDetail mus = returnedData["detail"];
+          prudStudioNotifier.newVideo.musicDetailId = mus.id;
+          prudStudioNotifier.newVideo.musicDetail = mus;
+          prudStudioNotifier.newVideo.hasSavedMusicDetails = true;
+          step = AddVideoStep.cost;
+        }
+        break;
+      }
+      case AddVideoStep.cost: {
+        if(mounted){
+          setState(() {
+            succeeded = returnedData != null && returnedData == true;
+            errorMsg = "Unable to save details of uploaded video. Check your network and try again.";
+          });
+        }
+        step = AddVideoStep.result;
         break;
       }
       default: {
         if(succeeded){
-
+          prudStudioNotifier.newVideo = PendingNewVideo(
+            thriller: VideoThriller(
+              videoId: "", videoUrl: ""
+            )
+          );
+          prudStudioNotifier.clearUnfinishedNewVideoFromCache();
+          Navigator.pop(context);
         }else{
-
+          Navigator.pop(context);
         }
         break;
       }
@@ -274,11 +333,21 @@ class AddVideoState extends State<AddVideo> {
                             onPrevious: handlePreviousEvents,
                           )
                           :
-                          VideoResult(
-                            succeeded: succeeded,
-                            errorMsg: errorMsg,
-                            onCompleted: handleNextEvents, 
-                            onPrevious: handlePreviousEvents,
+                          (
+                            presentStep == AddVideoStep.cost?
+                            VideoCost(
+                              channel: widget.channel,
+                              creatorId: widget.creatorId,
+                              onCompleted: handleNextEvents, 
+                              onPrevious: handlePreviousEvents,
+                            )
+                            :
+                            VideoResult(
+                              succeeded: succeeded,
+                              errorMsg: errorMsg,
+                              onCompleted: handleNextEvents, 
+                              onPrevious: handlePreviousEvents,
+                            )
                           )
                         )
                       )

@@ -214,7 +214,7 @@ class ChannelSearchComponentState extends State<ChannelSearchComponent> {
           ],
         ),
         if(showFilter) spacer.height,
-        if(showFilter) FormBuilderChoiceChip<String>(
+        if(showFilter) FormBuilderChoiceChips<String>(
           decoration: getDeco("Filter"),
           backgroundColor: prudColorTheme.bgA,
           disabledColor: prudColorTheme.bgD,

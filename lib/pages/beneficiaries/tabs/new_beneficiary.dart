@@ -279,7 +279,7 @@ class NewBeneficiaryState extends State<NewBeneficiary> {
                   ),
                   spacer.height,
                   FormBuilder(
-                    child: FormBuilderChoiceChip(
+                    child: FormBuilderChoiceChips(
                       decoration: getDeco("Gender"),
                       backgroundColor: prudColorTheme.bgA,
                       disabledColor: prudColorTheme.bgD,
@@ -439,7 +439,7 @@ class NewBeneficiaryState extends State<NewBeneficiary> {
               child: Column(
                 children: [
                   FormBuilder(
-                    child: FormBuilderChoiceChip(
+                    child: FormBuilderChoiceChips(
                       decoration: getDeco("Face"),
                       backgroundColor: prudColorTheme.bgA,
                       disabledColor: prudColorTheme.bgD,

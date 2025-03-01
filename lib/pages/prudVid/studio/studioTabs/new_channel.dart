@@ -399,7 +399,7 @@ class _NewChannelState extends State<NewChannel> {
                             children: [
                               mediumSpacer.height,
                               FormBuilder(
-                                child: FormBuilderChoiceChip(
+                                child: FormBuilderChoiceChips(
                                   decoration: getDeco("Category"),
                                   backgroundColor: prudColorTheme.bgA,
                                   disabledColor: prudColorTheme.bgD,

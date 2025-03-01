@@ -38,7 +38,7 @@ class _ChannelViewState extends State<ChannelView> {
   bool loading = false;
   final GlobalKey<InnerMenuState> _key = GlobalKey();
   RatingSearchResult hasVotedB4 = RatingSearchResult(index: -1);
-  bool isCreator = false;
+  bool isCreator = prudStudioNotifier.amACreator != null;
 
   void moveTo(int index) {
     if (_key.currentState != null) {
@@ -202,8 +202,8 @@ class _ChannelViewState extends State<ChannelView> {
   }
 
   void openAddVideo(){
-    if(mounted){
-      iCloud.goto(context, AddVideo(channelId: widget.channel.id!, creatorId: prudStudioNotifier.amACreator?.id,));
+    if(mounted && isCreator){
+      iCloud.goto(context, AddVideo(channel: widget.channel, creatorId: prudStudioNotifier.amACreator!.id!,));
     }
   }
 

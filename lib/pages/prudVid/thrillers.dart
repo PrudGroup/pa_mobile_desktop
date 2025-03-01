@@ -6,14 +6,17 @@ import '../../../models/theme.dart';
 
 class Thrillers extends StatefulWidget {
   final int? tab;
-  const Thrillers({super.key, this.tab, });
+  final String? category;
+
+  const Thrillers({super.key, this.tab, this.category, });
 
   @override
   ThrillersState createState() => ThrillersState();
 }
 
 class ThrillersState extends State<Thrillers> with TickerProviderStateMixin {
-
+  // TODO: implement category listing
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(

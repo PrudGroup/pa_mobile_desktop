@@ -57,11 +57,7 @@ class MyStorage extends ChangeNotifier {
       alertElevation: 0.0
   );
   String? installReferralCode;
-  String? giftReferral;
-  String? busReferral;
-  String? flightReferral;
-  String? rechargeReferral;
-  String? hotelsReferral;
+  String? generalReferral;
 
 
   factory MyStorage() {
@@ -91,9 +87,9 @@ class MyStorage extends ChangeNotifier {
     }
   }
 
-  saveProductReferral(String productId, String linkId){
+  saveThrillerReferral(String tid, String linkId){
     Future.delayed(Duration.zero, () async {
-      String key = "product_${productId}_referral";
+      String key = "thriller_${tid}_referral";
       await addToStore(key: key, value: linkId);
     });
   }
@@ -105,63 +101,52 @@ class MyStorage extends ChangeNotifier {
     });
   }
 
-  saveHotelReferral(String hotelId, String linkId){
+  saveVideoReferral(String vid, String linkId){
     Future.delayed(Duration.zero, () async {
-      String key = "hotel_${hotelId}_referral";
+      String key = "video_${vid}_referral";
       await addToStore(key: key, value: linkId);
     });
   }
 
-  saveRechargeReferral(String linkId){
+  saveChannelReferral(String cid, String linkId){
     Future.delayed(Duration.zero, () async {
-      String key = "recharge_referral";
+      String key = "channel_${cid}_referral";
       await addToStore(key: key, value: linkId);
     });
   }
 
-  saveFlightReferral(String linkId){
+  saveGeneralReferral(String linkId){
     Future.delayed(Duration.zero, () async {
-      String key = "flight_referral";
+      String key = "general_referral";
       await addToStore(key: key, value: linkId);
     });
   }
 
-  saveBusReferral(String linkId){
+  saveStreamReferral(String sid, String linkId){
     Future.delayed(Duration.zero, () async {
-      String key = "bus_referral";
+      String key = "stream_${sid}_referral";
       await addToStore(key: key, value: linkId);
     });
   }
 
-  saveGiftReferral(String linkId){
+  saveAppInstallReferral(String code){
     Future.delayed(Duration.zero, () async {
-      String key = "gift_referral";
-      await addToStore(key: key, value: linkId);
+      String key = "install_referral_code";
+      await addToStore(key: key, value: code);
     });
   }
 
-  saveHotelsReferral(String linkId){
-    Future.delayed(Duration.zero, () async {
-      String key = "hotels_referral";
-      await addToStore(key: key, value: linkId);
-    });
-  }
+  String? getGeneralReferral() => getFromStore(key: "general_referral");
+  
+  String? getThrillerReferral(String tid) => getFromStore(key: "thriller_${tid}_referral");
 
-  String? getHotelsReferral() => getFromStore(key: "hotels_referral");
+  String? getVideoReferral(String vid) => getFromStore(key: "video_${vid}_referral");
 
-  String? getGiftReferral() => getFromStore(key: "gift_referral");
-
-  String? getBusReferral() => getFromStore(key: "bus_referral");
-
-  String? getFlightReferral() => getFromStore(key: "flight_referral");
-
-  String? getRechargeReferral() => getFromStore(key: "recharge_referral");
+  String? getChannelReferral(String cid) => getFromStore(key: "channel_${cid}_referral");
 
   String? getAdsReferral(String adsId) => getFromStore(key: "ads_${adsId}_referral");
 
-  String? getProductReferral(String productId) => getFromStore(key: "product_${productId}_referral");
-
-  String? getHotelReferral(String hotelId) => getFromStore(key: "hotel_${hotelId}_referral");
+  String? getStreamReferral(String sid) => getFromStore(key: "stream_${sid}_referral");
 
   String? getAppInstallReferralCode() => getFromStore(key: "install_referral_code");
 
@@ -174,12 +159,8 @@ class MyStorage extends ChangeNotifier {
       await setConvertibleCurrencies();
       await getLostImageData();
       hasInitialized = true;
-      hotelsReferral = getHotelsReferral();
       installReferralCode = getAppInstallReferralCode();
-      giftReferral = getGiftReferral();
-      busReferral = getBusReferral();
-      flightReferral = getFlightReferral();
-      rechargeReferral = getRechargeReferral();
+      generalReferral = getGeneralReferral();
       notifyListeners();
     }catch (ex) {
       debugPrint("ErrorHandler: SharedLocalStorage: initializeValues(): $ex");

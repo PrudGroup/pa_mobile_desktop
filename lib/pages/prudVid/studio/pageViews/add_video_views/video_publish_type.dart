@@ -67,7 +67,7 @@ class VideoPublishTypeState extends State<VideoPublishType> {
                 children: [
                   mediumSpacer.height,
                   FormBuilder(
-                    child: FormBuilderChoiceChip(
+                    child: FormBuilderChoiceChips(
                       decoration: getDeco("Type"),
                       backgroundColor: prudColorTheme.bgA,
                       disabledColor: prudColorTheme.bgD,

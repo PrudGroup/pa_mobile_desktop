@@ -174,6 +174,12 @@ class TabData extends ChangeNotifier {
     }
   }
 
+  Duration parseDurationFromDouble(double hours) {
+    return Duration(
+      seconds: (hours * Duration.secondsPerHour).toInt()
+    );
+  }
+
   int getTimestampFromDate(DateTime dDate){
     String dRealDate = DateFormat('yyyy-MM-dd').format(dDate.toLocal());
     return (DateTime.parse(dRealDate)).microsecondsSinceEpoch;

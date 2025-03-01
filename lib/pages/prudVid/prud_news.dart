@@ -5,8 +5,9 @@ import 'package:prudapp/models/theme.dart';
 import '../../components/work_in_progress.dart';
 
 class PrudNews extends StatefulWidget {
-
-  const PrudNews({super.key});
+  final String? affLinkId;
+  
+  const PrudNews({super.key, this.affLinkId});
 
   @override
   State<PrudNews> createState() => _PrudNewsState();

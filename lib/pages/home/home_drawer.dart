@@ -8,9 +8,7 @@ import 'package:prudapp/pages/prudVid/thrillers.dart';
 import 'package:prudapp/pages/register/login.dart';
 import 'package:prudapp/pages/settings/policy.dart';
 import 'package:prudapp/pages/settings/settings.dart';
-import 'package:prudapp/pages/shippers/shippers.dart';
 import 'package:prudapp/pages/shorteners/shortener.dart';
-import 'package:prudapp/pages/switzstores/switz_stores.dart';
 
 import '../../components/side_menu_item.dart';
 import '../../models/images.dart';
@@ -18,7 +16,6 @@ import '../ads/ads.dart';
 import '../beneficiaries/my_beneficiaries.dart';
 import '../settings/legal.dart';
 import '../support/support.dart';
-import '../travels/switz_travels.dart';
 
 class HomeDrawer extends StatefulWidget {
   const HomeDrawer({super.key});
@@ -97,24 +94,6 @@ class HomeDrawerState extends State<HomeDrawer> {
               endIndent: 0.0,
               color: prudColorTheme.secondary
             ),
-            SideMenuItem(
-              text: "SwitzTravels",
-              page: const SwitzTravels(),
-              isIcon: false,
-              image: prudImages.travel1,
-            ),
-            SideMenuItem(
-              text: "My Bus Bookings",
-              page: const SwitzTravels(tab: 1,),
-              isIcon: false,
-              image: prudImages.transport,
-            ),
-            SideMenuItem(
-              text: "Transit Dashboard",
-              page: const SwitzTravels(tab: 2,),
-              isIcon: false,
-              image: prudImages.transport,
-            ),
             Divider(
               height: 3.0,
               thickness: 1.0,
@@ -129,22 +108,10 @@ class HomeDrawerState extends State<HomeDrawer> {
               image: prudImages.videoAd,
             ),
             SideMenuItem(
-              text: "Switz Stores",
-              page: const SwitzStores(),
-              isIcon: false,
-              image: prudImages.stores,
-            ),
-            SideMenuItem(
               text: "Shortener",
               page: const Shortener(),
               isIcon: false,
               image: prudImages.shortener,
-            ),
-            SideMenuItem(
-              text: "Shippers & Delivery",
-              page: const Shippers(),
-              isIcon: false,
-              image: prudImages.shipper,
             ),
             Divider(
               height: 3.0,

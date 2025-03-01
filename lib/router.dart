@@ -4,11 +4,19 @@ import 'package:prudapp/pages/ads/ads.dart';
 import 'package:prudapp/pages/ads/ads_details.dart';
 import 'package:prudapp/pages/home/home.dart';
 import 'package:prudapp/pages/influencers/influencers.dart';
+import 'package:prudapp/pages/prudStreams/prud_streams.dart';
+import 'package:prudapp/pages/prudStreams/views/vid_stream_detail.dart';
+import 'package:prudapp/pages/prudVid/prud_comedy.dart';
+import 'package:prudapp/pages/prudVid/prud_cuisine.dart';
+import 'package:prudapp/pages/prudVid/prud_learn.dart';
+import 'package:prudapp/pages/prudVid/prud_movies.dart';
+import 'package:prudapp/pages/prudVid/prud_music.dart';
+import 'package:prudapp/pages/prudVid/prud_news.dart';
 import 'package:prudapp/pages/prudVid/prud_vid.dart';
-import 'package:prudapp/pages/switzstores/product_details.dart';
-import 'package:prudapp/pages/switzstores/products.dart';
-import 'package:prudapp/pages/switzstores/switz_stores.dart';
-import 'package:prudapp/pages/travels/switz_travels.dart';
+import 'package:prudapp/pages/prudVid/tabs/views/channel_detail.dart';
+import 'package:prudapp/pages/prudVid/tabs/views/video_detail.dart';
+import 'package:prudapp/pages/prudVid/thriller_views/thriller_detail.dart';
+import 'package:prudapp/pages/prudVid/thrillers.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 
 final GoRouter prudRouter = GoRouter(
@@ -29,9 +37,9 @@ final GoRouter prudRouter = GoRouter(
       },
       routes: <RouteBase>[
         GoRoute(
-          path: "products",
+          path: "videos",
           builder: (BuildContext context, GoRouterState state) {
-            return const Products(category: 'wears',);
+            return const Thrillers();
           },
         )
       ]
@@ -51,37 +59,37 @@ final GoRouter prudRouter = GoRouter(
       },
     ),
     GoRoute(
-      path: '/SwitzStores',
-      name: 'SwitzStores',
+      path: '/movies',
+      name: 'Movies',
       builder: (BuildContext context, GoRouterState state) {
-        return const SwitzStores();
+        return const PrudMovies();
       },
     ),
     GoRoute(
-      path: '/products',
-      name: 'products',
+      path: '/thrillers',
+      name: 'thrillers',
       builder: (BuildContext context, GoRouterState state) {
-        return const SwitzStores();
+        return const Thrillers();
       },
       routes: <RouteBase>[
         GoRoute(
-          path: ':product_id',
-          name: 'product',
+          path: ':thriller_id',
+          name: 'thriller',
           builder: (BuildContext context, GoRouterState state) {
-            String proId = state.pathParameters['product_id']!;
+            String tid = state.pathParameters['thriller_id']!;
             String? linkId = state.uri.queryParameters['link_id'];
-            if(linkId != null) myStorage.saveProductReferral(proId, linkId);
-            return ProductDetails(
-              productId: proId,
-              affLinkId: linkId,
+            if(linkId != null) myStorage.saveThrillerReferral(tid, linkId);
+            return ThrillerDetail(
+              thrillerId: tid,
+              referralLinkId: linkId,
             );
           },
         ),
         GoRoute(
           path: 'category/:category_name',
-          name: 'product_category',
+          name: 'thriller_category',
           builder: (BuildContext context, GoRouterState state) {
-            return Products(category: state.pathParameters['category_name']!);
+            return Thrillers(category: state.pathParameters['category_name']!);
           },
         ),
       ]
@@ -109,38 +117,105 @@ final GoRouter prudRouter = GoRouter(
       ]
     ),
     GoRoute(
-      path: '/flight',
-      name: 'flight',
+      path: '/watch',
+      name: 'watch_videos',
       builder: (BuildContext context, GoRouterState state) {
-        String? linkId = state.uri.queryParameters['link_id'];
-        if(linkId != null) myStorage.saveFlightReferral(linkId);
-        return const SwitzTravels(tab: 0,);
+        return const PrudVid(tab: 0,);
       },
+      routes: <RouteBase>[
+        GoRoute(
+          path: ':vid',
+          name: 'watch_video',
+          builder: (BuildContext context, GoRouterState state) {
+            String vid = state.pathParameters['vid']!;
+            String? linkId = state.uri.queryParameters['link_id'];
+            if(linkId != null) myStorage.saveVideoReferral(vid, linkId);
+            return VideoDetail(
+              videoId: vid,
+              affLinkId: linkId,
+            );
+          },
+        ),
+        GoRoute(
+          path: 'category/:category_name',
+          name: 'watch_video_category',
+          builder: (BuildContext context, GoRouterState state) {
+            String category = state.pathParameters['category_name']!;
+            String? linkId = state.uri.queryParameters['link_id'];
+            if(linkId != null) myStorage.saveGeneralReferral(linkId);
+            switch(category.toLowerCase()){
+              case "movies": return PrudMovies(affLinkId: linkId,);
+              case "music": return PrudMusic(affLinkId: linkId);
+              case "cuisines": return PrudCuisine(affLinkId: linkId);
+              case "news": return PrudNews(affLinkId: linkId);
+              case "comedy": return PrudComedy(affLinkId: linkId);
+              default: return PrudLearn(affLinkId: linkId,);
+            }
+          },
+        )
+      ]
     ),
     GoRoute(
-      path: '/buses',
-      name: 'buses',
+      path: '/streams',
+      name: 'streams',
       builder: (BuildContext context, GoRouterState state) {
         String? linkId = state.uri.queryParameters['link_id'];
-        if(linkId != null) myStorage.saveBusReferral(linkId);
-        return const SwitzTravels(tab: 1,);
+        if(linkId != null) myStorage.saveGeneralReferral(linkId);
+        return const PrudStreams(tab: 0,);
       },
+      routes: <RouteBase>[
+        GoRoute(
+          path: ':sid',
+          name: 'streaming',
+          builder: (BuildContext context, GoRouterState state) {
+            String sid = state.pathParameters['sid']!;
+            String? linkId = state.uri.queryParameters['link_id'];
+            if(linkId != null) myStorage.saveStreamReferral(sid, linkId);
+            return VidStreamDetail(
+              sid: sid,
+              referralLinkId: linkId,
+            );
+          },
+        ),
+        GoRoute(
+          path: 'country/:country_code',
+          name: 'streaming_via_country',
+          builder: (BuildContext context, GoRouterState state) {
+            String country = state.pathParameters['country_code']!;
+            String? linkId = state.uri.queryParameters['link_id'];
+            if(linkId != null) myStorage.saveGeneralReferral(linkId);
+            return PrudStreams(searchByCountry: true, countryCode: country,);
+          },
+        )
+      ]
     ),
     GoRoute(
-      path: '/hotels',
-      name: 'hotels',
+      path: '/channels',
+      name: 'channels',
       builder: (BuildContext context, GoRouterState state) {
         String? linkId = state.uri.queryParameters['link_id'];
-        if(linkId != null) myStorage.saveHotelsReferral(linkId);
-        return const SwitzTravels(tab: 2,);
+        if(linkId != null) myStorage.saveGeneralReferral(linkId);
+        return PrudVid(tab: 0, viewByChannels: true, affLinkId: linkId,);
       },
+      routes: <RouteBase>[
+        GoRoute(
+          path: ':cid',
+          name: 'channel',
+          builder: (BuildContext context, GoRouterState state) {
+            String cid = state.pathParameters['cid']!;
+            String? linkId = state.uri.queryParameters['link_id'];
+            if(linkId != null) myStorage.saveChannelReferral(cid, linkId);
+            return ChannelDetail(cid: cid);
+          },
+        )
+      ]
     ),
     GoRoute(
       path: '/prudVid',
       name: 'prudVid',
       builder: (BuildContext context, GoRouterState state) {
         String? linkId = state.uri.queryParameters['link_id'];
-        if(linkId != null) myStorage.saveGiftReferral(linkId);
+        if(linkId != null) myStorage.saveGeneralReferral(linkId);
         return PrudVid(affLinkId: linkId,);
       },
     ),

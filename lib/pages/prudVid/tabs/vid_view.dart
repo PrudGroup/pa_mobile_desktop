@@ -6,7 +6,8 @@ import '../../../models/theme.dart';
 
 class VidView extends StatefulWidget {
   final Function(int)? goToTab;
-  const VidView({super.key, this.goToTab});
+  final bool includeChannels;
+  const VidView({super.key, this.goToTab, this.includeChannels = false});
 
   @override
   VidViewState createState() => VidViewState();

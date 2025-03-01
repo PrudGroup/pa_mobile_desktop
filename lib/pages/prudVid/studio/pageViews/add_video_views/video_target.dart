@@ -93,7 +93,7 @@ class VideoTargetState extends State<VideoTarget> {
                 children: [
                   mediumSpacer.height,
                   FormBuilder(
-                    child: FormBuilderChoiceChip(
+                    child: FormBuilderChoiceChips(
                       decoration: getDeco("Targetted Audience"),
                       backgroundColor: prudColorTheme.bgA,
                       disabledColor: prudColorTheme.bgD,
@@ -166,8 +166,6 @@ class VideoTargetState extends State<VideoTarget> {
                         controller: inputFieldValues.textEditingController,
                         focusNode: inputFieldValues.focusNode,
                         name: 'Video Tags',
-                        minLines: 8,
-                        maxLines: 12,
                         enableInteractiveSelection: true,
                         onTap: (){
                           inputFieldValues.focusNode.requestFocus();

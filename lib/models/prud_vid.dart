@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:currency_picker/currency_picker.dart';
 import 'package:prudapp/models/backblaze.dart';
 import 'package:prudapp/models/user.dart';
@@ -884,6 +886,9 @@ class ChannelVideo {
       if (updatedAt != null) "updatedAt": updatedAt!.toString(),
       if (liveStartsOn != null) "liveStartsOn": liveStartsOn!.toString(),
       if (liveEndedOn != null) "liveEndedOn": liveEndedOn!.toString(),
+      if(snippets != null) "snippets": snippets!.map((snip) => snip.toJson()).toList(),
+      if(thriller != null) "thriller": thriller!.toJson(),
+      if(sponsored != null) "sponsored":	sponsored!.toJson(),
       "targetAudience": targetAudience,
       "channelId": channelId,
       "promoted": promoted,
@@ -1013,24 +1018,25 @@ class StudioWalletHistory {
   int month;
   int year;
 
-  StudioWalletHistory(
-      {required this.id,
-      required this.currency,
-      required this.walletId,
-      required this.amount,
-      required this.selectedCurrency,
-      required this.amtInSelectedCurrency,
-      required this.viaChannel,
-      required this.videoId,
-      required this.isCredit,
-      required this.channelId,
-      required this.dated,
-      required this.month,
-      required this.year,
-      this.transId,
-      this.wallet,
-      this.channel,
-      this.video});
+  StudioWalletHistory({
+    required this.id,
+    required this.currency,
+    required this.walletId,
+    required this.amount,
+    required this.selectedCurrency,
+    required this.amtInSelectedCurrency,
+    required this.viaChannel,
+    required this.videoId,
+    required this.isCredit,
+    required this.channelId,
+    required this.dated,
+    required this.month,
+    required this.year,
+    this.transId,
+    this.wallet,
+    this.channel,
+    this.video
+  });
 
   Map<String, dynamic> toJson() {
     return {
@@ -1343,14 +1349,15 @@ class VideoSnippet {
   String title;
   String description;
 
-  VideoSnippet(
-      {required this.videoId,
-      required this.description,
-      required this.title,
-      required this.startAt,
-      required this.endAt,
-      this.video,
-      this.id});
+  VideoSnippet({
+    required this.videoId,
+    required this.description,
+    required this.title,
+    required this.startAt,
+    required this.endAt,
+    this.video,
+    this.id
+  });
 
   Map<String, dynamic> toJson() {
     return {
@@ -1646,7 +1653,7 @@ class VideoMovieDetail {
   String? id;
   ChannelVideo? video;
   String executiveProducerName;
-  String productionYear;
+  int productionYear;
   int productionMonth;
   String parentalGuard;
   String movieTitle;
@@ -1658,6 +1665,8 @@ class VideoMovieDetail {
   List<String>? tags;
   String? morePlot;
   int totalCast;
+  String movieType;
+  String movieSubType;
   double totalCostOfProduction;
   List<VideoMovieCast>? casts;
 
@@ -1671,6 +1680,8 @@ class VideoMovieDetail {
     required this.movieTitle,
     required this.productionMonth,
     required this.productionYear,
+    required this.movieType,
+    required this.movieSubType,
     this.isSeries = false,
     this.tags,
     this.id,
@@ -1684,7 +1695,9 @@ class VideoMovieDetail {
   Map<String, dynamic> toJson() {
     return {
       if (id != null) "id": id,
+      if(casts != null && casts!.isNotEmpty) "casts": casts!.map((cast) => cast.toJson()).toList(),
       if (season != null) "season": season,
+      if(video != null) "video": video!.toJson(),
       if (episode != null) "episode": episode,
       if (tags != null) "tags": tags,
       if (morePlot != null) "morePlot": morePlot,
@@ -1694,6 +1707,8 @@ class VideoMovieDetail {
       "parentalGuard": parentalGuard,
       "movieTitle": movieTitle,
       "movieSubtitle": movieSubtitle,
+      "movieSubType": movieSubType,
+      "movieType": movieType,
       "isSeries": isSeries,
       "productionCompanyNames": productionCompanyNames,
       "totalCast": totalCast,
@@ -1714,15 +1729,14 @@ class VideoMovieDetail {
       productionYear: json["productionYear"],
       tags: json["tags"],
       morePlot: json["morePlot"],
+      movieSubType: json["movieSubType"],
+      movieType: json["movieType"],
       episode: json["episode"],
       season: json["season"],
       isSeries: json["isSeries"],
       id: json["id"],
-      video:
-          json["video"] != null ? ChannelVideo.fromJson(json["video"]) : null,
-      casts: json["casts"]
-          ?.map<VideoMovieCast>((cha) => VideoMovieCast.fromJson(cha))
-          .toList(),
+      video: json["video"] != null ? ChannelVideo.fromJson(json["video"]) : null,
+      casts: json["casts"]?.map<VideoMovieCast>((cha) => VideoMovieCast.fromJson(cha)).toList(),
     );
   }
 }
@@ -1740,18 +1754,19 @@ class VideoMusicDetail {
   List<String>? tags;
   double? totalCostOfProduction;
 
-  VideoMusicDetail(
-      {required this.parentalGuard,
-      required this.albumTitle,
-      required this.musicLabel,
-      required this.executiveProducerName,
-      required this.trackTitle,
-      this.productionYear,
-      this.productionMonth,
-      this.tags,
-      this.id,
-      this.totalCostOfProduction,
-      this.video});
+  VideoMusicDetail({
+    required this.parentalGuard,
+    required this.albumTitle,
+    required this.musicLabel,
+    required this.executiveProducerName,
+    required this.trackTitle,
+    this.productionYear,
+    this.productionMonth,
+    this.tags,
+    this.id,
+    this.totalCostOfProduction,
+    this.video
+  });
 
   Map<String, dynamic> toJson() {
     return {
@@ -1798,16 +1813,17 @@ class VideoMovieCast {
   int votes;
   int voters;
 
-  VideoMovieCast(
-      {required this.detailId,
-      required this.fullname,
-      required this.roleName,
-      this.voters = 0,
-      this.votes = 0,
-      this.id,
-      this.castPhotoUrl,
-      this.rolePlot,
-      this.movieDetail});
+  VideoMovieCast({
+    required this.detailId,
+    required this.fullname,
+    required this.roleName,
+    this.voters = 0,
+    this.votes = 0,
+    this.id,
+    this.castPhotoUrl,
+    this.rolePlot,
+    this.movieDetail
+  });
 
   double getRating() {
     if (voters > 0 && votes > 0) return votes / voters;
@@ -2306,6 +2322,7 @@ enum AddVideoStep {
   snippets,
   movie,
   music,
+  cost,
   result // promote
 }
 
@@ -2344,6 +2361,7 @@ class PendingNewVideo {
   bool hasSavedMusicDetails;
   bool hasSaveThriller;
   bool hasSavedSponsored;
+  File? videoLocalFile;
   
 
   PendingNewVideo({
@@ -2379,7 +2397,8 @@ class PendingNewVideo {
     this.promoted,
     this.tags,
     this.saveVideoProgress,
-    this.saveThrillerProgress
+    this.saveThrillerProgress,
+    this.videoLocalFile,
   });
 
   Map<String, dynamic> toJson() {
@@ -2417,6 +2436,7 @@ class PendingNewVideo {
       "hasSavedMusicDetails": hasSavedMusicDetails,
       "hasSaveThriller": hasSaveThriller,
       "hasSavedSponsored": hasSavedSponsored,
+      if(videoLocalFile != null) "videoLocalFile": videoLocalFile!.path,
     };
   }
 
@@ -2455,6 +2475,7 @@ class PendingNewVideo {
       hasSavedMusicDetails: json["hasSavedMusicDetails"],
       hasSaveThriller: json["hasSaveThriller"],
       hasSavedSponsored: json["hasSavedSponsored"],
+      videoLocalFile: json["videoLocalFile"] != null? File(json["videoLocalFile"]) : null,
     );
   }
 }

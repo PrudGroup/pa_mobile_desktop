@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:connection_notifier/connection_notifier.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -11,8 +10,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_to_pdf/flutter_to_pdf.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:pdf/widgets.dart' as pdf;
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/pages/prud_predict/prud_predict.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
@@ -33,7 +34,6 @@ import '../pages/prudVid/prud_news.dart';
 import '../pages/prudVid/prud_vid.dart';
 import '../pages/prudVid/prud_vid_studio.dart';
 import '../pages/prudVid/thrillers.dart';
-import '../pages/travels/switz_travels.dart';
 
 enum RegisterState {
   first,
@@ -98,13 +98,8 @@ class ICloud extends ChangeNotifier {
         ));
   }
 
-  Future<bool> checkNetwork() async {
-    if (ConnectionNotifierTools.isConnected) {
-      return true;
-    } else {
-      return false;
-    }
-  }
+  Future<bool> checkNetwork() async => await InternetConnection().hasInternetAccess;
+    
 
   Future<pdf.Document> exportToPdf(String id) async {
     return await exportDelegate.exportToPdfDocument(id);
@@ -346,15 +341,6 @@ class ICloud extends ChangeNotifier {
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const SwitzTravels()),
-        child: PrudContainer(
-          hasPadding: false,
-          hasTitle: true,
-          title: "SwitzTravels",
-          child: Image.asset(prudImages.front15),
-        ),
-      ),
-      InkWell(
         onTap: () => iCloud.goto(context, const PrudNews()),
         child: PrudContainer(
           hasPadding: false,
@@ -378,12 +364,12 @@ class ICloud extends ChangeNotifier {
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const SwitzTravels()),
+        onTap: () => iCloud.goto(context, const PrudPredict()),
         child: PrudContainer(
           hasPadding: false,
           hasTitle: true,
           titleAlignment: MainAxisAlignment.end,
-          title: "SwitzTravels",
+          title: "PrudPredict",
           child: Image.asset(prudImages.front14),
         ),
       ),
@@ -492,7 +478,6 @@ class ICloud extends ChangeNotifier {
   Future<FirebaseApp> setFirebase(
       String apiKey, String appId, String msgID) async {
     FirebaseApp? fireApp;
-    await ConnectionNotifierTools.initialize();
     if (Platform.isAndroid || Platform.isIOS) {
       fireApp = await Firebase.initializeApp(
         options: FirebaseOptions(

@@ -4,14 +4,14 @@ import 'package:prudapp/components/work_in_progress.dart';
 import 'package:prudapp/models/theme.dart';
 
 class PrudComedy extends StatefulWidget {
+  final String? affLinkId;
+  const PrudComedy({super.key, this.affLinkId});
 
-    const PrudComedy({super.key});
-
-    @override
-    State<PrudComedy> createState() => _PrudComedyState();
+  @override
+  State<PrudComedy> createState() => PrudComedyState();
 }
 
-class _PrudComedyState extends State<PrudComedy> {
+class PrudComedyState extends State<PrudComedy> {
 
   @override
   void initState() {

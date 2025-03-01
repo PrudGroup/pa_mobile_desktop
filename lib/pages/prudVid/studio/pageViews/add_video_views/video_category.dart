@@ -66,7 +66,7 @@ class VideoCategoryState extends State<VideoCategory> {
                 children: [
                   mediumSpacer.height,
                   FormBuilder(
-                    child: FormBuilderChoiceChip(
+                    child: FormBuilderChoiceChips(
                       decoration: getDeco("Category"),
                       backgroundColor: prudColorTheme.bgA,
                       disabledColor: prudColorTheme.bgD,

@@ -6,7 +6,9 @@ import '../../../models/theme.dart';
 
 class PrudStreams extends StatefulWidget {
   final int? tab;
-  const PrudStreams({super.key, this.tab, });
+  final bool searchByCountry;
+  final String? countryCode;
+  const PrudStreams({super.key, this.tab, this.searchByCountry = false, this.countryCode, });
 
   @override
   PrudStreamsState createState() => PrudStreamsState();

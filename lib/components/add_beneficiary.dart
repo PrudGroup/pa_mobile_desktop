@@ -24,7 +24,7 @@ class AddBeneficiaryState extends State<AddBeneficiary> {
     maxCoverage: 0.3,
     minCoverage: 0.2,
     align: StackAlign.left,
-    infoIndent: 15,
+    infoItem: InfoItem(indent: 15)
   );
 
   void showBeneficiaryModel(){
@@ -92,7 +92,7 @@ class AddBeneficiaryState extends State<AddBeneficiary> {
             if(selectedBeneficiaries.isNotEmpty) AvatarStack(
               height: 50,
               settings: settings,
-              infoWidgetBuilder: (surplus) => _infoWidget(surplus, context),
+              infoWidgetBuilder: (surplus, context) => _infoWidget(surplus, context),
               avatars: [for (var n = 0; n < selectedBeneficiaries.length; n++) getAvatar(selectedBeneficiaries[n])],
             ),
             if(selectedBeneficiaries.isEmpty) Translate(

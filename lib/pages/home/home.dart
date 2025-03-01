@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:connection_notifier/connection_notifier.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:getwidget/getwidget.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:prudapp/components/main_menu.dart';
 import 'package:prudapp/components/network_issue_component.dart';
 import 'package:prudapp/components/prud_showroom.dart';
@@ -21,6 +21,7 @@ import 'package:prudapp/pages/prudVid/prud_news.dart';
 import 'package:prudapp/pages/prudVid/prud_vid.dart';
 import 'package:prudapp/pages/prudVid/prud_vid_studio.dart';
 import 'package:prudapp/pages/prudVid/thrillers.dart';
+import 'package:prudapp/pages/prud_predict/prud_predict.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:rate_my_app/rate_my_app.dart';
 import 'package:prudapp/singletons/tab_data.dart';
@@ -32,7 +33,6 @@ import '../../singletons/currency_math.dart';
 import '../../singletons/shared_local_storage.dart';
 import '../prudVid/prud_cuisine.dart';
 import '../settings/settings.dart';
-import '../travels/switz_travels.dart';
 import 'home_drawer.dart';
 
 // ignore: must_be_immutable
@@ -45,13 +45,11 @@ class MyHomePage extends StatefulWidget {
   MyHomePageState createState() => MyHomePageState();
 }
 
-class MyHomePageState extends State<MyHomePage>
-    with SingleTickerProviderStateMixin {
+class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
   final _advDrawerController = AdvancedDrawerController();
   bool hasCartContent = false;
-  final MethodChannel platform =
-      const MethodChannel('reactivestreams.io/resourceResolver');
+  final MethodChannel platform = const MethodChannel('reactivestreams.io/resourceResolver');
   final RateMyApp _rateMyApp = RateMyApp(
     preferencesPrefix: 'eLib_',
     minDays: 7,
@@ -74,51 +72,20 @@ class MyHomePageState extends State<MyHomePage>
     Menu(title: 'PrudVid', page: const PrudVid(), icon: prudImages.prudVid),
     Menu(title: 'PrudMovies', page: const PrudMovies(), icon: prudImages.movie),
     Menu(title: 'PrudMusic', page: const PrudMusic(), icon: prudImages.music),
-    Menu(
-        title: 'PrudComedy', page: const PrudComedy(), icon: prudImages.comedy),
+    Menu(title: 'PrudComedy', page: const PrudComedy(), icon: prudImages.comedy),
     Menu(title: 'PrudNews', page: const PrudNews(), icon: prudImages.news),
     Menu(title: 'PrudLearn', page: const PrudLearn(), icon: prudImages.learn),
-    Menu(
-        title: 'PrudCuisines',
-        page: const PrudCuisine(),
-        icon: prudImages.cuisine),
-    Menu(
-        title: 'PrudStreams',
-        page: const PrudStreams(),
-        icon: prudImages.streamDark),
-    Menu(
-        title: 'Thrillers',
-        page: const Thrillers(),
-        icon: prudImages.thrillerDark),
-    Menu(
-        title: 'PrudVid Studio',
-        page: const PrudVidStudio(),
-        icon: prudImages.prudVidStudio),
-    Menu(
-        title: 'PrudStreams Studio',
-        page: const PrudStreamStudio(),
-        icon: prudImages.streamStudioDark),
-    Menu(
-        title: 'SwitzTravels',
-        page: const SwitzTravels(),
-        icon: prudImages.travel1),
-    Menu(
-        title: 'Influencers',
-        page: const Influencers(),
-        icon: prudImages.influencerFemale),
-    /*Menu(
-      title: 'Ads & Promotions',
-      page: const Ads(),
-      icon: prudImages.videoAd
-    ),*/
-    /*Menu(
-      title: 'My Account',
-      page: const MyAccount(),
-      icon: prudImages.account
-    ),*/
+    Menu(title: 'PrudCuisines', page: const PrudCuisine(), icon: prudImages.cuisine),
+    Menu(title: 'PrudStreams', page: const PrudStreams(), icon: prudImages.streamDark),
+    Menu(title: 'Thrillers', page: const Thrillers(), icon: prudImages.thrillerDark),
+    Menu(title: 'PrudVid Studio', page: const PrudVidStudio(), icon: prudImages.prudVidStudio),
+    Menu(title: 'PrudStreams Studio', page: const PrudStreamStudio(), icon: prudImages.streamStudioDark),
+    Menu(title: 'PrudPredict', page: const PrudPredict(), icon: prudImages.travel1),
+    Menu( title: 'Influencers', page: const Influencers(), icon: prudImages.influencerFemale),
     Menu(title: 'Settings', page: const Settings(), icon: prudImages.settings),
   ];
   bool prudServiceIsAvailable = true;
+  late final AppLifecycleListener lifeListener;
 
   Future<void> changeConnectionStatus() async {
     bool ok = await iCloud.prudServiceIsAvailable();
@@ -139,9 +106,21 @@ class MyHomePageState extends State<MyHomePage>
     carousels.shuffle();
     super.initState();
     _rateMyApp.init();
-    connectSub = ConnectionNotifierTools.onStatusChange.listen((_) async {
-      await changeConnectionStatus();
+    connectSub = InternetConnection().onStatusChange.listen((InternetStatus status) async {
+      switch (status) {
+        case InternetStatus.connected:
+          await changeConnectionStatus();
+          break;
+        case InternetStatus.disconnected:
+          if(mounted) setState(() => prudServiceIsAvailable = false);
+          break;
+      }
     });
+    lifeListener = AppLifecycleListener(
+      onResume: connectSub?.resume,
+      onHide: connectSub?.pause,
+      onPause: connectSub?.pause,
+    );
     FGBGEvents fgbg = FGBGEvents.instance;
     subscription = fgbg.stream.listen((event) {
       if (event == FGBGType.background) {
@@ -168,6 +147,7 @@ class MyHomePageState extends State<MyHomePage>
     subscription?.cancel();
     messageStream?.cancel();
     connectSub?.cancel();
+    lifeListener.dispose();
     super.dispose();
   }
 

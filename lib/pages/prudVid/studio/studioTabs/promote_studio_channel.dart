@@ -281,7 +281,7 @@ class _PromoteStudioChannelState extends State<PromoteStudioChannel> {
                             child: Column(
                               children: [
                                 mediumSpacer.height,
-                                FormBuilderChoiceChip<String>(
+                                FormBuilderChoiceChips<String>(
                                   decoration: getDeco("Ads Type"),
                                   backgroundColor: prudColorTheme.bgA,
                                   disabledColor: prudColorTheme.bgD,

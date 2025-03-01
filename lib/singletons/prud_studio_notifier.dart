@@ -72,6 +72,10 @@ class PrudStudioNotifier extends ChangeNotifier {
     changedMembershipShare = null;
     // notifyListeners();
   }
+
+  Future<void> clearUnfinishedNewVideoFromCache() async {
+    await myStorage.lStore.remove("unfinishedNewVideo");
+  }
   
   Future<ChannelStreamServiceFigure> getChannelStreamFigures(String channelId) async {
     ChannelStreamServiceFigure result = ChannelStreamServiceFigure(active: 0, total: 0);
@@ -129,8 +133,7 @@ class PrudStudioNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> updateChannelRating(
-      RatedChannel rating, bool hasRatedB4, int index) async {
+  Future<void> updateChannelRating(RatedChannel rating, bool hasRatedB4, int index) async {
     if (hasRatedB4) {
       channelsRated[index] = rating;
     } else {
@@ -142,8 +145,9 @@ class PrudStudioNotifier extends ChangeNotifier {
 
   Future<void> saveChannelRatingToCache() async {
     await myStorage.addToStore(
-        key: "channelsRated",
-        value: channelsRated.map((rating) => rating.toJson()).toList());
+      key: "channelsRated",
+      value: channelsRated.map((rating) => rating.toJson()).toList()
+    );
   }
 
   void retrieveChannelRatingFromCache() {
@@ -674,10 +678,42 @@ class PrudStudioNotifier extends ChangeNotifier {
 
   Future<VidChannel?> createVidChannel(VidChannel newChannel) async {
     return await tryAsync("createVidChannel", () async {
-      dynamic res = await makeRequest(
-          path: "channels/", isGet: false, data: newChannel.toJson());
+      dynamic res = await makeRequest(path: "channels/", isGet: false, data: newChannel.toJson());
       if (res != null && res != false) {
         return VidChannel.fromJson(res);
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<VideoMovieDetail?> createMovieDetail(VideoMovieDetail newDetail) async {
+    return await tryAsync("createMovieDetail", () async {
+      dynamic res = await makeRequest(path: "channels/videos/movie_details/", isGet: false, data: newDetail.toJson());
+      if (res != null && res != false) {
+        return VideoMovieDetail.fromJson(res);
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<VideoMusicDetail?> createMusicDetail(VideoMusicDetail newDetail) async {
+    return await tryAsync("createMusicDetail", () async {
+      dynamic res = await makeRequest(path: "channels/videos/music_details/", isGet: false, data: newDetail.toJson());
+      if (res != null && res != false) {
+        return VideoMusicDetail.fromJson(res);
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<ChannelVideo?> createNewVideo(ChannelVideo newVideo) async {
+    return await tryAsync("createNewVideo", () async {
+      dynamic res = await makeRequest(path: "channels/videos/", isGet: false, data: newVideo.toJson());
+      if (res != null && res != false) {
+        return ChannelVideo.fromJson(res);
       } else {
         return null;
       }

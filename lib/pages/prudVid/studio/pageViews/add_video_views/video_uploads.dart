@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:prudapp/components/prud_image_picker.dart';
 import 'package:prudapp/components/prud_video_picker.dart';
@@ -60,33 +62,36 @@ class VideoUploadsState extends State<VideoUploads> {
   void setVideoSavedFinished(String url){
     if(mounted){
       setState(() {
-        prudStudioNotifier.newVideo.videoUrl = url;
         result ??= {};
         result!["videoUrl"] = url;
       });
-      prudStudioNotifier.saveNewVideoData();
     }
   }
 
   void setThrillerUrl(String url){
     if(mounted){
       setState(() {
-        prudStudioNotifier.newVideo.thriller!.videoUrl = url;
         result ??= {};
         result!["thrillerVideoUrl"] = url;
       });
-      prudStudioNotifier.saveNewVideoData();
+    }
+  }
+
+  void setVideoFile(String url){
+    if(mounted){
+      setState(() {
+        result ??= {};
+        result!["videoLocalFile"] = File(url);
+      });
     }
   }
 
   void setThumbnailUrl(String? url){
     if(mounted){
       setState(() {
-        prudStudioNotifier.newVideo.videoThumbnail = url;
         result ??= {};
         result!["videoThumbnail"] = url;
       });
-      prudStudioNotifier.saveNewVideoData();
     }
   }
   
@@ -133,6 +138,7 @@ class VideoUploadsState extends State<VideoUploads> {
               onProgressChanged: setVideoProgressChanged,
               destination: "channels/${prudStudioNotifier.newVideo.channelId}/videos",
               saveToCloud: true,
+              onVideoPicked: setVideoFile,
               alreadyUploaded: prudStudioNotifier.newVideo.videoUrl != null,
             ),
             Divider(
