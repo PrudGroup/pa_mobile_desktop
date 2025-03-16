@@ -1,6 +1,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:prudapp/models/aff_link.dart';
 import 'package:prudapp/models/wallet.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
@@ -27,6 +28,87 @@ class InfluencerNotifier extends ChangeNotifier {
   String? influencerWalletCurrencyCode;
   InfluencerWallet? myWallet;
   List<WalletHistory>? myWalletHistory;
+  List<AffLink>? myLinks;
+
+
+  Future<AffLink?> createAffLinks(String target, String category, String categoryId) async {
+    return await tryAsync("createAffLinks", () async {
+      if(myStorage.user != null && myStorage.user!.id != null){
+        AffLink affLink = AffLink(
+          categoryId: categoryId, 
+          category: category, 
+          target: target, 
+          affDiscountPercentage: 0,
+          affId: myStorage.user!.id,
+          fullShortUrl: " "
+        );
+        String path = "aff_links/";
+        dynamic res = await makeRequest(path: path, isGet: false, data: affLink.toJson());
+        if (res != null && res != false) {
+          AffLink link = AffLink.fromJson(res);
+          return link;
+        } else {
+          return null;
+        }
+      }else{
+        return null;
+      }
+    }, error: () {
+      return null;
+    },);
+  }
+
+  Future<List<AffLink>?> getAffLinks() async {
+    return await tryAsync("getAffLinks", () async {
+      if(myStorage.user != null && myStorage.user!.id != null){
+        String path = "aff_links";
+        dynamic res = await makeRequest(path: path, qParams: {"aff_id": myStorage.user!.id});
+        if (res != null && res != false && res.isNotEmpty) {
+          List<AffLink> links = [];
+          for(dynamic link in res){
+            links.add(AffLink.fromJson(link));
+          }
+          myLinks = links;
+          notifyListeners();
+          return links;
+        } else {
+          return null;
+        }
+      }else{
+        return null;
+      }
+    }, error: () {
+      return null;
+    },);
+  }
+
+  Future<List<AffLink>?> getLinksByCategory(String category) async {
+    return await tryAsync("getLinksByCategory", () async {
+      if(myLinks!.isEmpty) await getAffLinks();
+      return myLinks!.where((link) => link.category == category).toList();
+    }, error: () {
+      return null;
+    },);
+  }
+
+  Future<List<AffLink>?> getLinksByCategoryId(String categoryId) async {
+    return await tryAsync("getLinksByCategoryId", () async {
+      if(myLinks!.isEmpty) await getAffLinks();
+      return myLinks!.where((link) => link.categoryId == categoryId).toList();
+    }, error: () => null);
+  }
+
+  Future<AffLink?> getLinkByLinkId(String linkId) async {
+    return await tryAsync("getLinkByLinkId", () async {
+      String path = "aff_links/$linkId";
+      dynamic res = await makeRequest(path: path);
+      if(res != null && res != false){
+        return AffLink.fromJson(res);
+      }else{
+        return null;
+      }
+    }, error: () => null);
+  }
 
   void updateWallet(InfluencerWallet wallet){
     myWallet = wallet;
@@ -158,18 +240,11 @@ class InfluencerNotifier extends ChangeNotifier {
   }
 
   Future<double?> getLinkReferralPercentage(String linkId) async {
-    try{
-      String path = "aff_links/$linkId";
-      dynamic res = await makeRequest(path: path);
-      if(res != null){
-        return res.toDouble();
-      }else{
-        return null;
-      }
-    }catch(ex){
-      debugPrint("InfluencerNotifier_getReferralPercentage Error: $ex");
+    return await tryAsync("getLinkReferralPercentage", () async {
+      AffLink? link = await getLinkByLinkId(linkId);
+      if(link != null) return link.affDiscountPercentage;
       return null;
-    }
+    });
   }
 
   Future<User?> getInfluencerById(String id) async {
@@ -186,12 +261,16 @@ class InfluencerNotifier extends ChangeNotifier {
     });
   }
 
-  Future<dynamic> makeRequest({required String path, bool isGet = true, Map<String, dynamic>? data}) async {
+  Future<dynamic> makeRequest({
+    required String path, bool isGet = true, 
+    Map<String, dynamic>? data, Map<String, dynamic>? qParams
+  }) async {
     currencyMath.loginAutomatically();
     if(iCloud.affAuthToken != null){
       setDioHeaders();
       String url = "$prudApiUrl/affiliates/$path";
-      Response res = isGet? (await influencerDio.get(url)) : (await influencerDio.post(url, data: data));
+      Response res = isGet? (await influencerDio.get(url, queryParameters: qParams)) 
+      : (await influencerDio.post(url, data: data));
       debugPrint("influencer Request: $res");
       return res.data;
     }else{

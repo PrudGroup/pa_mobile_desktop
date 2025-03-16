@@ -62,36 +62,44 @@ class VideoUploadsState extends State<VideoUploads> {
   void setVideoSavedFinished(String url){
     if(mounted){
       setState(() {
+        prudStudioNotifier.newVideo.videoUrl = url;
         result ??= {};
         result!["videoUrl"] = url;
       });
+      prudStudioNotifier.saveNewVideoData();
     }
   }
 
   void setThrillerUrl(String url){
     if(mounted){
       setState(() {
+        prudStudioNotifier.newVideo.thriller!.videoUrl = url;
         result ??= {};
         result!["thrillerVideoUrl"] = url;
       });
+      prudStudioNotifier.saveNewVideoData();
     }
   }
 
   void setVideoFile(String url){
     if(mounted){
       setState(() {
+        prudStudioNotifier.newVideo.videoLocalFile = File(url);
         result ??= {};
         result!["videoLocalFile"] = File(url);
       });
+      prudStudioNotifier.saveNewVideoData();
     }
   }
 
   void setThumbnailUrl(String? url){
     if(mounted){
       setState(() {
+        prudStudioNotifier.newVideo.videoThumbnail = url;
         result ??= {};
         result!["videoThumbnail"] = url;
       });
+      prudStudioNotifier.saveNewVideoData();
     }
   }
   
@@ -164,7 +172,7 @@ class VideoUploadsState extends State<VideoUploads> {
               onProgressChanged: setThrillerProgressChanged,
               destination: "channels/${prudStudioNotifier.newVideo.channelId}/thrillers",
               saveToCloud: true,
-              alreadyUploaded: prudStudioNotifier.newVideo.thriller?.videoUrl != null,
+              alreadyUploaded: prudStudioNotifier.newVideo.thriller?.videoUrl != null && prudStudioNotifier.newVideo.thriller!.videoUrl.isNotEmpty,
             ),
             Divider(
               color: prudColorTheme.lineC,

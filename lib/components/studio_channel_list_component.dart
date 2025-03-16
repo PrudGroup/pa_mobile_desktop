@@ -9,11 +9,13 @@ import 'package:prudapp/singletons/tab_data.dart';
 class StudioChannelListComponent extends StatelessWidget {
   final List<VidChannel> channels;
   final bool isOwner;
+  final bool useCarousel;
 
   const StudioChannelListComponent({
     super.key,
     required this.channels,
     this.isOwner = true,
+    this.useCarousel = false,
   });
 
   @override
@@ -22,7 +24,25 @@ class StudioChannelListComponent extends StatelessWidget {
     final CarouselController cCtrl = CarouselController(initialItem: 0);
     return SizedBox(
       height: 140,
-      child: CarouselView.weighted(
+      child: useCarousel == false? ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        physics: BouncingScrollPhysics(),
+        itemCount: channels.length,
+        itemBuilder: (bContext, index){
+          VidChannel menu = channels[index];
+          return PrudCarouselItem(
+            navigateToWidget: ChannelView(channel: menu, isOwner: isOwner),
+            title: menu.channelName,
+            moreTitle: menu.category.toUpperCase(),
+            blocked: menu.blocked,
+            logoUrl: menu.logo,
+            shape: isOwner? PrudCarouselItemShape.rectangle : PrudCarouselItemShape.circle,
+            displayUrl: menu.displayScreen,
+            subtitle: "${tabData.getCurrencySymbol(menu.channelCurrency)} | ${tabData.getCurrencyName(menu.channelCurrency)}",
+          );
+        }
+      ) : CarouselView.weighted(
         backgroundColor: prudColorTheme.bgE,
         padding: const EdgeInsets.only(left: 5),
         onTap: (int index) {
@@ -34,23 +54,18 @@ class StudioChannelListComponent extends StatelessWidget {
         controller: cCtrl,
         flexWeights: [3, 2, 1],
         scrollDirection: Axis.horizontal,
-        children: channels
-            .map<Widget>(
-              (menu) => PrudCarouselItem(
-                navigateToWidget: ChannelView(channel: menu, isOwner: isOwner),
-                title: menu.channelName,
-                moreTitle: menu.category.toUpperCase(),
-                blocked: menu.blocked,
-                logoUrl: menu.logo,
-                shape: isOwner
-                    ? PrudCarouselItemShape.rectangle
-                    : PrudCarouselItemShape.circle,
-                displayUrl: menu.displayScreen,
-                subtitle:
-                    "${tabData.getCurrencySymbol(menu.channelCurrency)} | ${tabData.getCurrencyName(menu.channelCurrency)}",
-              ),
-            )
-            .toList(),
+        children: channels.map<Widget>(
+          (menu) => PrudCarouselItem(
+            navigateToWidget: ChannelView(channel: menu, isOwner: isOwner),
+            title: menu.channelName,
+            moreTitle: menu.category.toUpperCase(),
+            blocked: menu.blocked,
+            logoUrl: menu.logo,
+            shape: isOwner? PrudCarouselItemShape.rectangle : PrudCarouselItemShape.circle,
+            displayUrl: menu.displayScreen,
+            subtitle: "${tabData.getCurrencySymbol(menu.channelCurrency)} | ${tabData.getCurrencyName(menu.channelCurrency)}",
+          ),
+        ).toList(),
       ),
     );
   }

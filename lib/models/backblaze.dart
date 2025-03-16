@@ -8,10 +8,10 @@ class StartLargeFileResponse{
   String bucketId;
   int contentLength;
   String? contentSha1;
-  String contentMd5;
+  String? contentMd5;
   String contentType;
   String fileId;
-  String fileInfo;
+  Map<String, dynamic> fileInfo;
   String fileName;
   dynamic legalHold;
   dynamic fileRetention;
@@ -25,12 +25,12 @@ class StartLargeFileResponse{
     required this.bucketId,
     required this.contentLength,
     required this.contentSha1,
-    required this.contentMd5,
     required this.contentType,
     required this.fileId,
     required this.fileInfo,
     required this.fileName,
     this.legalHold,
+    this.contentMd5,
     this.fileRetention,
     this.replicationStatus,
     this.serverSideEncryption,
@@ -57,7 +57,7 @@ class StartLargeFileResponse{
     };
   }
 
-  factory StartLargeFileResponse.fromMap(Map<String, dynamic> json) {
+  factory StartLargeFileResponse.fromJson(Map<String, dynamic> json) {
     return StartLargeFileResponse(
       accountId: json['accountId'],
       action: json['action'],
@@ -97,7 +97,7 @@ class UploadUrlForLargeFile{
     };
   }
 
-  factory UploadUrlForLargeFile.fromMap(Map<String, dynamic> json) {
+  factory UploadUrlForLargeFile.fromJson(Map<String, dynamic> json) {
     return UploadUrlForLargeFile(
       fileId: json['fileId'],
       uploadUrl: json['uploadUrl'],
@@ -134,7 +134,7 @@ class UploadPartResponse{
     };
   }
 
-  factory UploadPartResponse.fromMap(Map<String, dynamic> json) {
+  factory UploadPartResponse.fromJson(Map<String, dynamic> json) {
     return UploadPartResponse(
       fileId: json['fileId'],
       partNumber: json['partNumber'],
@@ -198,7 +198,7 @@ class LargeFileFinishedResponse{
     };
   }
 
-  factory LargeFileFinishedResponse.fromMap(Map<String, dynamic> json) {
+  factory LargeFileFinishedResponse.fromJson(Map<String, dynamic> json) {
     return LargeFileFinishedResponse(
       accountId: json['accountId'],
       action: json['action'],
@@ -218,12 +218,28 @@ class LargeFileFinishedResponse{
   }
 }
 
+class B2Credential{
+  String b2DownloadToken;
+  String b2AccToken;
+  String b2AuthKey;
+  String b2ApiUrl;
+
+  B2Credential({
+    required this.b2DownloadToken,
+    required this.b2AccToken,
+    required this.b2AuthKey,
+    required this.b2ApiUrl,
+  });
+}
+
 class UploadVideoStreamArg{
   SendPort sendPort;
   Stream<Uint8List> stream; 
   String contentType;
   String fileDestination;
   StartLargeFileResponse createdFile;
+  B2Credential cred;
+  String sha1;
 
   UploadVideoStreamArg({
     required this.sendPort,
@@ -231,6 +247,8 @@ class UploadVideoStreamArg{
     required this.contentType,
     required this.fileDestination,
     required this.createdFile,
+    required this.cred,
+    required this.sha1
   });
 }
 
@@ -239,12 +257,16 @@ class UploadVideoServiceArg{
   String fileId;
   Uint8List partVideo;
   int part;
+  B2Credential cred;
+  String sha1;
 
   UploadVideoServiceArg({
     required this.sendPort,
     required this.fileId,
     required this.partVideo,
     required this.part,
+    required this.cred,
+    required this.sha1
   });
 
 }
@@ -271,20 +293,20 @@ class SaveVideoResponse{
       'totalChunkCount': totalChunkCount,
       'uploadedChunkCount': uploadedChunkCount,
       'percentageUploaded': percentageUploaded,
-     'startedLargeFile': startedLargeFile.toJson(),
+      'startedLargeFile': startedLargeFile.toJson(),
       'uploadedParts': uploadedParts.map((part) => part.toJson()).toList(),
      'remainingChunks': remainingChunks,
     };
   }
 
-  factory SaveVideoResponse.fromMap(Map<String, dynamic> json) {
+  factory SaveVideoResponse.fromJson(Map<String, dynamic> json) {
     return SaveVideoResponse(
       totalChunkCount: json['totalChunkCount'],
       uploadedChunkCount: json['uploadedChunkCount'],
       percentageUploaded: json['percentageUploaded'],
-      startedLargeFile: StartLargeFileResponse.fromMap(json['startedLargeFile']),
-      uploadedParts: json['uploadedParts'].map((part) => UploadPartResponse.fromMap(part)).toList(),
-      remainingChunks: json['remainingChunks'],
+      startedLargeFile: StartLargeFileResponse.fromJson(json['startedLargeFile']),
+      uploadedParts: json['uploadedParts'].map<UploadPartResponse>((part) => UploadPartResponse.fromJson(part)).toList(),
+      remainingChunks: json['remainingChunks'].map<int>((count) => int.parse(count)).toList(),
     );
   }
 }

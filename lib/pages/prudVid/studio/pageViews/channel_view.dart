@@ -18,7 +18,9 @@ import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/playlists.da
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/videos.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
+import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 import '../../../../models/prud_vid.dart';
 
@@ -117,15 +119,15 @@ class _ChannelViewState extends State<ChannelView> {
             menu: ChannelInfo(channel: channel, isOwner: widget.isOwner),
           ),
           InnerMenuItem(
-              imageIcon: prudImages.movie,
-              title: "Videos",
-              menu: ChannelVideos(
-                  channel: channel, isOwner: widget.isOwner)),
+            imageIcon: prudImages.movie,
+            title: "Videos",
+            menu: ChannelVideos(channel: channel, isOwner: widget.isOwner)
+          ),
           InnerMenuItem(
-              imageIcon: prudImages.playlist,
-              title: "Playlist",
-              menu: ChannelPlaylists(
-                  channel: channel, isOwner: widget.isOwner)),
+            imageIcon: prudImages.playlist,
+            title: "Playlist",
+            menu: ChannelPlaylists(channel: channel, isOwner: widget.isOwner)
+          ),
           InnerMenuItem(
               imageIcon: prudImages.videoMembership,
               title: "Membership",
@@ -201,9 +203,51 @@ class _ChannelViewState extends State<ChannelView> {
     super.dispose();
   }
 
-  void openAddVideo(){
+  Future<void> openAddVideo() async {
     if(mounted && isCreator){
-      iCloud.goto(context, AddVideo(channel: widget.channel, creatorId: prudStudioNotifier.amACreator!.id!,));
+      if(prudStudioNotifier.newVideo.channelId == widget.channel.id){
+        prudStudioNotifier.newVideo.channelId = widget.channel.id;
+        await prudStudioNotifier.saveNewVideoData();
+        if(mounted) iCloud.goto(context, AddVideo(channel: widget.channel, creatorId: prudStudioNotifier.amACreator!.id!,));
+      }else{
+        Alert(context: context, style: myStorage.alertStyle,
+          type: AlertType.warning,title: "Unfinished Upload",
+          desc: "You have an unfinished upload on another channel. Would you want to continue the upload or start a new upload on the current channel(${widget.channel.channelName}).",
+          buttons: [
+            DialogButton(
+              onPressed: () {
+                Navigator.pop(context);
+                iCloud.goto(context, AddVideo(channel: widget.channel, creatorId: prudStudioNotifier.amACreator!.id!,));
+              },
+              color: prudColorTheme.buttonC,
+              radius: BorderRadius.circular(20),
+              child: const Translate(
+                text:"Continue",
+                style: TextStyle(color: Colors.black, fontSize: 16),
+              ),
+            ),
+            DialogButton(
+              onPressed: () async {
+                if(mounted) Navigator.pop(context);
+                prudStudioNotifier.newVideo = PendingNewVideo(
+                  thriller: VideoThriller(
+                    videoId: "", videoUrl: ""
+                  ),
+                  channelId: widget.channel.id,
+                );
+                await prudStudioNotifier.saveNewVideoData();
+                if(mounted) iCloud.goto(context, AddVideo(channel: widget.channel, creatorId: prudStudioNotifier.amACreator!.id!,));
+              },
+              color: prudColorTheme.primary,
+              radius: BorderRadius.circular(20),
+              child: const Translate(
+                text:"Restart",
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+          ],
+        ).show();
+      }
     }
   }
 
@@ -227,7 +271,7 @@ class _ChannelViewState extends State<ChannelView> {
                       authorizeUrl: true,
                     ),
                   ),
-                  if(widget.isOwner || isCreator) Padding(
+                  if(widget.isOwner && isCreator) Padding(
                     padding: const EdgeInsets.only(top: 100, bottom: 20, right: 10),
                     child: Flex(
                       direction: Axis.horizontal,
@@ -276,48 +320,45 @@ class _ChannelViewState extends State<ChannelView> {
                                       allowHalfRating: false,
                                       size: 30,
                                     ),
-                              Padding(
+                                Padding(
                                   padding: const EdgeInsets.only(top: 40),
                                   child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Translate(
-                                        text: tabData
-                                            .getRateInterpretation(rating),
-                                        style: prudWidgetStyle.btnTextStyle
-                                            .copyWith(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w500,
-                                                color: prudColorTheme.success),
+                                        text: tabData.getRateInterpretation(rating),
+                                        style: prudWidgetStyle.btnTextStyle.copyWith(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: prudColorTheme.success
+                                        ),
                                       ),
                                       Text(
                                         ".",
-                                        style: prudWidgetStyle.typedTextStyle
-                                            .copyWith(
-                                                color: prudColorTheme.lineC,
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 40),
+                                        style: prudWidgetStyle.typedTextStyle.copyWith(
+                                          color: prudColorTheme.lineC,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 40
+                                        ),
                                       ),
                                       Row(
                                         spacing: 2,
                                         children: [
                                           Text(
                                             "${tabData.getFormattedNumber(widget.channel.voters)}",
-                                            style: prudWidgetStyle.btnTextStyle
-                                                .copyWith(
-                                                    color: prudColorTheme
-                                                        .secondary,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 14),
+                                            style: prudWidgetStyle.btnTextStyle.copyWith(
+                                              color: prudColorTheme.secondary,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 14
+                                            ),
                                           ),
                                           Text(
                                             "Reviews",
-                                            style: prudWidgetStyle.btnTextStyle
-                                                .copyWith(
-                                                    color: prudColorTheme.iconB,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 13),
+                                            style: prudWidgetStyle.btnTextStyle.copyWith(
+                                              color: prudColorTheme.iconB,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 13
+                                            ),
                                           ),
                                         ],
                                       )

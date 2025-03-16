@@ -89,7 +89,7 @@ class PrudVidState extends State<PrudVid> with TickerProviderStateMixin {
             text: "Liked",
           ),
           Tab(
-            icon: Image.asset(prudImages.mySparks, width: 30,),
+            icon: Image.asset(prudImages.videos, width: 30,),
             text: "My Collections",
           ),
           Tab(

@@ -201,7 +201,8 @@ class PrudStudioNotifier extends ChangeNotifier {
 
   Future<void> saveNewVideoData() async {
     await myStorage.addToStore(
-        key: "unfinishedNewVideo", value: newVideo.toJson());
+      key: "unfinishedNewVideo", value: newVideo.toJson()
+    );
   }
 
   void retrieveUnfinishedNewChannelData() {
@@ -321,6 +322,50 @@ class PrudStudioNotifier extends ChangeNotifier {
           chas.add(ChannelVideo.fromJson(item));
         }
         return chas;
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<ChannelVideo?> getVideoById(String vid) async {
+    return await tryAsync("getVideoById", () async {
+      dynamic res = await makeRequest(path: "channels/videos/$vid");
+      if (res != null && res != false) {
+        return ChannelVideo.fromJson(res);
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<VidChannel?> getChannelById(String cid) async {
+    return await tryAsync("getChannelById", () async {
+      dynamic res = await makeRequest(path: "channels/$cid");
+      if (res != null && res != false) {
+        return VidChannel.fromJson(res);
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<VideoThriller?> getThrillerById({required String thrillId}) async {
+    return await tryAsync("getThrillerById", () async {
+      dynamic res = await makeRequest(path: "channels/videos/thrillers/$thrillId", isGet: true);
+      if (res != null && res != false) {
+        VideoThriller.fromJson(res);
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<VideoThriller?> getThrillerByVideoId({required String videoId}) async {
+    return await tryAsync("getThrillerById", () async {
+      dynamic res = await makeRequest(path: "channels/videos/thrillers/video/$videoId", isGet: true);
+      if (res != null && res != false) {
+        VideoThriller.fromJson(res);
       } else {
         return null;
       }
@@ -897,6 +942,13 @@ class PrudStudioNotifier extends ChangeNotifier {
       await getChannelsJoinedFromCache();
       await getChannelsSubscribedFromCache();
       getChannelRefferalsFromCache();
+      /* final receivePort = ReceivePort();
+      await Isolate.spawn(computeStream, (length: 10, port: receivePort.sendPort));
+      receivePort.listen((response) {
+        debugPrint("Isolate Result: $response");
+      }, onError: (err){
+        debugPrint('Error in computeStream: $err');
+      }); */
       if (studio != null && studio!.id != null) {
         wallet = await getWallet(studio!.id!);
         await getAmACreator();

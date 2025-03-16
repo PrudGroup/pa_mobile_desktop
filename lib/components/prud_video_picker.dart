@@ -57,17 +57,13 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
   bool showProgress = false;
   bool saving = false;
   int durationLimitInMinutes = 300;
+  List<String> uploadSha1s = [];
+  bool alreadyUploaded = false;
+  String filename = "prud.mp4";
 
-  int getChunkSize(int fileSize){
-    int chunkSize = (fileSize/100).toInt();
-    if(fileSize < 500000000 && fileSize > 5000000){
-      int checkFactor = (fileSize/5000000).toInt();
-      chunkSize = (fileSize/checkFactor).toInt();
-    }
-    return chunkSize;
-  }
+  int getChunkSize(int fileSize) => 5 * 1024 * 1024;
 
-  Future<void> finishUp(String fileId, List<String> sha1s) async {
+  Future<void> finishUp(String fileId) async {
     if(mounted) {
       setState(() {
         saving = false;
@@ -78,13 +74,15 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
     int tryTimes = 0;
     while(res == null && tryTimes < 5){
       tryTimes++;
-      res = await backblazeNotifier.finishLargeFileUpload(fileId, sha1s);
+      res = await backblazeNotifier.finishLargeFileUpload(fileId, uploadSha1s);
       res ??= await backblazeNotifier.checkIfFileUploaded(fileId);
     }
     if(res != null){
       String? downloadUrl = await iCloud.getFileDownloadUrl(res.fileName);
       if(downloadUrl != null){
+        debugPrint("download_url: $downloadUrl");
         widget.onSaveToCloud?.call(downloadUrl);
+        if(mounted) setState(() => alreadyUploaded = true);
       }else{
         widget.onError?.call('Failed to get downloadUrl');
       }
@@ -94,63 +92,42 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
     if(mounted) setState(() => finishing = false);
   }
 
-  Future<void> save(Stream<Uint8List> stream, String contentType) async {
-    if(mounted) {
-      setState(() {
-        picking = false;
-        saving = true;
-      });
-    }
-    StartLargeFileResponse? res = await backblazeNotifier.startLargeFileCreation(widget.destination, contentType);
-    if(res != null) {
-      UploadVideoStreamArg arg = UploadVideoStreamArg(
-        sendPort: receivePort.sendPort,
-        stream: stream,
-        contentType: contentType,
-        fileDestination: widget.destination,
-        createdFile: res
-      );
-      SaveVideoResponse progress = SaveVideoResponse(
-        totalChunkCount: await stream.length,
-        uploadedChunkCount: 0,
-        percentageUploaded: 0,
-        startedLargeFile: res,
-        uploadedParts: [],
-        remainingChunks: []
-      );
-      FlutterIsolate.spawn(uploadVideoStream, arg);
-      receivePort.listen((resp) async {
-        if(resp != null){
-          UploadPartResponse partRes = UploadPartResponse.fromMap(resp);
-          if(partRes.fileId == res.fileId){
-            progress.uploadedParts.add(partRes);
-            progress.uploadedChunkCount += 1;
-            progress.percentageUploaded =  ((progress.uploadedChunkCount * 100)/progress.totalChunkCount).toInt();
-            Set chunks = Set.from(List<int>.generate(progress.totalChunkCount, (i) => i + 1));
-            Set uploadedChunks = Set.from(progress.uploadedParts.map((ite) => ite.partNumber).toList());
-            progress.remainingChunks = List.from(chunks.difference(uploadedChunks));
-            widget.onProgressChanged(progress);
-            if(mounted){
-              setState(() {
-                uploadProgress = progress.percentageUploaded;
-                allPartsAreSaved = progress.totalChunkCount == progress.uploadedChunkCount? true : false;
-              });
-            }
-            if(allPartsAreSaved) {
-              List<String> uploadSha1s = progress.uploadedParts.map((pat) => pat.contentSha1).toList();
-              await finishUp(res.fileId, uploadSha1s);
-            }
+  Future<void> save(StartLargeFileResponse startedFile, int chunkCount) async {
+    SaveVideoResponse progress = SaveVideoResponse(
+      totalChunkCount: chunkCount,
+      uploadedChunkCount: 0,
+      percentageUploaded: 0,
+      startedLargeFile: startedFile,
+      uploadedParts: [],
+      remainingChunks: []
+    ); 
+    debugPrint("All chunks: $chunkCount");
+    receivePort.listen((resp) async {
+      if(resp != null){
+        UploadPartResponse partRes = UploadPartResponse.fromJson(resp);
+        if(partRes.fileId == startedFile.fileId){
+          progress.uploadedParts.add(partRes);
+          progress.uploadedChunkCount += 1;
+          progress.percentageUploaded =  ((progress.uploadedChunkCount * 100)/progress.totalChunkCount).toInt();
+          Set chunks = Set.from(List<int>.generate(progress.totalChunkCount, (i) => i + 1));
+          Set uploadedChunks = Set.from(progress.uploadedParts.map((ite) => ite.partNumber).toList());
+          progress.remainingChunks = List.from(chunks.difference(uploadedChunks));
+          widget.onProgressChanged(progress);
+          if(mounted){
+            setState(() {
+              uploadProgress = progress.percentageUploaded;
+              allPartsAreSaved = progress.totalChunkCount == progress.uploadedChunkCount? true : false;
+            });
+          }
+          if(allPartsAreSaved) {
+            await finishUp(startedFile.fileId);
           }
         }
-      });
-    }else{
-      if(mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Translate(text: "Unable To Start Video Upload"),
-        ));
-        setState(() => saving = false);
       }
-    }
+    }, onError: (err){
+      debugPrint('Error in save: $err');
+    });
+    
   }
 
   void cancel() {
@@ -169,6 +146,7 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
   void initState(){
     if(mounted) {
       setState(() {
+        alreadyUploaded = widget.alreadyUploaded;
         durationLimitInMinutes = widget.isShort? 3 : 300;
       });
     }
@@ -182,6 +160,19 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
     super.dispose();
   }
 
+  Future<List<Stream<List<int>>>> putFileInChunks(File file) async { 
+    final chunkSize = 5 * 1024 * 1024; // 5 MB 
+    final totalChunks = (file.lengthSync() / chunkSize).ceil(); 
+    List<Stream<List<int>>> chunks = [];
+    for (var i = 0; i < totalChunks; i++) { 
+      final start = i * chunkSize; 
+      final end = (i + 1) * chunkSize; 
+      Stream<List<int>> fileChunk = file.openRead(start, end); 
+      chunks.add(fileChunk); 
+    }
+    return chunks;
+  }
+
   Future<void> pickVideo() async {
     try{
       if(mounted) setState(() => picking = true);
@@ -189,12 +180,14 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
         allowMultiple: false,
         type: FileType.video,
         dialogTitle: "Upload Video",
+        withData: false,
         compressionQuality: 50,
         withReadStream: true,
         // allowedExtensions: ['mov', 'mp4', 'mpeg4', 'avi', "wmv", "mpegps", "flv", "3gpp", "webm", "hevc", "dnxhr", "prores", "cineform", "dnx", "mpg", "fmp4", "matroska"],
       );
       if (result != null && result.files.isNotEmpty) {
         PlatformFile file = result.files.first;
+        debugPrint("Got here: $file.size");
         if(file.size > 0 && file.size <= 10000000000){
           String? filePath = file.path;
           int chunkSize = getChunkSize(file.size);
@@ -217,8 +210,45 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
               MediaType? contentType = mimeType != null? MediaType.parse(mimeType) : null;
               Stream<List<int>>?  fileReadStream = file.readStream;
               if (fileReadStream != null && contentType != null) {
-                Stream<Uint8List> chunkedStream = sliceStream(fileReadStream, chunkSize);
-                await save(chunkedStream, contentType.mimeType);
+                if(mounted) {
+                  setState(() {
+                    filename = file.name;
+                    picking = false;
+                    saving = true;
+                  });
+                }
+                StartLargeFileResponse? res = await backblazeNotifier.startLargeFileCreation("${widget.destination}/$filename", contentType.mimeType);
+                if(res != null) { 
+                  int countPart = 0; 
+                  Stream<Uint8List> chunkedStream = sliceStream(fileReadStream, chunkSize).asBroadcastStream();          
+                  await for(Uint8List part in chunkedStream){
+                    countPart += 1;
+                    String sha1 = "${backblazeNotifier.generateSha1(part)}";
+                    uploadSha1s.add(sha1);
+                    UploadVideoServiceArg arg = UploadVideoServiceArg(
+                      fileId: res.fileId,
+                      part: countPart,
+                      partVideo: part,
+                      sendPort: receivePort.sendPort,
+                      cred: B2Credential(
+                        b2DownloadToken: b2DownloadToken!, 
+                        b2AccToken: b2AccToken!, 
+                        b2AuthKey: b2AuthKey!, 
+                        b2ApiUrl: b2ApiUrl!
+                      ),
+                      sha1: sha1
+                    );
+                    await Isolate.spawn(uploadVideoService, arg, onError: receivePort.sendPort, onExit: receivePort.sendPort);
+                  }
+                  await save(res, countPart);
+                }else{
+                  if(mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Translate(text: "Unable To Save Video"),
+                    ));
+                    setState(() => saving = false);
+                  }
+                }
               }else{
                 if(mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -268,14 +298,14 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
       title: "Select Video",
       child: Column(
         children: [
-          spacer.height,
-          Center(
-            child: widget.alreadyUploaded? Flex(
+          mediumSpacer.height,
+          SizedBox(
+            child: alreadyUploaded? Flex(
               direction: Axis.horizontal,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 SizedBox(
-                  width: 130,
+                  width: 200,
                   child: LinearProgressIndicator(
                     value: 1.0,
                     color: prudColorTheme.buttonB,
@@ -299,12 +329,12 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 if(saving) SizedBox(
-                  width: 130,
+                  width: 200,
                   child: Stack(
                     children: [
                       LinearProgressIndicator(
                         value: (uploadProgress/100).toDouble(),
-                        color: prudColorTheme.buttonB,
+                        // color: prudColorTheme.buttonB,
                         minHeight: 3,
                         backgroundColor: prudColorTheme.lineC,
                         valueColor: AlwaysStoppedAnimation<Color>(prudColorTheme.buttonB),
@@ -329,7 +359,7 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
                                 ),
                                 LoadingComponent(
                                   size: 5,
-                                  isShimmer: true,
+                                  isShimmer: false,
                                   defaultSpinnerType: false,
                                   spinnerColor: prudColorTheme.textB,
                                 )
@@ -351,11 +381,11 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
                   ),
                 ),
                 if(finishing) SizedBox(
-                  width: 130,
+                  width: 200,
                   child: Stack(
                     children: [
                       LinearProgressIndicator(
-                        color: prudColorTheme.buttonB,
+                        // color: prudColorTheme.buttonB,
                         minHeight: 3,
                         backgroundColor: prudColorTheme.lineC,
                         valueColor: AlwaysStoppedAnimation<Color>(prudColorTheme.buttonB),
@@ -380,7 +410,7 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
                                 ),
                                 LoadingComponent(
                                   size: 5,
-                                  isShimmer: true,
+                                  isShimmer: false,
                                   defaultSpinnerType: false,
                                   spinnerColor: prudColorTheme.buttonA,
                                 )

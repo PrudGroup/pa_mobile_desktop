@@ -16,7 +16,7 @@ class NetworkIssueComponent extends StatelessWidget {
       hasPadding: false,
       titleBorderColor: prudColorTheme.bgC,
       child: Container(
-        color: prudColorTheme.primary,
+        color: prudColorTheme.bgF,
         padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
         child: Row(
           children: [

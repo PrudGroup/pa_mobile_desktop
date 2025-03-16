@@ -80,7 +80,7 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
     Menu(title: 'Thrillers', page: const Thrillers(), icon: prudImages.thrillerDark),
     Menu(title: 'PrudVid Studio', page: const PrudVidStudio(), icon: prudImages.prudVidStudio),
     Menu(title: 'PrudStreams Studio', page: const PrudStreamStudio(), icon: prudImages.streamStudioDark),
-    Menu(title: 'PrudPredict', page: const PrudPredict(), icon: prudImages.travel1),
+    Menu(title: 'PrudPredict', page: const PrudPredict(), icon: prudImages.predict),
     Menu( title: 'Influencers', page: const Influencers(), icon: prudImages.influencerFemale),
     Menu(title: 'Settings', page: const Settings(), icon: prudImages.settings),
   ];
@@ -99,10 +99,9 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
 
   @override
   void initState() {
-    debugPrint("DeviceToken: ${myStorage.user?.deviceRegToken}");
-    Future.delayed(Duration.zero, () async {
+    /* Future.delayed(Duration.zero, () async {
       await changeConnectionStatus();
-    });
+    }); */
     carousels.shuffle();
     super.initState();
     _rateMyApp.init();
@@ -112,7 +111,7 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
           await changeConnectionStatus();
           break;
         case InternetStatus.disconnected:
-          if(mounted) setState(() => prudServiceIsAvailable = false);
+          await changeConnectionStatus();
           break;
       }
     });
@@ -255,7 +254,7 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
                           useWrap: true,
                         )),
                     spacer.height,
-                    PrudShowroom(items: iCloud.getShowroom(context)),
+                    PrudShowroom(items: iCloud.getShowroom(context, showroomItems: 5)),
                     largeSpacer.height,
                   ],
                 )),

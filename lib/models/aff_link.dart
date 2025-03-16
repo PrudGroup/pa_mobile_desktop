@@ -24,7 +24,7 @@ class AffLink {
     required this.affDiscountPercentage,
     this.id,
     this.affId,
-    this.totalSparks,
+    this.totalSparks = 0,
     this.shortenerId,
     this.createdAt,
     this.updatedAt,

@@ -28,41 +28,41 @@ class BackblazeNotifier extends ChangeNotifier {
       };
       String path = "b2api/v3/b2_start_large_file";
       dynamic res = await makeRequest(path: path, isGet: false, data: data);
-      debugPrint("File: $res");
-      return res != null? StartLargeFileResponse.fromMap(res) : null;
+      return res != null? StartLargeFileResponse.fromJson(res) : null;
     }, error: (){
       return null;
     });
   }
 
-  Future<UploadUrlForLargeFile?> getUrlToUploadLargeFile(String fileId) async {
+  Future<UploadUrlForLargeFile?> getUrlToUploadLargeFile(String fileId, B2Credential? cred) async {
     return await tryAsync("getUrlToUploadLargeFile", () async {
       String path = "b2api/v3/b2_get_upload_part_url";
-      dynamic res = await makeRequest(path: path, isGet: true, qParam: {"fileId": fileId});
-      return res != null? UploadUrlForLargeFile.fromMap(res) : null;
+      dynamic res = await makeRequest(path: path, isGet: true, qParam: {"fileId": fileId}, cred: cred);
+      return res != null? UploadUrlForLargeFile.fromJson(res) : null;
     }, error: (){
       return null;
     });
   } 
 
   Future<UploadPartResponse?> uploadPartOfLargeFile(
-    UploadUrlForLargeFile uploadLF, int partNumber, Uint8List data,
+    UploadUrlForLargeFile uploadLF, int partNumber, 
+    Uint8List data, B2Credential? cred, String sha1
   ) async {
     return await tryAsync("uploadPartOfLargeFile", () async {
-      String path = "b2api/v3/b2_upload_part";
+      String path = uploadLF.uploadUrl;
       Map<String, dynamic> headers = {
-        "Content-Type": "application/json",
+        "Content-Type": "b2/x-auto",
         "Content-Length": data.lengthInBytes,
         "X-Bz-Part-Number": partNumber,
-        "X-Bz-Content-Sha1": "${generateSha1(data)}",
-        "Authorization": "bearer ${uploadLF.authorizationToken}",
+        "X-Bz-Content-Sha1": sha1,
+        "Authorization": uploadLF.authorizationToken,
       };
       dynamic res = await makeRequest(
         path: path, isGet: false, 
         useDefaultHeaders: false, headers: headers,
-        data: data,
+        data: data, cred: cred, urlIsFull: true
       );
-      return res != null? UploadPartResponse.fromMap(res) : null;
+      return res != null? UploadPartResponse.fromJson(res) : null;
     }, error: (){
       return null;
     });
@@ -79,7 +79,7 @@ class BackblazeNotifier extends ChangeNotifier {
           "partSha1Array": partSha1s,
         }
       );
-      return res != null? LargeFileFinishedResponse.fromMap(res) : null;
+      return res != null? LargeFileFinishedResponse.fromJson(res) : null;
     }, error: (){
       return null;
     });
@@ -93,7 +93,7 @@ class BackblazeNotifier extends ChangeNotifier {
           "fileId": fileId,
         }
       );
-      return res != null && res["fileId"] != null? LargeFileFinishedResponse.fromMap(res) : null;
+      return res != null && res["fileId"] != null? LargeFileFinishedResponse.fromJson(res) : null;
     }, error: (){
       return null;
     });
@@ -101,25 +101,31 @@ class BackblazeNotifier extends ChangeNotifier {
 
   Digest generateSha1(Uint8List data) => sha1.convert(data);
 
-  void setDioHeaders() {
+  void setDioHeaders(B2Credential? cred) {
+    String? token = cred != null? cred.b2AccToken : b2AccToken;
     b2Dio.options.headers.addAll({
       "Content-Type": "application/json",
-      "Authorization": "bearer $b2AccToken",
+      "Authorization": "$token",
     });
   }
 
   Future<dynamic> makeRequest({
-    required String path, bool isGet = true, bool useDefaultHeaders = true, 
-    Map<String, dynamic>? headers, dynamic data, Map<String, dynamic>? qParam
+    required String path, bool isGet = true, bool urlIsFull = false, bool useDefaultHeaders = true, 
+    Map<String, dynamic>? headers, dynamic data, Map<String, dynamic>? qParam,
+    B2Credential? cred 
   }) async {
+    if(cred != null){
+      b2AccToken = cred.b2AccToken;
+      b2ApiUrl = cred.b2ApiUrl;
+    }
     if (b2AccToken != null && b2ApiUrl != null) {
       b2Dio.options.headers.clear();
       if(useDefaultHeaders == true){
-        setDioHeaders();
+        setDioHeaders(cred);
       }else{
         if(headers != null) b2Dio.options.headers.addAll(headers);
       }
-      String url = "$b2ApiUrl/$path";
+      String url = urlIsFull? path : "$b2ApiUrl/$path";
       Response res = isGet? await b2Dio.get(url, queryParameters: qParam) : await b2Dio.post(url, data: data);
       debugPrint("b2 Request: $res");
       return res.data;

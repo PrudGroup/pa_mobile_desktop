@@ -40,7 +40,7 @@ class StudioCreatorsState extends State<StudioCreators> {
       setState(() {
         tabMenus = [
           InnerMenuItem(imageIcon: prudImages.addOperator, title: "Add As Creator", menu: const AddAsCreator()),
-          InnerMenuItem(imageIcon: prudImages.addDriver, title: "Add To Channel", menu: const AddCreatorToChannel()),
+          InnerMenuItem(imageIcon: prudImages.prudVider, title: "Add To Channel", menu: const AddCreatorToChannel()),
           InnerMenuItem(icon: Icons.person_remove, title: "Remove From Channel", menu: const RemoveCreatorFromChannel()),
           InnerMenuItem(icon: Icons.group_rounded, title: "View Creators", menu:  const ViewStudioCreators())
         ];

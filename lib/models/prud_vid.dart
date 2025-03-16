@@ -481,26 +481,27 @@ class VidStream {
   String currency;
   List<StreamChannel>? channels;
 
-  VidStream(
-      {required this.currency,
-      required this.studioId,
-      required this.streamName,
-      required this.miniTargetAge,
-      required this.maxTargetAge,
-      required this.countryCode,
-      required this.logo,
-      required this.displayScreen,
-      required this.description,
-      required this.isGlobal,
-      required this.monthlySubscriptionCost,
-      required this.monthlySubscriptionCostInEuro,
-      this.id,
-      this.createdOn,
-      this.updatedOn,
-      this.verified,
-      this.blocked,
-      this.channels,
-      this.studio});
+  VidStream({
+    required this.currency,
+    required this.studioId,
+    required this.streamName,
+    required this.miniTargetAge,
+    required this.maxTargetAge,
+    required this.countryCode,
+    required this.logo,
+    required this.displayScreen,
+    required this.description,
+    required this.isGlobal,
+    required this.monthlySubscriptionCost,
+    required this.monthlySubscriptionCostInEuro,
+    this.id,
+    this.createdOn,
+    this.updatedOn,
+    this.verified,
+    this.blocked,
+    this.channels,
+    this.studio
+  });
 
   Map<String, dynamic> toJson() {
     return {
@@ -2458,8 +2459,8 @@ class PendingNewVideo {
       videoDuration: json["videoDuration"] != null? PrudVidDuration.fromJson(json["videoDuration"]) : null,
       movieDetailId: json["movieDetailId"],
       musicDetailId: json["musicDetailId"],
-      saveVideoProgress: json["saveVideoProgress"],
-      saveThrillerProgress: json["saveThrillerProgress"],
+      saveVideoProgress: json["saveVideoProgress"] != null? SaveVideoResponse.fromJson(json["saveVideoProgress"]) : null,
+      saveThrillerProgress: json["saveThrillerProgress"] != null? SaveVideoResponse.fromJson(json["saveThrillerProgress"]) : null,
       tags: json["tags"],
       scheduledFor: json["scheduledFor"] != null? DateTime.parse(json["scheduledFor"]) : null,
       snippets: json["snippets"]?.map((itm) => VideoSnippet.fromJson(itm)).toList(),

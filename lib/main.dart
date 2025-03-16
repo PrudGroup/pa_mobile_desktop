@@ -139,7 +139,7 @@ class MyApp extends StatelessWidget {
                         size: 10.0,
                         isShimmer: false,
                         defaultSpinnerType: false,
-                        spinnerColor: prudColorTheme.textD,
+                        spinnerColor: prudColorTheme.bgA,
                       ),
                     ),
                   ),

@@ -287,13 +287,11 @@ class ICloud extends ChangeNotifier {
       if (minutes > 20) {
         affAuthToken = null;
       }
-      debugPrint("minutes: $minutes : auth: $affAuthToken");
     }
     if (affAuthToken != null) {
       loggedIn = true;
     } else {
       List logged = await logAffiliateIn(url);
-      debugPrint("logged: $logged");
       loggedIn = logged[1];
       if (loggedIn) {
         affAuthToken = 'Bearer PrudApp ${logged[0]["authToken"]}';
@@ -314,8 +312,7 @@ class ICloud extends ChangeNotifier {
     List<Widget> showroom = [
       InkWell(
         onTap: () => iCloud.goto(context, const PrudVidStudio()),
-        child: PrudContainer(
-            hasPadding: false, child: Image.asset(prudImages.front1)),
+        child: PrudContainer(hasPadding: false, child: Image.asset(prudImages.front1)),
       ),
       InkWell(
         onTap: () => iCloud.goto(context, const Ads()),
@@ -419,6 +416,60 @@ class ICloud extends ChangeNotifier {
         child: PrudContainer(
           hasPadding: false,
           child: Image.asset(prudImages.front7),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const PrudPredict()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          title: "Predit & Win",
+          child: Image.asset(prudImages.front16),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const PrudPredict()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          title: "PrudPredict",
+          child: Image.asset(prudImages.front17),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const PrudPredict()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          title: "Fun Life",
+          child: Image.asset(prudImages.front18),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const PrudPredict()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          title: "Win Big",
+          child: Image.asset(prudImages.front19),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const PrudPredict()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          title: "Shopping Spray",
+          child: Image.asset(prudImages.front20),
+        ),
+      ),
+      InkWell(
+        onTap: () => iCloud.goto(context, const PrudPredict()),
+        child: PrudContainer(
+          hasPadding: false,
+          hasTitle: true,
+          title: "Power To Purchase",
+          child: Image.asset(prudImages.front21),
         ),
       ),
     ];
@@ -644,18 +695,16 @@ String? b2DownloadToken;
 String? b2AccToken;
 String? b2AuthKey;
 String? b2ApiUrl;
+const String prudWeb = "https://www.prudapp.com/";
+const String shareImageUrl = "https://shorturl.at/uMOHL";
 const bool isProduction = Constants.envType == "production";
 const String prudApiUrl = Constants.prudApiUrl;
 const String localApiUrl = Constants.localApiUrl;
 const String prudApiKey = Constants.prudApiKey;
 const String apiEndPoint = isProduction ? prudApiUrl : localApiUrl;
 const String waveApiUrl = "https://api.flutterwave.com/v3";
-const String paystackSecret = Constants.apiStatues == 'production'
-    ? Constants.paystackSecretLive
-    : Constants.paystackSecretTest;
-const String paystackPublic = Constants.apiStatues == 'production'
-    ? Constants.paystackPublicLive
-    : Constants.paystackPublicTest;
+const String paystackSecret = Constants.apiStatues == 'production'? Constants.paystackSecretLive : Constants.paystackSecretTest;
+const String paystackPublic = Constants.apiStatues == 'production'? Constants.paystackPublicLive : Constants.paystackPublicTest;
 const String paystackCallUrl = "$prudApiUrl/payments/paystack_call";
 const String paystackHook = "$prudApiUrl/payments/paystack_hook";
 const double waveVat = 0.07;
@@ -667,9 +716,7 @@ const referralCommission = 0.25;
 const merchantReferralCommission = 0.25;
 DateTime? lastAuthTokenGottenAt;
 final ExportDelegate exportDelegate = ExportDelegate(
-  options: const ExportOptions(
-      pageFormatOptions:
-          PageFormatOptions(pageFormat: PageFormat.a4, marginAll: 10.0)),
+  options: const ExportOptions(pageFormatOptions: PageFormatOptions(pageFormat: PageFormat.a4, marginAll: 10.0)),
   ttfFonts: {
     'Autobus': 'assets/fonts/Autobus.ttf',
     'Lato-Italic': 'assets/fonts/Lato-Italic.ttf',

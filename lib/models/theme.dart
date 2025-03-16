@@ -13,6 +13,7 @@ class ColorTheme {
   final Color bgC;
   final Color bgD;
   final Color bgE;
+  final Color bgF;
   final Color textA;
   final Color textB;
   final Color textC;
@@ -43,6 +44,7 @@ class ColorTheme {
     required this.bgC,
     required this.bgD,
     required this.bgE,
+    required this.bgF,
     required this.textA,
     required this.textB,
     required this.textC,
@@ -236,6 +238,7 @@ ColorTheme prudColorTheme = const ColorTheme(
     bgC: Color(0xffF2F4F7),
     bgD: Color(0xffEAECF0),
     bgE: Colors.transparent,
+    bgF: Color(0xff474747),
     textA: Color(0xff292929),
     textB: Color(0xff595757),
     textC: Color(0xffFFFFFF),
