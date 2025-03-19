@@ -22,6 +22,22 @@ class VideoUploadsState extends State<VideoUploads> {
   Map<String, dynamic>? result;
   bool shouldReset = false;
 
+  @override
+  void initState(){
+    if(mounted){
+      setState((){
+        result = {
+          "videoUrl": prudStudioNotifier.newVideo.videoType,
+          "thrillerVideoUrl": prudStudioNotifier.newVideo.thriller?.videoUrl,
+          "videoThumbnail": prudStudioNotifier.newVideo.videoThumbnail,
+          "videoLocalFile": prudStudioNotifier.newVideo.videoLocalFile,
+          "thrillerLocalFile": prudStudioNotifier.newVideo.thrillerLocalFile,
+        };
+      });
+    }
+    super.initState();
+  }
+
   void setVideoProgressChanged(SaveVideoResponse progress){
     if(mounted){
       setState(() {
@@ -92,6 +108,18 @@ class VideoUploadsState extends State<VideoUploads> {
     }
   }
 
+  void setThrillerFile(String url){
+    if(mounted){
+      setState(() {
+        prudStudioNotifier.newVideo.thrillerLocalFile = File(url);
+        result ??= {};
+        result!["thrillerLocalFile"] = File(url);
+      });
+      prudStudioNotifier.saveNewVideoData();
+    }
+  }
+
+
   void setThumbnailUrl(String? url){
     if(mounted){
       setState(() {
@@ -148,6 +176,9 @@ class VideoUploadsState extends State<VideoUploads> {
               saveToCloud: true,
               onVideoPicked: setVideoFile,
               alreadyUploaded: prudStudioNotifier.newVideo.videoUrl != null,
+              hasPartialUpload: prudStudioNotifier.newVideo.saveVideoProgress != null,
+              uploadedFilePath: prudStudioNotifier.newVideo.videoLocalFile?.path,
+              savedProgress: prudStudioNotifier.newVideo.saveVideoProgress,
             ),
             Divider(
               color: prudColorTheme.lineC,
@@ -172,7 +203,11 @@ class VideoUploadsState extends State<VideoUploads> {
               onProgressChanged: setThrillerProgressChanged,
               destination: "channels/${prudStudioNotifier.newVideo.channelId}/thrillers",
               saveToCloud: true,
+              onVideoPicked: setThrillerFile,
               alreadyUploaded: prudStudioNotifier.newVideo.thriller?.videoUrl != null && prudStudioNotifier.newVideo.thriller!.videoUrl.isNotEmpty,
+              hasPartialUpload: prudStudioNotifier.newVideo.saveThrillerProgress != null,
+              uploadedFilePath: prudStudioNotifier.newVideo.thrillerLocalFile?.path,
+              savedProgress: prudStudioNotifier.newVideo.saveThrillerProgress,
             ),
             Divider(
               color: prudColorTheme.lineC,
@@ -191,10 +226,11 @@ class VideoUploadsState extends State<VideoUploads> {
             ),
             spacer.height,
             PrudImagePicker(
-              destination: "studio/${prudStudioNotifier.studio!.id}/images/ads",
+              destination: "channels/${prudStudioNotifier.newVideo.channelId}/thumbnails",
               saveToCloud: true,
               reset: shouldReset,
               onSaveToCloud: setThumbnailUrl,
+              existingUrl: prudStudioNotifier.newVideo.videoThumbnail,
               onError: (err) {
                 debugPrint("Picker Error: $err");
               },
@@ -220,7 +256,8 @@ class VideoUploadsState extends State<VideoUploads> {
                   isPill: false
                 ),
               ],
-            )
+            ),
+            mediumSpacer.height,
           ],
         ),
       ),

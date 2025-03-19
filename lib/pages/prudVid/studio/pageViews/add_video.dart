@@ -138,24 +138,30 @@ class AddVideoState extends State<AddVideo> {
         break;
       }
       case AddVideoStep.live: {
+        step = AddVideoStep.live;
         if(returnedData != null){
           prudStudioNotifier.newVideo.liveStartsOn = returnedData;
+          step = AddVideoStep.uploads;
         }
-        step = AddVideoStep.uploads;
         break;
       }
       case AddVideoStep.uploads: {
+        step = AddVideoStep.uploads;
         if(returnedData != null && returnedData["videoUrl"] != null  && returnedData["thrillerVideoUrl"] != null  && returnedData["videoThumbnail"] != null){
           prudStudioNotifier.newVideo.videoUrl = returnedData["videoUrl"];
           prudStudioNotifier.newVideo.thriller = VideoThriller(videoId: "", videoUrl: returnedData["thrillerVideoUrl"]);
           prudStudioNotifier.newVideo.videoThumbnail = returnedData["videoThumbnail"];
           prudStudioNotifier.newVideo.videoLocalFile = returnedData["videoLocalFile"];
+          prudStudioNotifier.newVideo.thrillerLocalFile = returnedData["thrillerLocalFile"];
           step = AddVideoStep.titles;
         }
         break;
       }
       case AddVideoStep.titles: {
+        step = AddVideoStep.titles;
+        debugPrint("Things go here A");
         if(returnedData != null && returnedData["title"] != null && returnedData["description"] != null) {
+          debugPrint("Things go here B");
           prudStudioNotifier.newVideo.title = returnedData["title"];
           prudStudioNotifier.newVideo.description = returnedData["description"];
           step = AddVideoStep.target;
@@ -163,6 +169,7 @@ class AddVideoState extends State<AddVideo> {
         break;
       }
       case AddVideoStep.target: {
+        step = AddVideoStep.target;
         if(
           returnedData != null && returnedData["target"] != null && 
           returnedData["videoTags"] != null && returnedData["videoTags"]!.isNotEmpty && 
@@ -180,6 +187,7 @@ class AddVideoState extends State<AddVideo> {
         break;
       }
       case AddVideoStep.scheduled: {
+        step = AddVideoStep.scheduled;
         if(returnedData != null && returnedData["scheduledFor"] != null && returnedData["timezone"] != null) {
           prudStudioNotifier.newVideo.scheduledFor = returnedData["scheduledFor"];
           prudStudioNotifier.newVideo.timezone = returnedData["timezone"];
@@ -188,6 +196,7 @@ class AddVideoState extends State<AddVideo> {
         break;
       }
       case AddVideoStep.snippets: {
+        step = AddVideoStep.snippets;
         if(returnedData["snippets"] != null){
           prudStudioNotifier.newVideo.snippets = returnedData["snippets"];
           if(["movies", "music"].contains(widget.channel.category.toLowerCase())){
@@ -199,6 +208,7 @@ class AddVideoState extends State<AddVideo> {
         break;
       }
       case AddVideoStep.movie: {
+        step = AddVideoStep.movie;
         if(returnedData != null && returnedData["detail"] != null) {
           VideoMovieDetail mov = returnedData["detail"];
           prudStudioNotifier.newVideo.movieDetailId = mov.id;
@@ -209,6 +219,7 @@ class AddVideoState extends State<AddVideo> {
         break;
       }
       case AddVideoStep.music: {
+        step = AddVideoStep.music;
         if(returnedData != null && returnedData["detail"] != null) {
           VideoMusicDetail mus = returnedData["detail"];
           prudStudioNotifier.newVideo.musicDetailId = mus.id;
@@ -219,6 +230,7 @@ class AddVideoState extends State<AddVideo> {
         break;
       }
       case AddVideoStep.cost: {
+        step = AddVideoStep.cost;
         if(mounted){
           setState(() {
             succeeded = returnedData != null && returnedData == true;

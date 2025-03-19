@@ -338,13 +338,14 @@ class TabData extends ChangeNotifier {
   }
 
   String toTitleCaseWithoutSpace(String str) {
-    return str
-        .replaceAllMapped(
-        RegExp(
-            r'[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+'),
-            (Match m) =>
-        "${m[0]?[0].toUpperCase()}${m[0]?.substring(1).toLowerCase()}")
-        .replaceAll(RegExp(r'(_|-|" ")+'), '');
+    return str.replaceAllMapped(
+        RegExp(r'[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+'),
+        (Match m) => "${m[0]?[0].toUpperCase()}${m[0]?.substring(1).toLowerCase()}"
+    ).replaceAll(RegExp(r'(_|-|" ")+'), '');
+  }
+
+  String removeSpace(String txt){
+    return txt.replaceAll(RegExp(r'(_|-|" ")+'), '');
   }
 
   String shortenStringWithPeriod(String str, {int length = 30, bool makeTitleCased = true}){

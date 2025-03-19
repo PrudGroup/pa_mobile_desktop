@@ -110,7 +110,6 @@ dependencies:
   textfield_tags: ^3.0.1
   video_trimmer: ^4.0.2
   intl: any
-  flutter_hooks: ^0.21.2
   
 dependency_overrides: 
   intl: ">=0.20.2"

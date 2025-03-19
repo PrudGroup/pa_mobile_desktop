@@ -17,6 +17,7 @@ import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/backblaze_notifier.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
+import 'package:prudapp/singletons/tab_data.dart';
 import 'package:video_player/video_player.dart';
 
 class PrudVideoPicker extends StatefulWidget {
@@ -29,6 +30,9 @@ class PrudVideoPicker extends StatefulWidget {
   final bool isShort;
   final bool alreadyUploaded;
   final Function(String)? onVideoPicked;
+  final bool hasPartialUpload;
+  final String? uploadedFilePath;
+  final SaveVideoResponse? savedProgress;
 
   const PrudVideoPicker({
     super.key, 
@@ -41,6 +45,9 @@ class PrudVideoPicker extends StatefulWidget {
     this.onError,
     this.onVideoPicked,
     this.alreadyUploaded = false,
+    this.hasPartialUpload = false,
+    this.uploadedFilePath,
+    this.savedProgress,
   });
 
   @override
@@ -63,6 +70,104 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
 
   int getChunkSize(int fileSize) => 5 * 1024 * 1024;
 
+  Future<void> continueUpload() async {
+    if(widget.uploadedFilePath != null && widget.savedProgress != null){
+      await tryAsync("continueUpload", () async {
+        if(mounted){
+          setState(() {
+            uploadProgress = widget.savedProgress!.percentageUploaded;
+            showProgress = true;
+            saving = true;
+          });
+        }
+        final file = File(widget.uploadedFilePath!);
+        if(await file.exists()){
+          PlatformFile fileP = PlatformFile(
+            path: file.path, name: widget.savedProgress!.startedLargeFile.fileName, 
+            size: file.lengthSync()
+          );
+          Stream<List<int>>?  fileReadStream = fileP.readStream;
+          if (fileReadStream != null) {
+            if(mounted) setState(() => filename = tabData.removeSpace(fileP.name));
+            StartLargeFileResponse? res = widget.savedProgress?.startedLargeFile;
+            if(res != null) { 
+              int countPart = 0; 
+              int chunkSize = getChunkSize(fileP.size);
+              Stream<Uint8List> chunkedStream = sliceStream(fileReadStream, chunkSize).asBroadcastStream();          
+              if(await chunkedStream.length == widget.savedProgress!.totalChunkCount){
+                await for(Uint8List part in chunkedStream){
+                  countPart += 1;
+                  if(widget.savedProgress!.remainingChunks.contains(countPart)){
+                    String sha1 = "${backblazeNotifier.generateSha1(part)}";
+                    uploadSha1s.add(sha1);
+                    UploadVideoServiceArg arg = UploadVideoServiceArg(
+                      fileId: res.fileId,
+                      part: countPart,
+                      partVideo: part,
+                      sendPort: receivePort.sendPort,
+                      cred: B2Credential(
+                        b2DownloadToken: b2DownloadToken!, 
+                        b2AccToken: b2AccToken!, 
+                        b2AuthKey: b2AuthKey!, 
+                        b2ApiUrl: b2ApiUrl!
+                      ),
+                      sha1: sha1
+                    );
+                    await Isolate.spawn(uploadVideoService, arg, onError: receivePort.sendPort, onExit: receivePort.sendPort);
+                  }
+                }
+                await save(
+                  res, countPart, 
+                  uploadChunkCount: widget.savedProgress!.uploadedChunkCount,
+                  percentageUploaded: widget.savedProgress!.percentageUploaded,
+                  uploadedParts: widget.savedProgress!.uploadedParts,
+                  remainingChunks: widget.savedProgress!.remainingChunks,
+                );
+              }else{
+                if(mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Translate(text: "Unable assert chunks."),
+                  ));
+                  setState(() => saving = false);
+                }
+              }
+            }else{
+              if(mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Translate(text: "Unable To Save Video"),
+                ));
+                setState(() => saving = false);
+              }
+            }
+          }else{
+            if(mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Translate(text: "Failed to read file"),
+              ));
+              setState(() => picking = false);
+            }
+          }
+        }else{
+          if(mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Translate(text: "File no longer Exist."),
+            ));
+            setState(() => saving = false);
+            if(widget.onError != null) widget.onError!("The Video has been deleted");
+          }
+        }
+      }, error: (){
+        if(mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Translate(text: "Unable To Continue Saving Video"),
+          ));
+          setState(() => saving = false);
+          if(widget.onError != null) widget.onError!("Unknown Error.");
+        }
+      });
+    }
+  }
+  
   Future<void> finishUp(String fileId) async {
     if(mounted) {
       setState(() {
@@ -92,14 +197,19 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
     if(mounted) setState(() => finishing = false);
   }
 
-  Future<void> save(StartLargeFileResponse startedFile, int chunkCount) async {
+  Future<void> save(StartLargeFileResponse startedFile, int chunkCount, {
+    int uploadChunkCount = 0,
+    int percentageUploaded = 0,
+    List<UploadPartResponse>? uploadedParts,
+    List<int>? remainingChunks,
+  }) async {
     SaveVideoResponse progress = SaveVideoResponse(
       totalChunkCount: chunkCount,
-      uploadedChunkCount: 0,
-      percentageUploaded: 0,
+      uploadedChunkCount: uploadChunkCount,
+      percentageUploaded: percentageUploaded,
       startedLargeFile: startedFile,
-      uploadedParts: [],
-      remainingChunks: []
+      uploadedParts: uploadedParts?? [],
+      remainingChunks: remainingChunks?? []
     ); 
     debugPrint("All chunks: $chunkCount");
     receivePort.listen((resp) async {
@@ -150,6 +260,9 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
         durationLimitInMinutes = widget.isShort? 3 : 300;
       });
     }
+    Future.delayed(Duration.zero, () async {
+      if(widget.hasPartialUpload) await continueUpload();
+    });
     super.initState();
   }
 
@@ -212,7 +325,7 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
               if (fileReadStream != null && contentType != null) {
                 if(mounted) {
                   setState(() {
-                    filename = file.name;
+                    filename = tabData.removeSpace(file.name);
                     picking = false;
                     saving = true;
                   });

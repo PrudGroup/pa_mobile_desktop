@@ -33,11 +33,11 @@ class VideoTitlesState extends State<VideoTitles> {
     if(mounted){
       setState(() {
         result = {
-          "title": title,
-          "description": description,
+          "title": prudStudioNotifier.newVideo.title,
+          "description": prudStudioNotifier.newVideo.description,
         };
       });
-      txtCtrl.text = "$description";
+      txtCtrl.text = description?? '';
     }
     super.initState();
   }
@@ -112,8 +112,13 @@ class VideoTitlesState extends State<VideoTitles> {
                       if(mounted) {
                         setState(() { 
                           title = value?.trim();
-                          result?["title"] = title;
+                          result = {
+                            "title": title,
+                            "description": description,
+                          };
+                          prudStudioNotifier.newVideo.title = title;
                         });
+                        prudStudioNotifier.saveNewVideoData();
                       }
                     },
                     valueTransformer: (text) => num.tryParse(text!),
@@ -179,7 +184,13 @@ class VideoTitlesState extends State<VideoTitles> {
                           setState(() {
                             description = valueDesc.trim();
                             presentWords = tabData.countWordsInString(description!);
+                            result = {
+                              "title": title,
+                              "description": description,
+                            };
+                            prudStudioNotifier.newVideo.description = description;
                           });
+                          prudStudioNotifier.saveNewVideoData();
                         }
                       },
                       valueTransformer: (text) => num.tryParse(text!),
@@ -209,7 +220,7 @@ class VideoTitlesState extends State<VideoTitles> {
                   makeLight: true,
                   isPill: false
                 ),
-                prudWidgetStyle.getShortButton(
+                if(presentWords >= 30 && presentWords <= 100) prudWidgetStyle.getShortButton(
                   onPressed: () => widget.onCompleted(result), 
                   text: "Next",
                   makeLight: false,

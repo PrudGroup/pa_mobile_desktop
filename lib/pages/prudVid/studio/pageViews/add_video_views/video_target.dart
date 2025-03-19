@@ -26,7 +26,14 @@ class VideoTargetState extends State<VideoTarget> {
   String target = prudStudioNotifier.newVideo.targetAudience?? "General";
   List<String>? videoTags = prudStudioNotifier.newVideo.tags;
   List<String>? thrillerTags = prudStudioNotifier.newVideo.thriller?.tags;
+  late double _distanceToField;
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _distanceToField = MediaQuery.of(context).size.width;
+  }
+  
   @override
   void initState() {
     if(mounted) {
@@ -34,7 +41,9 @@ class VideoTargetState extends State<VideoTarget> {
         videoTags??= prudStudioNotifier.newVideo.title?.split(" ");
         thrillerTags??= videoTags;
         result = {"target": target, "videoTags": videoTags, "thrillerTags": thrillerTags};
+        prudStudioNotifier.newVideo.targetAudience = target;
       });
+      prudStudioNotifier.saveNewVideoData();
     }
     super.initState();
   }
@@ -106,7 +115,9 @@ class VideoTargetState extends State<VideoTarget> {
                             setState(() { 
                               target = selected;
                               result?["target"] = target;
+                              prudStudioNotifier.newVideo.targetAudience = target;
                             });
+                            prudStudioNotifier.saveNewVideoData();
                           }
                         });
                       },
@@ -157,32 +168,70 @@ class VideoTargetState extends State<VideoTarget> {
                     textSeparators: const [' '],
                     validator: (String tag){
                       if (tag.toLowerCase().containsAny(forbiddenTags)){
-                        return 'Sex not allowed';
+                        return 'Tag not allowed';
+                      } else if (tagCtrl.getTags!.contains(tag)) {
+                        return 'You\'ve already entered that';
                       }
                       return null;
                     },
                     inputFieldBuilder: (context, inputFieldValues){
-                      return FormBuilderTextField(
+                      return TextField(
                         controller: inputFieldValues.textEditingController,
                         focusNode: inputFieldValues.focusNode,
-                        name: 'Video Tags',
-                        enableInteractiveSelection: true,
-                        onTap: (){
-                          inputFieldValues.focusNode.requestFocus();
-                        },
+                        onTap: () => tagCtrl.getFocusNode?.requestFocus(),
                         style: tabData.npStyle,
                         keyboardType: TextInputType.text,
-                        decoration: getDeco(
-                          "Tags",
-                          onlyBottomBorder: true,
-                          borderColor: prudColorTheme.lineC
+                        decoration: getDeco("Tags", onlyBottomBorder: true, borderColor: prudColorTheme.lineC).copyWith(
+                          helperText: 'Enter language...',
+                          helperStyle: TextStyle(color: prudColorTheme.textD,),
+                          hintText: inputFieldValues.tags.isNotEmpty? '' : "Enter tag...",
+                          errorText: inputFieldValues.error,
+                          prefixIconConstraints: BoxConstraints(maxWidth: _distanceToField * 0.8),
+                          prefixIcon: inputFieldValues.tags.isNotEmpty? SingleChildScrollView(
+                            controller: inputFieldValues.tagScrollController,
+                            scrollDirection: Axis.vertical,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 8, bottom: 8, left: 8),
+                              child: Wrap(
+                                runSpacing: 4.0,
+                                spacing: 4.0,
+                                children: inputFieldValues.tags.map((String tag) {
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20.0),
+                                      color: prudColorTheme.lineC,
+                                    ),
+                                    margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        InkWell(
+                                          child: Text('#$tag', style: TextStyle(color: prudColorTheme.textB),),
+                                          onTap: () {debugPrint("selected Tag: #$tag");},
+                                        ),
+                                        const SizedBox(width: 4.0),
+                                        InkWell(
+                                          child: Icon(Icons.cancel, size: 14.0, color: prudColorTheme.success,),
+                                          onTap: () => inputFieldValues.onTagRemoved(tag),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList()
+                              ),
+                            ),
+                          ) : null,
                         ),
                         onChanged: (String? valueDesc){
                           if(mounted && valueDesc != null) {
                             setState(() {
                               videoTags = valueDesc.trim().split(" ");
                               result?["videoTags"] = videoTags;
+                              prudStudioNotifier.newVideo.tags = videoTags;
                             });
+                            prudStudioNotifier.saveNewVideoData();
                           }
                         },
                       );
@@ -218,34 +267,70 @@ class VideoTargetState extends State<VideoTarget> {
                     textSeparators: const [' '],
                     validator: (String tag){
                       if (tag.toLowerCase().containsAny(forbiddenTags)){
-                        return 'Sex not allowed';
+                        return 'tag not allowed';
+                      } else if (tagCtrl1.getTags!.contains(tag)) {
+                        return 'You\'ve already entered that';
                       }
                       return null;
                     },
                     inputFieldBuilder: (context, inputFieldValues){
-                      return FormBuilderTextField(
+                      return TextField(
                         controller: inputFieldValues.textEditingController,
                         focusNode: inputFieldValues.focusNode,
-                        name: 'Thriller Tags',
-                        minLines: 8,
-                        maxLines: 12,
-                        enableInteractiveSelection: true,
-                        onTap: (){
-                          inputFieldValues.focusNode.requestFocus();
-                        },
+                        onTap: () => tagCtrl1.getFocusNode?.requestFocus(),
                         style: tabData.npStyle,
                         keyboardType: TextInputType.text,
-                        decoration: getDeco(
-                          "Tags",
-                          onlyBottomBorder: true,
-                          borderColor: prudColorTheme.lineC
+                        decoration: getDeco("Thriller Tags", onlyBottomBorder: true, borderColor: prudColorTheme.lineC).copyWith(
+                          helperText: 'Enter Thriller...',
+                          helperStyle: TextStyle(color: prudColorTheme.textD,),
+                          hintText: inputFieldValues.tags.isNotEmpty? '' : "Enter tag...",
+                          errorText: inputFieldValues.error,
+                          prefixIconConstraints: BoxConstraints(maxWidth: _distanceToField * 0.8),
+                          prefixIcon: inputFieldValues.tags.isNotEmpty? SingleChildScrollView(
+                            controller: inputFieldValues.tagScrollController,
+                            scrollDirection: Axis.vertical,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 8, bottom: 8, left: 8),
+                              child: Wrap(
+                                runSpacing: 4.0,
+                                spacing: 4.0,
+                                children: inputFieldValues.tags.map((String tag) {
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20.0),
+                                      color: prudColorTheme.lineC,
+                                    ),
+                                    margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        InkWell(
+                                          child: Text('#$tag', style: TextStyle(color: prudColorTheme.textB),),
+                                          onTap: () {debugPrint("selected Tag: #$tag");},
+                                        ),
+                                        const SizedBox(width: 4.0),
+                                        InkWell(
+                                          child: Icon(Icons.cancel, size: 14.0, color: prudColorTheme.success,),
+                                          onTap: () => inputFieldValues.onTagRemoved(tag),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList()
+                              ),
+                            ),
+                          ) : null,
                         ),
                         onChanged: (String? valueDesc){
                           if(mounted && valueDesc != null) {
                             setState(() {
-                              thrillerTags = valueDesc.trim().split(" ");
+                              videoTags = valueDesc.trim().split(" ");
                               result?["thrillerTags"] = thrillerTags;
+                              prudStudioNotifier.newVideo.thriller!.tags = thrillerTags;
                             });
+                            prudStudioNotifier.saveNewVideoData();
                           }
                         },
                       );

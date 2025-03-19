@@ -2363,6 +2363,7 @@ class PendingNewVideo {
   bool hasSaveThriller;
   bool hasSavedSponsored;
   File? videoLocalFile;
+  File? thrillerLocalFile;
   
 
   PendingNewVideo({
@@ -2400,6 +2401,7 @@ class PendingNewVideo {
     this.saveVideoProgress,
     this.saveThrillerProgress,
     this.videoLocalFile,
+    this.thrillerLocalFile,
   });
 
   Map<String, dynamic> toJson() {
@@ -2438,6 +2440,7 @@ class PendingNewVideo {
       "hasSaveThriller": hasSaveThriller,
       "hasSavedSponsored": hasSavedSponsored,
       if(videoLocalFile != null) "videoLocalFile": videoLocalFile!.path,
+      if(thrillerLocalFile != null) "thrillerLocalFile": thrillerLocalFile!.path,
     };
   }
 
@@ -2477,6 +2480,7 @@ class PendingNewVideo {
       hasSaveThriller: json["hasSaveThriller"],
       hasSavedSponsored: json["hasSavedSponsored"],
       videoLocalFile: json["videoLocalFile"] != null? File(json["videoLocalFile"]) : null,
+      thrillerLocalFile: json["thrillerLocalFile"] != null? File(json["thrillerLocalFile"]) : null,
     );
   }
 }
