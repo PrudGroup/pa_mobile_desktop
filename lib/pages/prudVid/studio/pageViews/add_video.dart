@@ -15,6 +15,7 @@ import 'package:prudapp/pages/prudVid/studio/pageViews/add_video_views/video_tar
 import 'package:prudapp/pages/prudVid/studio/pageViews/add_video_views/video_titles.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/add_video_views/video_uploads.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
+import 'package:prudapp/singletons/settings_notifier.dart';
 
     
 class AddVideo extends StatefulWidget {
@@ -38,6 +39,8 @@ class AddVideoState extends State<AddVideo> {
 
   @override
   void initState() {
+    localSettings.updateLastRoute(Uri(path: '/prud_studio/add_new_video').toString());
+    localSettings.updateLastRouteData({"channel": widget.channel.toJson(), "creatorId": widget.creatorId});
     if(mounted) {
       setState(() {
         prudStudioNotifier.newVideo.videoType = widget.channel.category;

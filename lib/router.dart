@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/pages/ads/ads.dart';
 import 'package:prudapp/pages/ads/ads_details.dart';
 import 'package:prudapp/pages/home/home.dart';
@@ -13,14 +14,17 @@ import 'package:prudapp/pages/prudVid/prud_movies.dart';
 import 'package:prudapp/pages/prudVid/prud_music.dart';
 import 'package:prudapp/pages/prudVid/prud_news.dart';
 import 'package:prudapp/pages/prudVid/prud_vid.dart';
+import 'package:prudapp/pages/prudVid/prud_vid_studio.dart';
+import 'package:prudapp/pages/prudVid/studio/pageViews/add_video.dart';
 import 'package:prudapp/pages/prudVid/tabs/views/channel_detail.dart';
 import 'package:prudapp/pages/prudVid/tabs/views/video_detail.dart';
 import 'package:prudapp/pages/prudVid/thriller_views/thriller_detail.dart';
 import 'package:prudapp/pages/prudVid/thrillers.dart';
+import 'package:prudapp/singletons/settings_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 
 final GoRouter prudRouter = GoRouter(
-  initialLocation: '/',
+  initialLocation: localSettings.returnToLastPage(),
   debugLogDiagnostics: true,
   routes: <RouteBase>[
     GoRoute(
@@ -218,6 +222,42 @@ final GoRouter prudRouter = GoRouter(
         if(linkId != null) myStorage.saveGeneralReferral(linkId);
         return PrudVid(affLinkId: linkId,);
       },
+    ),
+    GoRoute(
+      path: '/prud_studio',
+      name: 'prud_studio',
+      builder: (BuildContext context, GoRouterState state) {
+        String? linkId = state.uri.queryParameters['link_id'];
+        String? tab = state.uri.queryParameters["tab"];
+        localSettings.updateLastRoute(state.uri.toString());
+        if(tab != null) {
+          return PrudVidStudio(affLinkId: linkId, tab: int.parse(tab),);
+        }else{
+          return PrudVidStudio(affLinkId: linkId);
+        }
+      },
+      routes: <RouteBase>[
+        GoRoute(
+          path: '/add_new_video',
+          name: 'add_new_video',
+          builder: (BuildContext context, GoRouterState state) {
+            dynamic data = state.extra;
+            if(data != null){
+              localSettings.updateLastRoute(state.uri.toString());
+              localSettings.updateLastRouteData(data);
+            }else{
+              data = {
+                "channel": localSettings.lastRouteData?["channel"],
+                "creatorId": localSettings.lastRouteData?["creatorId"],
+              };
+            }
+            return AddVideo(
+              channel: VidChannel.fromJson(data["channel"]),
+              creatorId: data["creatorId"], 
+            );
+          },
+        )
+      ]
     ),
   ],
 );

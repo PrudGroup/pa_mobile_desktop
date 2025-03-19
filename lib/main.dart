@@ -14,6 +14,7 @@ import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/influencer_notifier.dart';
 import 'package:prudapp/singletons/prudio_client.dart';
+import 'package:prudapp/singletons/settings_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:get_storage/get_storage.dart';
@@ -57,6 +58,7 @@ void main() async {
   await prudioNotifier.connect();
   await beneficiaryNotifier.initBens();
   await busNotifier.initBus();
+  await localSettings.init();
   await messenger.setAutoInitEnabled(true);
   myStorage.setWindowSize(size: const Size(400, 700));
 

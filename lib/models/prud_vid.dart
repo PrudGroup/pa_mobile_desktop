@@ -945,43 +945,21 @@ class ChannelVideo {
       votes: json["votes"],
       voters: json["voters"],
       id: json["id"],
-      channel:
-          json["channel"] != null ? VidChannel.fromJson(json["channel"]) : null,
-      tags: json["tags"],
-      creator: json["creator"] != null
-          ? ContentCreator.fromJson(json["creator"])
-          : null,
-      liveStartsOn: json["liveStartsOn"] != null
-          ? DateTime.parse(json["liveStartsOn"])
-          : null,
-      liveEndedOn: json["liveEndedOn"] != null
-          ? DateTime.parse(json["liveEndedOn"])
-          : null,
-      updatedAt:
-          json["updatedAt"] != null ? DateTime.parse(json["updatedAt"]) : null,
-      scheduledFor: json["scheduledFor"] != null
-          ? DateTime.parse(json["scheduledFor"])
-          : null,
-      viewMatrix: json["viewMatrix"]
-          ?.map((itm) => ChannelVideoViewMatrix.fromJson(itm))
-          .toList(),
-      paymentHistories: json["paymentHistories"]
-          ?.map((itm) => StudioWalletHistory.fromJson(itm))
-          .toList(),
-      claims:
-          json["claims"]?.map((itm) => VideoClaimReport.fromJson(itm)).toList(),
-      snippets:
-          json["snippets"]?.map((itm) => VideoSnippet.fromJson(itm)).toList(),
+      channel: json["channel"] != null ? VidChannel.fromJson(json["channel"]) : null,
+      tags: json["tags"]?.map<String>((item) => item.toString()).toList(),
+      creator: json["creator"] != null? ContentCreator.fromJson(json["creator"]) : null,
+      liveStartsOn: json["liveStartsOn"] != null? DateTime.parse(json["liveStartsOn"]) : null,
+      liveEndedOn: json["liveEndedOn"] != null? DateTime.parse(json["liveEndedOn"]) : null,
+      updatedAt: json["updatedAt"] != null ? DateTime.parse(json["updatedAt"]) : null,
+      scheduledFor: json["scheduledFor"] != null? DateTime.parse(json["scheduledFor"]) : null,
+      viewMatrix: json["viewMatrix"]?.map((itm) => ChannelVideoViewMatrix.fromJson(itm)).toList(),
+      paymentHistories: json["paymentHistories"]?.map((itm) => StudioWalletHistory.fromJson(itm)).toList(),
+      claims: json["claims"]?.map((itm) => VideoClaimReport.fromJson(itm)).toList(),
+      snippets: json["snippets"]?.map((itm) => VideoSnippet.fromJson(itm)).toList(),
       watches: json["watches"]?.map((itm) => VideoWatch.fromJson(itm)).toList(),
-      thriller: json["thriller"] != null
-          ? VideoThriller.fromJson(json["thriller"])
-          : null,
-      movieDetail: json["movieDetail"] != null
-          ? VideoMovieDetail.fromJson(json["movieDetail"])
-          : null,
-      musicDetail: json["musicDetail"] != null
-          ? VideoMusicDetail.fromJson(json["musicDetail"])
-          : null,
+      thriller: json["thriller"] != null? VideoThriller.fromJson(json["thriller"]) : null,
+      movieDetail: json["movieDetail"] != null? VideoMovieDetail.fromJson(json["movieDetail"]) : null,
+      musicDetail: json["musicDetail"] != null? VideoMusicDetail.fromJson(json["musicDetail"]) : null,
       memberViews: json["memberViews"] as int,
       nonMemberViews: json["nonMemberViews"],
       likes: json["likes"],
@@ -990,12 +968,9 @@ class ChannelVideo {
       watchMinutes: json["watchMinutes"],
       downloads: json["downloads"],
       isLive: json["isLive"],
-      sponsored: json["sponsored"] != null
-          ? PromoteVideo.fromJson(json["sponsored"])
-          : null,
+      sponsored: json["sponsored"] != null? PromoteVideo.fromJson(json["sponsored"]) : null,
       statusDescription: json["statusDescription"],
-      comments:
-          json["comments"]?.map((itm) => VideoComment.fromJson(itm)).toList(),
+      comments: json["comments"]?.map((itm) => VideoComment.fromJson(itm)).toList(),
     );
   }
 }
@@ -1502,7 +1477,7 @@ class VideoThriller {
       likes: json["likes"],
       dislikes: json["dislikes"],
       impressions: json["impressions"],
-      tags: json["tags"],
+      tags: json["tags"]?.map<String>((item) => item.toString()).toList(),
       id: json["id"],
       durationInMinutes: json["durationInMinutes"],
       durationInSeconds: json["durationInSeconds"],
@@ -1728,7 +1703,7 @@ class VideoMovieDetail {
       movieTitle: json["movieTitle"],
       productionMonth: json["productionMonth"],
       productionYear: json["productionYear"],
-      tags: json["tags"],
+      tags: json["tags"]?.map<String>((item) => item.toString()).toList(),
       morePlot: json["morePlot"],
       movieSubType: json["movieSubType"],
       movieType: json["movieType"],
@@ -1793,7 +1768,7 @@ class VideoMusicDetail {
       executiveProducerName: json["executiveProducerName"],
       trackTitle: json["trackTitle"],
       id: json["id"],
-      tags: json["tags"],
+      tags: json["tags"]?.map<String>((item) => item.toString()).toList(),
       productionMonth: json["productionMonth"],
       productionYear: json["productionYear"],
       totalCostOfProduction: json["totalCostOfProduction"],
@@ -2464,7 +2439,7 @@ class PendingNewVideo {
       musicDetailId: json["musicDetailId"],
       saveVideoProgress: json["saveVideoProgress"] != null? SaveVideoResponse.fromJson(json["saveVideoProgress"]) : null,
       saveThrillerProgress: json["saveThrillerProgress"] != null? SaveVideoResponse.fromJson(json["saveThrillerProgress"]) : null,
-      tags: json["tags"],
+      tags: json["tags"]?.map<String>((item) => item.toString()).toList(),
       scheduledFor: json["scheduledFor"] != null? DateTime.parse(json["scheduledFor"]) : null,
       snippets: json["snippets"]?.map((itm) => VideoSnippet.fromJson(itm)).toList(),
       thriller: json["thriller"] != null? VideoThriller.fromJson(json["thriller"]) : null,

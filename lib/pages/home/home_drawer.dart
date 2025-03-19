@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/pages/home/home.dart';
 import 'package:prudapp/pages/prudStreams/prud_streams.dart';
 import 'package:prudapp/pages/prudStreams/studio/prud_stream_studio.dart';
 import 'package:prudapp/pages/prudVid/prud_vid.dart';
@@ -50,6 +51,12 @@ class HomeDrawerState extends State<HomeDrawer> {
               indent: 0.0,
               endIndent: 0.0,
               color: prudColorTheme.primary
+            ),
+            SideMenuItem(
+              text: "Main Menu",
+              page: MyHomePage(title: 'Prudapp',),
+              isIcon: false,
+              image: prudImages.prudIcon,
             ),
             SideMenuItem(
               text: "Thrillers",

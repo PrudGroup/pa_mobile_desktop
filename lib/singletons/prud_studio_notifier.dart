@@ -182,7 +182,7 @@ class PrudStudioNotifier extends ChangeNotifier {
     }
   }
 
-  void getSearchedTearm4ChannelFromCache() {
+  void getSearchedTerm4ChannelFromCache() {
     List<dynamic>? searchTerms =
         myStorage.getFromStore(key: "searchedTerms4Channel");
     if (searchTerms != null) {
@@ -394,8 +394,7 @@ class PrudStudioNotifier extends ChangeNotifier {
   Future<void> getAffiliatedChannels() async {
     affiliatedChannels = await tryAsync("getAffiliatedChannels", () async {
       if (amACreator != null && amACreator!.id != null) {
-        dynamic res =
-            await makeRequest(path: "channels/affiliated/${amACreator!.id}");
+        dynamic res = await makeRequest(path: "channels/affiliated/${amACreator!.id}");
         if (res != null && res != [] && res != false && res.length > 0) {
           List<VidChannel> chas = [];
           for (var item in res) {
@@ -937,7 +936,7 @@ class PrudStudioNotifier extends ChangeNotifier {
       await getStudio();
       retrieveUnfinishedNewChannelData();
       retrieveUnfinishedNewVideoData();
-      getSearchedTearm4ChannelFromCache();
+      getSearchedTerm4ChannelFromCache();
       retrieveChannelRatingFromCache();
       await getChannelsJoinedFromCache();
       await getChannelsSubscribedFromCache();
