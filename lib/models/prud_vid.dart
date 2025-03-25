@@ -1481,12 +1481,10 @@ class VideoThriller {
       id: json["id"],
       durationInMinutes: json["durationInMinutes"],
       durationInSeconds: json["durationInSeconds"],
-      video:
-          json["video"] != null ? ChannelVideo.fromJson(json["video"]) : null,
-      comments: json["comments"]
-          ?.map<VideoThrillerComment>(
-              (cha) => VideoThrillerComment.fromJson(cha))
-          .toList(),
+      video: json["video"] != null ? ChannelVideo.fromJson(json["video"]) : null,
+      comments: json["comments"]?.map<VideoThrillerComment>(
+        (cha) => VideoThrillerComment.fromJson(cha))
+        .toList(),
     );
   }
 }

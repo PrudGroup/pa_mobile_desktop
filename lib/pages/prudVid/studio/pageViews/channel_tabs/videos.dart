@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:prudapp/components/loading_component.dart';
+import 'package:prudapp/components/multi_player/flick_multi_manager.dart';
 import 'package:prudapp/components/prud_infinite_loader.dart';
 import 'package:prudapp/components/video_component.dart';
 import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/tab_data.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../../../models/theme.dart';
 
@@ -30,6 +32,7 @@ class ChannelVideosState extends State<ChannelVideos> {
   int offset = 0;
   double lastScrollPoint = 0;
   ScrollController sCtrl = ScrollController();
+  late FlickMultiManager flickMultiManager;
 
   Future<List<ChannelVideo>?> getFromCloud(bool isInit) async {
     return await tryAsync("getVideos", () async {
@@ -91,6 +94,7 @@ class ChannelVideosState extends State<ChannelVideos> {
   
   @override
   void initState() {
+    flickMultiManager = FlickMultiManager();
     Future.delayed(Duration.zero, () async {
       await getVideos();
     });
@@ -128,17 +132,26 @@ class ChannelVideosState extends State<ChannelVideos> {
         videos.isNotEmpty? Column(
           children: [
             Expanded(
-              child: ListView.builder(
-                physics: BouncingScrollPhysics(),
-                controller: sCtrl,
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                itemCount: videos.length,
-                itemBuilder: (context, index) {
-                  return PrudVideoComponent(
-                    video: videos[index],
-                    isOwner: widget.isOwner,
-                  );
+              child: VisibilityDetector(
+                key: ObjectKey(flickMultiManager),
+                onVisibilityChanged: (visibility) {
+                  if (visibility.visibleFraction == 0 && mounted) {
+                    flickMultiManager.pause();
+                  }
                 },
+                child: ListView.builder(
+                  physics: BouncingScrollPhysics(),
+                  controller: sCtrl,
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  itemCount: videos.length,
+                  itemBuilder: (context, index) {
+                    return PrudVideoComponent(
+                      video: videos[index],
+                      isOwner: widget.isOwner,
+                      flickMultiManager: flickMultiManager,
+                    );
+                  },
+                ),
               ),
             ),
             if(gettingMore) PrudInfiniteLoader(text: "Video Clips"),

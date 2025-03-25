@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
     
 class VideoLive extends StatefulWidget {
   final Function(dynamic) onCompleted;
@@ -20,7 +21,7 @@ class VideoLiveState extends State<VideoLive> {
       appBar:  AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: prudColorTheme.bgA,),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => iCloud.goBack(context),
           splashRadius: 20,
         ),
         title: Translate(
@@ -55,7 +56,7 @@ class VideoLiveState extends State<VideoLive> {
               height: 10,
             ),
             prudWidgetStyle.getLongButton(
-              onPressed: () => Navigator.pop(context), 
+              onPressed: () => iCloud.goBack(context), 
               text: "Close",
               makeLight: false,
               shape: 1

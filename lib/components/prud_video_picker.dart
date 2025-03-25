@@ -17,6 +17,7 @@ import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/backblaze_notifier.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
+import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 import 'package:video_player/video_player.dart';
 
@@ -70,6 +71,14 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
 
   int getChunkSize(int fileSize) => 5 * 1024 * 1024;
 
+  bool checkIfUploadedChunksWaDeleted(StartLargeFileResponse res){
+    bool deleted = false;
+    DateTime uploadedDate = DateTime.fromMillisecondsSinceEpoch(res.uploadTimestamp);
+    int hours = myStorage.dateDifference(dDate: uploadedDate, inWhat: 2);
+    deleted = hours > 24;
+    return deleted;
+  }
+
   Future<void> continueUpload() async {
     if(widget.uploadedFilePath != null && widget.savedProgress != null){
       await tryAsync("continueUpload", () async {
@@ -82,55 +91,47 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
         }
         final file = File(widget.uploadedFilePath!);
         if(await file.exists()){
-          PlatformFile fileP = PlatformFile(
-            path: file.path, name: widget.savedProgress!.startedLargeFile.fileName, 
-            size: file.lengthSync()
-          );
-          Stream<List<int>>?  fileReadStream = fileP.readStream;
-          if (fileReadStream != null) {
-            if(mounted) setState(() => filename = tabData.removeSpace(fileP.name));
-            StartLargeFileResponse? res = widget.savedProgress?.startedLargeFile;
+          if(mounted) setState(() => filename = tabData.removeSpace(widget.savedProgress!.startedLargeFile.fileName));
+          StartLargeFileResponse? res = widget.savedProgress?.startedLargeFile;
+          if(res != null){
+            bool uploadedChunksHasBeenDeleted = checkIfUploadedChunksWaDeleted(res);
+            if(uploadedChunksHasBeenDeleted) {
+              res = await backblazeNotifier.startLargeFileCreation("${widget.destination}/$filename", res.contentType);
+            }
             if(res != null) { 
               int countPart = 0; 
-              int chunkSize = getChunkSize(fileP.size);
+              int chunkSize = getChunkSize(file.lengthSync());
+              Stream<List<int>>  fileReadStream = file.openRead();
               Stream<Uint8List> chunkedStream = sliceStream(fileReadStream, chunkSize).asBroadcastStream();          
-              if(await chunkedStream.length == widget.savedProgress!.totalChunkCount){
-                await for(Uint8List part in chunkedStream){
-                  countPart += 1;
-                  if(widget.savedProgress!.remainingChunks.contains(countPart)){
-                    String sha1 = "${backblazeNotifier.generateSha1(part)}";
-                    uploadSha1s.add(sha1);
-                    UploadVideoServiceArg arg = UploadVideoServiceArg(
-                      fileId: res.fileId,
-                      part: countPart,
-                      partVideo: part,
-                      sendPort: receivePort.sendPort,
-                      cred: B2Credential(
-                        b2DownloadToken: b2DownloadToken!, 
-                        b2AccToken: b2AccToken!, 
-                        b2AuthKey: b2AuthKey!, 
-                        b2ApiUrl: b2ApiUrl!
-                      ),
-                      sha1: sha1
-                    );
-                    await Isolate.spawn(uploadVideoService, arg, onError: receivePort.sendPort, onExit: receivePort.sendPort);
-                  }
-                }
-                await save(
-                  res, countPart, 
-                  uploadChunkCount: widget.savedProgress!.uploadedChunkCount,
-                  percentageUploaded: widget.savedProgress!.percentageUploaded,
-                  uploadedParts: widget.savedProgress!.uploadedParts,
-                  remainingChunks: widget.savedProgress!.remainingChunks,
-                );
-              }else{
-                if(mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Translate(text: "Unable assert chunks."),
-                  ));
-                  setState(() => saving = false);
+              await for(Uint8List part in chunkedStream){
+                countPart += 1;
+                if(uploadedChunksHasBeenDeleted || widget.savedProgress!.remainingChunks.contains(countPart)){
+                  debugPrint("Got F: contains");
+                  String sha1 = "${backblazeNotifier.generateSha1(part)}";
+                  uploadSha1s.add(sha1);
+                  UploadVideoServiceArg arg = UploadVideoServiceArg(
+                    fileId: res.fileId,
+                    part: countPart,
+                    partVideo: part,
+                    sendPort: receivePort.sendPort,
+                    cred: B2Credential(
+                      b2DownloadToken: b2DownloadToken!, 
+                      b2AccToken: b2AccToken!, 
+                      b2AuthKey: b2AuthKey!, 
+                      b2ApiUrl: b2ApiUrl!
+                    ),
+                    sha1: sha1
+                  );
+                  await Isolate.spawn(uploadVideoService, arg, onError: receivePort.sendPort, onExit: receivePort.sendPort);
                 }
               }
+              await save(
+                res, countPart, 
+                uploadChunkCount: widget.savedProgress!.uploadedChunkCount,
+                percentageUploaded: widget.savedProgress!.percentageUploaded,
+                uploadedParts: widget.savedProgress!.uploadedParts,
+                remainingChunks: widget.savedProgress!.remainingChunks,
+              );
             }else{
               if(mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -142,9 +143,9 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
           }else{
             if(mounted) {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Translate(text: "Failed to read file"),
+                content: Translate(text: "Unable To Save Video"),
               ));
-              setState(() => picking = false);
+              setState(() => saving = false);
             }
           }
         }else{
@@ -185,7 +186,6 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
     if(res != null){
       String? downloadUrl = await iCloud.getFileDownloadUrl(res.fileName);
       if(downloadUrl != null){
-        debugPrint("download_url: $downloadUrl");
         widget.onSaveToCloud?.call(downloadUrl);
         if(mounted) setState(() => alreadyUploaded = true);
       }else{
@@ -211,7 +211,6 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
       uploadedParts: uploadedParts?? [],
       remainingChunks: remainingChunks?? []
     ); 
-    debugPrint("All chunks: $chunkCount");
     receivePort.listen((resp) async {
       if(resp != null){
         UploadPartResponse partRes = UploadPartResponse.fromJson(resp);

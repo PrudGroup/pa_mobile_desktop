@@ -139,7 +139,8 @@ class BackblazeNotifier extends ChangeNotifier {
 
 
 
-Dio b2Dio = Dio(BaseOptions(
+Dio b2Dio = Dio(
+  BaseOptions(
     receiveDataWhenStatusError: true,
     connectTimeout: const Duration(seconds: 60), // 60 seconds
     receiveTimeout: const Duration(seconds: 60),

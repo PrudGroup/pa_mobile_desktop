@@ -14,6 +14,7 @@ import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 import 'package:prudapp/string_api.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:textfield_tags/textfield_tags.dart';
     
@@ -182,7 +183,7 @@ class VideoMovieState extends State<VideoMovie> {
       appBar:  AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: prudColorTheme.bgA,),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => iCloud.goBack(context),
           splashRadius: 20,
         ),
         title: Translate(

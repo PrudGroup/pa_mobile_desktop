@@ -1,15 +1,17 @@
 import 'package:fast_cached_network_image/fast_cached_network_image.dart';
-import 'package:flick_video_player/flick_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/avatar/gf_avatar.dart';
 import 'package:getwidget/components/rating/gf_rating.dart';
-import 'package:prudapp/components/prud_network_image.dart';
+import 'package:prudapp/components/multi_player/flick_multi_manager.dart';
+import 'package:prudapp/components/multi_player/flick_multi_player.dart';
 import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/components/video_loading.dart';
 import 'package:prudapp/models/aff_link.dart';
 import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/pages/prudVid/studio/pageViews/channel_view.dart';
 import 'package:prudapp/pages/prudVid/tabs/views/add_report_or_claim.dart';
+import 'package:prudapp/pages/prudVid/thriller_views/thriller_detail.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/influencer_notifier.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
@@ -17,7 +19,6 @@ import 'package:prudapp/singletons/prudvid_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:video_player/video_player.dart';
 
 class PrudVideoComponent extends StatefulWidget{
   final ChannelVideo? video;
@@ -26,12 +27,12 @@ class PrudVideoComponent extends StatefulWidget{
   final VideoThriller? thriller;
   final bool isOwner;
   final String? affLinkId;
-  final bool autoplay;
+  final FlickMultiManager flickMultiManager;
 
   const PrudVideoComponent({
     super.key, this.video, required this.isOwner,
     this.thrillerId, this.affLinkId, this.thriller,
-    this.autoplay = false, this.channel,
+    this.channel, required this.flickMultiManager
   });
 
   @override
@@ -42,7 +43,6 @@ class PrudVideoComponentState extends State<PrudVideoComponent> {
   VideoThriller? thriller;
   ChannelVideo? video;
   bool loading = false;
-  late FlickManager flickManager;
   bool allVidsReady = false;
   String authorizedUrl = "";
   VidChannel? channel;
@@ -190,7 +190,6 @@ class PrudVideoComponentState extends State<PrudVideoComponent> {
 
   @override
   void dispose(){
-    flickManager.dispose();
     super.dispose();
   }
   
@@ -204,10 +203,6 @@ class PrudVideoComponentState extends State<PrudVideoComponent> {
           await getChannel();
         }
       }
-      flickManager = FlickManager(
-        autoPlay: widget.autoplay,
-        videoPlayerController: VideoPlayerController.networkUrl(Uri.parse(thriller!.videoUrl)),
-      );
       if(mounted){
         setState(() {
           thriller ??= widget.thriller;
@@ -400,6 +395,27 @@ class PrudVideoComponentState extends State<PrudVideoComponent> {
     );
   }
   
+  void viewThriller(){
+    if(mounted) {
+      iCloud.goto(context, ThrillerDetail(
+        thriller: thriller,
+        video: video,
+        thrillerId: thriller?.id,
+        referralLinkId: widget.affLinkId,
+        isOwner: widget.isOwner,
+      ));
+    }
+  }
+
+  void viewChannel(){
+    if(channel != null && mounted){
+      iCloud.goto(context, ChannelView(
+        channel: channel!,
+        isOwner: widget.isOwner,
+      ));
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     return OrientationBuilder(
@@ -420,11 +436,13 @@ class PrudVideoComponentState extends State<PrudVideoComponent> {
             borderRadius: BorderRadius.circular(20.0),
             child: allVidsReady == true? Column(
               children: [
-                SizedBox(
-                  height: orientation == Orientation.portrait? 190 : 240,
-                  child: widget.autoplay? FlickVideoPlayer(
-                    flickManager: flickManager
-                  ) : PrudNetworkImage(url: video!.videoThumbnail, authorizeUrl: true,),
+                InkWell(
+                  onTap: viewThriller,
+                  child: FlickMultiPlayer(
+                    url: authorizedUrl,
+                    flickMultiManager: widget.flickMultiManager,
+                    image: video!.videoThumbnail,
+                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.all(10),
@@ -434,95 +452,101 @@ class PrudVideoComponentState extends State<PrudVideoComponent> {
                     children: [
                       Row(
                         children: [
-                          GFAvatar(
-                            backgroundImage: FastCachedImageProvider(
-                              iCloud.authorizeDownloadUrl(channel!.logo),
+                          InkWell(
+                            onTap: viewChannel,
+                            child: GFAvatar(
+                              backgroundImage: FastCachedImageProvider(
+                                iCloud.authorizeDownloadUrl(channel!.logo),
+                              ),
                             ),
                           ),
                           spacer.width,
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                width: double.maxFinite,
-                                child: Translate(
-                                  text: tabData.shortenStringWithPeriod(video!.title, length: 70),
-                                  style: prudWidgetStyle.tabTextStyle.copyWith(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: prudColorTheme.bgA,
+                          InkWell(
+                            onTap: viewThriller,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  width: double.maxFinite,
+                                  child: Translate(
+                                    text: tabData.shortenStringWithPeriod(video!.title, length: 70),
+                                    style: prudWidgetStyle.tabTextStyle.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: prudColorTheme.bgA,
+                                    ),
+                                    align: TextAlign.left,
                                   ),
-                                  align: TextAlign.left,
                                 ),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    tabData.shortenStringWithPeriod(channel!.channelName, length: 25),
-                                    style: prudWidgetStyle.hintStyle.copyWith(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w500,
-                                      color: prudColorTheme.lineC,
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      tabData.shortenStringWithPeriod(channel!.channelName, length: 25),
+                                      style: prudWidgetStyle.hintStyle.copyWith(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
+                                        color: prudColorTheme.lineC,
+                                      ),
+                                      textAlign: TextAlign.left,
                                     ),
-                                    textAlign: TextAlign.left,
-                                  ),
-                                  SizedBox(height: 5, child: Align(alignment: Alignment.center, child: Container(width: 2, height: 2, color: prudColorTheme.textC))),
-                                  Translate(
-                                    text: "${tabData.getFormattedNumber(totalViews)} Views",
-                                    style: prudWidgetStyle.hintStyle.copyWith(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w500,
-                                      color: prudColorTheme.lineC,
+                                    SizedBox(height: 5, child: Align(alignment: Alignment.center, child: Container(width: 2, height: 2, color: prudColorTheme.textC))),
+                                    Translate(
+                                      text: "${tabData.getFormattedNumber(totalViews)} Views",
+                                      style: prudWidgetStyle.hintStyle.copyWith(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
+                                        color: prudColorTheme.lineC,
+                                      ),
+                                      align: TextAlign.left,
                                     ),
-                                    align: TextAlign.left,
-                                  ),
-                                  SizedBox(height: 5, child: Align(alignment: Alignment.center, child: Container(width: 2, height: 2, color: prudColorTheme.textC))),
-                                  Translate(
-                                    text: uploadedWhen,
-                                    style: prudWidgetStyle.hintStyle.copyWith(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w500,
-                                      color: prudColorTheme.lineC,
+                                    SizedBox(height: 5, child: Align(alignment: Alignment.center, child: Container(width: 2, height: 2, color: prudColorTheme.textC))),
+                                    Translate(
+                                      text: uploadedWhen,
+                                      style: prudWidgetStyle.hintStyle.copyWith(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
+                                        color: prudColorTheme.lineC,
+                                      ),
+                                      align: TextAlign.left,
                                     ),
-                                    align: TextAlign.left,
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  GFRating(
-                                    onChanged: (rate){},
-                                    value: rating,
-                                    color: prudColorTheme.textD,
-                                    borderColor: prudColorTheme.textD,
-                                    size: 8,
-                                  ),
-                                  SizedBox(height: 5, child: Align(alignment: Alignment.center, child: Container(width: 2, height: 2, color: prudColorTheme.textC))),
-                                  Translate(
-                                    text: "$rating | ${tabData.getRateInterpretation(rating)}",
-                                    style: prudWidgetStyle.hintStyle.copyWith(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w500,
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    GFRating(
+                                      onChanged: (rate){},
+                                      value: rating,
                                       color: prudColorTheme.textD,
+                                      borderColor: prudColorTheme.textD,
+                                      size: 8,
                                     ),
-                                    align: TextAlign.left,
-                                  ),
-                                  SizedBox(height: 5, child: Align(alignment: Alignment.center, child: Container(width: 2, height: 2, color: prudColorTheme.textC))),
-                                  Translate(
-                                    text: "${tabData.getFormattedNumber(thriller!.impressions)} Impressions",
-                                    style: prudWidgetStyle.hintStyle.copyWith(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w500,
-                                      color: prudColorTheme.textD,
+                                    SizedBox(height: 5, child: Align(alignment: Alignment.center, child: Container(width: 2, height: 2, color: prudColorTheme.textC))),
+                                    Translate(
+                                      text: "$rating | ${tabData.getRateInterpretation(rating)}",
+                                      style: prudWidgetStyle.hintStyle.copyWith(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
+                                        color: prudColorTheme.textD,
+                                      ),
+                                      align: TextAlign.left,
                                     ),
-                                    align: TextAlign.left,
-                                  ),
-                                ],
-                              )
-                            ],
-                          )
+                                    SizedBox(height: 5, child: Align(alignment: Alignment.center, child: Container(width: 2, height: 2, color: prudColorTheme.textC))),
+                                    Translate(
+                                      text: "${tabData.getFormattedNumber(thriller!.impressions)} Impressions",
+                                      style: prudWidgetStyle.hintStyle.copyWith(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
+                                        color: prudColorTheme.textD,
+                                      ),
+                                      align: TextAlign.left,
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                       if(!widget.isOwner) IconButton(

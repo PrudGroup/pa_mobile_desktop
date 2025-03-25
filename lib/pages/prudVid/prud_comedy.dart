@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/components/work_in_progress.dart';
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
 
 class PrudComedy extends StatefulWidget {
   final String? affLinkId;
@@ -26,7 +27,7 @@ class PrudComedyState extends State<PrudComedy> {
       appBar:  AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: prudColorTheme.bgA,),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => iCloud.goBack(context),
           splashRadius: 20,
         ),
         title: Translate(

@@ -11,6 +11,7 @@ import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 import 'package:prudapp/string_api.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:textfield_tags/textfield_tags.dart';
     
 class VideoMusic extends StatefulWidget {
@@ -106,7 +107,7 @@ class VideoMusicState extends State<VideoMusic> {
       appBar:  AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: prudColorTheme.bgA,),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => iCloud.goBack(context),
           splashRadius: 20,
         ),
         title: Translate(

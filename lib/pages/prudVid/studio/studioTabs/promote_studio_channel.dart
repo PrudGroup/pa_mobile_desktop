@@ -11,6 +11,7 @@ import 'package:prudapp/models/backblaze.dart';
 import 'package:prudapp/models/images.dart';
 import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
@@ -147,7 +148,7 @@ class _PromoteStudioChannelState extends State<PromoteStudioChannel> {
                 ),
         ),
         DialogButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => iCloud.goBack(context),
           color: prudColorTheme.buttonC,
           radius: BorderRadius.zero,
           child: const Translate(

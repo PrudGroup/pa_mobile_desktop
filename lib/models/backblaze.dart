@@ -306,7 +306,7 @@ class SaveVideoResponse{
       percentageUploaded: json['percentageUploaded'],
       startedLargeFile: StartLargeFileResponse.fromJson(json['startedLargeFile']),
       uploadedParts: json['uploadedParts'].map<UploadPartResponse>((part) => UploadPartResponse.fromJson(part)).toList(),
-      remainingChunks: json['remainingChunks'].map<int>((count) => int.parse(count)).toList(),
+      remainingChunks:  json['remainingChunks'].map<int>((ct) => int.parse(ct.toString())).toList(),
     );
   }
 }

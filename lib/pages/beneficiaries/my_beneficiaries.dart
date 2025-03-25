@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:prudapp/pages/beneficiaries/tabs/existing_beneficiary.dart';
 import 'package:prudapp/pages/beneficiaries/tabs/new_beneficiary.dart';
 import 'package:prudapp/singletons/beneficiary_notifier.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
 
 import '../../components/translate_text.dart';
 import '../../components/inner_menu.dart';
@@ -66,7 +67,7 @@ class MyBeneficiariesState extends State<MyBeneficiaries> {
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: prudColorTheme.bgA,),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => iCloud.goBack(context),
           splashRadius: 20,
         ),
         title: Translate(

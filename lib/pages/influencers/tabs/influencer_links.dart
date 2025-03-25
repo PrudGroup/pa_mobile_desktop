@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:prudapp/pages/influencers/tabs/link_tabs/ads_links.dart';
 import 'package:prudapp/pages/influencers/tabs/link_tabs/spark_links.dart';
 import 'package:prudapp/pages/influencers/tabs/link_tabs/switz_store_links.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
 
 import '../../../components/inner_menu.dart';
 import '../../../components/translate_text.dart';
@@ -35,7 +36,7 @@ class InfluencerLinksState extends State<InfluencerLinks> {
       appBar:  AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: prudColorTheme.bgA,),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => iCloud.goBack(context),
           splashRadius: 20,
         ),
         backgroundColor: prudColorTheme.primary,

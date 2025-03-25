@@ -7,6 +7,7 @@ import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/models/backblaze.dart';
 import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
 
 class VideoUploads extends StatefulWidget {
@@ -139,7 +140,7 @@ class VideoUploadsState extends State<VideoUploads> {
       appBar:  AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: prudColorTheme.bgA,),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => iCloud.goBack(context),
           splashRadius: 20,
         ),
         title: Translate(
@@ -172,7 +173,7 @@ class VideoUploadsState extends State<VideoUploads> {
               onDurationGotten: setVideoDurationGotten,
               onSaveToCloud: setVideoSavedFinished,
               onProgressChanged: setVideoProgressChanged,
-              destination: "channels/${prudStudioNotifier.newVideo.channelId}/videos",
+              destination: "prudapp/channels/${prudStudioNotifier.newVideo.channelId}/videos",
               saveToCloud: true,
               onVideoPicked: setVideoFile,
               alreadyUploaded: prudStudioNotifier.newVideo.videoUrl != null,
@@ -201,7 +202,7 @@ class VideoUploadsState extends State<VideoUploads> {
               onDurationGotten: setThrillerDurationGotten,
               onSaveToCloud: setThrillerUrl,
               onProgressChanged: setThrillerProgressChanged,
-              destination: "channels/${prudStudioNotifier.newVideo.channelId}/thrillers",
+              destination: "prudapp/channels/${prudStudioNotifier.newVideo.channelId}/thrillers",
               saveToCloud: true,
               onVideoPicked: setThrillerFile,
               alreadyUploaded: prudStudioNotifier.newVideo.thriller?.videoUrl != null && prudStudioNotifier.newVideo.thriller!.videoUrl.isNotEmpty,
@@ -226,7 +227,7 @@ class VideoUploadsState extends State<VideoUploads> {
             ),
             spacer.height,
             PrudImagePicker(
-              destination: "channels/${prudStudioNotifier.newVideo.channelId}/thumbnails",
+              destination: "prudapp/channels/${prudStudioNotifier.newVideo.channelId}/thumbnails",
               saveToCloud: true,
               reset: shouldReset,
               onSaveToCloud: setThumbnailUrl,
@@ -249,7 +250,10 @@ class VideoUploadsState extends State<VideoUploads> {
                   makeLight: true,
                   isPill: false
                 ),
-                prudWidgetStyle.getShortButton(
+                if(
+                  result != null && result!["thrillerVideoUrl"] != null && 
+                  result!["videoUrl"] != null && result!["videoThumbnail"] != null
+                ) prudWidgetStyle.getShortButton(
                   onPressed: () => widget.onCompleted(result), 
                   text: "Next",
                   makeLight: false,

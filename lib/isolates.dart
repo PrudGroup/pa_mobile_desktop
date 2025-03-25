@@ -20,7 +20,6 @@ uploadVideoService(UploadVideoServiceArg uvSerArg) async {
       uploadPartResponse = await backblazeNotifier.uploadPartOfLargeFile(uploadUrl, uvSerArg.part, uvSerArg.partVideo, uvSerArg.cred, uvSerArg.sha1);
       if (uploadPartResponse != null && uploadPartResponse.contentLength > 0) {
         uploaded = true;
-        debugPrint('Video Part ${uvSerArg.part} uploaded successfully: ${uploadPartResponse.toJson()}');
       }
     }
   }

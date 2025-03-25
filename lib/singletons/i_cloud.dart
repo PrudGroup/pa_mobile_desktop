@@ -13,10 +13,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:pdf/widgets.dart' as pdf;
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/pages/home/home.dart';
 import 'package:prudapp/pages/prud_predict/prud_predict.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:prudapp/singletons/tab_data.dart';
 import '../components/page_transitions/scale.dart';
 import '../components/prud_container.dart';
 import '../constants.dart';
@@ -681,6 +683,16 @@ class ICloud extends ChangeNotifier {
 
   void goto(BuildContext context, Widget where) =>
       Navigator.push(context, ScaleRoute(page: where));
+
+  void goBack(BuildContext context){
+    tryOnly("goBack", (){
+      if(Navigator.of(context).canPop()){
+        Navigator.pop(context);
+      } else {
+        goto(context, MyHomePage(title: "Prudapp",));
+      }
+    });
+  }
 
   Future<bool> prudServiceIsAvailable() async {
     bool isConnected = await checkNetwork();

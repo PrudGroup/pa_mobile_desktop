@@ -8,6 +8,7 @@ import 'creatorTabs/add_as_creator.dart';
 import 'creatorTabs/add_creator_to_channel.dart';
 import 'creatorTabs/remove_creator_from_channel.dart';
 import 'creatorTabs/view_studio_creators.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
 
 class StudioCreators extends StatefulWidget {
   final Function(int)? goToTab;
@@ -56,7 +57,7 @@ class StudioCreatorsState extends State<StudioCreators> {
       appBar:  AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: prudColorTheme.bgA,),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => iCloud.goBack(context),
           splashRadius: 20,
         ),
         title: Translate(

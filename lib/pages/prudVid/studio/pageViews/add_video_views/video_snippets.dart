@@ -9,6 +9,7 @@ import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/components/video_snippet_card.dart';
 import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 import 'package:video_trimmer/video_trimmer.dart';
@@ -93,7 +94,7 @@ class VideoSnippetsState extends State<VideoSnippets> {
       appBar:  AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: prudColorTheme.bgA,),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => iCloud.goBack(context),
           splashRadius: 20,
         ),
         title: Translate(
@@ -169,105 +170,125 @@ class VideoSnippetsState extends State<VideoSnippets> {
                     ],
                   ),
                   spacer.height,
-                  if(showSnippetAdd && videoFile != null) PrudPanel(
-                    title: "New Snippet",
-                    titleColor: prudColorTheme.textB,
-                    bgColor: prudColorTheme.bgC,
-                    titleSize: 14,
-                    child: FormBuilder(
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      child: Column(
-                        children: [
-                          FormBuilderTextField(
-                            name: 'title',
-                            initialValue: title,
-                            enableInteractiveSelection: true,
-                            autofocus: true,
-                            style: tabData.npStyle,
-                            keyboardType: TextInputType.text,
-                            decoration: getDeco(
-                              "Title",
-                              onlyBottomBorder: true,
-                              borderColor: prudColorTheme.lineC
+                  if(showSnippetAdd && videoFile != null) Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: PrudPanel(
+                      title: "New Snippet",
+                      titleColor: prudColorTheme.textB,
+                      bgColor: prudColorTheme.bgA,
+                      titleSize: 14,
+                      child: FormBuilder(
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        child: Column(
+                          children: [
+                            FormBuilderTextField(
+                              name: 'title',
+                              initialValue: title,
+                              enableInteractiveSelection: true,
+                              autofocus: true,
+                              style: tabData.npStyle,
+                              keyboardType: TextInputType.text,
+                              decoration: getDeco(
+                                "Title",
+                                onlyBottomBorder: true,
+                                borderColor: prudColorTheme.lineC
+                              ),
+                              onChanged: (String? value){
+                                if(mounted) setState(() => title = value);
+                              },
+                              valueTransformer: (text) => num.tryParse(text!),
+                              validator: FormBuilderValidators.compose([
+                                FormBuilderValidators.required(),
+                                FormBuilderValidators.minLength(3),
+                                FormBuilderValidators.maxLength(30),
+                              ]),
                             ),
-                            onChanged: (String? value){
-                              if(mounted) setState(() => title = value);
-                            },
-                            valueTransformer: (text) => num.tryParse(text!),
-                            validator: FormBuilderValidators.compose([
-                              FormBuilderValidators.required(),
-                              FormBuilderValidators.minLength(3),
-                              FormBuilderValidators.maxLength(30),
-                            ]),
-                          ),
-                          spacer.height,
-                          FormBuilderTextField(
-                            name: 'description',
-                            initialValue: description,
-                            enableInteractiveSelection: true,
-                            autofocus: true,
-                            style: tabData.npStyle,
-                            keyboardType: TextInputType.text,
-                            decoration: getDeco(
-                              "Description",
-                              onlyBottomBorder: true,
-                              borderColor: prudColorTheme.lineC
+                            spacer.height,
+                            FormBuilderTextField(
+                              name: 'description',
+                              initialValue: description,
+                              enableInteractiveSelection: true,
+                              autofocus: true,
+                              style: tabData.npStyle,
+                              keyboardType: TextInputType.text,
+                              decoration: getDeco(
+                                "Description",
+                                onlyBottomBorder: true,
+                                borderColor: prudColorTheme.lineC
+                              ),
+                              onChanged: (String? value){
+                                if(mounted) setState(() => description = value);
+                              },
+                              valueTransformer: (text) => num.tryParse(text!),
+                              validator: FormBuilderValidators.compose([
+                                FormBuilderValidators.required(),
+                                FormBuilderValidators.minLength(3),
+                                FormBuilderValidators.maxLength(30),
+                              ]),
                             ),
-                            onChanged: (String? value){
-                              if(mounted) setState(() => description = value);
-                            },
-                            valueTransformer: (text) => num.tryParse(text!),
-                            validator: FormBuilderValidators.compose([
-                              FormBuilderValidators.required(),
-                              FormBuilderValidators.minLength(3),
-                              FormBuilderValidators.maxLength(30),
-                            ]),
-                          ),
-                          spacer.height,
-                          VideoViewer(trimmer: trimmer),
-                          spacer.height,
-                          TrimViewer(
-                            trimmer: trimmer,
-                            viewerHeight: 50.0,
-                            viewerWidth: MediaQuery.of(context).size.width,
-                            // maxVideoLength: const Duration(seconds: 10),
-                            onChangeStart: (value) {
-                              if(mounted){
-                                setState(() {
-                                  start = tabData.parseDurationFromDouble(value).toString();
-                                });
-                              }
-                            },
-                            onChangeEnd: (value) {
-                              if(mounted){
-                                setState(() {
-                                  end = tabData.parseDurationFromDouble(value).toString();
-                                });
-                              }
-                            },
-                            onChangePlaybackState: (value) {},
-                          ),
-                          spacer.height,
-                          Divider(
-                            color: prudColorTheme.lineC,
-                            thickness: 1,
-                            indent: 10,
-                            endIndent: 10,
-                            height: 10,
-                          ),
-                          if(description != null && title != null && start != null && end != null) Flex(
-                            direction: Axis.horizontal,
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              prudWidgetStyle.getShortButton(
-                                onPressed: save, 
-                                text: "Save",
-                                isSmall: true,
-                                isPill: false,
-                              )
-                            ],
-                          ),
-                        ],
+                            spacer.height,
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: VideoViewer(trimmer: trimmer),
+                                ),
+                              ]
+                            ),
+                            spacer.height,
+                            TrimViewer(
+                              trimmer: trimmer,
+                              durationTextStyle: const TextStyle(color: Colors.black),
+                              viewerHeight: 50.0,
+                              editorProperties: TrimEditorProperties(
+                                borderPaintColor: Colors.yellow,
+                                borderWidth: 4,
+                                borderRadius: 5,
+                                circlePaintColor: Colors.yellow.shade800,
+                              ),
+                              areaProperties: TrimAreaProperties.edgeBlur(
+                                thumbnailQuality: 10,
+                              ),
+                              viewerWidth: MediaQuery.of(context).size.width,
+                              maxVideoLength: const Duration(seconds: 3600),
+                              onChangeStart: (value) {
+                                if(mounted){
+                                  setState(() {
+                                    start = tabData.parseDurationFromDouble(value).toString();
+                                  });
+                                }
+                              },
+                              onChangeEnd: (value) {
+                                if(mounted){
+                                  setState(() {
+                                    end = tabData.parseDurationFromDouble(value).toString();
+                                  });
+                                }
+                              },
+                              onChangePlaybackState: (value) {},
+                            ),
+                            spacer.height,
+                            Divider(
+                              color: prudColorTheme.lineC,
+                              thickness: 1,
+                              indent: 10,
+                              endIndent: 10,
+                              height: 10,
+                            ),
+                            if(description != null && title != null && start != null && end != null) Flex(
+                              direction: Axis.horizontal,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                prudWidgetStyle.getShortButton(
+                                  onPressed: save, 
+                                  text: "Save",
+                                  isSmall: true,
+                                  isPill: false,
+                                ),
+                              ],
+                            ),
+                            spacer.height,
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -287,6 +308,12 @@ class VideoSnippetsState extends State<VideoSnippets> {
                   onPressed: widget.onPrevious, 
                   text: "Previous",
                   makeLight: true,
+                  isPill: false
+                ),
+                prudWidgetStyle.getShortButton(
+                  onPressed: () => widget.onCompleted(true), 
+                  text: "No Snippet",
+                  makeLight: false,
                   isPill: false
                 ),
                 prudWidgetStyle.getShortButton(

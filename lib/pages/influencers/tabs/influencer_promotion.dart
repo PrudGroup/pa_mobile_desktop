@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prudapp/components/work_in_progress.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
 
 import '../../../components/translate_text.dart';
 import '../../../models/theme.dart';
@@ -24,7 +25,7 @@ class InfluencerPromotionState extends State<InfluencerPromotion> {
       appBar:  AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: prudColorTheme.bgA,),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => iCloud.goBack(context),
           splashRadius: 20,
         ),
         backgroundColor: prudColorTheme.primary,

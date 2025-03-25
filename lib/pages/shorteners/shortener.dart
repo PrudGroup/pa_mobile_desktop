@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/theme.dart';
 import '../../components/translate_text.dart';
 import "../../components/work_in_progress.dart";
+import 'package:prudapp/singletons/i_cloud.dart';
 
 class Shortener extends StatefulWidget {
   const Shortener({super.key});
@@ -20,7 +21,7 @@ class ShortenerState extends State<Shortener> {
       appBar:  AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: prudColorTheme.bgA,),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => iCloud.goBack(context),
           splashRadius: 20,
         ),
         title: Translate(

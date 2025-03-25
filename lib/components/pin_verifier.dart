@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:pinput/pinput.dart';
 import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/influencer_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
@@ -87,7 +88,7 @@ class PinVerifierState extends State<PinVerifier> {
             ),
             spacer.height,
             prudWidgetStyle.getLongButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => iCloud.goBack(context),
               text: "End Transaction",
               shape: 1,
             )

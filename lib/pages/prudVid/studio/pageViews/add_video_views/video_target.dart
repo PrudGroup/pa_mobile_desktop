@@ -7,6 +7,7 @@ import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 import 'package:prudapp/string_api.dart';
 import 'package:textfield_tags/textfield_tags.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
     
 class VideoTarget extends StatefulWidget {
   final Function(dynamic) onCompleted;
@@ -63,7 +64,7 @@ class VideoTargetState extends State<VideoTarget> {
       appBar:  AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: prudColorTheme.bgA,),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => iCloud.goBack(context),
           splashRadius: 20,
         ),
         title: Translate(
@@ -180,9 +181,11 @@ class VideoTargetState extends State<VideoTarget> {
                         focusNode: inputFieldValues.focusNode,
                         onTap: () => tagCtrl.getFocusNode?.requestFocus(),
                         style: tabData.npStyle,
+                        maxLines: 15,
+                        minLines: 6,
                         keyboardType: TextInputType.text,
                         decoration: getDeco("Tags", onlyBottomBorder: true, borderColor: prudColorTheme.lineC).copyWith(
-                          helperText: 'Enter language...',
+                          helperText: 'Enter Tag...',
                           helperStyle: TextStyle(color: prudColorTheme.textD,),
                           hintText: inputFieldValues.tags.isNotEmpty? '' : "Enter tag...",
                           errorText: inputFieldValues.error,
@@ -213,7 +216,7 @@ class VideoTargetState extends State<VideoTarget> {
                                         ),
                                         const SizedBox(width: 4.0),
                                         InkWell(
-                                          child: Icon(Icons.cancel, size: 14.0, color: prudColorTheme.success,),
+                                          child: Icon(Icons.cancel, size: 15.0, color: prudColorTheme.buttonA,),
                                           onTap: () => inputFieldValues.onTagRemoved(tag),
                                         ),
                                       ],
@@ -226,6 +229,7 @@ class VideoTargetState extends State<VideoTarget> {
                         ),
                         onChanged: (String? valueDesc){
                           if(mounted && valueDesc != null) {
+                            inputFieldValues.onTagChanged(valueDesc);
                             setState(() {
                               videoTags = valueDesc.trim().split(" ");
                               result?["videoTags"] = videoTags;
@@ -234,6 +238,7 @@ class VideoTargetState extends State<VideoTarget> {
                             prudStudioNotifier.saveNewVideoData();
                           }
                         },
+                        onSubmitted: inputFieldValues.onTagSubmitted,
                       );
                     }
                   ),
@@ -279,6 +284,8 @@ class VideoTargetState extends State<VideoTarget> {
                         focusNode: inputFieldValues.focusNode,
                         onTap: () => tagCtrl1.getFocusNode?.requestFocus(),
                         style: tabData.npStyle,
+                        minLines: 6,
+                        maxLines: 10,
                         keyboardType: TextInputType.text,
                         decoration: getDeco("Thriller Tags", onlyBottomBorder: true, borderColor: prudColorTheme.lineC).copyWith(
                           helperText: 'Enter Thriller...',
@@ -312,7 +319,7 @@ class VideoTargetState extends State<VideoTarget> {
                                         ),
                                         const SizedBox(width: 4.0),
                                         InkWell(
-                                          child: Icon(Icons.cancel, size: 14.0, color: prudColorTheme.success,),
+                                          child: Icon(Icons.cancel, size: 15.0, color: prudColorTheme.buttonA,),
                                           onTap: () => inputFieldValues.onTagRemoved(tag),
                                         ),
                                       ],
@@ -325,6 +332,7 @@ class VideoTargetState extends State<VideoTarget> {
                         ),
                         onChanged: (String? valueDesc){
                           if(mounted && valueDesc != null) {
+                            inputFieldValues.onTagChanged(valueDesc);
                             setState(() {
                               videoTags = valueDesc.trim().split(" ");
                               result?["thrillerTags"] = thrillerTags;
@@ -333,6 +341,7 @@ class VideoTargetState extends State<VideoTarget> {
                             prudStudioNotifier.saveNewVideoData();
                           }
                         },
+                        onSubmitted: inputFieldValues.onTagSubmitted,
                       );
                     }
                   ),

@@ -4,6 +4,7 @@ import 'package:prudapp/models/prud_vid.dart';
 import '../../../../../components/translate_text.dart';
 import '../../../../../components/work_in_progress.dart';
 import '../../../../../models/theme.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
 
 class ChannelPlaylists extends StatefulWidget {
   final VidChannel channel;
@@ -27,13 +28,12 @@ class ChannelPlaylistsState extends State<ChannelPlaylists> {
             Icons.arrow_back_ios,
             color: prudColorTheme.bgA,
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => iCloud.goBack(context),
           splashRadius: 20,
         ),
         title: Translate(
           text: "Channel Playlist",
-          style: prudWidgetStyle.tabTextStyle
-              .copyWith(fontSize: 16, color: prudColorTheme.bgA),
+          style: prudWidgetStyle.tabTextStyle.copyWith(fontSize: 16, color: prudColorTheme.bgA),
         ),
         actions: const [],
       ),

@@ -6,6 +6,7 @@ import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/tab_data.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
     
 class VideoTitles extends StatefulWidget {
   final Function(dynamic) onCompleted;
@@ -58,7 +59,7 @@ class VideoTitlesState extends State<VideoTitles> {
       appBar:  AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: prudColorTheme.bgA,),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => iCloud.goBack(context),
           splashRadius: 20,
         ),
         title: Translate(

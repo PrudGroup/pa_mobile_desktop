@@ -152,7 +152,7 @@ class PayInState extends State<PayIn> {
                 ),
                 spacer.height,
                 prudWidgetStyle.getLongButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => iCloud.goBack(context),
                   text: "Go Back"
                 ),
                 spacer.height,

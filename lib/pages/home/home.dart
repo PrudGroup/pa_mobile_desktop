@@ -239,13 +239,12 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
                           items: carousels),
                     ),
                     spacer.height,
-                    if (!prudServiceIsAvailable)
-                      Column(
-                        children: [
-                          const NetworkIssueComponent(),
-                          spacer.height,
-                        ],
-                      ),
+                    if (!prudServiceIsAvailable) Column(
+                      children: [
+                        const NetworkIssueComponent(),
+                        spacer.height,
+                      ],
+                    ),
                     PrudContainer(
                         hasPadding: true,
                         child: MainMenu(

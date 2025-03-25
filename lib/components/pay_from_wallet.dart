@@ -3,6 +3,7 @@ import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/components/pin_verifier.dart';
 import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/singletons/currency_math.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/influencer_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
@@ -209,7 +210,7 @@ class PayFromWalletState extends State<PayFromWallet> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     prudWidgetStyle.getShortButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () => iCloud.goBack(context),
                         text: "Cancel",
                         isPill: false,
                         makeLight: true
@@ -284,7 +285,7 @@ class PayFromWalletState extends State<PayFromWallet> {
                   ),
                   spacer.height,
                   prudWidgetStyle.getLongButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => iCloud.goBack(context),
                       text: "Cancel Transaction"
                   ),
                 ],

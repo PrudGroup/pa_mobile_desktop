@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:prudapp/components/loading_component.dart';
+import 'package:prudapp/components/network_issue_component.dart';
 import 'package:prudapp/models/prud_vid.dart';
+import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/pages/home/home.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/add_video_views/video_category.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/add_video_views/video_cost.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/add_video_views/video_declare.dart';
@@ -14,8 +18,12 @@ import 'package:prudapp/pages/prudVid/studio/pageViews/add_video_views/video_sni
 import 'package:prudapp/pages/prudVid/studio/pageViews/add_video_views/video_target.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/add_video_views/video_titles.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/add_video_views/video_uploads.dart';
+import 'package:prudapp/singletons/currency_math.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/settings_notifier.dart';
+import 'package:prudapp/singletons/shared_local_storage.dart';
+import 'package:prudapp/singletons/tab_data.dart';
 
     
 class AddVideo extends StatefulWidget {
@@ -36,17 +44,32 @@ class AddVideoState extends State<AddVideo> {
   AddVideoStep presentStep = prudStudioNotifier.newVideo.lastStep;
   bool succeeded = false;
   String? errorMsg;
+  bool prudServiceIsAvailable = true;
+  bool refreshing = false;
 
   @override
   void initState() {
+    Future.delayed(Duration.zero, () async {
+      await changeConnectionStatus();
+    });
     localSettings.updateLastRoute(Uri(path: '/prud_studio/add_new_video').toString());
     localSettings.updateLastRouteData({"channel": widget.channel.toJson(), "creatorId": widget.creatorId});
     if(mounted) {
       setState(() {
+        prudStudioNotifier.newVideo.channelId = widget.channel.id;
         prudStudioNotifier.newVideo.videoType = widget.channel.category;
       });
     }
     super.initState();
+    prudStudioNotifier.addListener((){
+      if(mounted) setState(() => presentStep = prudStudioNotifier.newVideo.lastStep);
+    });
+  }
+
+  @override
+  void dispose() {
+    prudStudioNotifier.removeListener(() {});
+    super.dispose();
   }
 
   void handlePreviousEvents() async {
@@ -201,7 +224,9 @@ class AddVideoState extends State<AddVideo> {
       case AddVideoStep.snippets: {
         step = AddVideoStep.snippets;
         if(returnedData["snippets"] != null){
-          prudStudioNotifier.newVideo.snippets = returnedData["snippets"];
+          if(returnedData["snippets"] != true){
+            prudStudioNotifier.newVideo.snippets = returnedData["snippets"];
+          }
           if(["movies", "music"].contains(widget.channel.category.toLowerCase())){
             step = widget.channel.category.toLowerCase() == "movies"? AddVideoStep.movie : AddVideoStep.music;
           }else{
@@ -262,16 +287,83 @@ class AddVideoState extends State<AddVideo> {
     await prudStudioNotifier.saveNewVideoData();
     if(mounted) setState(() => presentStep = step);
   }
+
+  Future<void> changeConnectionStatus() async {
+    bool ok = await iCloud.prudServiceIsAvailable();
+    if (mounted) setState(() => prudServiceIsAvailable = ok);
+  }
+
+  Future<void> _refresh() async {
+    await currencyMath.loginAutomatically();
+    await changeConnectionStatus();
+    await prudStudioNotifier.initPrudStudio();
+  }
+
+  Future<void> refresh() async {
+    if(mounted) setState(() => refreshing = true);
+    await _refresh();
+    if(mounted) setState(() => refreshing = false);
+  }
   
   @override
   Widget build(BuildContext context) {
-    return presentStep == AddVideoStep.policy?
-     VideoPolicy(
+    Size screen = MediaQuery.of(context).size;
+    return prudServiceIsAvailable != true? Scaffold(
+      resizeToAvoidBottomInset: false,
+      backgroundColor: prudColorTheme.bgC,
+      appBar: AppBar(
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: prudColorTheme.bgA,),
+          onPressed: () => iCloud.goBack(context),
+          splashRadius: 20,
+        ),
+        title: Text(
+          "Pull To Refresh",
+          style: prudWidgetStyle.tabTextStyle.copyWith(fontSize: 16, color: prudColorTheme.bgA),
+          textAlign: TextAlign.center,
+        ),
+        backgroundColor: prudTheme.primaryColor,
+        foregroundColor: prudTheme.colorScheme.surface,
+        actions: [
+          refreshing? LoadingComponent(
+            isShimmer: false,
+            size: 25,
+            spinnerColor: prudColorTheme.bgA,
+          ) : IconButton(
+            onPressed: refresh,
+            icon: Icon(Icons.refresh),
+            iconSize: 25,
+            color: prudColorTheme.bgA,
+          )
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: SizedBox(
+          width: screen.width,
+          height: screen.height,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              children: [
+                spacer.height,
+                const NetworkIssueComponent(),
+                spacer.height,
+                largeSpacer.height,
+              ],
+            )
+          ),
+        )
+      ),
+    ) : presentStep == AddVideoStep.policy?
+    VideoPolicy(
       onCompleted: handleNextEvents, 
       onPrevious: handlePreviousEvents,
-     ) 
-     : 
-     (
+    ) 
+    : 
+    (
       presentStep == AddVideoStep.declaration?
       VideoDeclare(
         onCompleted: handleNextEvents, 
@@ -374,6 +466,6 @@ class AddVideoState extends State<AddVideo> {
           )
         )
       )
-     );
+    );
   }
 }

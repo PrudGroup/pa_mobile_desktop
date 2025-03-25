@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:prudapp/pages/prudVid/studio/studio_channel.dart';
 import 'package:prudapp/pages/prudVid/studio/studio_creators.dart';
 import 'package:prudapp/pages/prudVid/studio/studio_wallet.dart';
+import 'package:prudapp/singletons/settings_notifier.dart';
 
 import '../../models/images.dart';
 import '../../models/theme.dart';
@@ -23,6 +24,7 @@ class PrudVidStudioState extends State<PrudVidStudio> with TickerProviderStateMi
   @override
   void initState(){
     super.initState();
+    localSettings.updateLastRoute(Uri(path: '/prud_studio', queryParameters: widget.tab != null? {"tab": widget.tab.toString()} : null).toString());
     if(widget.tab != null) {
       tabCtrl.animateTo(widget.tab!);
     } else {

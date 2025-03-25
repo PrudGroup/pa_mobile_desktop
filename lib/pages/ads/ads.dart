@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:prudapp/singletons/i_cloud.dart';
 
 import '../../models/theme.dart';
 import '../../components/translate_text.dart';
@@ -20,7 +21,7 @@ class AdsState extends State<Ads> {
       appBar:  AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: prudColorTheme.bgA,),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => iCloud.goBack(context),
           splashRadius: 20,
         ),
         title: Translate(
