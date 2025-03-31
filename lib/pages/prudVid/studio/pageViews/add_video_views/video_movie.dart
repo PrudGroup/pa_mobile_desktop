@@ -35,7 +35,7 @@ class VideoMovieState extends State<VideoMovie> {
   List<String> guards = ["Adult", "All", "PG", "18+", "16+", "13+", "8+", "Infants"];
   List<String> mTypes = ["Animation", "Live Action"];
    List<String> mSubTypes = ["Drama", "Action", "Epic", "Sci-Fi", "Horror", "Comedy", "Thriller", "Romance"];
-  List<String>? tags = prudStudioNotifier.newVideo.movieDetail?.tags;
+  List<String>? tags = prudStudioNotifier.newVideo.movieDetail?.tags?.toList();
   String? producerName = prudStudioNotifier.newVideo.movieDetail?.executiveProducerName;
   String parentalGuard = prudStudioNotifier.newVideo.movieDetail?.parentalGuard?? "Adult";
   int productionMonth = prudStudioNotifier.newVideo.movieDetail?.productionMonth?? 0;
@@ -46,7 +46,7 @@ class VideoMovieState extends State<VideoMovie> {
   bool isSeries = prudStudioNotifier.newVideo.movieDetail?.isSeries?? false;
   int? season = prudStudioNotifier.newVideo.movieDetail?.season;
   int? episode = prudStudioNotifier.newVideo.movieDetail?.episode;
-  List<String> companies = prudStudioNotifier.newVideo.movieDetail?.productionCompanyNames?? [];
+  List<String> companies = prudStudioNotifier.newVideo.movieDetail?.productionCompanyNames.toList()?? [];
   int totalCasts = prudStudioNotifier.newVideo.movieDetail?.totalCast?? 0;
   double totalCost = prudStudioNotifier.newVideo.movieDetail?.totalCostOfProduction?? 0;
   List<VideoMovieCast> casts = prudStudioNotifier.newVideo.movieDetail?.casts?? [];

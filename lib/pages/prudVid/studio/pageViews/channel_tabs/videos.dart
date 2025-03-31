@@ -35,7 +35,7 @@ class ChannelVideosState extends State<ChannelVideos> {
   late FlickMultiManager flickMultiManager;
 
   Future<List<ChannelVideo>?> getFromCloud(bool isInit) async {
-    return await tryAsync("getVideos", () async {
+    return await tryAsync("getFromCloud", () async {
       return prudStudioNotifier.getChannelVideos(
         channelId: widget.channel.id!,
         limit: 50,
@@ -47,48 +47,57 @@ class ChannelVideosState extends State<ChannelVideos> {
   }
 
   Future<void> getMoreVideos() async {
-    if(mounted) setState(() => gettingMore = true);
-    List<ChannelVideo>? vids = await getFromCloud(false);
-    if(vids != null && vids.isNotEmpty){
-      if(mounted) {
-        setState(() {
-          videos.addAll(vids);
-          offset += vids.length;
-        });
-        prudStudioNotifier.lastOffsetChannelVideos = offset;
-        prudStudioNotifier.selectedChannelId = widget.channel.id;
-        prudStudioNotifier.selectedChannelVideos = vids;
-      }
-    }
-    if(mounted) setState(() => gettingMore = false);
-  }
-
-  Future<void> getVideos() async {
-    if(prudStudioNotifier.selectedChannelId == widget.channel.id && prudStudioNotifier.selectedChannelVideos.isNotEmpty){
-      if(mounted) {
-        setState((){
-          videos = prudStudioNotifier.selectedChannelVideos;
-          offset = prudStudioNotifier.lastOffsetChannelVideos;
-          lastScrollPoint = prudStudioNotifier.lastScrollPointChannelVideos;
-        });
-        sCtrl.animateTo(lastScrollPoint, duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
-      }
-    }else{
-      if(mounted) setState(() => loading = true);
-      List<ChannelVideo>? vids = await getFromCloud(true);
+    await tryAsync("getMoreVideos", () async {
+      if(mounted) setState(() => gettingMore = true);
+      List<ChannelVideo>? vids = await getFromCloud(false);
       if(vids != null && vids.isNotEmpty){
         if(mounted) {
           setState(() {
-            videos = vids;
-            offset = vids.length;
+            videos.addAll(vids);
+            offset += vids.length;
           });
           prudStudioNotifier.lastOffsetChannelVideos = offset;
           prudStudioNotifier.selectedChannelId = widget.channel.id;
           prudStudioNotifier.selectedChannelVideos = vids;
         }
       }
+      if(mounted) setState(() => gettingMore = false);
+    }, error: (){
+      if(mounted) setState(() => gettingMore = false);
+    });
+  }
+
+  Future<void> getVideos() async {
+    await tryAsync("getVideos", () async {
+      if(prudStudioNotifier.selectedChannelId == widget.channel.id && prudStudioNotifier.selectedChannelVideos.isNotEmpty){
+        if(mounted) {
+          setState((){
+            videos = prudStudioNotifier.selectedChannelVideos;
+            offset = prudStudioNotifier.lastOffsetChannelVideos;
+            lastScrollPoint = prudStudioNotifier.lastScrollPointChannelVideos;
+          });
+          sCtrl.animateTo(lastScrollPoint, duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
+        }
+      }else{
+        if(mounted) setState(() => loading = true);
+        List<ChannelVideo>? vids = await getFromCloud(true);
+        if(vids != null && vids.isNotEmpty){
+          if(mounted) {
+            setState(() {
+              videos = vids;
+              offset = vids.length;
+            });
+            prudStudioNotifier.lastOffsetChannelVideos = offset;
+            prudStudioNotifier.selectedChannelId = widget.channel.id;
+            prudStudioNotifier.selectedChannelVideos = vids;
+          }
+        }
+        if(mounted) setState(() => loading = false);
+      }
+    }, error: (){
       if(mounted) setState(() => loading = false);
-    }
+    });
+    
   }
 
   
@@ -154,7 +163,7 @@ class ChannelVideosState extends State<ChannelVideos> {
                 ),
               ),
             ),
-            if(gettingMore) PrudInfiniteLoader(text: "Video Clips"),
+            if(gettingMore) PrudInfiniteLoader(text: "Clips"),
           ],
         ) : Column(
           crossAxisAlignment: CrossAxisAlignment.start,

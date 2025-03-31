@@ -55,11 +55,36 @@ class VideoCostState extends State<VideoCost> {
         videoType: widget.channel.category, isLive: prudStudioNotifier.newVideo.isLive, liveStartsOn: prudStudioNotifier.newVideo.liveStartsOn,
         uploadedAt: DateTime.now(), updatedAt: DateTime.now(), scheduledFor: prudStudioNotifier.newVideo.scheduledFor,
         timezone: prudStudioNotifier.newVideo.timezone?? "WAT", costPerNonMemberView: prudStudioNotifier.newVideo.costPerNonMemberView!,
-        iDeclared: prudStudioNotifier.newVideo.iDeclared!, videoDuration: prudStudioNotifier.newVideo.videoDuration!.toJson(),
-        snippets: prudStudioNotifier.newVideo.snippets, thriller: prudStudioNotifier.newVideo.thriller, sponsored: prudStudioNotifier.newVideo.sponsored,
+        iDeclared: prudStudioNotifier.newVideo.iDeclared!, videoDuration: prudStudioNotifier.newVideo.videoDuration!.toString(),
+        movieDetailId: prudStudioNotifier.newVideo.movieDetailId, musicDetailId: prudStudioNotifier.newVideo.musicDetailId,
       );
       ChannelVideo? savedVid = await prudStudioNotifier.createNewVideo(newVid);
       if(savedVid != null){
+        if(savedVid.id != null && prudStudioNotifier.newVideo.snippets != null && prudStudioNotifier.newVideo.snippets!.isNotEmpty){
+          List<VideoSnippet> snippets = prudStudioNotifier.newVideo.snippets!.map<VideoSnippet>((snip) {
+            snip.videoId = savedVid.id!;
+            return snip;
+          }).toList();
+          savedVid.snippets = snippets;
+          bool snippetsCreated = false;
+          while(snippetsCreated == false){
+            snippetsCreated = await prudStudioNotifier.createNewBulkSnippet(snippets);
+          }
+        }
+        if(prudStudioNotifier.newVideo.promoted == true && prudStudioNotifier.newVideo.sponsored != null){
+          PromoteVideo? sponsoredCreated;
+          PromoteVideo sponsor = PromoteVideo(videoId: savedVid.id!);
+          prudStudioNotifier.newVideo.sponsored = sponsor;
+          while(sponsoredCreated == null){
+            sponsoredCreated = await prudStudioNotifier.promoteVideo(sponsor);
+          }
+          savedVid.sponsored = sponsoredCreated;
+        }
+        if(prudStudioNotifier.newVideo.thriller != null){
+          prudStudioNotifier.newVideo.thriller!.videoId = savedVid.id!;
+          VideoThriller? vThriller = await prudStudioNotifier.createNewThriller(prudStudioNotifier.newVideo.thriller!);
+          savedVid.thriller = vThriller;
+        }
         if(mounted){
           setState(() {
             prudStudioNotifier.newVideo.hasSavedVideo = true;
@@ -117,7 +142,7 @@ class VideoCostState extends State<VideoCost> {
           splashRadius: 20,
         ),
         title: Translate(
-          text: "Video View Cost",
+          text: "Video Viewing Cost",
           style: prudWidgetStyle.tabTextStyle.copyWith(
             fontSize: 16,
             color: prudColorTheme.bgA
@@ -166,11 +191,15 @@ class VideoCostState extends State<VideoCost> {
                       borderColor: prudColorTheme.lineC
                     ),
                     onChanged: (String? value){
-                      if(mounted && value != null) {
-                        setState(() { 
-                          cost = double.parse(value.trim());
-                        });
-                      }
+                      tryOnly("onChange", (){
+                        if(mounted && value != null) {
+                          setState(() { 
+                            cost = double.parse(value.trim());
+                          });
+                        }
+                      }, error: (){
+                        debugPrint("Wrong Values");
+                      });
                     },
                     valueTransformer: (text) => num.tryParse(text!),
                     validator: FormBuilderValidators.compose([

@@ -496,7 +496,7 @@ class ThrillerDetailState extends State<ThrillerDetail> {
                       ),
                       SizedBox(height: 5, child: Align(alignment: Alignment.center, child: Container(width: 2, height: 2, color: prudColorTheme.textC))),
                       Text(
-                        "#${thriller?.tags?[0]}",
+                        "#${thriller?.tags?.elementAt(0)}",
                         style: prudWidgetStyle.hintStyle.copyWith(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,

@@ -38,6 +38,8 @@ class VideoTargetState extends State<VideoTarget> {
   @override
   void initState() {
     if(mounted) {
+      debugPrint("VideoTags: $videoTags");
+      debugPrint("ThrillerTags: $thrillerTags");
       setState(() { 
         videoTags??= prudStudioNotifier.newVideo.title?.split(" ");
         thrillerTags??= videoTags;
@@ -231,7 +233,7 @@ class VideoTargetState extends State<VideoTarget> {
                           if(mounted && valueDesc != null) {
                             inputFieldValues.onTagChanged(valueDesc);
                             setState(() {
-                              videoTags = valueDesc.trim().split(" ");
+                              videoTags = inputFieldValues.tags;
                               result?["videoTags"] = videoTags;
                               prudStudioNotifier.newVideo.tags = videoTags;
                             });
@@ -334,7 +336,7 @@ class VideoTargetState extends State<VideoTarget> {
                           if(mounted && valueDesc != null) {
                             inputFieldValues.onTagChanged(valueDesc);
                             setState(() {
-                              videoTags = valueDesc.trim().split(" ");
+                              thrillerTags = inputFieldValues.tags;
                               result?["thrillerTags"] = thrillerTags;
                               prudStudioNotifier.newVideo.thriller!.tags = thrillerTags;
                             });

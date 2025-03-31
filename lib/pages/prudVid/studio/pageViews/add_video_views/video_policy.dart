@@ -50,9 +50,9 @@ class VideoPolicyState extends State<VideoPolicy> {
               text: "Uploading a video to PrudVid is a great way of creating passive income. "
               " We are very protective towards what video content can be uploaded to our platform. "
               " You must completely read and understand our policies regarding video contents. "
-              "We just want to resound it clear hear that each policy is strictly to be adhered to."
-              " The content must be original, of great value, and high quality. We greatly frown at AI created contents."
-              "The content must also adhere to government policies that exist in the country you primarily selected for your channel. "
+              "We just want to resound it clear that each policy is strictly to be adhered to."
+              " The content must be original, of great value, and high quality. We greatly frown at AI generated contents."
+              " The content must also adhere to government policies that exist in the country you primarily selected for your channel. "
               "Thumbnails must not be misleading. Thumbnails must be inline with the video content. No sexual, nudity or violence inciting contents allowed. "
               "If any video content policy is broken, that content will be blocked and your channel suppended for a month. ",
               style: prudWidgetStyle.tabTextStyle.copyWith(

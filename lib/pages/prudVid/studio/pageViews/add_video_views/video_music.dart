@@ -28,7 +28,7 @@ class VideoMusicState extends State<VideoMusic> {
   Map<String, dynamic>? result;
   List<String> forbiddenTags = ["sex", "fuck", "pussy", "violence", "viral", "shorts", "youtube"];
   List<String> guards = ["Adult", "All", "PG", "18+", "16+", "13+", "8+", "Infants"];
-  List<String>? tags = prudStudioNotifier.newVideo.musicDetail?.tags;
+  List<String>? tags = prudStudioNotifier.newVideo.musicDetail?.tags?.toList();
   String? producerName = prudStudioNotifier.newVideo.musicDetail?.executiveProducerName;
   String parentalGuard = prudStudioNotifier.newVideo.musicDetail?.parentalGuard?? "Adult";
   int productionMonth = prudStudioNotifier.newVideo.musicDetail?.productionMonth?? 0;

@@ -264,6 +264,15 @@ class PrudStudioNotifier extends ChangeNotifier {
     }
   }
 
+  Future<PromoteVideo?> promoteVideo(PromoteVideo pro) async {
+    dynamic res = await makeRequest(path: "promote_videos/", isGet: false, data: pro.toJson());
+    if (res != null && res != false) {
+      return PromoteVideo.fromJson(res);
+    } else {
+      return null;
+    }
+  }
+
   Future<void> getStudio() async {
     studio = await tryAsync("getStudio", () async {
       dynamic stud = myStorage.getFromStore(key: "studio");
@@ -362,7 +371,7 @@ class PrudStudioNotifier extends ChangeNotifier {
   }
 
   Future<VideoThriller?> getThrillerByVideoId({required String videoId}) async {
-    return await tryAsync("getThrillerById", () async {
+    return await tryAsync("getThrillerByVideoId", () async {
       dynamic res = await makeRequest(path: "channels/videos/thrillers/video/$videoId", isGet: true);
       if (res != null && res != false) {
         VideoThriller.fromJson(res);
@@ -760,6 +769,40 @@ class PrudStudioNotifier extends ChangeNotifier {
         return ChannelVideo.fromJson(res);
       } else {
         return null;
+      }
+    });
+  }
+
+  Future<VideoThriller?> createNewThriller(VideoThriller newThriller) async {
+    return await tryAsync("createNewThriller", () async {
+      dynamic res = await makeRequest(path: "channels/videos/thrillers/", isGet: false, data: newThriller.toJson());
+      if (res != null && res != false) {
+        return VideoThriller.fromJson(res);
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<VideoSnippet?> createNewSnippet(VideoSnippet newSnippet) async {
+    return await tryAsync("createNewSnippet", () async {
+      dynamic res = await makeRequest(path: "channels/videos/snippets/", isGet: false, data: newSnippet.toJson());
+      if (res != null && res != false) {
+        return VideoSnippet.fromJson(res);
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<bool> createNewBulkSnippet(List<VideoSnippet> newSnippets) async {
+    dynamic snippets = newSnippets.map((snip) => snip.toJson()).toList();
+    return await tryAsync("createNewBulkSnippet", () async {
+      dynamic res = await makeRequest(path: "channels/videos/snippets/", isGet: false, data: {"bulk": snippets});
+      if (res != null && res != false) {
+        return true;
+      } else {
+        return false;
       }
     });
   }

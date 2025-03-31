@@ -196,13 +196,9 @@ class PrudVideoComponentState extends State<PrudVideoComponent> {
   @override
   void initState() {
     Future.delayed(Duration.zero, () async {
-      if(widget.thriller == null){
-        await getThriller();
-        if(widget.video == null){
-          await getVideo();
-          await getChannel();
-        }
-      }
+      if(widget.thriller == null) await getThriller();
+      if(widget.video == null) await getVideo();
+      if(widget.channel == null)  await getChannel();
       if(mounted){
         setState(() {
           thriller ??= widget.thriller;
@@ -210,7 +206,7 @@ class PrudVideoComponentState extends State<PrudVideoComponent> {
           authorizedUrl = iCloud.authorizeDownloadUrl(thriller!.videoUrl);
           totalViews = video!.nonMemberViews + video!.memberViews;
           uploadedWhen = myStorage.ago(dDate: video!.uploadedAt, isShort: false);
-          rating = video!.getRating();
+          if(video != null) rating = video!.getRating();
           allVidsReady = true;
         });
       }

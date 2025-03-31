@@ -14,8 +14,7 @@ class PrudInfiniteLoader extends StatelessWidget {
     return Container(
       width: screen.width,
       padding: const EdgeInsets.all(10),
-      child: Align(
-        alignment: Alignment.center,
+      child: Center(
         child: Row(
           children: [
             Stack(
@@ -38,19 +37,19 @@ class PrudInfiniteLoader extends StatelessWidget {
               alignment: Alignment.topLeft,
               children: [
                 Translate(
-                  text: "Loading more $text",
+                  text: "getting more $text",
                   style: prudWidgetStyle.tabTextStyle.copyWith(
-                    fontSize: 16,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: prudColorTheme.success,
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 22),
+                  padding: const EdgeInsets.only(top: 18),
                   child: Translate(
                     text: "Wait For it!",
                     style: prudWidgetStyle.tabTextStyle.copyWith(
-                      fontSize: 13,
+                      fontSize: 10,
                       fontWeight: FontWeight.w500,
                       color: prudColorTheme.secondary,
                     ),

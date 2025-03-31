@@ -810,7 +810,7 @@ class ChannelVideo {
   bool iDeclared;
   int votes;
   int voters;
-  Map<String, dynamic> videoDuration;
+  String videoDuration;
   List<ChannelVideoViewMatrix>? viewMatrix;
   List<StudioWalletHistory>? paymentHistories;
   List<VideoClaimReport>? claims;
@@ -1770,8 +1770,7 @@ class VideoMusicDetail {
       productionMonth: json["productionMonth"],
       productionYear: json["productionYear"],
       totalCostOfProduction: json["totalCostOfProduction"],
-      video:
-          json["video"] != null ? ChannelVideo.fromJson(json["video"]) : null,
+      video: json["video"] != null ? ChannelVideo.fromJson(json["video"]) : null,
     );
   }
 }
@@ -1877,19 +1876,13 @@ class ContentCreatorRequest {
       channelId: json["channelId"],
       creatorId: json["creatorId"],
       requestMessage: json["requestMessage"],
-      updatedOn:
-          json["updatedOn"] != null ? DateTime.parse(json["updatedOn"]) : null,
-      requestedOn: json["requestedOn"] != null
-          ? DateTime.parse(json["requestedOn"])
-          : null,
+      updatedOn: json["updatedOn"] != null ? DateTime.parse(json["updatedOn"]) : null,
+      requestedOn: json["requestedOn"] != null? DateTime.parse(json["requestedOn"]): null,
       meetingLink: json["meetingLink"],
       id: json["id"],
       status: json["status"],
-      creator: json["creator"] != null
-          ? ContentCreator.fromJson(json["creator"])
-          : null,
-      channel:
-          json["channel"] != null ? VidChannel.fromJson(json["channel"]) : null,
+      creator: json["creator"] != null? ContentCreator.fromJson(json["creator"]) : null,
+      channel: json["channel"] != null? VidChannel.fromJson(json["channel"]) : null,
     );
   }
 }
@@ -1909,8 +1902,9 @@ class CreatorDetail {
 
   factory CreatorDetail.fromJson(Map<String, dynamic> json) {
     return CreatorDetail(
-        creator: ContentCreator.fromJson(json["creator"]),
-        detail: User.fromJson(json["detail"]));
+      creator: ContentCreator.fromJson(json["creator"]),
+      detail: User.fromJson(json["detail"])
+    );
   }
 }
 
@@ -1933,9 +1927,7 @@ class CachedChannelCreator {
   factory CachedChannelCreator.fromJson(Map<String, dynamic> json) {
     return CachedChannelCreator(
       channel: VidChannel.fromJson(json["channel"]),
-      creators: json["creators"]
-          .map<CreatorDetail>((cha) => CreatorDetail.fromJson(cha))
-          .toList(),
+      creators: json["creators"].map<CreatorDetail>((cha) => CreatorDetail.fromJson(cha)).toList(),
     );
   }
 }
@@ -1978,16 +1970,10 @@ class PromoteChannel {
       mediaType: json["mediaType"],
       mediaUrl: json["mediaUrl"],
       id: json["id"],
-      createdOn:
-          json["createdOn"] != null ? DateTime.parse(json["createdOn"]) : null,
-      updatedOn:
-          json["updatedOn"] != null ? DateTime.parse(json["updatedOn"]) : null,
-      channel:
-          json["channel"] != null ? VidChannel.fromJson(json["channel"]) : null,
-      metrics: json["metrics"]
-          .map<PromoteChannelMetric>(
-              (pcm) => PromoteChannelMetric.fromJson(pcm))
-          .toList(),
+      createdOn: json["createdOn"] != null ? DateTime.parse(json["createdOn"]) : null,
+      updatedOn: json["updatedOn"] != null ? DateTime.parse(json["updatedOn"]) : null,
+      channel: json["channel"] != null ? VidChannel.fromJson(json["channel"]) : null,
+      metrics: json["metrics"]?.map<PromoteChannelMetric>((pcm) => PromoteChannelMetric.fromJson(pcm)).toList(),
     );
   }
 }
@@ -2022,15 +2008,10 @@ class PromoteVideo {
     return PromoteVideo(
       videoId: json["videoId"],
       id: json["id"],
-      createdOn:
-          json["createdOn"] != null ? DateTime.parse(json["createdOn"]) : null,
-      updatedOn:
-          json["updatedOn"] != null ? DateTime.parse(json["updatedOn"]) : null,
-      video:
-          json["video"] != null ? ChannelVideo.fromJson(json["video"]) : null,
-      metrics: json["metrics"]
-          .map<PromoteVideoMetric>((pvm) => PromoteVideoMetric.fromJson(pvm))
-          .toList(),
+      createdOn: json["createdOn"] != null ? DateTime.parse(json["createdOn"]) : null,
+      updatedOn: json["updatedOn"] != null ? DateTime.parse(json["updatedOn"]) : null,
+      video: json["video"] != null ? ChannelVideo.fromJson(json["video"]) : null,
+      metrics: json["metrics"]?.map<PromoteVideoMetric>((pvm) => PromoteVideoMetric.fromJson(pvm)).toList(),
     );
   }
 }
@@ -2476,6 +2457,9 @@ class PrudVidDuration{
       "seconds": seconds,
     };
   }
+
+  @override
+  String toString() => "${toJson()}";
 
   factory PrudVidDuration.fromJson(Map<String, dynamic> json) {
     return PrudVidDuration(

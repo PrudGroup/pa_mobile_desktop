@@ -3,7 +3,6 @@ import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/components/network_issue_component.dart';
 import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/theme.dart';
-import 'package:prudapp/pages/home/home.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/add_video_views/video_category.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/add_video_views/video_cost.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/add_video_views/video_declare.dart';
@@ -23,7 +22,6 @@ import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/settings_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
-import 'package:prudapp/singletons/tab_data.dart';
 
     
 class AddVideo extends StatefulWidget {
@@ -206,6 +204,8 @@ class AddVideoState extends State<AddVideo> {
           prudStudioNotifier.newVideo.thriller!.tags = returnedData["thrillerTags"];
           step = AddVideoStep.publishType;
         }
+        debugPrint("Video Tags: ${prudStudioNotifier.newVideo.tags}");
+        debugPrint("Thriller Tags: ${prudStudioNotifier.newVideo.thriller!.tags}");
         break;
       }
       case AddVideoStep.publishType: {
@@ -223,8 +223,8 @@ class AddVideoState extends State<AddVideo> {
       }
       case AddVideoStep.snippets: {
         step = AddVideoStep.snippets;
-        if(returnedData["snippets"] != null){
-          if(returnedData["snippets"] != true){
+        if(returnedData != null){
+          if(returnedData != true){
             prudStudioNotifier.newVideo.snippets = returnedData["snippets"];
           }
           if(["movies", "music"].contains(widget.channel.category.toLowerCase())){
@@ -276,9 +276,9 @@ class AddVideoState extends State<AddVideo> {
             )
           );
           prudStudioNotifier.clearUnfinishedNewVideoFromCache();
-          Navigator.pop(context);
+          iCloud.goBack(context);
         }else{
-          Navigator.pop(context);
+          iCloud.goBack(context);
         }
         break;
       }

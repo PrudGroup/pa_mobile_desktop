@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -12,7 +10,6 @@ import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/tab_data.dart';
-import 'package:video_trimmer/video_trimmer.dart';
     
 class VideoSnippets extends StatefulWidget {
   final Function(dynamic) onCompleted;
@@ -32,14 +29,11 @@ class VideoSnippetsState extends State<VideoSnippets> {
   String? start;
   String? end;
   String videoId = "";
-  File? videoFile = prudStudioNotifier.newVideo.videoLocalFile;
-  final Trimmer trimmer = Trimmer();
 
   @override
   void initState() {
     Future.delayed(Duration.zero, () async {
-      if(mounted && videoFile != null){
-        await trimmer.loadVideo(videoFile: videoFile!);
+      if(mounted){
         setState((){
           result = {"snippets": snippets};
         });
@@ -170,7 +164,7 @@ class VideoSnippetsState extends State<VideoSnippets> {
                     ],
                   ),
                   spacer.height,
-                  if(showSnippetAdd && videoFile != null) Padding(
+                  if(showSnippetAdd) Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
                     child: PrudPanel(
                       title: "New Snippet",
@@ -208,7 +202,6 @@ class VideoSnippetsState extends State<VideoSnippets> {
                               name: 'description',
                               initialValue: description,
                               enableInteractiveSelection: true,
-                              autofocus: true,
                               style: tabData.npStyle,
                               keyboardType: TextInputType.text,
                               decoration: getDeco(
@@ -230,41 +223,49 @@ class VideoSnippetsState extends State<VideoSnippets> {
                             Row(
                               children: [
                                 Expanded(
-                                  child: VideoViewer(trimmer: trimmer),
+                                  child: FormBuilderTextField(
+                                    name: 'start',
+                                    initialValue: description,
+                                    enableInteractiveSelection: true,
+                                    style: tabData.npStyle,
+                                    keyboardType: TextInputType.datetime,
+                                    decoration: getDeco(
+                                      "Start At",
+                                      onlyBottomBorder: true,
+                                      borderColor: prudColorTheme.lineC
+                                    ),
+                                    onChanged: (String? value){
+                                      if(mounted && value != null) setState(() => start = tabData.parseDurationFromDouble(double.parse(value)).toString());
+                                    },
+                                    valueTransformer: (text) => num.tryParse(text!),
+                                    validator: FormBuilderValidators.compose([
+                                      FormBuilderValidators.required()
+                                    ]),
+                                  ),
                                 ),
+                                spacer.width,
+                                Expanded(
+                                  child: FormBuilderTextField(
+                                    name: 'End',
+                                    initialValue: description,
+                                    enableInteractiveSelection: true,
+                                    style: tabData.npStyle,
+                                    keyboardType: TextInputType.text,
+                                    decoration: getDeco(
+                                      "End At",
+                                      onlyBottomBorder: true,
+                                      borderColor: prudColorTheme.lineC
+                                    ),
+                                    onChanged: (String? value){
+                                      if(mounted && value != null) setState(() => end = tabData.parseDurationFromDouble(double.parse(value)).toString());
+                                    },
+                                    valueTransformer: (text) => num.tryParse(text!),
+                                    validator: FormBuilderValidators.compose([
+                                      FormBuilderValidators.required(),
+                                    ]),
+                                  ),
+                                )
                               ]
-                            ),
-                            spacer.height,
-                            TrimViewer(
-                              trimmer: trimmer,
-                              durationTextStyle: const TextStyle(color: Colors.black),
-                              viewerHeight: 50.0,
-                              editorProperties: TrimEditorProperties(
-                                borderPaintColor: Colors.yellow,
-                                borderWidth: 4,
-                                borderRadius: 5,
-                                circlePaintColor: Colors.yellow.shade800,
-                              ),
-                              areaProperties: TrimAreaProperties.edgeBlur(
-                                thumbnailQuality: 10,
-                              ),
-                              viewerWidth: MediaQuery.of(context).size.width,
-                              maxVideoLength: const Duration(seconds: 3600),
-                              onChangeStart: (value) {
-                                if(mounted){
-                                  setState(() {
-                                    start = tabData.parseDurationFromDouble(value).toString();
-                                  });
-                                }
-                              },
-                              onChangeEnd: (value) {
-                                if(mounted){
-                                  setState(() {
-                                    end = tabData.parseDurationFromDouble(value).toString();
-                                  });
-                                }
-                              },
-                              onChangePlaybackState: (value) {},
                             ),
                             spacer.height,
                             Divider(

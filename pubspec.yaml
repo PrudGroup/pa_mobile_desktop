@@ -84,10 +84,10 @@ dependencies:
   share_plus: ^10.1.4
   printing: ^5.14.2
   socket_io_client: ^3.0.2
-  camerawesome: ^2.1.0
+  camerawesome: ^2.3.0
   paystack_for_flutter: ^1.0.2
   carousel_slider: ^5.0.0
-  syncfusion_flutter_sliders: ^28.2.12
+  syncfusion_flutter_sliders: ^29.1.33
   flutter_swipe_detector: ^2.0.0
   crypto: ^3.0.6
   file_picker: ^9.2.1
@@ -95,7 +95,7 @@ dependencies:
   mime: ^2.0.0
   http_parser: ^4.1.2
   flick_video_player: ^0.9.0
-  video_player_media_kit: ^1.0.5
+  video_player_media_kit: ^1.0.6
   media_kit_libs_android_video: any
   media_kit_libs_ios_video: any
   media_kit_libs_macos_video: any
@@ -107,7 +107,6 @@ dependencies:
   flutter_staggered_grid_view: ^0.7.0
   flutter_staggered_animations: ^1.1.1
   textfield_tags: ^3.0.1
-  video_trimmer: ^4.0.2
   visibility_detector: ^0.4.0+2
   intl: any
   
