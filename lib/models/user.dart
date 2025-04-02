@@ -38,6 +38,8 @@ class User {
   BusBrandOperator? isBusOperator;
   List<JourneyPassenger>? journeysTaken;
   List<VideoThrillerComment>? thrillerComments;
+  List<StreamBroadcastComment>? streamBroadcastComments;
+  List<ChannelBroadcastComment>? channelBroadcastComments;
 
   User({
     this.id,
@@ -70,7 +72,9 @@ class User {
     this.memberedChannelLinks,
     this.merchantReferral,
     this.points,
-    this.thrillerComments
+    this.thrillerComments,
+    this.channelBroadcastComments,
+    this.streamBroadcastComments,
   });
 
   Map<String, dynamic> toJson() => {
@@ -121,7 +125,8 @@ class User {
       points: json["points"]?.map<AffPoint>((itm) => AffPoint.fromJson(itm)).toList(),
       journeysTaken: json["journeysTaken"]?.map<JourneyPassenger>((itm) => JourneyPassenger.fromJson(itm)).toList(),
       thrillerComments: json["thrillerComments"]?.map<VideoThrillerComment>((itm) => VideoThrillerComment.fromJson(itm)).toList(),
+      streamBroadcastComments: json["streamBroadcastComments"]?.map<StreamBroadcastComment>((itm) => StreamBroadcastComment.fromJson(itm)).toList(),
+      channelBroadcastComments: json["channelBroadcastComments"]?.map<ChannelBroadcastComment>((itm) => ChannelBroadcastComment.fromJson(itm)).toList(),
     );
   }
-
 }

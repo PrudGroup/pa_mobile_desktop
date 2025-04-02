@@ -18,6 +18,7 @@ import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/playlists.da
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/videos.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
+import 'package:prudapp/singletons/settings_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -182,6 +183,8 @@ class _ChannelViewState extends State<ChannelView> {
   @override
   void initState() {
     setMenu(widget.channel);
+    localSettings.updateLastRoute(Uri(path: '/channels/${widget.channel.id}').toString());
+    localSettings.updateLastRouteData({"isOwner": widget.isOwner, "channel": widget.channel.toJson()});
     super.initState();
     Future.delayed(Duration.zero, () async {
       await checkIfIsChannelCreator();

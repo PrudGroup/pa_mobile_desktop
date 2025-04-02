@@ -337,6 +337,24 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
+  Future<List<ChannelBroadcast>?> getChannelBroadcasts({required String channelId, int limit = 100, int? offset}) async {
+    return await tryAsync("getChannelBroadcasts", () async {
+      dynamic res = await makeRequest(path: "channels/broadcasts/channel/$channelId", qParam: {
+        "limit": limit,
+        if(offset != null) "offset": offset
+      });
+      if (res != null && res != false && res.length > 0) {
+        List<ChannelBroadcast> chas = [];
+        for (var item in res) {
+          chas.add(ChannelBroadcast.fromJson(item));
+        }
+        return chas;
+      } else {
+        return null;
+      }
+    });
+  }
+
   Future<ChannelVideo?> getVideoById(String vid) async {
     return await tryAsync("getVideoById", () async {
       dynamic res = await makeRequest(path: "channels/videos/$vid");

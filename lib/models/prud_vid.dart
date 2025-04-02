@@ -274,46 +274,49 @@ class VidChannel {
   List<StreamChannel>? streamServices;
   List<ContentCreatorRequest>? creatorRequests;
   PromoteChannel? sponsored;
+  List<ChannelBroadcast>? broadcasts;
 
-  VidChannel(
-      {required this.channelName,
-      required this.contentPercentageSharePerView,
-      required this.monthlyMembershipCost,
-      required this.monthlyMembershipCostInEuro,
-      required this.monthlyStreamingCost,
-      required this.monthlyStreamingCostInEuro,
-      required this.membershipPercentageSharePerMonth,
-      required this.description,
-      required this.displayScreen,
-      required this.studioId,
-      required this.logo,
-      required this.countryCode,
-      required this.maxTargetAge,
-      required this.miniTargetAge,
-      required this.category,
-      this.subCategory = "Any",
-      this.verified = false,
-      this.promoted = false,
-      this.blocked = false,
-      this.presentlySeekingCreators = false,
-      this.channelCurrency = "EUR",
-      this.totalSubscribers = 0,
-      this.totalMembers = 0,
-      this.votes = 0,
-      this.voters = 0,
-      this.id,
-      this.creators,
-      this.studio,
-      this.subscriberLinks,
-      this.memberLinks,
-      this.membershipMatrix,
-      this.videos,
-      this.paymentHistories,
-      this.streamServices,
-      this.creatorRequests,
-      this.sponsored,
-      this.createdOn,
-      this.updatedOn});
+  VidChannel({
+    required this.channelName,
+    required this.contentPercentageSharePerView,
+    required this.monthlyMembershipCost,
+    required this.monthlyMembershipCostInEuro,
+    required this.monthlyStreamingCost,
+    required this.monthlyStreamingCostInEuro,
+    required this.membershipPercentageSharePerMonth,
+    required this.description,
+    required this.displayScreen,
+    required this.studioId,
+    required this.logo,
+    required this.countryCode,
+    required this.maxTargetAge,
+    required this.miniTargetAge,
+    required this.category,
+    this.subCategory = "Any",
+    this.verified = false,
+    this.promoted = false,
+    this.blocked = false,
+    this.presentlySeekingCreators = false,
+    this.channelCurrency = "EUR",
+    this.totalSubscribers = 0,
+    this.totalMembers = 0,
+    this.votes = 0,
+    this.voters = 0,
+    this.id,
+    this.creators,
+    this.studio,
+    this.subscriberLinks,
+    this.memberLinks,
+    this.membershipMatrix,
+    this.videos,
+    this.paymentHistories,
+    this.streamServices,
+    this.creatorRequests,
+    this.sponsored,
+    this.createdOn,
+    this.updatedOn,
+    this.broadcasts,
+  });
 
   double getRating() {
     if (voters > 0 && votes > 0) return votes / voters;
@@ -361,8 +364,7 @@ class VidChannel {
       monthlyMembershipCostInEuro: json["monthlyMembershipCostInEuro"],
       monthlyStreamingCost: json["monthlyStreamingCost"],
       monthlyStreamingCostInEuro: json["monthlyStreamingCostInEuro"],
-      membershipPercentageSharePerMonth:
-          json["membershipPercentageSharePerMonth"],
+      membershipPercentageSharePerMonth: json["membershipPercentageSharePerMonth"],
       description: json["description"],
       displayScreen: json["displayScreen"],
       studioId: json["studioId"],
@@ -380,39 +382,18 @@ class VidChannel {
       category: json["category"],
       votes: json["votes"],
       voters: json["voters"],
-      createdOn:
-          json["createdOn"] != null ? DateTime.parse(json["createdOn"]) : null,
-      updatedOn:
-          json["updatedOn"] != null ? DateTime.parse(json["updatedOn"]) : null,
-      streamServices: json["streamServices"]
-          ?.map<StreamChannel>((cha) => StreamChannel.fromJson(cha))
-          .toList(),
-      creatorRequests: json["creatorRequests"]
-          ?.map<ContentCreatorRequest>(
-              (cha) => ContentCreatorRequest.fromJson(cha))
-          .toList(),
-      paymentHistories: json["paymentHistories"]
-          ?.map<StudioWalletHistory>((cha) => StudioWalletHistory.fromJson(cha))
-          .toList(),
-      videos: json["videos"]
-          ?.map<ChannelVideo>((cha) => ChannelVideo.fromJson(cha))
-          .toList(),
-      membershipMatrix: json["membershipMatrix"]
-          ?.map<ChannelMembershipMatrix>(
-              (cha) => ChannelMembershipMatrix.fromJson(cha))
-          .toList(),
-      memberLinks: json["memberLinks"]
-          ?.map<ChannelMembership>((cha) => ChannelMembership.fromJson(cha))
-          .toList(),
-      subscriberLinks: json["subscriberLinks"]
-          ?.map<ChannelSubscriber>((cha) => ChannelSubscriber.fromJson(cha))
-          .toList(),
-      creators: json["creators"]
-          ?.map<ContentCreator>((cha) => ContentCreator.fromJson(cha))
-          .toList(),
-      sponsored: json["sponsored"] != null
-          ? PromoteChannel.fromJson(json["sponsored"])
-          : null,
+      createdOn: json["createdOn"] != null ? DateTime.parse(json["createdOn"]) : null,
+      updatedOn: json["updatedOn"] != null ? DateTime.parse(json["updatedOn"]) : null,
+      streamServices: json["streamServices"]?.map<StreamChannel>((cha) => StreamChannel.fromJson(cha)).toList(),
+      creatorRequests: json["creatorRequests"]?.map<ContentCreatorRequest>((cha) => ContentCreatorRequest.fromJson(cha)).toList(),
+      paymentHistories: json["paymentHistories"]?.map<StudioWalletHistory>((cha) => StudioWalletHistory.fromJson(cha)).toList(),
+      videos: json["videos"]?.map<ChannelVideo>((cha) => ChannelVideo.fromJson(cha)).toList(),
+      membershipMatrix: json["membershipMatrix"]?.map<ChannelMembershipMatrix>((cha) => ChannelMembershipMatrix.fromJson(cha)).toList(),
+      memberLinks: json["memberLinks"]?.map<ChannelMembership>((cha) => ChannelMembership.fromJson(cha)).toList(),
+      subscriberLinks: json["subscriberLinks"]?.map<ChannelSubscriber>((cha) => ChannelSubscriber.fromJson(cha)).toList(),
+      creators: json["creators"]?.map<ContentCreator>((cha) => ContentCreator.fromJson(cha)).toList(),
+      sponsored: json["sponsored"] != null? PromoteChannel.fromJson(json["sponsored"]) : null,
+      broadcasts: json["broadcasts"]?.map<ChannelBroadcast>((cha) => ChannelBroadcast.fromJson(cha)).toList(),
     );
   }
 }
@@ -480,6 +461,7 @@ class VidStream {
   double monthlySubscriptionCostInEuro;
   String currency;
   List<StreamChannel>? channels;
+  List<StreamBroadcast>? broadcasts;
 
   VidStream({
     required this.currency,
@@ -500,7 +482,8 @@ class VidStream {
     this.verified,
     this.blocked,
     this.channels,
-    this.studio
+    this.studio,
+    this.broadcasts,
   });
 
   Map<String, dynamic> toJson() {
@@ -542,14 +525,11 @@ class VidStream {
       blocked: json["blocked"],
       verified: json["verified"],
       id: json["id"],
-      createdOn:
-          json["createdOn"] != null ? DateTime.parse(json["createdOn"]) : null,
-      updatedOn:
-          json["createdOn"] != null ? DateTime.parse(json["createdOn"]) : null,
-      channels: json["channels"]
-          ?.map<StreamChannel>((cha) => StreamChannel.fromJson(cha))
-          .toList(),
+      createdOn: json["createdOn"] != null ? DateTime.parse(json["createdOn"]) : null,
+      updatedOn: json["createdOn"] != null ? DateTime.parse(json["createdOn"]) : null,
+      channels: json["channels"]?.map<StreamChannel>((cha) => StreamChannel.fromJson(cha)).toList(),
       studio: json["studio"] != null ? Studio.fromJson(json["studio"]) : null,
+      broadcasts: json["broadcasts"]?.map<StreamBroadcast>((cha) => StreamBroadcast.fromJson(cha)).toList(),
     );
   }
 }
@@ -2048,7 +2028,7 @@ class PromoteVideoMetric {
       "year": year,
       "impressions": impressions,
       "createdOn": createdOn.toString(),
-      "updatedOn": updatedOn
+      "updatedOn": updatedOn.toString(),
     };
   }
 
@@ -2098,7 +2078,7 @@ class PromoteChannelMetric {
       "year": year,
       "impressions": impressions,
       "createdOn": createdOn.toString(),
-      "updatedOn": updatedOn
+      "updatedOn": updatedOn.toString(),
     };
   }
 
@@ -2466,6 +2446,276 @@ class PrudVidDuration{
       hours: json["hours"],
       minutes: json["minutes"],
       seconds: json["seconds"],
+    );
+  }
+}
+
+
+class ChannelBroadcast{
+  String? id;
+  String channelId;
+  VidChannel? channel;
+  int likes;
+  int dislikes;
+  int impressions;
+  String message;
+  List<String>? images;
+  List<String>? links;
+  DateTime? createdOn;
+  DateTime? updatedOn;
+  List<ChannelBroadcastComment>? comments;
+
+  ChannelBroadcast({
+    required this.channelId,
+    required this.likes,
+    required this.dislikes,
+    required this.impressions,
+    required this.message,
+    this.id,
+    this.channel,
+    this.images,
+    this.links,
+    this.createdOn,
+    this.updatedOn,
+    this.comments,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      if(id != null) "id": id,
+      "channelId": channelId,
+      "likes": likes,
+      "dislikes": dislikes,
+      "impressions": impressions,
+      "message": message,
+      if(images != null) "images": images,
+      if(links != null) "links": links,
+      if(createdOn != null) "createdOn": createdOn!.toString(),
+      if(updatedOn != null) "updatedOn": updatedOn!.toString(),
+    };
+  }
+
+  @override
+  String toString() => "${toJson()}";
+
+  factory ChannelBroadcast.fromJson(Map<String, dynamic> json) {
+    return ChannelBroadcast(
+      id: json["id"],
+      channelId: json["channelId"],
+      likes: json["likes"],
+      dislikes: json["dislikes"],
+      impressions: json["impressions"],
+      message: json["message"],
+      images: json["images"]?.map<String>((itm) => itm.toString()).toList(),
+      links: json["links"]?.map<String>((itm) => itm.toString()).toList(),
+      createdOn: json["createdOn"] != null? DateTime.parse(json["createdOn"]) : null,
+      updatedOn: json["updatedOn"] != null? DateTime.parse(json["updatedOn"]) : null,
+      channel: json["channel"] != null? VidChannel.fromJson(json["channel"]) : null,
+      comments: json["comments"]?.map((itm) => ChannelBroadcastComment.fromJson(itm)).toList(),
+    );
+  }
+}
+
+
+class ChannelBroadcastComment {
+  String? id;
+  String broadcastId;
+  ChannelBroadcast? broadcast;
+  String comment;
+  bool isInnerComment;
+  String? innerCommentId;
+  String madeBy;
+  bool commentIsFromChannelOwner;
+  User? affiliate;
+  int likes;
+  int dislikes;
+  DateTime? createdOn;
+  DateTime? updatedOn;
+
+  ChannelBroadcastComment({
+    required this.broadcastId,
+    required this.comment,
+    required this.isInnerComment,
+    required this.commentIsFromChannelOwner,
+    required this.madeBy,
+    this.id,
+    this.broadcast,
+    this.innerCommentId,
+    this.affiliate,
+    this.createdOn,
+    this.updatedOn,
+    this.likes = 0,
+    this.dislikes = 0,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      "broadcastId": broadcastId,
+      "likes": likes,
+      "dislikes": dislikes,
+      "comment": comment,
+      "isInnerComment": isInnerComment,
+      "madeBy": madeBy,
+      "commentIsFromChannelOwner": commentIsFromChannelOwner,
+      if(id != null) "id": id,
+      if(innerCommentId != null) "innerCommentId": innerCommentId,
+      if(affiliate != null) "affiliate": affiliate!.toJson(),
+      if(createdOn != null) "createdOn": createdOn!.toString(),
+      if(updatedOn != null) "updatedOn": updatedOn!.toString(),
+    };
+  }
+
+  @override
+  String toString() => "${toJson()}";
+
+  factory ChannelBroadcastComment.fromJson(Map<String, dynamic> json) {
+    return ChannelBroadcastComment(
+      broadcastId: json["broadcastId"],
+      likes: json["likes"],
+      dislikes: json["dislikes"],
+      comment: json["comment"],
+      isInnerComment: json["isInnerComment"],
+      madeBy: json["madeBy"],
+      commentIsFromChannelOwner: json["commentIsFromChannelOwner"],
+      id: json["id"],
+      innerCommentId: json["innerCommentId"],
+      affiliate: json["affiliate"] != null? User.fromJson(json["affiliate"]) : null,
+      createdOn: json["createdOn"] != null? DateTime.parse(json["createdOn"]) : null,
+      updatedOn: json["updatedOn"] != null? DateTime.parse(json["updatedOn"]) : null,
+    );
+  }
+}
+
+
+class StreamBroadcast{
+  String? id;
+  String streamId;
+  VidStream? stream;
+  int likes;
+  int dislikes;
+  int impressions;
+  String message;
+  List<String>? images;
+  List<String>? links;
+  DateTime? createdOn;
+  DateTime? updatedOn;
+  List<StreamBroadcastComment>? comments;
+
+  StreamBroadcast({
+    required this.streamId,
+    required this.message,
+    this.id,
+    this.stream,
+    this.images,
+    this.links,
+    this.createdOn,
+    this.updatedOn,
+    this.comments,
+    this.likes = 0,
+    this.dislikes = 0,
+    this.impressions = 0,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      "streamId": streamId,
+      "likes": likes,
+      "dislikes": dislikes,
+      "impressions": impressions,
+      "message": message,
+      if(images != null) "images": images,
+      if(links != null) "links": links,
+      if(createdOn != null) "createdOn": createdOn!.toString(),
+      if(updatedOn != null) "updatedOn": updatedOn!.toString(),
+    };
+  }
+
+  @override
+  String toString() => "${toJson()}";
+
+  factory StreamBroadcast.fromJson(Map<String, dynamic> json) {
+    return StreamBroadcast(
+      streamId: json["streamId"],
+      likes: json["likes"],
+      dislikes: json["dislikes"],
+      impressions: json["impressions"],
+      message: json["message"],
+      links: json["links"]?.map<String>((itm) => itm.toString()).toList(),
+      images: json["images"]?.map<String>((itm) => itm.toString()).toList(),
+      createdOn: json["createdOn"] != null? DateTime.parse(json["createdOn"]) : null,
+      updatedOn: json["updatedOn"] != null? DateTime.parse(json["updatedOn"]) : null,
+      stream: json["stream"] != null? VidStream.fromJson(json["stream"]) : null,
+      comments: json["comments"]?.map((itm) => StreamBroadcastComment.fromJson(itm)).toList(),
+    );
+  }
+} 
+
+
+class StreamBroadcastComment{
+  String? id;
+  String broadcastId;
+  StreamBroadcast? broadcast;
+  String comment;
+  bool isInnerComment;
+  String? innerCommentId;
+  String madeBy;
+  bool commentIsFromChannelOwner;
+  User? affiliate;
+  int likes;
+  int dislikes;
+  DateTime? createdOn;
+  DateTime? updatedOn;
+
+  StreamBroadcastComment({
+    required this.broadcastId,
+    required this.comment,
+    required this.isInnerComment,
+    required this.commentIsFromChannelOwner,
+    required this.madeBy,
+    this.id,
+    this.broadcast,
+    this.innerCommentId,
+    this.affiliate,
+    this.createdOn,
+    this.updatedOn,
+    this.likes = 0,
+    this.dislikes = 0,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      "broadcastId": broadcastId,
+      "likes": likes,
+      "dislikes": dislikes,
+      "comment": comment,
+      "isInnerComment": isInnerComment,
+      "madeBy": madeBy,
+      "commentIsFromChannelOwner": commentIsFromChannelOwner,
+      if(id != null) "id": id,
+      if(innerCommentId != null) "innerCommentId": innerCommentId,
+      if(affiliate != null) "affiliate": affiliate!.toJson(),
+      if(createdOn != null) "createdOn": createdOn!.toString(),
+      if(updatedOn != null) "updatedOn": updatedOn!.toString(),
+    };
+  }
+
+  @override
+  String toString() => "${toJson()}";
+
+  factory StreamBroadcastComment.fromJson(Map<String, dynamic> json) {
+    return StreamBroadcastComment(
+      broadcastId: json["broadcastId"],
+      likes: json["likes"],
+      dislikes: json["dislikes"],
+      comment: json["comment"],
+      isInnerComment: json["isInnerComment"],
+      madeBy: json["madeBy"],
+      commentIsFromChannelOwner: json["commentIsFromChannelOwner"],
+      id: json["id"],
+      innerCommentId: json["innerCommentId"],
+      affiliate: json["affiliate"] != null? User.fromJson(json["affiliate"]) : null,
+      createdOn: json["createdOn"] != null? DateTime.parse(json["createdOn"]) : null,
+      updatedOn: json["updatedOn"] != null? DateTime.parse(json["updatedOn"]) : null,
     );
   }
 }

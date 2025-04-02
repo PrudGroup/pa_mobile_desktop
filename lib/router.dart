@@ -16,6 +16,7 @@ import 'package:prudapp/pages/prudVid/prud_news.dart';
 import 'package:prudapp/pages/prudVid/prud_vid.dart';
 import 'package:prudapp/pages/prudVid/prud_vid_studio.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/add_video.dart';
+import 'package:prudapp/pages/prudVid/studio/pageViews/channel_view.dart';
 import 'package:prudapp/pages/prudVid/tabs/views/channel_detail.dart';
 import 'package:prudapp/pages/prudVid/tabs/views/video_detail.dart';
 import 'package:prudapp/pages/prudVid/thriller_views/thriller_detail.dart';
@@ -209,6 +210,12 @@ final GoRouter prudRouter = GoRouter(
             String cid = state.pathParameters['cid']!;
             String? linkId = state.uri.queryParameters['link_id'];
             if(linkId != null) myStorage.saveChannelReferral(cid, linkId);
+            if(localSettings.lastRouteData != null && localSettings.lastRouteData!["channel"] != null){
+              return ChannelView(
+                channel: localSettings.lastRouteData!["channel"],
+                isOwner: localSettings.lastRouteData!["isOwner"],
+              );
+            }
             return ChannelDetail(cid: cid);
           },
         )

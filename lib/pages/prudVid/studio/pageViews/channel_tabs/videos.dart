@@ -113,7 +113,7 @@ class ChannelVideosState extends State<ChannelVideos> {
         lastScrollPoint = sCtrl.offset;
         prudStudioNotifier.lastScrollPointChannelVideos = lastScrollPoint;
       }
-      if(sCtrl.position.pixels == sCtrl.position.maxScrollExtent) await getMoreVideos();
+      if(sCtrl.position.pixels == sCtrl.position.maxScrollExtent && videos.isNotEmpty) await getMoreVideos();
     });
   }
 
