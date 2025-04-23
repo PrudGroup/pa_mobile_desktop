@@ -1,20 +1,20 @@
-import 'package:fast_cached_network_image/fast_cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:getwidget/components/avatar/gf_avatar.dart';
 import 'package:getwidget/components/rating/gf_rating.dart';
+import 'package:prudapp/components/channel_logo.dart';
 import 'package:prudapp/components/multi_player/flick_multi_manager.dart';
 import 'package:prudapp/components/multi_player/flick_multi_player.dart';
+import 'package:prudapp/components/point_divider.dart';
 import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/components/video_loading.dart';
 import 'package:prudapp/models/aff_link.dart';
 import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/theme.dart';
-import 'package:prudapp/pages/prudVid/studio/pageViews/channel_view.dart';
 import 'package:prudapp/pages/prudVid/tabs/views/add_report_or_claim.dart';
 import 'package:prudapp/pages/prudVid/thriller_views/thriller_detail.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/influencer_notifier.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
+import 'package:prudapp/singletons/prudio_client.dart';
 import 'package:prudapp/singletons/prudvid_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
@@ -28,11 +28,14 @@ class PrudVideoComponent extends StatefulWidget{
   final bool isOwner;
   final String? affLinkId;
   final FlickMultiManager flickMultiManager;
+  final bool noBorderRadius;
+  final bool isPortrait;
 
   const PrudVideoComponent({
     super.key, this.video, required this.isOwner,
     this.thrillerId, this.affLinkId, this.thriller,
-    this.channel, required this.flickMultiManager
+    this.isPortrait = true,
+    this.channel, required this.flickMultiManager, this.noBorderRadius = true,
   });
 
   @override
@@ -50,6 +53,8 @@ class PrudVideoComponentState extends State<PrudVideoComponent> {
   String uploadedWhen = "";
   double rating = 0;
   bool sharing = false;
+  bool channelIsLive = false;
+  int totalMembers = 0;
 
   void watchLater() {
     tryOnly("watchLater", (){
@@ -68,6 +73,40 @@ class PrudVideoComponentState extends State<PrudVideoComponent> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Translate(text: "Added")
       ));
+    });
+  }
+
+  void listenToThrillerFromSocket(){
+    prudSocket.on("live_changed", (json){
+      if(json != null && json["id"] == channel!.id){
+        if(mounted){
+          setState(() {
+            channel!.presentlyLive = json["isLive"];
+            channelIsLive = json["isLive"];
+          });
+        }
+      }
+    });
+
+    prudSocket.on("video_views_changed", (json){
+      if(json != null && json["id"] == video!.id){
+        if(mounted){
+          setState(() {
+            video!.memberViews = json["memberViews"];
+            video!.nonMemberViews = json["nonMemberViews"];
+          });
+        }
+      }
+    });
+
+    prudSocket.on("channel_members_changed", (json){
+      if(json != null && json["id"] == channel!.id){
+        if(mounted){
+          setState(() {
+            totalMembers = json["memberCount"];
+          });
+        }
+      }
     });
   }
 
@@ -164,16 +203,19 @@ class PrudVideoComponentState extends State<PrudVideoComponent> {
   Future<void> getChannel() async {
     if(widget.channel == null) {
       if(video != null){
-        if(video!.channel == null){
+        if(video!.channel != null){
           if(mounted) setState(() => channel = video!.channel);
         }else{
-          if(mounted) setState(() => loading = true);
           await tryAsync("getChannel", () async {
             if(mounted) setState(() => loading = true);
             VidChannel? cha = await prudStudioNotifier.getChannelById(video!.channelId);
             if(mounted) {
               setState(() {
                 channel = cha;
+                if(cha != null) {
+                  totalMembers = cha.totalMembers;
+                  channelIsLive = cha.presentlyLive;
+                }
                 loading = false;
               });
             }
@@ -188,6 +230,15 @@ class PrudVideoComponentState extends State<PrudVideoComponent> {
   }
 
 
+  void saveThrillerToCache(){
+    if(channel != null && video != null && thriller != null){
+      prudStudioNotifier.updateVideoThrillerToVisitedChannels(
+        channel!.id!, thriller!
+      );
+    }
+  }
+
+
   @override
   void dispose(){
     super.dispose();
@@ -196,22 +247,33 @@ class PrudVideoComponentState extends State<PrudVideoComponent> {
   @override
   void initState() {
     Future.delayed(Duration.zero, () async {
-      if(widget.thriller == null) await getThriller();
-      if(widget.video == null) await getVideo();
-      if(widget.channel == null)  await getChannel();
+      if(widget.thriller == null) {
+        await getThriller();
+      }else{
+        if(mounted) setState(() => thriller ??= widget.thriller);
+      }
+      if(widget.video == null) {
+        await getVideo();
+      }else{
+        if(mounted) setState(() => video ??= widget.video);
+      }
+      await getChannel();
       if(mounted){
         setState(() {
-          thriller ??= widget.thriller;
-          video ??= widget.video;
-          authorizedUrl = iCloud.authorizeDownloadUrl(thriller!.videoUrl);
-          totalViews = video!.nonMemberViews + video!.memberViews;
-          uploadedWhen = myStorage.ago(dDate: video!.uploadedAt, isShort: false);
-          if(video != null) rating = video!.getRating();
+          if(thriller != null) authorizedUrl = iCloud.authorizeDownloadUrl(thriller!.videoUrl);
+          debugPrint("channel_id: ${channel?.id}");
+          if(video != null) {
+            totalViews = video!.nonMemberViews + video!.memberViews;
+            uploadedWhen = myStorage.ago(dDate: video!.uploadedAt, isShort: false);
+            rating = video!.getRating();
+          }
           allVidsReady = true;
         });
       }
     });
     super.initState();
+    saveThrillerToCache();
+    listenToThrillerFromSocket();
   }
 
   void showMenu(){
@@ -403,163 +465,158 @@ class PrudVideoComponentState extends State<PrudVideoComponent> {
     }
   }
 
-  void viewChannel(){
-    if(channel != null && mounted){
-      iCloud.goto(context, ChannelView(
-        channel: channel!,
-        isOwner: widget.isOwner,
-      ));
-    }
-  }
-  
   @override
   Widget build(BuildContext context) {
-    return OrientationBuilder(
-      builder: (context, orientation){
-        return Container(
-          width: MediaQuery.of(context).size.width,
-          height: orientation == Orientation.portrait? 250 : 300,
-          decoration: BoxDecoration(
-            color: prudColorTheme.bgA,
-            border: Border(
-              bottom: BorderSide(
-                color: prudColorTheme.lineC, 
-                width: 3,
-              )
+    BorderRadius rad = widget.noBorderRadius? BorderRadius.zero : BorderRadius.circular(20.0);
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      constraints: widget.isPortrait? BoxConstraints(
+        minHeight: 250,
+      ) : BoxConstraints(
+        maxWidth: 500,
+      ),
+      decoration: BoxDecoration(
+        color: prudColorTheme.secondary,
+        border: Border(
+          bottom: BorderSide(
+            color: prudColorTheme.lineC, 
+            width: 3,
+          )
+        ),
+        borderRadius: rad
+      ),
+      child: ClipRRect(
+        borderRadius: rad,
+        child: allVidsReady == true? Column(
+          children: [
+            InkWell(
+              onTap: viewThriller,
+              child: FlickMultiPlayer(
+                url: authorizedUrl,
+                flickMultiManager: widget.flickMultiManager,
+                image: video!.videoThumbnail,
+                thrillerId: thriller!.id!,
+                watched: prudStudioNotifier.isThrillerWatched(thriller!.id!),
+              ),
             ),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20.0),
-            child: allVidsReady == true? Column(
-              children: [
-                InkWell(
-                  onTap: viewThriller,
-                  child: FlickMultiPlayer(
-                    url: authorizedUrl,
-                    flickMultiManager: widget.flickMultiManager,
-                    image: video!.videoThumbnail,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  color: prudColorTheme.primary,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          InkWell(
-                            onTap: viewChannel,
-                            child: GFAvatar(
-                              backgroundImage: FastCachedImageProvider(
-                                iCloud.authorizeDownloadUrl(channel!.logo),
+            Container(
+              padding: const EdgeInsets.all(5),
+              color: prudColorTheme.bgF,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        if(channel != null) ChannelLogo(
+                          channel: channel!, isLive: channelIsLive,
+                          context: context, isOwner: widget.isOwner,
+                        ),
+                        spacer.width,
+                        if(video != null && channel != null && thriller != null) InkWell(
+                          onTap: viewThriller,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                child: Translate(
+                                  text: tabData.shortenStringWithPeriod(video!.title, length: 70),
+                                  style: prudWidgetStyle.tabTextStyle.copyWith(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: prudColorTheme.bgA,
+                                  ),
+                                  align: TextAlign.left,
+                                ),
                               ),
-                            ),
-                          ),
-                          spacer.width,
-                          InkWell(
-                            onTap: viewThriller,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(
-                                  width: double.maxFinite,
-                                  child: Translate(
-                                    text: tabData.shortenStringWithPeriod(video!.title, length: 70),
-                                    style: prudWidgetStyle.tabTextStyle.copyWith(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: prudColorTheme.bgA,
+                              Wrap(
+                                spacing: 5,
+                                runSpacing: 5,
+                                children: [
+                                  Text(
+                                    tabData.shortenStringWithPeriod(channel!.channelName, length: 25),
+                                    style: prudWidgetStyle.hintStyle.copyWith(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: prudColorTheme.lineC,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  PointDivider(),
+                                  Translate(
+                                    text: "${tabData.getFormattedNumber(totalViews)} Views",
+                                    style: prudWidgetStyle.hintStyle.copyWith(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: prudColorTheme.lineC,
                                     ),
                                     align: TextAlign.left,
                                   ),
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      tabData.shortenStringWithPeriod(channel!.channelName, length: 25),
-                                      style: prudWidgetStyle.hintStyle.copyWith(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                        color: prudColorTheme.lineC,
-                                      ),
-                                      textAlign: TextAlign.left,
+                                  PointDivider(),
+                                  Translate(
+                                    text: uploadedWhen,
+                                    style: prudWidgetStyle.hintStyle.copyWith(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: prudColorTheme.lineC,
                                     ),
-                                    SizedBox(height: 5, child: Align(alignment: Alignment.center, child: Container(width: 2, height: 2, color: prudColorTheme.textC))),
-                                    Translate(
-                                      text: "${tabData.getFormattedNumber(totalViews)} Views",
-                                      style: prudWidgetStyle.hintStyle.copyWith(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                        color: prudColorTheme.lineC,
-                                      ),
-                                      align: TextAlign.left,
+                                    align: TextAlign.left,
+                                  ),
+                                ],
+                              ),
+                              Wrap(
+                                spacing: 5,
+                                runSpacing: 5,
+                                children: [
+                                  GFRating(
+                                    onChanged: (rate){},
+                                    value: rating,
+                                    color: prudColorTheme.buttonC,
+                                    borderColor: prudColorTheme.buttonC,
+                                    size: 10,
+                                  ),
+                                  PointDivider(),
+                                  Translate(
+                                    text: "$rating | ${tabData.getRateInterpretation(rating)}",
+                                    style: prudWidgetStyle.hintStyle.copyWith(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                      color: prudColorTheme.iconC,
                                     ),
-                                    SizedBox(height: 5, child: Align(alignment: Alignment.center, child: Container(width: 2, height: 2, color: prudColorTheme.textC))),
-                                    Translate(
-                                      text: uploadedWhen,
-                                      style: prudWidgetStyle.hintStyle.copyWith(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                        color: prudColorTheme.lineC,
-                                      ),
-                                      align: TextAlign.left,
+                                    align: TextAlign.left,
+                                  ),
+                                  PointDivider(),
+                                  Translate(
+                                    text: "${tabData.getFormattedNumber(thriller!.impressions)} Impressions",
+                                    style: prudWidgetStyle.hintStyle.copyWith(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                      color: prudColorTheme.iconC,
                                     ),
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    GFRating(
-                                      onChanged: (rate){},
-                                      value: rating,
-                                      color: prudColorTheme.textD,
-                                      borderColor: prudColorTheme.textD,
-                                      size: 8,
-                                    ),
-                                    SizedBox(height: 5, child: Align(alignment: Alignment.center, child: Container(width: 2, height: 2, color: prudColorTheme.textC))),
-                                    Translate(
-                                      text: "$rating | ${tabData.getRateInterpretation(rating)}",
-                                      style: prudWidgetStyle.hintStyle.copyWith(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                        color: prudColorTheme.textD,
-                                      ),
-                                      align: TextAlign.left,
-                                    ),
-                                    SizedBox(height: 5, child: Align(alignment: Alignment.center, child: Container(width: 2, height: 2, color: prudColorTheme.textC))),
-                                    Translate(
-                                      text: "${tabData.getFormattedNumber(thriller!.impressions)} Impressions",
-                                      style: prudWidgetStyle.hintStyle.copyWith(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                        color: prudColorTheme.textD,
-                                      ),
-                                      align: TextAlign.left,
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
+                                    align: TextAlign.left,
+                                  ),
+                                ],
+                              )
+                            ],
                           ),
-                        ],
-                      ),
-                      if(!widget.isOwner) IconButton(
-                        onPressed: showMenu, 
-                        icon: Icon(Icons.more_vert_sharp, semanticLabel: "More Menu",),
-                        iconSize: 30,
-                      )
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ) : Center(
-              child: VideoLoading(),
+                  if(!widget.isOwner) IconButton(
+                    onPressed: showMenu, 
+                    icon: Icon(Icons.more_vert_sharp, semanticLabel: "More Menu",),
+                    iconSize: 25,
+                    color: prudColorTheme.lineC,
+                  )
+                ],
+              ),
             ),
-          ),
-        );
-      }
+          ],
+        ) : Center(
+          child: VideoLoading(),
+        ),
+      ),
     );
   }
 }

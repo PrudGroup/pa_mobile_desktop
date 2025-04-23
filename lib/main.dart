@@ -9,11 +9,11 @@ import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/pages/register/register.dart';
 import 'package:prudapp/router.dart';
 import 'package:prudapp/singletons/beneficiary_notifier.dart';
-import 'package:prudapp/singletons/bus_notifier.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
 import 'package:prudapp/singletons/influencer_notifier.dart';
 import 'package:prudapp/singletons/prudio_client.dart';
+import 'package:prudapp/singletons/prudvid_notifier.dart';
 import 'package:prudapp/singletons/settings_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:universal_platform/universal_platform.dart';
@@ -43,6 +43,8 @@ void main() async {
     windows: true,          // default: false    -    dependency: media_kit_libs_windows_video
     linux: true,            // default: false    -    dependency: media_kit_libs_linux
   );
+
+  // TODO: take all this to isolate for speed
   await iCloud.setFirebase(
       Constants.fireApiKey,
       Platform.isAndroid? Constants.fireAndroidAppID :
@@ -57,9 +59,9 @@ void main() async {
   await influencerNotifier.initInfluencer();
   await prudioNotifier.connect();
   await beneficiaryNotifier.initBens();
-  await busNotifier.initBus();
   await localSettings.init();
   await messenger.setAutoInitEnabled(true);
+  await prudVidNotifier.init();
   myStorage.setWindowSize(size: const Size(400, 700));
 
   _setTargetPlatformForDesktop();

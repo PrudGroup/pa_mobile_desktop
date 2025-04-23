@@ -1,10 +1,12 @@
 import 'dart:io';
 
 import 'package:currency_picker/currency_picker.dart';
+import 'package:flutter/services.dart';
 import 'package:prudapp/models/backblaze.dart';
 import 'package:prudapp/models/user.dart';
 import 'package:prudapp/models/wallet.dart';
 import 'package:prudapp/singletons/currency_math.dart';
+import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 
 import '../pages/prudVid/studio/studioTabs/new_channel.dart';
@@ -247,6 +249,7 @@ class VidChannel {
   String countryCode;
   int miniTargetAge;
   int maxTargetAge;
+  bool presentlyLive;
   String studioId;
   Studio? studio;
   String description;
@@ -296,6 +299,7 @@ class VidChannel {
     this.verified = false,
     this.promoted = false,
     this.blocked = false,
+    this.presentlyLive = false,
     this.presentlySeekingCreators = false,
     this.channelCurrency = "EUR",
     this.totalSubscribers = 0,
@@ -344,6 +348,7 @@ class VidChannel {
       "verified": verified,
       "promoted": promoted,
       "blocked": blocked,
+      "presentlyLive": presentlyLive,
       "channelCurrency": channelCurrency,
       "totalSubscribers": totalSubscribers,
       "totalMembers": totalMembers,
@@ -352,6 +357,16 @@ class VidChannel {
       if (createdOn != null) "createdOn": createdOn.toString(),
       if (updatedOn != null) "updatedOn": updatedOn.toString(),
       if (id != null) "id": id,
+      if(streamServices != null) "streamServices": streamServices?.map((itm) => itm.toJson()).toList(),
+      if(creatorRequests != null) "creatorRequests": creatorRequests?.map((itm) => itm.toJson()).toList(),
+      if(paymentHistories != null) "paymentHistories": paymentHistories?.map((itm) => itm.toJson()).toList(),
+      if(videos != null) "videos": videos?.map((itm) => itm.toJson()).toList(),
+      if(membershipMatrix != null) "membershipMatrix": membershipMatrix?.map((itm) => itm.toJson()).toList(),
+      if(memberLinks != null) "memberLinks": memberLinks?.map((itm) => itm.toJson()).toList(),
+      if(subscriberLinks != null) "subscriberLinks": subscriberLinks?.map((itm) => itm.toJson()).toList(),
+      if(creators != null) "creators": creators?.map((itm) => itm.toJson()).toList(),
+      if(broadcasts != null) "broadcasts": broadcasts?.map((itm) => itm.toJson()).toList(),
+      if(sponsored != null) "sponsored": sponsored?.toJson(),
     };
   }
 
@@ -369,6 +384,7 @@ class VidChannel {
       displayScreen: json["displayScreen"],
       studioId: json["studioId"],
       logo: json["logo"],
+      presentlyLive: json["presentlyLive"],
       subCategory: json["subCategory"],
       countryCode: json["countryCode"],
       maxTargetAge: json["maxTargetAge"],
@@ -633,6 +649,8 @@ class ChannelMembership {
   String affId;
   String? channelReferral;
   String? appInstallReferral;
+  int? lastSubscribedMonth;
+  int? lastSubscribedYear;
   DateTime? joinedOn;
   VidChannel? channel;
   User? member;
@@ -645,6 +663,8 @@ class ChannelMembership {
     this.joinedOn,
     this.channel,
     this.member,
+    this.lastSubscribedMonth,
+    this.lastSubscribedYear,
   });
 
   Map<String, dynamic> toJson() {
@@ -653,7 +673,9 @@ class ChannelMembership {
       "channelId": channelId,
       if (joinedOn != null) "joinedOn": joinedOn!.toString(),
       if (appInstallReferral != null) "appInstallReferral": appInstallReferral,
-      if (channelReferral != null) "channelReferral": channelReferral
+      if (channelReferral != null) "channelReferral": channelReferral,
+      if (lastSubscribedMonth != null) "lastSubscribedMonth": lastSubscribedMonth,
+      if (lastSubscribedYear != null) "lastSubscribedYear": lastSubscribedYear
     };
   }
 
@@ -661,13 +683,13 @@ class ChannelMembership {
     return ChannelMembership(
       affId: json["affId"],
       channelId: json["channelId"],
+      lastSubscribedMonth: json["lastSubscribedMonth"],
+      lastSubscribedYear: json["lastSubscribedYear"],
       appInstallReferral: json["appInstallReferral"],
       channelReferral: json["channelReferral"],
-      joinedOn:
-          json["joinedOn"] != null ? DateTime.parse(json["joinedOn"]) : null,
+      joinedOn: json["joinedOn"] != null ? DateTime.parse(json["joinedOn"]) : null,
       member: json["member"] != null ? User.fromJson(json["member"]) : null,
-      channel:
-          json["channel"] != null ? VidChannel.fromJson(json["channel"]) : null,
+      channel: json["channel"] != null ? VidChannel.fromJson(json["channel"]) : null,
     );
   }
 }
@@ -682,33 +704,40 @@ class ChannelMembershipMatrix {
   int totalMemberCostPaid;
   double prudappCharges;
   double influencersGotFromCharges;
+  double influencersGotFromChargesInEuro;
   double prudappProfit;
   double prudappProfitInEuro;
   String transactionCurrency;
   double channelIncome;
   double contentCreatorsGot;
+  double contentCreatorsGotInEuro;
   double channelProfit;
+  double channelProfitInEuro;
   DateTime createdOn;
   DateTime updatedOn;
 
-  ChannelMembershipMatrix(
-      {required this.id,
-      required this.channelId,
-      required this.updatedOn,
-      required this.createdOn,
-      required this.year,
-      required this.month,
-      required this.channelIncome,
-      required this.channelProfit,
-      required this.contentCreatorsGot,
-      required this.influencersGotFromCharges,
-      required this.prudappCharges,
-      required this.prudappProfit,
-      required this.prudappProfitInEuro,
-      required this.totalMemberCostPaid,
-      required this.totalMembersAsAtDate,
-      required this.transactionCurrency,
-      this.channel});
+  ChannelMembershipMatrix({
+    required this.id,
+    required this.channelId,
+    required this.updatedOn,
+    required this.createdOn,
+    required this.year,
+    required this.month,
+    required this.channelIncome,
+    required this.channelProfit,
+    required this.contentCreatorsGot,
+    required this.influencersGotFromCharges,
+    required this.prudappCharges,
+    required this.prudappProfit,
+    required this.prudappProfitInEuro,
+    required this.totalMemberCostPaid,
+    required this.totalMembersAsAtDate,
+    required this.transactionCurrency,
+    required this.channelProfitInEuro,
+    required this.influencersGotFromChargesInEuro,
+    required this.contentCreatorsGotInEuro,
+    this.channel
+  });
 
   Map<String, dynamic> toJson() {
     return {
@@ -720,12 +749,15 @@ class ChannelMembershipMatrix {
       "totalMemberCostPaid": totalMemberCostPaid,
       "prudappCharges": prudappCharges,
       "influencersGotFromCharges": influencersGotFromCharges,
+      "influencersGotFromChargesInEuro": influencersGotFromChargesInEuro,
       "prudappProfit": prudappProfit,
       "prudappProfitInEuro": prudappProfitInEuro,
       "transactionCurrency": transactionCurrency,
       "channelIncome": channelIncome,
       "contentCreatorsGot": contentCreatorsGot,
+      "contentCreatorsGotInEuro": contentCreatorsGotInEuro,
       "channelProfit": channelProfit,
+      "channelProfitInEuro": channelProfitInEuro,
       "createdOn": createdOn.toString(),
       "updatedOn": updatedOn.toString(),
     };
@@ -741,16 +773,18 @@ class ChannelMembershipMatrix {
       month: json["month"],
       channelIncome: json["channelIncome"],
       channelProfit: json["channelProfit"],
+      channelProfitInEuro: json["channelProfitInEuro"],
       contentCreatorsGot: json["contentCreatorsGot"],
+      contentCreatorsGotInEuro: json["contentCreatorsGotInEuro"],
       influencersGotFromCharges: json["influencersGotFromCharges"],
+      influencersGotFromChargesInEuro: json["influencersGotFromChargesInEuro"],
       prudappCharges: json["prudappCharges"],
       prudappProfit: json["prudappProfit"],
       prudappProfitInEuro: json["prudappProfitInEuro"],
       totalMemberCostPaid: json["totalMemberCostPaid"],
       totalMembersAsAtDate: json["totalMembersAsAtDate"],
       transactionCurrency: json["transactionCurrency"],
-      channel:
-          json["channel"] != null ? VidChannel.fromJson(json["channel"]) : null,
+      channel: json["channel"] != null ? VidChannel.fromJson(json["channel"]) : null,
     );
   }
 }
@@ -787,6 +821,7 @@ class ChannelVideo {
   int impressions;
   int watchMinutes;
   int downloads;
+  int thanks;
   bool iDeclared;
   int votes;
   int voters;
@@ -803,6 +838,9 @@ class ChannelVideo {
   VideoMusicDetail? musicDetail;
   List<VideoComment>? comments;
   PromoteVideo? sponsored;
+  List<VideoViewPurchase>? viewPurchases; 
+  List<ChannelVideoDownloadMatrix>? downloadMatrix;
+  List<ChannelVideoThanksMatrix>? thanksMatrix;
 
   ChannelVideo({
     required this.channelId,
@@ -824,6 +862,7 @@ class ChannelVideo {
     this.statusDescription = "just created",
     this.dislikes = 0,
     this.downloads = 0,
+    this.thanks = 0,
     this.watchMinutes = 0,
     this.impressions = 0,
     this.likes = 0,
@@ -852,6 +891,9 @@ class ChannelVideo {
     this.snippets,
     this.comments,
     this.sponsored,
+    this.viewPurchases,
+    this.downloadMatrix,
+    this.thanksMatrix
   });
 
   double getRating() {
@@ -895,6 +937,7 @@ class ChannelVideo {
       "votes": votes,
       "watchMinutes": watchMinutes,
       "downloads": downloads,
+      "thanks": thanks,
       "iDeclared": iDeclared,
       "videoDuration": videoDuration,
       "movieDetailId": movieDetailId,
@@ -947,8 +990,12 @@ class ChannelVideo {
       impressions: json["impressions"],
       watchMinutes: json["watchMinutes"],
       downloads: json["downloads"],
+      thanks: json["thanks"],
       isLive: json["isLive"],
       sponsored: json["sponsored"] != null? PromoteVideo.fromJson(json["sponsored"]) : null,
+      viewPurchases: json["viewPurchases"]?.map((itm) => VideoViewPurchase.fromJson(itm)).toList(),
+      downloadMatrix: json["downloadMatrix"]?.map((itm) => ChannelVideoDownloadMatrix.fromJson(itm)).toList(),
+      thanksMatrix: json["thanksMatrix"]?.map((itm) => ChannelVideoThanksMatrix.fromJson(itm)).toList(),
       statusDescription: json["statusDescription"],
       comments: json["comments"]?.map((itm) => VideoComment.fromJson(itm)).toList(),
     );
@@ -1139,6 +1186,7 @@ class ChannelVideoViewMatrix {
   String id;
   String videoId;
   ChannelVideo? video;
+  String channelId;
   int day;
   int month;
   int year;
@@ -1147,37 +1195,47 @@ class ChannelVideoViewMatrix {
   double totalViewCosts;
   double prudappCharges; // charged to totalViewCosts
   double influencersGotFromCharges;
+  double influencersGotFromChargesInEuro;
   double prudappProfit;
   double prudappProfitInEuro;
-  double totalStudioIncomeAfterCharges;
-  double contentCreatorGotFromStudioIncome;
+  double totalChannelIncomeAfterCharges;
+  double channelProfit;
+  double channelProfitInEuro;
+  double contentCreatorGotFromChannelIncome;
+  double contentCreatorGotFromChannelIncomeInEuro;
   double currency;
   bool paid;
   DateTime? paidOn;
   DateTime createdAt;
   DateTime updatedAt;
 
-  ChannelVideoViewMatrix(
-      {required this.id,
-      required this.videoId,
-      required this.day,
-      required this.month,
-      required this.year,
-      required this.nonMemberViews,
-      required this.contentCreatorGotFromStudioIncome,
-      required this.currency,
-      required this.createdAt,
-      required this.updatedAt,
-      required this.prudappProfitInEuro,
-      required this.prudappProfit,
-      required this.prudappCharges,
-      required this.influencersGotFromCharges,
-      required this.totalStudioIncomeAfterCharges,
-      required this.totalViewCosts,
-      required this.paid,
-      required this.costPerView,
-      this.video,
-      this.paidOn});
+  ChannelVideoViewMatrix({
+    required this.id,
+    required this.videoId,
+    required this.day,
+    required this.month,
+    required this.year,
+    required this.nonMemberViews,
+    required this.currency,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.prudappProfitInEuro,
+    required this.prudappProfit,
+    required this.prudappCharges,
+    required this.influencersGotFromCharges,
+    required this.totalViewCosts,
+    required this.paid,
+    required this.costPerView,
+    required this.channelId,
+    required this.channelProfit,
+    required this.channelProfitInEuro,
+    required this.contentCreatorGotFromChannelIncome,
+    required this.contentCreatorGotFromChannelIncomeInEuro,
+    required this.influencersGotFromChargesInEuro,
+    required this.totalChannelIncomeAfterCharges,
+    this.video,
+    this.paidOn
+  });
 
   Map<String, dynamic> toJson() {
     return {
@@ -1191,11 +1249,16 @@ class ChannelVideoViewMatrix {
       "totalViewCosts": totalViewCosts,
       "prudappCharges": prudappCharges,
       "influencersGotFromCharges": influencersGotFromCharges,
+      "influencersGotFromChargesInEuro": influencersGotFromChargesInEuro,
       "prudappProfit": prudappProfit,
       "prudappProfitInEuro": prudappProfitInEuro,
-      "totalStudioIncomeAfterCharges": totalStudioIncomeAfterCharges,
-      "contentCreatorGotFromStudioIncome": contentCreatorGotFromStudioIncome,
+      "totalChannelIncomeAfterCharges": totalChannelIncomeAfterCharges,
+      "contentCreatorGotFromChannelIncome": contentCreatorGotFromChannelIncome,
+      "contentCreatorGotFromChannelIncomeInEuro": contentCreatorGotFromChannelIncomeInEuro,
+      "channelProfit": channelProfit,
+      "channelProfitInEuro": channelProfitInEuro,
       "currency": currency,
+      "channelId": channelId,
       "paid": paid,
       if (paidOn != null) "paidOn": paidOn.toString(),
       "createdAt": createdAt.toString(),
@@ -1211,8 +1274,8 @@ class ChannelVideoViewMatrix {
       month: json["month"],
       year: json["year"],
       nonMemberViews: json["nonMemberViews"],
-      contentCreatorGotFromStudioIncome:
-          json["contentCreatorGotFromStudioIncome"],
+      contentCreatorGotFromChannelIncome: json["contentCreatorGotFromChannelIncome"],
+      contentCreatorGotFromChannelIncomeInEuro: json["contentCreatorGotFromChannelIncomeInEuro"],
       currency: json["currency"],
       createdAt: json["createdAt"],
       updatedAt: json["updatedAt"],
@@ -1220,13 +1283,16 @@ class ChannelVideoViewMatrix {
       prudappProfit: json["prudappProfit"],
       prudappCharges: json["prudappCharges"],
       influencersGotFromCharges: json["influencersGotFromCharges"],
-      totalStudioIncomeAfterCharges: json["totalStudioIncomeAfterCharges"],
+      influencersGotFromChargesInEuro: json["influencersGotFromChargesInEuro"],
+      totalChannelIncomeAfterCharges: json["totalChannelIncomeAfterCharges"],
       totalViewCosts: json["totalViewCosts"],
+      channelProfit: json["channelProfit"],
+      channelProfitInEuro: json["channelProfitInEuro"],
       paid: json["paid"],
+      channelId: json["channelId"],
       costPerView: json["costPerView"],
       paidOn: json["paidOn"] != null ? DateTime.parse(json["paidOn"]) : null,
-      video:
-          json["video"] != null ? ChannelVideo.fromJson(json["video"]) : null,
+      video: json["video"] != null ? ChannelVideo.fromJson(json["video"]) : null,
     );
   }
 }
@@ -2451,7 +2517,7 @@ class PrudVidDuration{
 }
 
 
-class ChannelBroadcast{
+class ChannelBroadcast {
   String? id;
   String channelId;
   VidChannel? channel;
@@ -2716,6 +2782,443 @@ class StreamBroadcastComment{
       affiliate: json["affiliate"] != null? User.fromJson(json["affiliate"]) : null,
       createdOn: json["createdOn"] != null? DateTime.parse(json["createdOn"]) : null,
       updatedOn: json["updatedOn"] != null? DateTime.parse(json["updatedOn"]) : null,
+    );
+  }
+}
+
+
+class VisitedChannel{
+  VidChannel channel;
+  int lastVideoOffset;
+  int lastBroadcastOffset;
+  double lastVideoScrollPoint;
+  double lastBroadcastScrollPoint;
+
+  VisitedChannel({
+    required this.channel,
+    required this.lastVideoOffset,
+    required this.lastBroadcastOffset,
+    required this.lastVideoScrollPoint,
+    required this.lastBroadcastScrollPoint,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      "channel": channel.toJson(),
+      "lastVideoOffset": lastVideoOffset,
+      "lastBroadcastOffset": lastBroadcastOffset,
+      "lastVideoScrollPoint": lastVideoScrollPoint,
+      "lastBroadcastScrollPoint": lastBroadcastScrollPoint,
+    };
+  }
+
+  @override
+  String toString() => "${toJson()}";
+
+  factory VisitedChannel.fromJson(Map<String, dynamic> json) {
+    return VisitedChannel(
+      channel: VidChannel.fromJson(json["channel"]),
+      lastVideoOffset: json["lastVideoOffset"],
+      lastBroadcastOffset: json["lastBroadcastOffset"],
+      lastVideoScrollPoint: json["lastVideoScrollPoint"],
+      lastBroadcastScrollPoint: json["lastBroadcastScrollPoint"],
+    );
+  }
+}
+
+
+class LikeDislikeAction{
+  String itemId;
+  int liked;
+
+  LikeDislikeAction({
+    required this.itemId,
+    required this.liked,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      "itemId": itemId,
+      "liked": liked,
+    };
+  }
+
+  @override
+  String toString() => "${toJson()}";
+
+  factory LikeDislikeAction.fromJson(Map<String, dynamic> json) {
+    return LikeDislikeAction(
+      itemId: json["itemId"],
+      liked: json["liked"],
+    );
+  }
+}
+
+
+class VideoViewPurchase{
+  String? id;
+  String videoId;
+  ChannelVideo? video;
+  String purchaserId;
+  User? purchaser;
+  DateTime? createdOn;
+
+  VideoViewPurchase({
+    required this.purchaserId,
+    required this.videoId,
+    this.id,
+    this.video,
+    this.purchaser,
+    this.createdOn,
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      "purchaserId": purchaserId,
+      "videoId": videoId,
+      if(id != null) "id": id,
+      if(createdOn != null) "createdOn": createdOn!.toIso8601String(),
+    };
+  }
+
+  factory VideoViewPurchase.fromJson(Map<String, dynamic> json){
+    return VideoViewPurchase(
+      id: json["id"],
+      videoId: json["videoId"],
+      video: json["video"] != null? ChannelVideo.fromJson(json["video"]) : null,
+      purchaserId: json["purchaserId"],
+      purchaser: json["purchaser"] != null? User.fromJson(json["purchaser"]) : null,
+      createdOn: json["createdOn"] != null? DateTime.parse(json["createdOn"]) : null,
+    );
+  }
+}
+
+
+class ChannelVideoDownloadMatrix {
+  String id;
+  String videoId;
+  ChannelVideo? video;
+  String channelId;
+  int day;
+  int month;
+  int year;
+  double totalDownloadCosts;
+  double prudappCharges;
+  double influencersGotFromCharges;
+  double influencersGotFromChargesInEuro;
+  double prudappProfit;
+  double prudappProfitInEuro;
+  double totalChannelIncomeAfterCharges;
+  double contentCreatorGotFromChannelIncome;
+  double contentCreatorGotFromChannelIncomeInEuro;
+  double channelProfit;
+  double channelProfitInEuro;
+  String currency;
+  bool paid;
+  DateTime paidOn;
+  DateTime createdOn;
+  DateTime updatedOn;
+
+  ChannelVideoDownloadMatrix({
+    required this.id,
+    required this.createdOn,
+    required this.channelProfit,
+    required this.contentCreatorGotFromChannelIncome,
+    required this.currency,
+    required this.day,
+    required this.influencersGotFromCharges,
+    required this.month,
+    required this.paid,
+    required this.paidOn,
+    required this.prudappCharges,
+    required this.prudappProfit,
+    required this.prudappProfitInEuro,
+    required this.totalChannelIncomeAfterCharges,
+    required this.totalDownloadCosts,
+    required this.updatedOn,
+    required this.videoId,
+    required this.year,
+    required this.channelId,
+    required this.contentCreatorGotFromChannelIncomeInEuro,
+    required this.influencersGotFromChargesInEuro,
+    required this.channelProfitInEuro,
+    this.video,
+  });
+
+  factory ChannelVideoDownloadMatrix.fromJson(Map<String, dynamic> json){
+    return ChannelVideoDownloadMatrix(
+      id: json["id"],
+      createdOn: DateTime.parse(json["createdOn"]),
+      updatedOn: DateTime.parse(json["updatedOn"]),
+      channelProfit: json["channelProfit"],
+      channelProfitInEuro: json["channelProfitInEuro"],
+      contentCreatorGotFromChannelIncome: json["contentCreatorGotFromChannelIncome"],
+      contentCreatorGotFromChannelIncomeInEuro: json["contentCreatorGotFromChannelIncomeInEuro"],
+      currency: json["currency"],
+      day: json["day"],
+      channelId: json["channelId"],
+      influencersGotFromCharges: json["influencersGotFromCharges"],
+      influencersGotFromChargesInEuro: json["influencersGotFromChargesInEuro"],
+      month: json["month"],
+      paid: json["paid"],
+      paidOn: json["paidOn"],
+      prudappCharges: json["prudappCharges"],
+      prudappProfit: json["prudappProfit"],
+      prudappProfitInEuro: json["prudappProfitInEuro"],
+      totalChannelIncomeAfterCharges: json["totalChannelIncomeAfterCharges"],
+      totalDownloadCosts: json["totalDownloadCosts"],
+      videoId: json["videoId"],
+      year: json["year"],
+      video: json["video"] != null? ChannelVideo.fromJson(json["video"]) : null,
+    );
+  }
+}
+
+
+class ChannelVideoThanksMatrix {
+  String id;
+  String videoId;
+  ChannelVideo? video;
+  int day;
+  int month;
+  int year;
+  String channelId;
+  double totalThanksCosts;
+  double prudappCharges;
+  double influencersGotFromCharges;
+  double influencersGotFromChargesInEuro;
+  double prudappProfit;
+  double prudappProfitInEuro;
+  double totalChannelIncomeAfterCharges;
+  double contentCreatorGotFromChannelIncome;
+  double contentCreatorGotFromChannelIncomeInEuro;
+  double channelProfit;
+  double channelProfitInEuro;
+  String currency;
+  bool paid;
+  DateTime paidOn;
+  DateTime createdOn;
+  DateTime updatedOn;
+
+  ChannelVideoThanksMatrix({
+    required this.id,
+    required this.createdOn,
+    required this.channelProfit,
+    required this.contentCreatorGotFromChannelIncome,
+    required this.currency,
+    required this.day,
+    required this.influencersGotFromCharges,
+    required this.month,
+    required this.paid,
+    required this.paidOn,
+    required this.prudappCharges,
+    required this.prudappProfit,
+    required this.prudappProfitInEuro,
+    required this.totalChannelIncomeAfterCharges,
+    required this.totalThanksCosts,
+    required this.updatedOn,
+    required this.videoId,
+    required this.year,
+    required this.channelId,
+    required this.influencersGotFromChargesInEuro,
+    required this.channelProfitInEuro,
+    required this.contentCreatorGotFromChannelIncomeInEuro,
+    this.video,
+  });
+
+  factory ChannelVideoThanksMatrix.fromJson(Map<String, dynamic> json){
+    return ChannelVideoThanksMatrix(
+      id: json["id"],
+      createdOn: DateTime.parse(json["createdOn"]),
+      updatedOn: DateTime.parse(json["updatedOn"]),
+      channelProfit: json["channelProfit"],
+      channelProfitInEuro: json["channelProfitInEuro"],
+      contentCreatorGotFromChannelIncome: json["contentCreatorGotFromChannelIncome"],
+      contentCreatorGotFromChannelIncomeInEuro: json["contentCreatorGotFromChannelIncomeInEuro"],
+      currency: json["currency"],
+      day: json["day"],
+      influencersGotFromCharges: json["influencersGotFromCharges"],
+      influencersGotFromChargesInEuro: json["influencersGotFromChargesInEuro"],
+      month: json["month"],
+      paid: json["paid"],
+      paidOn: json["paidOn"],
+      channelId: json["channelId"],
+      prudappCharges: json["prudappCharges"],
+      prudappProfit: json["prudappProfit"],
+      prudappProfitInEuro: json["prudappProfitInEuro"],
+      totalChannelIncomeAfterCharges: json["totalChannelIncomeAfterCharges"],
+      totalThanksCosts: json["totalThanksCosts"],
+      videoId: json["videoId"],
+      year: json["year"],
+      video: json["video"] != null? ChannelVideo.fromJson(json["video"]) : null,
+    );
+  }
+}
+
+
+class PayForVideoViewSchema{
+  String vidId;
+  double costInEuro;
+  String viewerId;
+  String? videoReferral;
+  String? appReferral;
+  String socketUserId;
+  double? dwCostInSelectedCurrency;
+
+  PayForVideoViewSchema({
+    required this.vidId,
+    required this.costInEuro,
+    required this.viewerId,
+    required this.socketUserId,
+    this.videoReferral,
+    this.appReferral,
+    this.dwCostInSelectedCurrency
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      if(dwCostInSelectedCurrency != null) "dwCostInSelectedCurrency": dwCostInSelectedCurrency,
+      if(appReferral != null) "appReferral": appReferral,
+      if(videoReferral != null) "videoReferral": videoReferral,
+      "socketUserId": socketUserId,
+      "vidId": vidId,
+      "viewerId": viewerId,
+      "costInEuro": costInEuro,
+    };
+  }
+
+  factory PayForVideoViewSchema.fromJson(Map<String, dynamic> json){
+    return PayForVideoViewSchema(
+      vidId: json["vidId"], 
+      costInEuro: json["costInEuro"], 
+      viewerId: json["viewerId"], 
+      socketUserId: json["socketUserId"],
+      dwCostInSelectedCurrency: json["dwCostInSelectedCurrency"],
+      appReferral: json["appReferral"],
+      videoReferral: json["videoReferral"]
+    );
+  }
+}
+
+
+class VideoPaidFor{
+  String videoId;
+  DateTime paidOn;
+
+  VideoPaidFor({
+    required this.videoId,
+    required this.paidOn
+  });
+
+  bool isExpired(){
+    int days = myStorage.dateDifference(dDate: paidOn);
+    return days >= 7;
+  }
+
+  Map<String, dynamic> toJson(){
+    return {
+      "videoId": videoId,
+      "paidOn": paidOn.toIso8601String()
+    };
+  }
+
+  factory VideoPaidFor.fromJson(Map<String, dynamic> json){
+    return VideoPaidFor(
+      videoId: json["videoId"],
+      paidOn: DateTime.parse(json["paidOn"])
+    );
+  }
+}
+
+
+class DownloadedVideo{
+  String videoId;
+  String videoUrl;
+  String placeholderUrl;
+  List<int> chucksDownloaded;
+  List<int> chucksRemaining;
+  bool downloadingComplete;
+  double downloadedPercent;
+  int totalChunkSize;
+  int downloadedSize;
+  DateTime startedAt;
+  DateTime? ended;
+  List<Uint8List> mergedChunk;
+  Uint8List? finishedFile;
+  Uint8List? placeholder;
+  String videoType;
+  String channelId;
+  int chunkCount;
+  String filename;
+  int placeholderSize;
+
+  DownloadedVideo({
+    required this.chucksDownloaded,
+    required this.chucksRemaining,
+    required this.startedAt,
+    required this.mergedChunk,
+    required this.videoId,
+    required this.placeholderUrl,
+    required this.videoUrl,
+    required this.videoType,
+    required this.channelId,
+    this.chunkCount = 0,
+    this.placeholderSize = 0,
+    this.totalChunkSize = 0,
+    this.downloadedSize = 0,
+    this.downloadingComplete = false,
+    this.downloadedPercent = 0,
+    this.ended,
+    this.placeholder,
+    this.finishedFile,
+    required this.filename,
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      if(finishedFile != null) "finishedFile": finishedFile,
+      if(ended != null) "ended": ended,
+      "placeholderSize": placeholderSize,
+      if(placeholder != null) "placeholder": placeholder,
+      "videoId": videoId,
+      "filename": filename,
+      "chunkCount": chunkCount,
+      "totalChunkSize": totalChunkSize,
+      "downloadedSize": downloadedSize,
+      "placeholderUrl": placeholderUrl,
+      "videoUrl": videoUrl,
+      "videoType": videoType,
+      "channelId": channelId,
+      "chucksDownloaded": chucksDownloaded,
+      "chucksRemaining": chucksRemaining,
+      "downloadedPercent": downloadedPercent,
+      "downloadingComplete": downloadingComplete,
+      "startedAt": startedAt.toIso8601String(),
+      "mergedChunk": mergedChunk,
+    };
+  }
+
+  factory DownloadedVideo.fromJson(Map<String, dynamic> json){
+    return DownloadedVideo(
+      placeholderSize: json["placeholderSize"],
+      chucksDownloaded: json["chucksDownloaded"], 
+      chucksRemaining: json["chucksRemaining"], 
+      downloadedPercent: json["downloadedPercent"], 
+      downloadingComplete: json["downloadingComplete"], 
+      downloadedSize: json["downloadedSize"],
+      filename: json["filename"],
+      startedAt: json["startedAt"], 
+      mergedChunk: json["mergedChunk"], 
+      totalChunkSize: json["totalChunkSize"], 
+      videoId: json["videoId"],
+      chunkCount: json["chunkCount"],
+      channelId: json["channelId"], 
+      videoType: json["videoType"],
+      placeholderUrl: json["placeholderUrl"],
+      finishedFile: json["finishedFile"],
+      videoUrl: json["videoUrl"],
+      ended: json["ended"] != null? DateTime.parse(json["ended"]): null,
+      placeholder: json["placeholder"]
     );
   }
 }

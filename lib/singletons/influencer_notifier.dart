@@ -1,6 +1,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:prudapp/models/aff_link.dart';
 import 'package:prudapp/models/wallet.dart';
 import 'package:prudapp/singletons/currency_math.dart';
@@ -29,6 +30,7 @@ class InfluencerNotifier extends ChangeNotifier {
   InfluencerWallet? myWallet;
   List<WalletHistory>? myWalletHistory;
   List<AffLink>? myLinks;
+  String? appInstallAffId;
 
 
   Future<AffLink?> createAffLinks(String target, String category, String categoryId) async {
@@ -58,6 +60,20 @@ class InfluencerNotifier extends ChangeNotifier {
     },);
   }
 
+  Future<void> getAppInstallDetailFromCache() async{
+    String? affId = myStorage.getFromStore(key: "appInstallAffId");
+    if(affId != null){
+      appInstallAffId = affId;
+    }else{
+      AffInstallReferral? referral = await getInstallRefferalViaCode();
+      if(referral != null){
+        appInstallAffId = referral.affId;
+        await myStorage.addToStore(key: "appInstallAffId", value: appInstallAffId);
+      }
+    }
+    notifyListeners();
+  }
+
   Future<List<AffLink>?> getAffLinks() async {
     return await tryAsync("getAffLinks", () async {
       if(myStorage.user != null && myStorage.user!.id != null){
@@ -71,6 +87,25 @@ class InfluencerNotifier extends ChangeNotifier {
           myLinks = links;
           notifyListeners();
           return links;
+        } else {
+          return null;
+        }
+      }else{
+        return null;
+      }
+    }, error: () {
+      return null;
+    },);
+  }
+
+  Future<AffInstallReferral?> getInstallRefferalViaCode() async {
+    return await tryAsync("getInstallRefferalViaCode", () async {
+      String? code = myStorage.getAppInstallReferralCode();
+      if(code != null){
+        String path = "app_installs//via_code/$code";
+        dynamic res = await makeRequest(path: path);
+        if (res != null && res != false) {
+          return AffInstallReferral.fromJson(res);
         } else {
           return null;
         }
@@ -282,6 +317,7 @@ class InfluencerNotifier extends ChangeNotifier {
     try{
       getPinStatus();
       getWalletCurrency();
+      getAppInstallDetailFromCache();
       notifyListeners();
     }catch(ex){
       debugPrint("InfluencerNotifier_initInfluencer Error: $ex");
@@ -309,6 +345,6 @@ Dio influencerDio = Dio(BaseOptions(
       return false;
     }
   }
-));
+))..interceptors.add(PrettyDioLogger());
 final influencerNotifier = InfluencerNotifier();
 double influencersReferralCommissionPercentage = 0;

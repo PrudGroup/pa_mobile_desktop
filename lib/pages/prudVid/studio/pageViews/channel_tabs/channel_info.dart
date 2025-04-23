@@ -103,6 +103,7 @@ class ChannelInfoState extends State<ChannelInfo> {
   @override
   void initState() {
     Future.delayed(Duration.zero, () async {
+      // TODO: take this to isolate for speed
       await getSubscribersCount();
       await getMembersCount();
       await setStreamServicesFigures();
@@ -533,9 +534,9 @@ class ChannelInfoState extends State<ChannelInfo> {
               height: 2,
             ),
             FittedBox(
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
                   PrudDataViewer(
                     field: "Target Age",
                     value: widget.channel.miniTargetAge,

@@ -23,7 +23,8 @@ class ChannelVideos extends StatefulWidget {
 class ChannelVideosState extends State<ChannelVideos> {
   List<ChannelVideo> videos = [];
   bool loading = false;
-  bool gettingMore = false;   
+  bool loaded = false;
+  bool gettingMore = false;  
   Widget noVideos = tabData.getNotFoundWidget(
     title: "No Video!",
     desc: "This channel is yet to upload contents. Stay tuned.",
@@ -56,9 +57,14 @@ class ChannelVideosState extends State<ChannelVideos> {
             videos.addAll(vids);
             offset += vids.length;
           });
-          prudStudioNotifier.lastOffsetChannelVideos = offset;
-          prudStudioNotifier.selectedChannelId = widget.channel.id;
-          prudStudioNotifier.selectedChannelVideos = vids;
+          VisitedChannel vCha = VisitedChannel(
+            channel: widget.channel, 
+            lastVideoOffset: offset, 
+            lastBroadcastOffset: widget.channel.broadcasts?.length?? 0, 
+            lastVideoScrollPoint: lastScrollPoint, 
+            lastBroadcastScrollPoint: 0
+          );
+          prudStudioNotifier.updateChannelVideoToVisitedChannels(vCha, videos);
         }
       }
       if(mounted) setState(() => gettingMore = false);
@@ -69,14 +75,15 @@ class ChannelVideosState extends State<ChannelVideos> {
 
   Future<void> getVideos() async {
     await tryAsync("getVideos", () async {
-      if(prudStudioNotifier.selectedChannelId == widget.channel.id && prudStudioNotifier.selectedChannelVideos.isNotEmpty){
+      VisitedChannel? vCha = prudStudioNotifier.getCachedVisitedChannel(widget.channel.id!);
+      if(vCha != null && vCha.channel.videos != null){
         if(mounted) {
           setState((){
-            videos = prudStudioNotifier.selectedChannelVideos;
-            offset = prudStudioNotifier.lastOffsetChannelVideos;
-            lastScrollPoint = prudStudioNotifier.lastScrollPointChannelVideos;
+            videos = vCha!.channel.videos!;
+            offset = vCha.lastVideoOffset;
+            lastScrollPoint = vCha.lastVideoScrollPoint;
           });
-          sCtrl.animateTo(lastScrollPoint, duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
+          if(videos.isNotEmpty && lastScrollPoint > 0) sCtrl.animateTo(lastScrollPoint, duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
         }
       }else{
         if(mounted) setState(() => loading = true);
@@ -87,9 +94,14 @@ class ChannelVideosState extends State<ChannelVideos> {
               videos = vids;
               offset = vids.length;
             });
-            prudStudioNotifier.lastOffsetChannelVideos = offset;
-            prudStudioNotifier.selectedChannelId = widget.channel.id;
-            prudStudioNotifier.selectedChannelVideos = vids;
+            vCha = VisitedChannel(
+              channel: widget.channel, 
+              lastVideoOffset: offset, 
+              lastBroadcastOffset: widget.channel.broadcasts?.length?? 0, 
+              lastVideoScrollPoint: 0, 
+              lastBroadcastScrollPoint: 0
+            );
+            prudStudioNotifier.addChannelVideoToVisitedChannels(vCha, vids);
           }
         }
         if(mounted) setState(() => loading = false);
@@ -97,7 +109,6 @@ class ChannelVideosState extends State<ChannelVideos> {
     }, error: (){
       if(mounted) setState(() => loading = false);
     });
-    
   }
 
   
@@ -106,12 +117,20 @@ class ChannelVideosState extends State<ChannelVideos> {
     flickMultiManager = FlickMultiManager();
     Future.delayed(Duration.zero, () async {
       await getVideos();
+      if(mounted) setState(() => loaded = true);
     });
     super.initState();
     sCtrl.addListener(() async {
       if(mounted){
-        lastScrollPoint = sCtrl.offset;
-        prudStudioNotifier.lastScrollPointChannelVideos = lastScrollPoint;
+        setState(() => lastScrollPoint = sCtrl.offset);
+        VisitedChannel vCha = VisitedChannel(
+          channel: widget.channel, 
+          lastVideoOffset: offset, 
+          lastBroadcastOffset: widget.channel.broadcasts?.length?? 0, 
+          lastVideoScrollPoint: lastScrollPoint, 
+          lastBroadcastScrollPoint: 0
+        );
+        prudStudioNotifier.updateChannelVideoToVisitedChannels(vCha, videos);
       }
       if(sCtrl.position.pixels == sCtrl.position.maxScrollExtent && videos.isNotEmpty) await getMoreVideos();
     });
@@ -151,12 +170,15 @@ class ChannelVideosState extends State<ChannelVideos> {
                 child: ListView.builder(
                   physics: BouncingScrollPhysics(),
                   controller: sCtrl,
-                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
                   itemCount: videos.length,
                   itemBuilder: (context, index) {
                     return PrudVideoComponent(
                       video: videos[index],
+                      thriller: videos[index].thriller,
+                      channel: widget.channel,
                       isOwner: widget.isOwner,
+                      noBorderRadius: false,
                       flickMultiManager: flickMultiManager,
                     );
                   },
@@ -168,7 +190,7 @@ class ChannelVideosState extends State<ChannelVideos> {
         ) : Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
-          children: [noVideos],
+          children: [if(loaded) noVideos],
         )
       ),
     );

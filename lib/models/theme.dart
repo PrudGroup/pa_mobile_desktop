@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
+import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/models/shared_classes.dart';
 
 import '../components/translate_text.dart';
@@ -212,6 +213,58 @@ class WidgetStyle{
       highlightElevation: elevation,
       textStyle: btnTextStyle.copyWith(color: textColor),
       text: text,
+    );
+  }
+
+  Widget getShortIconButton({
+    required Function onPressed, 
+    required String text, 
+    bool makeLight = false, 
+    bool isPill = true, 
+    bool isSmall = false,
+    Color? bgColor,
+    bool hasIcon = false,
+    Widget? icon,
+    bool showLoader = false
+  }){
+    Color btnColor = makeLight? prudColorTheme.buttonD : bgColor?? prudColorTheme.primary;
+    Color lightColor = btnColor.withValues(alpha: 0.7);
+    Color textColor = makeLight? prudColorTheme.error : prudColorTheme.textC;
+    return GFButton(
+      onPressed: () => onPressed(),
+      shape: isPill? GFButtonShape.pills : GFButtonShape.square,
+      size: isSmall? GFSize.SMALL : btnSize,
+      padding: const EdgeInsets.only(left: 25, right: 25),
+      color: btnColor,
+      splashColor: lightColor,
+      highlightColor: lightColor,
+      hoverColor: lightColor,
+      hoverElevation: elevation,
+      elevation: elevation,
+      highlightElevation: elevation,
+      child: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              children: [
+                if(hasIcon && icon != null) icon,
+                if(hasIcon && icon != null) spacer.width,
+                Translate(
+                  text: text,
+                  style: btnTextStyle.copyWith(color: textColor),
+                ),
+              ],
+            ),
+            if(showLoader) LoadingComponent(
+              size: 7,
+              spinnerColor: textColor,
+              isShimmer: false,
+              defaultSpinnerType: false,
+            )
+          ],
+        ),
+      ),
     );
   }
 }

@@ -337,6 +337,8 @@ class TabData extends ChangeNotifier {
     );
   }
 
+  String getFilenameFromUrl(String url) => url.substring(url.lastIndexOf("/") + 1);
+
   String toTitleCaseWithoutSpace(String str) {
     return str.replaceAllMapped(
         RegExp(r'[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+'),

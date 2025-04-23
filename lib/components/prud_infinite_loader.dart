@@ -23,10 +23,10 @@ class PrudInfiniteLoader extends StatelessWidget {
                 Image.asset(
                   prudImages.prudIcon,
                   fit: BoxFit.contain,
-                  width: 15,
+                  width: 20,
                 ),
                 LoadingComponent(
-                  size: 40,
+                  size: 50,
                   isShimmer: false,
                   spinnerColor: prudColorTheme.primary,
                 )

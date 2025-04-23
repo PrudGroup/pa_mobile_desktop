@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:pdf/widgets.dart' as pdf;
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/pages/home/home.dart';
 import 'package:prudapp/pages/prud_predict/prud_predict.dart';
@@ -749,6 +750,7 @@ final ExportDelegate exportDelegate = ExportDelegate(
   },
 );
 FirebaseMessaging messenger = FirebaseMessaging.instance;
+String? prudIOConnectID;
 Dio prudDio = Dio(BaseOptions(
     receiveDataWhenStatusError: true,
     connectTimeout: const Duration(seconds: 60), // 60 seconds
@@ -765,5 +767,7 @@ Dio prudDio = Dio(BaseOptions(
       } else {
         return false;
       }
-    }));
+    }
+  )
+)..interceptors.add(PrettyDioLogger());
 final iCloud = ICloud();

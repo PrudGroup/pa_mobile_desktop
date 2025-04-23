@@ -1,7 +1,11 @@
 import 'dart:convert';
+import 'dart:isolate';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+import 'package:prudapp/isolates.dart';
+import 'package:prudapp/models/shared_classes.dart';
 import 'package:prudapp/models/wallet.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
@@ -12,8 +16,7 @@ import '../models/prud_vid.dart';
 import 'i_cloud.dart';
 
 class PrudStudioNotifier extends ChangeNotifier {
-  static final PrudStudioNotifier _prudStudioNotifier =
-      PrudStudioNotifier._internal();
+  static final PrudStudioNotifier _prudStudioNotifier = PrudStudioNotifier._internal();
   static get prudStudioNotifier => _prudStudioNotifier;
 
   factory PrudStudioNotifier() {
@@ -45,14 +48,112 @@ class PrudStudioNotifier extends ChangeNotifier {
   double? changedViewShare;
   double? changedMembershipShare;
   String? selectedChannelId;
-  double lastScrollPointChannelVideos = 0;
-  int lastOffsetChannelVideos = 0;
-  List<ChannelVideo> selectedChannelVideos = [];
   PendingNewVideo newVideo = PendingNewVideo(
     thriller: VideoThriller(
       videoId: "", videoUrl: ""
     )
   );
+  List<VisitedChannel> visitedChannels = [];
+  List<String> watchedTrillers = [];
+  List<dynamic> thrillerDetailSuggestions = [];
+  int thrillerDetailLastItemScroll = 0;
+
+
+  void updateThrillerDetailSuggestions(List<dynamic> items){
+    thrillerDetailSuggestions = items;
+    notifyListeners();
+  }
+
+  bool isThrillerWatched(String thrillerId) => watchedTrillers.contains(thrillerId);
+
+  void addToWatchedThrillers(String thrillerId){
+    bool alreadyExists = watchedTrillers.contains(thrillerId);
+    if(!alreadyExists) watchedTrillers.add(thrillerId);
+    myStorage.addToStore(key: "watchedTrillers", value: watchedTrillers);
+  }
+
+  void getWatchedThrillersFromCache(){
+    List<dynamic>?  watched = myStorage.getFromStore(key: "watchedTrillers");
+    if(watched != null){
+      watchedTrillers = watched as List<String>;
+    }
+  }
+
+  void addChannelVideoToVisitedChannels(VisitedChannel visitedChannel, List<ChannelVideo> videos){
+    int index = visitedChannels.indexWhere((cha) => cha.channel.id == visitedChannel.channel.id);
+    visitedChannel.channel.videos = videos;
+    visitedChannel.lastVideoOffset = videos.length;
+    if(index == -1){
+      visitedChannels.add(visitedChannel);
+    }else{
+      visitedChannels[index] = visitedChannel;
+    }
+    notifyListeners();
+  }
+
+  void updateChannelVideoToVisitedChannels(VisitedChannel visitedChannel, List<ChannelVideo> videos){
+    int index = visitedChannels.indexWhere((cha) => cha.channel.id == visitedChannel.channel.id);
+    visitedChannel.channel.videos = videos;
+    if(index == -1){
+      visitedChannels.add(visitedChannel);
+    }else{
+      VisitedChannel cha = visitedChannels[index];
+      cha.channel.videos = videos;
+      cha.lastVideoOffset = visitedChannel.lastVideoOffset;
+      cha.lastVideoScrollPoint = visitedChannel.lastVideoScrollPoint;
+      visitedChannels[index] = cha;
+    }
+    notifyListeners();
+  }
+
+  void updateVideoThrillerToVisitedChannels(String channelId, VideoThriller thrill){
+    int index = visitedChannels.indexWhere((cha) => cha.channel.id == channelId);
+    if(index > -1){
+      VisitedChannel cha = visitedChannels[index];
+      if(cha.channel.videos != null){
+        int ind = cha.channel.videos!.indexWhere((vid) => vid.id == thrill.videoId);
+        if(ind > -1){
+          ChannelVideo dVid = cha.channel.videos![ind];
+          dVid.thriller = thrill;
+          cha.channel.videos![ind] = dVid;
+          visitedChannels[index] = cha;
+        }
+      }
+    }
+    notifyListeners();
+  }
+
+  VisitedChannel? getCachedVisitedChannel(String channelId){
+    int index = visitedChannels.indexWhere((cha) => cha.channel.id == channelId);
+    return index >= 0? visitedChannels[index] : null;
+  }
+
+  void addChannelBroadcastToVisitedChannels(VisitedChannel visitedChannel, List<ChannelBroadcast> bCasts){
+    int index = visitedChannels.indexWhere((cha) => cha.channel.id == visitedChannel.channel.id);
+    visitedChannel.channel.broadcasts = bCasts;
+    visitedChannel.lastBroadcastOffset = bCasts.length;
+    if(index == -1){
+      visitedChannels.add(visitedChannel);
+    }else{
+      visitedChannels[index] = visitedChannel;
+    }
+    notifyListeners();
+  }
+
+  void updateChannelBroadcastToVisitedChannels(VisitedChannel visitedChannel, List<ChannelBroadcast> bCasts){
+    int index = visitedChannels.indexWhere((cha) => cha.channel.id == visitedChannel.channel.id);
+    visitedChannel.channel.broadcasts = bCasts;
+    if(index == -1){
+      visitedChannels.add(visitedChannel);
+    }else{
+      VisitedChannel cha = visitedChannels[index];
+      cha.channel.broadcasts = bCasts;
+      cha.lastBroadcastOffset = visitedChannel.lastBroadcastOffset;
+      cha.lastBroadcastScrollPoint = visitedChannel.lastBroadcastScrollPoint;
+      visitedChannels[index] = cha;
+    }
+    notifyListeners();
+  }
 
 
   void channelChangesOccurred(VidChannel cha){
@@ -273,6 +374,32 @@ class PrudStudioNotifier extends ChangeNotifier {
     }
   }
 
+  Future<PayForVideoViewSchema?> pay4View(PayForVideoViewSchema pay) async{
+    return await tryAsync("pay4View", () async {
+      dynamic res = await makeRequest(path: "channels/videos/pay_for_view/", isGet: false, data: pay.toJson());
+      if (res != null) {
+        return PayForVideoViewSchema.fromJson(res);
+      } else {
+        return null;
+      }
+    }, error: (){
+      return null;
+    });
+  }
+
+  Future<PayForVideoViewSchema?> pay4Download(PayForVideoViewSchema pay) async{
+    return await tryAsync("pay4Download", () async {
+      dynamic res = await makeRequest(path: "channels/videos/pay_for_download/", isGet: false, data: pay.toJson());
+      if (res != null) {
+        return PayForVideoViewSchema.fromJson(res);
+      } else {
+        return null;
+      }
+    }, error: (){
+      return null;
+    });
+  }
+
   Future<void> getStudio() async {
     studio = await tryAsync("getStudio", () async {
       dynamic stud = myStorage.getFromStore(key: "studio");
@@ -337,6 +464,47 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
+  Future<List<ChannelVideo>?> getSuggestedVideos({required VideoSearch criteria, PrudCredential? cred}) async {
+    return await tryAsync("getSuggestedVideos", () async {
+      dynamic res = await makeRequest(path: "channels/videos/search_by/${criteria.toInt()}", qParam: {
+        "limit": criteria.limit,
+        "offset": criteria.offset,
+        "category": criteria.category,
+        "audience": criteria.audience?.name,
+        "country": criteria.country,
+        "search_text": criteria.searchText,
+      }, cred: cred);
+      if (res != null && res != false && res.length > 0) {
+        List<ChannelVideo> chas = [];
+        for (var item in res) {
+          chas.add(ChannelVideo.fromJson(item));
+        }
+        return chas;
+      } else {
+        return null;
+      }
+    }, error: () => null);
+  }
+
+  Future<List<ChannelBroadcast>?> getSuggestedBroadcasts({required String criteria, PrudCredential? cred, int limit = 100, int offset = 0}) async {
+    return await tryAsync("getSuggestedBroadcasts", () async {
+      dynamic res = await makeRequest(path: "channels/broadcasts/search/random", qParam: {
+        "limit": limit,
+        "offset": offset,
+        "search_text": criteria,
+      }, cred: cred);
+      if (res != null && res != false && res.length > 0) {
+        List<ChannelBroadcast> chas = [];
+        for (var item in res) {
+          chas.add(ChannelBroadcast.fromJson(item));
+        }
+        return chas;
+      } else {
+        return null;
+      }
+    }, error: () => null);
+  }
+
   Future<List<ChannelBroadcast>?> getChannelBroadcasts({required String channelId, int limit = 100, int? offset}) async {
     return await tryAsync("getChannelBroadcasts", () async {
       dynamic res = await makeRequest(path: "channels/broadcasts/channel/$channelId", qParam: {
@@ -355,9 +523,53 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
-  Future<ChannelVideo?> getVideoById(String vid) async {
+  Future<bool> incrementVideoImpression({required String vidId, PrudCredential? cred}) async {
+    return await tryAsync("incrementVideoImpression", () async {
+      dynamic res = await makeRequest(path: "channels/videos/$vidId/increment_impressions", cred: cred);
+      if (res != null && res != false) {
+        return true;
+      } else {
+        return false;
+      }
+    }, error: () => false);
+  }
+
+  Future<bool> incrementVideoDownloads({required String vidId, PrudCredential? cred}) async {
+    return await tryAsync("incrementVideoDownloads", () async {
+      dynamic res = await makeRequest(path: "channels/videos/$vidId/increment_download", cred: cred);
+      if (res != null && res != false) {
+        return true;
+      } else {
+        return false;
+      }
+    }, error: () => false);
+  }
+
+  Future<bool> incrementVideoWatchMinutes({required String vidId, required int minutes, PrudCredential? cred}) async {
+    return await tryAsync("incrementVideoWatchMinutes", () async {
+      dynamic res = await makeRequest(path: "channels/videos/$vidId/increment_watch_minutes", qParam: {"minutes": minutes}, cred: cred);
+      if (res != null && res != false) {
+        return true;
+      } else {
+        return false;
+      }
+    }, error: () => false);
+  }
+
+  Future<bool> incrementBroadcastImpression({required String castId, PrudCredential? cred}) async {
+    return await tryAsync("incrementBroadcastImpression", () async {
+      dynamic res = await makeRequest(path: "channels/broadcasts/$castId/impressions/increment", cred: cred);
+      if (res != null && res != false) {
+        return true;
+      } else {
+        return false;
+      }
+    }, error: () => false);
+  }
+
+  Future<ChannelVideo?> getVideoById(String vid, {PrudCredential? cred}) async {
     return await tryAsync("getVideoById", () async {
-      dynamic res = await makeRequest(path: "channels/videos/$vid");
+      dynamic res = await makeRequest(path: "channels/videos/$vid", cred: cred);
       if (res != null && res != false) {
         return ChannelVideo.fromJson(res);
       } else {
@@ -366,9 +578,9 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
-  Future<VidChannel?> getChannelById(String cid) async {
+  Future<VidChannel?> getChannelById(String cid, {PrudCredential? cred}) async {
     return await tryAsync("getChannelById", () async {
-      dynamic res = await makeRequest(path: "channels/$cid");
+      dynamic res = await makeRequest(path: "channels/$cid", cred: cred);
       if (res != null && res != false) {
         return VidChannel.fromJson(res);
       } else {
@@ -377,11 +589,11 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
-  Future<VideoThriller?> getThrillerById({required String thrillId}) async {
+  Future<VideoThriller?> getThrillerById({required String thrillId, PrudCredential? cred}) async {
     return await tryAsync("getThrillerById", () async {
-      dynamic res = await makeRequest(path: "channels/videos/thrillers/$thrillId", isGet: true);
+      dynamic res = await makeRequest(path: "channels/videos/thrillers/$thrillId", isGet: true, cred: cred);
       if (res != null && res != false) {
-        VideoThriller.fromJson(res);
+        return VideoThriller.fromJson(res);
       } else {
         return null;
       }
@@ -392,7 +604,7 @@ class PrudStudioNotifier extends ChangeNotifier {
     return await tryAsync("getThrillerByVideoId", () async {
       dynamic res = await makeRequest(path: "channels/videos/thrillers/video/$videoId", isGet: true);
       if (res != null && res != false) {
-        VideoThriller.fromJson(res);
+        return VideoThriller.fromJson(res);
       } else {
         return null;
       }
@@ -467,8 +679,7 @@ class PrudStudioNotifier extends ChangeNotifier {
 
   Future<Studio?> createStudio(Studio newStudio) async {
     return await tryAsync("createStudio", () async {
-      dynamic res =
-          await makeRequest(path: "", isGet: false, data: newStudio.toJson());
+      dynamic res = await makeRequest(path: "", isGet: false, data: newStudio.toJson());
       if (res != null) {
         Studio st = Studio.fromJson(res);
         await myStorage.addToStore(key: "studio", value: jsonEncode(st));
@@ -535,8 +746,7 @@ class PrudStudioNotifier extends ChangeNotifier {
   Future<void> addJoinedToCache(ChannelMembership memb) async {
     await tryAsync("updateJoinedToCache", () async {
       affJoined.add(memb);
-      await myStorage.addToStore(
-          key: "joined", value: affJoined.map((mem) => mem.toJson()).toList());
+      await myStorage.addToStore(key: "joined", value: affJoined.map((mem) => mem.toJson()).toList());
       notifyListeners();
     });
   }
@@ -544,8 +754,7 @@ class PrudStudioNotifier extends ChangeNotifier {
   Future<void> removeJoinedFromCache(ChannelMembership memb) async {
     await tryAsync("updateJoinedToCache", () async {
       affJoined.removeWhere((item) => item.affId == memb.affId && item.channelId == memb.channelId);
-      await myStorage.addToStore(
-          key: "joined", value: affJoined.map((mem) => mem.toJson()).toList());
+      await myStorage.addToStore(key: "joined", value: affJoined.map((mem) => mem.toJson()).toList());
       notifyListeners();
     });
   }
@@ -571,27 +780,27 @@ class PrudStudioNotifier extends ChangeNotifier {
   }
 
   Future<void> getChannelsJoinedFromCache() async {
-    List<dynamic>? cacheJoined = myStorage.getFromStore(key: "joined");
-    if (cacheJoined != null) {
-      affJoined = cacheJoined
-          .map((dynamic mem) => ChannelMembership.fromJson(mem))
-          .toList();
-    } else {
-      if (myStorage.user != null && myStorage.user!.id != null) {
-        List<ChannelMembership> cloudJoined =
-            await getChannelsMembered(myStorage.user!.id!);
-        if (cloudJoined.isNotEmpty) {
-          affJoined = cloudJoined;
-        } else {
-          affJoined = List<ChannelMembership>.empty();
-        }
+    //you have to get this from cloud first to assert latest update
+    if (myStorage.user != null && myStorage.user!.id != null) {
+      List<ChannelMembership> cloudJoined = await getChannelsMembered(myStorage.user!.id!);
+      if (cloudJoined.isNotEmpty) {
+        affJoined = cloudJoined;
       } else {
         affJoined = List<ChannelMembership>.empty();
       }
-      await myStorage.addToStore(
-          key: "joined",
-          value: affJoined.map((mem) => mem.toJson()).toList());
+    } else {
+      affJoined = List<ChannelMembership>.empty();
     }
+    if(affJoined.isEmpty){
+      List<dynamic>? cacheJoined = myStorage.getFromStore(key: "joined");
+      if(cacheJoined != null){
+        affJoined = cacheJoined.map((dynamic mem) => ChannelMembership.fromJson(mem)).toList();
+      }
+    }
+    await myStorage.addToStore(
+      key: "joined",
+      value: affJoined.map((mem) => mem.toJson()).toList()
+    );
     notifyListeners();
   }
 
@@ -878,6 +1087,24 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
+  Future<dynamic> getTotalComments(String objId, CommentType commentType, {PrudCredential? cred}) async {
+    return await tryAsync("getWallet", () async {
+      String path = "";
+      switch(commentType){
+        case CommentType.videoComment: path = "";
+        case CommentType.thrillerComment: path = "";
+        case CommentType.channelBroadcastComment: path = "";
+        default: path = "";
+      }
+      dynamic res = await makeRequest(path: path, cred: cred);
+      if (res != null) {
+        return StudioWallet.fromJson(res);
+      } else {
+        return null;
+      }
+    });
+  }
+
   Future<List<VidChannel>> searchForChannels(
       String filter, String? filterValue, int limit, int? offset,
       {bool onlySeeking = false}) async {
@@ -946,11 +1173,13 @@ class PrudStudioNotifier extends ChangeNotifier {
         myStorage.getFromStore(key: "prudStudioWalletCurrencyCode") ?? "EUR";
   }
 
-  void setDioHeaders() {
+  void setDioHeaders(PrudCredential? cred) {
+    String? token = cred != null? cred.token : iCloud.affAuthToken;
+    String? key = cred != null? cred.key : prudApiKey;
     prudStudioDio.options.headers.addAll({
       "Content-Type": "application/json",
-      "AppCredential": prudApiKey,
-      "Authorization": iCloud.affAuthToken
+      "AppCredential": key,
+      "Authorization": token
     });
   }
 
@@ -967,16 +1196,14 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
-  Future<dynamic> makeRequest(
-      {required String path,
-      bool isGet = true,
-      bool isPut = false,
-      bool isDelete = false,
-      Map<String, dynamic>? data,
-      Map<String, dynamic>? qParam}) async {
+  Future<dynamic> makeRequest({
+    required String path, bool isGet = true,
+    bool isPut = false, bool isDelete = false, PrudCredential? cred,
+    Map<String, dynamic>? data, Map<String, dynamic>? qParam
+  }) async {
     currencyMath.loginAutomatically();
-    if (iCloud.affAuthToken != null) {
-      setDioHeaders();
+    if (iCloud.affAuthToken != null || cred != null) {
+      setDioHeaders(cred);
       String url = "$prudApiUrl/studios/$path";
       Response res = isGet
           ? (await prudStudioDio.get(url, queryParameters: qParam))
@@ -1002,19 +1229,23 @@ class PrudStudioNotifier extends ChangeNotifier {
       await getChannelsJoinedFromCache();
       await getChannelsSubscribedFromCache();
       getChannelRefferalsFromCache();
-      /* final receivePort = ReceivePort();
-      await Isolate.spawn(computeStream, (length: 10, port: receivePort.sendPort));
-      receivePort.listen((response) {
-        debugPrint("Isolate Result: $response");
-      }, onError: (err){
-        debugPrint('Error in computeStream: $err');
-      }); */
+      getWatchedThrillersFromCache();
       if (studio != null && studio!.id != null) {
         wallet = await getWallet(studio!.id!);
         await getAmACreator();
         await getMyChannels();
         await getAffiliatedChannels();
       }
+      ReceivePort rPort = ReceivePort();
+      ListItemSearchArg searchArgs = ListItemSearchArg(
+        sendPort: rPort.sendPort,
+        searchList: ["2345ABCDEF", "2345", "102030"],
+        searchItem: "EMEA"
+      );
+      Isolate.spawn(listItemSearch, searchArgs, onError: rPort.sendPort, onExit: rPort.sendPort);
+      rPort.listen((resp) {
+        debugPrint("Result: $resp");
+      });
       notifyListeners();
     } catch (ex) {
       debugPrint("PrudStudioNotifier_initPrudStudio Error: $ex");
@@ -1040,7 +1271,7 @@ Dio prudStudioDio = Dio(BaseOptions(
       } else {
         return false;
       }
-    }));
+    }))..interceptors.add(PrettyDioLogger());
 final prudStudioNotifier = PrudStudioNotifier();
 List<String> channelCategories = [
   "movies",

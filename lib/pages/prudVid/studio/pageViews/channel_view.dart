@@ -76,10 +76,11 @@ class _ChannelViewState extends State<ChannelView> {
             yearRated: now.year,
           );
           await prudStudioNotifier.updateChannelRating(
-              ratedChannel, hasVotedB4.index != -1, hasVotedB4.index);
+            ratedChannel, hasVotedB4.index != -1, hasVotedB4.index
+          );
           setState(() {
-            loading = false;
             channel = result;
+            loading = false;
           });
           if(mounted) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -202,6 +203,8 @@ class _ChannelViewState extends State<ChannelView> {
 
   @override
   void dispose() {
+    localSettings.updateLastRoute(Uri(path: '/channels/${channel.id}').toString());
+    localSettings.updateLastRouteData({"isOwner": widget.isOwner, "channel": channel.toJson()});
     prudStudioNotifier.removeListener(() {});
     super.dispose();
   }
@@ -272,6 +275,7 @@ class _ChannelViewState extends State<ChannelView> {
                       width: double.maxFinite,
                       url: channel.displayScreen,
                       authorizeUrl: true,
+                      errorWidget: Center(child: Translate(text: "Unable To Display (Network Issue).")),
                     ),
                   ),
                   if(widget.isOwner && isCreator) Padding(
@@ -348,7 +352,7 @@ class _ChannelViewState extends State<ChannelView> {
                                         spacing: 2,
                                         children: [
                                           Text(
-                                            "${tabData.getFormattedNumber(widget.channel.voters)}",
+                                            "${tabData.getFormattedNumber(channel.voters)}",
                                             style: prudWidgetStyle.btnTextStyle.copyWith(
                                               color: prudColorTheme.secondary,
                                               fontWeight: FontWeight.w600,

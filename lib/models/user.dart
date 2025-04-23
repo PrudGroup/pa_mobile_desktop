@@ -1,6 +1,11 @@
 import 'dart:core';
 
+import 'package:flutter/material.dart';
+import 'package:getwidget/components/avatar/gf_avatar.dart';
+import 'package:getwidget/shape/gf_avatar_shape.dart';
+import 'package:namefully/namefully.dart';
 import 'package:prudapp/models/prud_vid.dart';
+import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/models/wallet.dart';
 
 import 'aff_link.dart';
@@ -40,6 +45,7 @@ class User {
   List<VideoThrillerComment>? thrillerComments;
   List<StreamBroadcastComment>? streamBroadcastComments;
   List<ChannelBroadcastComment>? channelBroadcastComments;
+  List<VideoViewPurchase>? videoViewPurchases;
 
   User({
     this.id,
@@ -75,7 +81,52 @@ class User {
     this.thrillerComments,
     this.channelBroadcastComments,
     this.streamBroadcastComments,
+    this.videoViewPurchases
   });
+
+  Color bgColor(){
+    var hash = 0;
+    for (var i = 0; i < fullName!.length; i++) {
+      hash = fullName!.codeUnitAt(i)+ ((hash << 5) - hash);
+    }
+    final finalHash = hash.abs() % (256*256*256);
+    final red = ((finalHash & 0xFF0000) >> 16);
+    final blue = ((finalHash & 0xFF00) >> 8);
+    final green = ((finalHash & 0xFF));
+    final color = Color.fromRGBO(red, green, blue, 1);
+    return color;
+  }
+
+  Color invert() {
+    Color bColor = bgColor();
+    final r = 255 - bColor.r.toInt();
+    final g = 255 - bColor.g.toInt();
+    final b = 255 - bColor.b.toInt();
+
+    return Color.fromARGB((bColor.a * 255).round(), r, g, b);
+  }
+
+  Widget getAvatar({double? size, int? shape}){
+    Namefully name = Namefully(fullName!);
+    String initials = name.initials(withMid: false).join("");
+    double avaSize = size?? 25.0;
+    Color fgC = invert();
+    return GFAvatar(
+      size: avaSize,
+      shape: shape == null || shape == 0? GFAvatarShape.circle : GFAvatarShape.square,
+      backgroundColor: bgColor(),
+      foregroundColor: fgC,
+      child: Text(
+        initials.toUpperCase(),
+        style: prudWidgetStyle.hintStyle.copyWith(
+          fontSize: avaSize / 2,
+          color: fgC,
+          fontWeight: FontWeight.bold
+        ),
+        textAlign: TextAlign.center
+      )
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     if(id != null) 'id': id,
@@ -127,6 +178,7 @@ class User {
       thrillerComments: json["thrillerComments"]?.map<VideoThrillerComment>((itm) => VideoThrillerComment.fromJson(itm)).toList(),
       streamBroadcastComments: json["streamBroadcastComments"]?.map<StreamBroadcastComment>((itm) => StreamBroadcastComment.fromJson(itm)).toList(),
       channelBroadcastComments: json["channelBroadcastComments"]?.map<ChannelBroadcastComment>((itm) => ChannelBroadcastComment.fromJson(itm)).toList(),
+      videoViewPurchases: json["videoViewPurchases"]?.map<VideoViewPurchase>((itm) => VideoViewPurchase.fromJson(itm)).toList(),
     );
   }
 }

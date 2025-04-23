@@ -4,7 +4,7 @@ class FlickMultiManager {
   // ignore: prefer_final_fields
   List<FlickManager> _flickManagers = [];
   FlickManager? _activeManager;
-  bool _isMute = false;
+  bool _isMute = true;
 
   init(FlickManager flickManager) {
     _flickManagers.add(flickManager);

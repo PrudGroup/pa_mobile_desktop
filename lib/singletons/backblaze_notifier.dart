@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:prudapp/constants.dart';
 import 'package:prudapp/models/backblaze.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
@@ -158,6 +159,6 @@ Dio b2Dio = Dio(
       }
     }
   )
-);
+)..interceptors.add(PrettyDioLogger());
 final backblazeNotifier = BackblazeNotifier();
 const String b2Key = Constants.b2Key;

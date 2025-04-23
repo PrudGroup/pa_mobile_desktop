@@ -212,7 +212,7 @@ final GoRouter prudRouter = GoRouter(
             if(linkId != null) myStorage.saveChannelReferral(cid, linkId);
             if(localSettings.lastRouteData != null && localSettings.lastRouteData!["channel"] != null){
               return ChannelView(
-                channel: localSettings.lastRouteData!["channel"],
+                channel: VidChannel.fromJson(localSettings.lastRouteData!["channel"]),
                 isOwner: localSettings.lastRouteData!["isOwner"],
               );
             }

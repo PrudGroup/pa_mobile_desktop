@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:prudapp/components/broadcast_component.dart';
 import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/components/prud_infinite_loader.dart';
-import 'package:prudapp/components/work_in_progress.dart';
 import 'package:prudapp/models/images.dart';
 import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/theme.dart';
@@ -48,9 +47,17 @@ class ChannelBroadcastsState extends State<ChannelBroadcasts> {
         setState((){
           if(foundBroadcasts != null && foundBroadcasts.isNotEmpty) broadcasts.addAll(foundBroadcasts);
           offset = broadcasts.length;                            
-          loadingMore = false;
         });
+        VisitedChannel vCha = VisitedChannel(
+            channel: widget.channel, 
+            lastVideoOffset: widget.channel.videos?.length?? 0, 
+            lastBroadcastOffset: offset, 
+            lastVideoScrollPoint: 0, 
+            lastBroadcastScrollPoint: lastScrollPoint
+          );
+          prudStudioNotifier.updateChannelBroadcastToVisitedChannels(vCha, broadcasts);
       }
+      if(mounted) setState(() => loadingMore = false);
     }, error: (){
       if(mounted) setState(() => loadingMore = false);
     });
@@ -58,16 +65,36 @@ class ChannelBroadcastsState extends State<ChannelBroadcasts> {
 
   Future<void> getChannelBroadcast() async {
     await tryAsync("getChannelBroadcast", () async {
-      if(mounted) setState(() => loading = true);
-      List<ChannelBroadcast>? foundBroadcasts = await prudStudioNotifier.getChannelBroadcasts(
-        channelId: widget.channel.id!, limit: 100, 
-      );
-      if(mounted) {
-        setState((){
-          if(foundBroadcasts != null && foundBroadcasts.isNotEmpty) broadcasts = foundBroadcasts;
-          offset = broadcasts.length;                            
-          loading = false;
-        });
+      VisitedChannel? vCha = prudStudioNotifier.getCachedVisitedChannel(widget.channel.id!);
+      if(vCha != null && vCha.channel.broadcasts != null){
+        if(mounted) {
+          setState((){
+            broadcasts = vCha!.channel.broadcasts!;
+            offset = vCha.lastBroadcastOffset;
+            lastScrollPoint = vCha.lastBroadcastScrollPoint;
+          });
+          if(broadcasts.isNotEmpty && lastScrollPoint > 0) sCtrl.animateTo(lastScrollPoint, duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
+        }
+      }else{
+        if(mounted) setState(() => loading = true);
+        List<ChannelBroadcast>? foundBroadcasts = await prudStudioNotifier.getChannelBroadcasts(
+          channelId: widget.channel.id!, limit: 100, 
+        );
+        if(mounted) {
+          setState((){
+            if(foundBroadcasts != null && foundBroadcasts.isNotEmpty) broadcasts = foundBroadcasts;
+            offset = broadcasts.length;                            
+            loading = false;
+          });
+          vCha = VisitedChannel(
+            channel: widget.channel, 
+            lastVideoOffset: 0, 
+            lastBroadcastOffset: offset, 
+            lastVideoScrollPoint: 0, 
+            lastBroadcastScrollPoint: 0
+          );
+          prudStudioNotifier.addChannelBroadcastToVisitedChannels(vCha, broadcasts);
+        }
       }
     }, error: (){
       if(mounted) setState(() => loading = false);
@@ -82,11 +109,25 @@ class ChannelBroadcastsState extends State<ChannelBroadcasts> {
     super.initState();
     sCtrl.addListener(() async {
       if(mounted){
-        lastScrollPoint = sCtrl.offset;
-        prudStudioNotifier.lastScrollPointChannelVideos = lastScrollPoint;
+        setState(() => lastScrollPoint = sCtrl.offset);
+        VisitedChannel vCha = VisitedChannel(
+          channel: widget.channel, 
+          lastVideoOffset: 0, 
+          lastBroadcastOffset: offset, 
+          lastVideoScrollPoint: 0, 
+          lastBroadcastScrollPoint: lastScrollPoint
+        );
+        prudStudioNotifier.updateChannelBroadcastToVisitedChannels(vCha, broadcasts);
       }
       if(sCtrl.position.pixels == sCtrl.position.maxScrollExtent && broadcasts.isNotEmpty) await getMoreChannelBroadcast();
     });
+  }
+
+  @override
+  void dispose() {
+    sCtrl.removeListener((){});
+    sCtrl.dispose();
+    super.dispose();
   }
 
   @override

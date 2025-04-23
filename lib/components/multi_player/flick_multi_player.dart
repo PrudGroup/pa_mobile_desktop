@@ -1,6 +1,7 @@
 import 'package:prudapp/components/multi_player/portrait_controls.dart';
 import 'package:prudapp/components/prud_network_image.dart';
 import 'package:prudapp/models/theme.dart';
+import 'package:prudapp/singletons/prud_studio_notifier.dart';
 
 import './flick_multi_manager.dart';
 import 'package:flick_video_player/flick_video_player.dart';
@@ -14,10 +15,13 @@ class FlickMultiPlayer extends StatefulWidget {
   final String url;
   final String? image;
   final FlickMultiManager flickMultiManager;
+  final bool watched;
+  final String thrillerId;
 
   const FlickMultiPlayer({
-    super.key, required this.url,
+    super.key, required this.url, required this.thrillerId,
     required this.flickMultiManager, this.image,
+    this.watched = false
   });
 
 
@@ -31,10 +35,14 @@ class FlickMultiPlayerState extends State<FlickMultiPlayer> {
   @override
   void initState() {
     flickManager = FlickManager(
-      videoPlayerController: VideoPlayerController.networkUrl(Uri.parse(widget.url))..setLooping(true),
+      videoPlayerController: VideoPlayerController.networkUrl(Uri.parse(widget.url))/* ..setLooping(true) */,
       autoPlay: false,
+      onVideoEnd: () => prudStudioNotifier.addToWatchedThrillers(widget.thrillerId),
     );
     widget.flickMultiManager.init(flickManager);
+    if(widget.watched) {
+      widget.flickMultiManager.pause();
+    }
     super.initState();
   }
 

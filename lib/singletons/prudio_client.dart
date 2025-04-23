@@ -16,6 +16,7 @@ class PrudioNotifier extends ChangeNotifier {
       prudSocket.connect();
       prudSocket.onConnect((d) {
         debugPrint('PrudSocket connect $d');
+        prudIOConnectID = d;
         prudSocket.emit('AhlaluYahuah', 'test');
       });
       prudSocket.onError((e) {
@@ -29,6 +30,7 @@ class PrudioNotifier extends ChangeNotifier {
       debugPrint("Unable To Connect To PrudSocketIO");
     });
   }
+
 
   PrudioNotifier._internal();
 }

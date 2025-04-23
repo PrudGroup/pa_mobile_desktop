@@ -124,14 +124,107 @@ class AffMerchantReferral{
 }
 
 class AffInstallReferral{
+  String? id;
+  String code;
+  String affId;
+  User? affiliate;
+  int totalInstalls;
+  DateTime? createdOn;
+  DateTime? updatedOn;
+  List<AffInstallReferralMetric>? metrics;
 
-  AffInstallReferral();
+  AffInstallReferral({
+    required this.affId,
+    required this.code,
+    this.totalInstalls = 0,
+    this.affiliate,
+    this.createdOn,
+    this.id,
+    this.updatedOn,
+    this.metrics
+  });
 
   Map<String, dynamic> toJson(){
-    return {};
+    return {
+      if(createdOn != null) "createdOn": createdOn!.toIso8601String(),
+      if(updatedOn != null) "updatedOn": updatedOn!.toIso8601String(),
+      if(id != null) "id": id,
+      "affId": affId,
+      "code": code,
+      "totalInstalls": totalInstalls,
+    };
   }
 
   factory AffInstallReferral.fromJson(Map<String, dynamic> json){
-    return AffInstallReferral();
+    return AffInstallReferral(
+      totalInstalls: json["totalInstalls"],
+      id: json["id"],
+      code: json["code"],
+      affId: json["affId"],
+      affiliate: json["affiliate"] != null? User.fromJson(json["affiliate"]) : null,
+      createdOn: json["createdOn"] != null? DateTime.parse(json["createdOn"]) : null,
+      updatedOn: json["updatedOn"] != null? DateTime.parse(json["updatedOn"]) : null,
+      metrics: json["metrics"]?.map<AffInstallReferralMetric>((itm) => AffInstallReferralMetric.fromJson(itm))
+    );
+  }
+}
+
+
+class AffInstallReferralMetric{
+  String id;
+  String referralId;
+  AffInstallReferral? referral;
+  int day;
+  int month;
+  int year;
+  double incomeInEuro;
+  bool paid;
+  DateTime? paidOn;
+  DateTime? createdOn;
+  DateTime? lastUpdatedOn;
+
+  AffInstallReferralMetric({
+    required this.id,
+    required this.day,
+    required this.month,
+    required this.year,
+    required this.paid,
+    required this.referralId,
+    required this.incomeInEuro,
+    this.referral,
+    this.createdOn,
+    this.lastUpdatedOn,
+    this.paidOn
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      if(lastUpdatedOn != null) "lastUpdatedOn": lastUpdatedOn!.toIso8601String(),
+      if(createdOn != null) "createdOn": createdOn!.toIso8601String(),
+      if(paidOn != null) "paidOn": paidOn!.toIso8601String(),
+      "incomeInEuro": incomeInEuro,
+      "referralId": referralId,
+      "paid": paid,
+      "month": month,
+      "year": year,
+      "day": day,
+      "id": id,
+    };
+  }
+
+  factory AffInstallReferralMetric.fromJson(Map<String, dynamic> json){
+    return AffInstallReferralMetric(
+      id: json["id"], 
+      day: json["day"], 
+      month: json["month"], 
+      year: json["year"],
+      paid: json["paid"],
+      referralId: json["referralId"],
+      incomeInEuro: json["incomeInEuro"],
+      referral: json["referral"] != null? AffInstallReferral.fromJson(json["referral"]) : null,
+      createdOn: json["createdOn"] != null? DateTime.parse(json["createdOn"]) : null,
+      lastUpdatedOn: json["lastUpdatedOn"] != null? DateTime.parse(json["lastUpdatedOn"]) : null,
+      paidOn: json["paidOn"] != null? DateTime.parse(json["paidOn"]) : null,
+    );
   }
 }

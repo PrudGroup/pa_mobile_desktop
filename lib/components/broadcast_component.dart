@@ -5,9 +5,11 @@ class BroadcastComponent extends StatefulWidget {
   final dynamic broadcast;
   final bool isChannel;
   final bool isOwner;
+  final bool isPortrait;
   
   const BroadcastComponent({
-    super.key, this.broadcast, required this.isChannel, this.isOwner = false
+    super.key, this.broadcast, required this.isChannel, this.isOwner = false,
+    this.isPortrait = true,
   }) : assert(isChannel? broadcast is ChannelBroadcast : broadcast is StreamBroadcast);
 
   @override

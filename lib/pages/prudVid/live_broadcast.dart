@@ -5,16 +5,15 @@ import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
     
-class AddBroadcast extends StatefulWidget {
-  final VidChannel channel;
-  
-  const AddBroadcast({super.key, required this.channel});
+class LiveBroadcast extends StatefulWidget {
+  final VidChannel? channel;
+  const LiveBroadcast({super.key, this.channel});
 
   @override
-  AddBroadcastState createState() => AddBroadcastState();
+  LiveBroadcastState createState() => LiveBroadcastState();
 }
 
-class AddBroadcastState extends State<AddBroadcast> {
+class LiveBroadcastState extends State<LiveBroadcast> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,7 +26,7 @@ class AddBroadcastState extends State<AddBroadcast> {
           splashRadius: 20,
         ),
         title: Translate(
-          text: "New Broadcast",
+          text: "Live Broadcast",
           style: prudWidgetStyle.tabTextStyle.copyWith(
             fontSize: 16,
             color: prudColorTheme.bgA
@@ -36,7 +35,7 @@ class AddBroadcastState extends State<AddBroadcast> {
         actions: const [
         ],
       ),
-      body: WorkInProgress(),
+      body: const WorkInProgress(),
     );
   }
 }

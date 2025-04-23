@@ -40,6 +40,7 @@ class PrudNetworkImage extends StatelessWidget {
         return errorWidget?? Image(
           image: AssetImage(prudImages.prudIcon),
           fit: BoxFit.contain,
+          width: 50,
         );
       },
     );

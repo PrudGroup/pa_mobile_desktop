@@ -5,8 +5,13 @@ class VideoDetail extends StatefulWidget {
   final ChannelVideo? video;
   final String? videoId;
   final String? affLinkId;
+  final VidChannel? channel;
+  final DownloadedVideo? localVid;
 
-  const VideoDetail({super.key, this.video, this.videoId, this.affLinkId});
+  const VideoDetail({
+    super.key, this.video, this.videoId, this.affLinkId,
+    this.channel, this.localVid
+  });
 
   @override
   VideoDetailState createState() => VideoDetailState();

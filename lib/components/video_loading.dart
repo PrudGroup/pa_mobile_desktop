@@ -17,6 +17,7 @@ class VideoLoading extends StatelessWidget {
       child: Align(
         alignment: Alignment.center,
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Stack(
               alignment: Alignment.center,
@@ -24,12 +25,11 @@ class VideoLoading extends StatelessWidget {
                 Image.asset(
                   prudImages.prudIcon,
                   fit: BoxFit.contain,
-                  width: 15,
+                  width: 20,
                 ),
                 LoadingComponent(
-                  size: 10,
+                  size: 50,
                   isShimmer: false,
-                  defaultSpinnerType: false,
                   spinnerColor: prudColorTheme.primary,
                 )
               ],
@@ -39,31 +39,31 @@ class VideoLoading extends StatelessWidget {
               alignment: Alignment.topLeft,
               children: [
                 Translate(
-                  text: "Loading Video",
+                  text: "Loading Clip",
                   style: prudWidgetStyle.tabTextStyle.copyWith(
-                    fontSize: 16,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: prudColorTheme.success,
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 22),
+                  padding: const EdgeInsets.only(top: 15),
                   child: Translate(
                     text: "Wait For it!",
                     style: prudWidgetStyle.tabTextStyle.copyWith(
-                      fontSize: 13,
+                      fontSize: 11,
                       fontWeight: FontWeight.w500,
-                      color: prudColorTheme.secondary,
+                      color: prudColorTheme.bgA,
                     ),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 40),
+                  padding: const EdgeInsets.only(top: 25),
                   child: Translate(
                     text: "Everyone get paid!",
                     style: prudWidgetStyle.tabTextStyle.copyWith(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 8,
+                      fontWeight: FontWeight.w600,
                       color: prudColorTheme.iconB,
                     ),
                   ),

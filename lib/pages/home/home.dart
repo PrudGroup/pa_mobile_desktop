@@ -228,15 +228,16 @@ class MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMi
                     PrudContainer(
                       hasPadding: false,
                       child: GFCarousel(
-                          height: 137.0,
-                          autoPlay: true,
-                          aspectRatio: double.maxFinite,
-                          viewportFraction: 1.0,
-                          enlargeMainPage: true,
-                          enableInfiniteScroll: true,
-                          pauseAutoPlayOnTouch: const Duration(seconds: 10),
-                          autoPlayInterval: const Duration(seconds: 5),
-                          items: carousels),
+                        height: 137.0,
+                        autoPlay: true,
+                        aspectRatio: double.maxFinite,
+                        viewportFraction: 1.0,
+                        enlargeMainPage: true,
+                        enableInfiniteScroll: true,
+                        pauseAutoPlayOnTouch: const Duration(seconds: 10),
+                        autoPlayInterval: const Duration(seconds: 5),
+                        items: carousels
+                      ),
                     ),
                     spacer.height,
                     if (!prudServiceIsAvailable) Column(
