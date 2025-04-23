@@ -1564,6 +1564,12 @@ class VideoThrillerComment {
     this.innerCommentId,
   });
 
+  bool isEditted(){
+    if(createdOn != null && updatedOn != null){
+      return createdOn!.compareTo(updatedOn!) != 0;
+    }else{return false;}
+  }
+
   Map<String, dynamic> toJson() {
     return {
       if (id != null) "id": id,
@@ -1630,6 +1636,12 @@ class VideoComment {
     this.video,
     this.innerCommentId,
   });
+
+  bool isEditted(){
+    if(createdOn != null && updatedOn != null){
+      return createdOn!.compareTo(updatedOn!) != 0;
+    }else{return false;}
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -2614,6 +2626,12 @@ class ChannelBroadcastComment {
     this.dislikes = 0,
   });
 
+  bool isEditted(){
+    if(createdOn != null && updatedOn != null){
+      return createdOn!.compareTo(updatedOn!) != 0;
+    }else{return false;}
+  }
+
   Map<String, dynamic> toJson() {
     return {
       "broadcastId": broadcastId,
@@ -2747,6 +2765,12 @@ class StreamBroadcastComment{
     this.likes = 0,
     this.dislikes = 0,
   });
+
+  bool isEditted(){
+    if(createdOn != null && updatedOn != null){
+      return createdOn!.compareTo(updatedOn!) != 0;
+    }else{return false;}
+  }
 
   Map<String, dynamic> toJson() {
     return {

@@ -1087,20 +1087,212 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
-  Future<dynamic> getTotalComments(String objId, CommentType commentType, {PrudCredential? cred}) async {
-    return await tryAsync("getWallet", () async {
+  Future<CountSchema?> getTotalComments(String objId, CommentType commentType, {PrudCredential? cred}) async {
+    return await tryAsync("getTotalComments", () async {
       String path = "";
       switch(commentType){
-        case CommentType.videoComment: path = "";
-        case CommentType.thrillerComment: path = "";
-        case CommentType.channelBroadcastComment: path = "";
-        default: path = "";
+        case CommentType.videoComment: path = "channels/videos/$objId/comments/count";
+        case CommentType.thrillerComment: path = "channels/videos/thrillers/$objId/comments/count";
+        case CommentType.channelBroadcastComment: path = "channels/broadcasts/$objId/comments/count";
+        default: path = "streams/broadcasts/$objId/comments/count";
       }
       dynamic res = await makeRequest(path: path, cred: cred);
-      if (res != null) {
-        return StudioWallet.fromJson(res);
+      if (res != null && res != false) {
+        return CountSchema.fromJson(res);
       } else {
         return null;
+      }
+    });
+  }
+
+  Future<CountSchema?> getTotalMemberComments( String channelId, String objId, CommentType commentType, {PrudCredential? cred}) async {
+    return await tryAsync("getTotalMemberComments", () async {
+      String path = "";
+      switch(commentType){
+        case CommentType.videoComment: path = "channels/videos/$objId/comments/$channelId/count";
+        case CommentType.thrillerComment: path = "channels/videos/thrillers/$objId/comments/$channelId/count";
+        case CommentType.channelBroadcastComment: path = "channels/broadcasts/$objId/comments/$channelId/count";
+        default: path = "streams/broadcasts/$objId/comments/$channelId/count";
+      }
+      dynamic res = await makeRequest(path: path, cred: cred);
+      if (res != null && res != false) {
+        return CountSchema.fromJson(res);
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<List<dynamic>?> getComments(String objId, CommentType commentType, {PrudCredential? cred, int limit = 150, int offset = 0}) async {
+    return await tryAsync("getComments", () async {
+      String path = "";
+      switch(commentType){
+        case CommentType.videoComment: path = "channels/videos/$objId/comments/main";
+        case CommentType.thrillerComment: path = "channels/videos/thrillers/$objId/comments/main";
+        case CommentType.channelBroadcastComment: path = "channels/broadcasts/$objId/comments/main";
+        default: path = "streams/broadcasts/$objId/comments/main";
+      }
+      dynamic res = await makeRequest(
+        path: path, cred: cred, qParam: {
+        "limit": limit,
+        "offset": offset
+      });
+      if (res != null && res != false && res.length > 0) {
+        List<dynamic> result = [];
+        for(var re in res){
+          switch(commentType){
+            case CommentType.videoComment: result.add(VideoComment.fromJson(re));
+            case CommentType.thrillerComment: result.add(VideoThrillerComment.fromJson(re));
+            case CommentType.channelBroadcastComment: result.add(ChannelBroadcastComment.fromJson(re));
+            default: result.add(StreamBroadcastComment.fromJson(re));
+          }
+        }
+        return res;
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<List<dynamic>?> getInnerComments(String commentId, CommentType commentType, {PrudCredential? cred, int limit = 150, int offset = 0}) async {
+    return await tryAsync("getInnerComments", () async {
+      String path = "";
+      switch(commentType){
+        case CommentType.videoComment: path = "channels/videos/comments/$commentId/comments";
+        case CommentType.thrillerComment: path = "channels/videos/thrillers/comments/$commentId/comments";
+        case CommentType.channelBroadcastComment: path = "channels/broadcasts/comments/$commentId/comments";
+        default: path = "streams/broadcasts/comments/$commentId/comments";
+      }
+      dynamic res = await makeRequest(
+        path: path, cred: cred, qParam: {
+        "limit": limit,
+        "offset": offset
+      });
+      if (res != null && res != false && res.length > 0) {
+        List<dynamic> result = [];
+        for(var re in res){
+          switch(commentType){
+            case CommentType.videoComment: result.add(VideoComment.fromJson(re));
+            case CommentType.thrillerComment: result.add(VideoThrillerComment.fromJson(re));
+            case CommentType.channelBroadcastComment: result.add(ChannelBroadcastComment.fromJson(re));
+            default: result.add(StreamBroadcastComment.fromJson(re));
+          }
+        }
+        return res;
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<List<dynamic>?> getMembersComments(String channelId, String objId, CommentType commentType, {PrudCredential? cred, int limit = 150, int offset = 0}) async {
+    return await tryAsync("getMembersComments", () async {
+      String path = "";
+      switch(commentType){
+        case CommentType.videoComment: path = "channels/videos/$objId/comments/$channelId/main";
+        case CommentType.thrillerComment: path = "channels/videos/thrillers/$objId/comments/$channelId/main";
+        case CommentType.channelBroadcastComment: path = "channels/broadcasts/$objId/comments/$channelId/main";
+        default: path = "streams/broadcasts/$objId/comments/$channelId/main";
+      }
+      dynamic res = await makeRequest(
+        path: path, cred: cred, qParam: {
+        "limit": limit,
+        "offset": offset
+      });
+      if (res != null && res != false && res.length > 0) {
+        List<dynamic> result = [];
+        for(var re in res){
+          switch(commentType){
+            case CommentType.videoComment: result.add(VideoComment.fromJson(re));
+            case CommentType.thrillerComment: result.add(VideoThrillerComment.fromJson(re));
+            case CommentType.channelBroadcastComment: result.add(ChannelBroadcastComment.fromJson(re));
+            default: result.add(StreamBroadcastComment.fromJson(re));
+          }
+        }
+        return res;
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<bool> likeOrDislikeComments(String commentId, CommentType commentType, {PrudCredential? cred, bool like = true, bool actionAlreadyTaken = false}) async {
+    return await tryAsync("likeOrDislikeComments", () async {
+      String path = "";
+      switch(commentType){
+        case CommentType.videoComment: path = "channels/videos/comments/$commentId/liked_action";
+        case CommentType.thrillerComment: path = "channels/videos/thrillers/comments/$commentId/liked_action";
+        case CommentType.channelBroadcastComment: path = "channels/broadcasts/comments/$commentId/liked_action";
+        default: path = "streams/broadcasts/comments/$commentId/liked_action";
+      }
+      dynamic res = await makeRequest(
+        path: path, cred: cred, qParam: {
+        "liked": like,
+        "already_took_action": actionAlreadyTaken
+      });
+      if (res != null && res != false) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
+
+  Future<bool> deleteComments(String commentId, CommentType commentType, {PrudCredential? cred}) async {
+    return await tryAsync("deleteComments", () async {
+      String path = "";
+      switch(commentType){
+        case CommentType.videoComment: path = "channels/videos/comments/$commentId";
+        case CommentType.thrillerComment: path = "channels/videos/thrillers/comments/$commentId";
+        case CommentType.channelBroadcastComment: path = "channels/broadcasts/comments/$commentId";
+        default: path = "streams/broadcasts/comments/$commentId";
+      }
+      dynamic res = await makeRequest(path: path, cred: cred, isDelete: true, isGet: false, isPut: false);
+      if (res != null && res != false) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
+
+  Future<bool> updateComments(String commentId, CommentType commentType, {PrudCredential? cred, required CommentPutSchema newUpdate}) async {
+    return await tryAsync("updateComments", () async {
+      String path = "";
+      switch(commentType){
+        case CommentType.videoComment: path = "channels/videos/comments/$commentId";
+        case CommentType.thrillerComment: path = "channels/videos/thrillers/comments/$commentId";
+        case CommentType.channelBroadcastComment: path = "channels/broadcasts/comments/$commentId";
+        default: path = "streams/broadcasts/comments/$commentId";
+      }
+      dynamic res = await makeRequest(path: path, cred: cred, isDelete: false, isGet: false, isPut: true, data: newUpdate.toJson());
+      if (res != null && res != false) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
+
+  Future<dynamic> addComments(CommentType commentType, {PrudCredential? cred, required dynamic newObj}) async {
+    return await tryAsync("updateComments", () async {
+      String path = "";
+      switch(commentType){
+        case CommentType.videoComment: path = "channels/videos/comments/";
+        case CommentType.thrillerComment: path = "channels/videos/thrillers/comments/";
+        case CommentType.channelBroadcastComment: path = "channels/broadcasts/comments/";
+        default: path = "streams/broadcasts/comments/";
+      }
+      dynamic res = await makeRequest(path: path, cred: cred, isGet: false, data: newObj.toJson());
+      if (res != null && res != false) {
+        switch(commentType){
+          case CommentType.videoComment: return VideoComment.fromJson(res);
+          case CommentType.thrillerComment: return VideoThrillerComment.fromJson(res);
+          case CommentType.channelBroadcastComment: return ChannelBroadcastComment.fromJson(res);
+          default: return StreamBroadcastComment.fromJson(res);
+        }
+      } else {
+        return false;
       }
     });
   }

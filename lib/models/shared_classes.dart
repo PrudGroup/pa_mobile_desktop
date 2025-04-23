@@ -437,3 +437,27 @@ class ConditionalWidgetItem{
     required this.widget,
   });
 }
+
+class CountSchema{
+  String countBy;
+  int total;
+
+  CountSchema({
+    required this.countBy,
+    required this.total
+  });
+
+  factory CountSchema.fromJson(Map<String, dynamic> json){
+    return CountSchema(countBy: json["countBy"], total: json["total"]);
+  }
+}
+
+class CommentPutSchema{
+  String message;
+
+  CommentPutSchema({required this.message});
+
+  Map<String, dynamic> toJson(){
+    return {"message": message};
+  }
+}
