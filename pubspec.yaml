@@ -115,6 +115,8 @@ dependencies:
   dashed_circular_progress_bar: ^0.0.6
   fade_shimmer: ^2.3.0
   namefully: ^0.2.1
+  comment_tree: ^0.3.0
+  emoji_picker_flutter: ^4.3.0
   
 dependency_overrides: 
   intl: ">=0.20.2"

@@ -53,6 +53,10 @@ class DownloadVideoComponentState extends State<DownloadVideoComponent> {
   ReceivePort chaPort = ReceivePort();
   ReceivePort mergePort = ReceivePort();
   Isolate? downloadIsolate;
+  Isolate? imgIsolate;
+  Isolate? vidIsolate;
+  Isolate? chaIsolate;
+  Isolate? mergeIsolate;
   Capability dwIsoCap = Capability();
   List<ConditionalWidgetItem> widgets = [];
   int fileSize = 0;
@@ -83,6 +87,7 @@ class DownloadVideoComponentState extends State<DownloadVideoComponent> {
       });
     }
     Future.delayed(Duration.zero, () async {
+      bool connected = await iCloud.checkNetwork();
       if(mounted) setState(() => loading = true);
       if(details.totalChunkSize <= 0 || details.chunkCount <= 0){
         Future.wait([getVideoFileSize(), getPlaceholderFileSize()]);
@@ -124,7 +129,7 @@ class DownloadVideoComponentState extends State<DownloadVideoComponent> {
         Future.wait([
           if(shouldDownload) downloadVideo(), 
           if(shouldDownload) downloadPlaceholder(),
-          getChannel(), getVideo(),
+          /* getChannel(), */ if(connected) getVideo(),
         ]);
       }
     });
@@ -138,12 +143,17 @@ class DownloadVideoComponentState extends State<DownloadVideoComponent> {
     vidPort.close();
     chaPort.close();
     mergePort.close();
+    downloadIsolate?.kill(priority: Isolate.immediate);
+    chaIsolate?.kill(priority: Isolate.immediate);
+    mergeIsolate?.kill(priority: Isolate.immediate);
+    vidIsolate?.kill(priority: Isolate.immediate);
+    imgIsolate?.kill(priority: Isolate.immediate);
     super.dispose();
   }
 
   Future<void> mergeLocalVidData() async {
     if(details.finishedFile == null && details.mergedChunk.isNotEmpty && details.chucksDownloaded.isEmpty){
-      await Isolate.spawn(mergeBytesData, MergeBytesArg(
+      mergeIsolate = await Isolate.spawn(mergeBytesData, MergeBytesArg(
         actualBytes: details.mergedChunk,
         actualBytesIndexes: details.chucksDownloaded,
         arrangedIndex: [for (var i = 0; i < details.chunkCount; i++) i],
@@ -205,7 +215,7 @@ class DownloadVideoComponentState extends State<DownloadVideoComponent> {
       if(mounted) setState(() => channel = widget.video!.channel);
     }else{
       if(mounted) setState(() => loading = true);
-      await Isolate.spawn(
+      chaIsolate = await Isolate.spawn(
         getChannelFromCloud, 
         CommonArg(id: details.channelId, sendPort: chaPort.sendPort, cred: cred),
         onError: chaPort.sendPort, onExit: chaPort.sendPort
@@ -227,7 +237,7 @@ class DownloadVideoComponentState extends State<DownloadVideoComponent> {
       if(mounted) setState(() => video = widget.video);
     } else {
       if(mounted) setState(() => loading = true);
-      await Isolate.spawn(
+      vidIsolate = await Isolate.spawn(
         getVideoFromCloud, 
         CommonArg(id: details.videoId, sendPort: vidPort.sendPort, cred: cred),
         onError: vidPort.sendPort, onExit: vidPort.sendPort
@@ -245,7 +255,7 @@ class DownloadVideoComponentState extends State<DownloadVideoComponent> {
 
   Future<void> downloadPlaceholder() async {
     if(details.placeholder != null) return;
-    await Isolate.spawn(
+    imgIsolate = await Isolate.spawn(
       downloadSmallFileInBytes, 
       DownloadSmallFileArg(
         port: imgPort.sendPort,
@@ -335,7 +345,7 @@ class DownloadVideoComponentState extends State<DownloadVideoComponent> {
   void openLocalVideo(){
     if(details.finishedFile != null && details.placeholder != null){
       iCloud.goto(context, VideoDetail(
-        video: video!, channel: channel, localVid: details,
+        video: video, channel: channel, localVid: details, isOwner: false, 
       ));
     }
   }
@@ -393,7 +403,7 @@ class DownloadVideoComponentState extends State<DownloadVideoComponent> {
                       children: [
                         SizedBox(
                           child: Text(
-                            video!.title,
+                            details.videoTitle,
                             style: prudWidgetStyle.typedTextStyle.copyWith(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
@@ -405,15 +415,15 @@ class DownloadVideoComponentState extends State<DownloadVideoComponent> {
                           spacing: 5.0,
                           runSpacing: 5.0,
                           children: [
-                            if(channel != null) Text(
-                              channel!.channelName,
+                            Text(
+                              details.channelName,
                               style: prudWidgetStyle.hintStyle.copyWith(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w500,
                                 color: prudColorTheme.lineC,
                               ),
                             ),
-                            if(channel != null) PointDivider(),
+                            PointDivider(),
                             if(details.ended != null) Translate(
                               text: myStorage.ago(dDate: details.ended!, isShort: false),
                               style: prudWidgetStyle.hintStyle.copyWith(
@@ -435,8 +445,8 @@ class DownloadVideoComponentState extends State<DownloadVideoComponent> {
                             ),
                           ],
                         ),
-                        if(video != null) Text(
-                          video!.videoDuration,
+                        Text(
+                          details.videoDuration,
                           style: prudWidgetStyle.hintStyle.copyWith(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,

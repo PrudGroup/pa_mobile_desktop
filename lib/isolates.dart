@@ -11,7 +11,9 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:prudapp/models/backblaze.dart';
 import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/shared_classes.dart';
+import 'package:prudapp/models/user.dart';
 import 'package:prudapp/singletons/backblaze_notifier.dart';
+import 'package:prudapp/singletons/influencer_notifier.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/prudvid_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
@@ -512,4 +514,211 @@ getThrillerFromCloud(CommonArg comArg) async {
     });
   }
   comArg.sendPort.send(result?.toJson());
+}
+
+
+@pragma("vm:entry-point")
+Future<void> getTotalComments(CommentActionArg caArg) async {
+  CountSchema? res;
+  int trials = 0;
+  while(res == null && trials > 3){
+    trials++;
+    res = await prudStudioNotifier.getTotalComments(
+      caArg.id, caArg.commentType, cred: caArg.cred
+    );
+  }
+  caArg.sendPort.send(res?.toJson());
+}
+
+@pragma("vm:entry-point")
+Future<void> getTotalMemberComments(CommentActionArg caArg) async {
+  CountSchema? res;
+  int trials = 0;
+  while(res == null && trials > 3){
+    trials++;
+    res = await prudStudioNotifier.getTotalMemberComments(
+      caArg.channelOrStreamId!, caArg.id, caArg.commentType, cred: caArg.cred
+    );
+  }
+  caArg.sendPort.send(res?.toJson());
+}
+
+@pragma("vm:entry-point")
+Future<void> getComments(CommentActionArg caArg) async {
+  bool found = false;
+  int trials = 0;
+  List<dynamic>? res;
+  while(found == false && trials > 3){
+    trials++;
+    res = await prudStudioNotifier.getComments(
+      caArg.id, caArg.commentType, cred: caArg.cred,
+      limit: caArg.limit, offset: caArg.offset
+    );
+    if(res != null && res.isNotEmpty){
+      found = true;
+    }
+  }
+  caArg.sendPort.send(res?.map((itm) => itm.toJson()).toList());
+}
+
+
+@pragma("vm:entry-point")
+Future<void> getInnerComments(CommentActionArg caArg) async {
+  bool found = false;
+  int trials = 0;
+  List<dynamic>? res;
+  while(found == false && trials > 3){
+    trials++;
+    res = await prudStudioNotifier.getInnerComments(
+      caArg.id, caArg.commentType, cred: caArg.cred,
+      limit: caArg.limit, offset: caArg.offset
+    );
+    if(res != null && res.isNotEmpty){
+      found = true;
+    }
+  }
+  caArg.sendPort.send(res?.map((itm) => itm.toJson()).toList());
+}
+
+@pragma("vm:entry-point")
+Future<void> getTotalInnerComments(CommentActionArg caArg) async {
+  CountSchema? res;
+  int trials = 0;
+  while(res == null && trials > 3){
+    trials++;
+    res = await prudStudioNotifier.getTotalInnerComments(
+      caArg.id, caArg.commentType, cred: caArg.cred
+    );
+  }
+  caArg.sendPort.send(res?.toJson());
+}
+
+
+@pragma("vm:entry-point")
+Future<void> getMembersComments(CommentActionArg caArg) async {
+  bool found = false;
+  int trials = 0;
+  List<dynamic>? res;
+  while(found == false && trials > 3){
+    trials++;
+    res = await prudStudioNotifier.getMembersComments(
+      caArg.channelOrStreamId!, caArg.id, caArg.commentType, cred: caArg.cred,
+      limit: caArg.limit, offset: caArg.offset
+    );
+    if(res != null && res.isNotEmpty){
+      found = true;
+    }
+  }
+  caArg.sendPort.send(res?.map((itm) => itm.toJson()).toList());
+}
+
+@pragma("vm:entry-point")
+Future<void> likeOrDislikeComments(CommentActionArg caArg) async {
+  bool found = false;
+  int trials = 0;
+  while(found == false && trials > 3){
+    trials++;
+    found = await prudStudioNotifier.likeOrDislikeComments(
+      caArg.id, caArg.commentType, cred: caArg.cred,
+      like: caArg.like, actionAlreadyTaken: caArg.actionAlreadyTaken
+    );
+  }
+  caArg.sendPort.send(found);
+}
+
+
+@pragma("vm:entry-point")
+Future<void> deleteComments(CommentActionArg caArg) async {
+  bool deleted = false;
+  int trials = 0;
+  while(deleted == false && trials > 3){
+    trials++;
+    deleted = await prudStudioNotifier.deleteComments(
+      caArg.id, caArg.commentType, cred: caArg.cred,
+    );
+  }
+  caArg.sendPort.send(deleted);
+}
+
+
+@pragma("vm:entry-point")
+Future<void> updateComments(CommentActionArg caArg) async {
+  bool updated = false;
+  int trials = 0;
+  if(caArg.newUpdate == null){
+    caArg.sendPort.send(null);
+    return;
+  }
+  while(updated == false && trials > 3){
+    trials++;
+    updated = await prudStudioNotifier.updateComments(
+      caArg.id, caArg.commentType, cred: caArg.cred,
+      newUpdate: caArg.newUpdate!
+    );
+  }
+  caArg.sendPort.send(updated);
+}
+
+@pragma("vm:entry-point")
+Future<void> addComments(CommentActionArg caArg) async {
+  dynamic addedComment;
+  int trials = 0;
+  if(caArg.newComment == null){
+    caArg.sendPort.send(null);
+    return;
+  }
+  while(addedComment == null && trials > 3){
+    trials++;
+    addedComment = await prudStudioNotifier.addComments(
+      caArg.commentType, cred: caArg.cred,
+      newObj: caArg.newComment!
+    );
+  }
+  caArg.sendPort.send(addedComment?.toJson());
+}
+
+
+@pragma("vm:entry-point")
+Future<void> isCommentMadeByCreatorOrOwner(CommentActionArg caArg) async {
+  WhoCommented? res;
+  int trials = 0;
+  while(res == null && trials > 3){
+    trials++;
+    res = await prudStudioNotifier.isCommentMadeByCreatorOrOwner(
+      caArg.id, caArg.affId!, caArg.commentType, cred: caArg.cred
+    );
+  }
+  caArg.sendPort.send(res?.toJson());
+}
+
+@pragma("vm:entry-point")
+Future<void> getInfluencerById(CommonArg cArg) async {
+  User? res;
+  int trials = 0;
+  while(res == null && trials > 3){
+    trials++;
+    res = await influencerNotifier.getInfluencerById(
+      cArg.id, cred: cArg.cred
+    );
+  }
+  cArg.sendPort.send(res?.toJson());
+}
+
+
+@pragma("vm:entry-point")
+Future<void> getVideoSuggestionsByChannel(CommentActionArg caArg) async {
+  bool updated = false;
+  int trials = 0;
+  if(caArg.newUpdate == null){
+    caArg.sendPort.send(null);
+    return;
+  }
+  while(updated == false && trials > 3){
+    trials++;
+    updated = await prudStudioNotifier.updateComments(
+      caArg.id, caArg.commentType, cred: caArg.cred,
+      newUpdate: caArg.newUpdate!
+    );
+  }
+  caArg.sendPort.send(updated);
 }

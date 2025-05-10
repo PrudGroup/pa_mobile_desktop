@@ -204,6 +204,7 @@ class VideoSearch{
   }
 }
 
+
 class VideoSearchServiceArg extends VideoSearch{
   SendPort sendPort;
   PrudCredential cred;
@@ -400,6 +401,8 @@ enum CommentType {
   streamBroadcastComment
 }
 
+enum VoteObjectType { video, channel, stream, movieCast }
+
 class LikeDislikeActionArg{
   SendPort sendPort;
   LikeDislikeAction action;
@@ -428,6 +431,33 @@ class CommonArg{
   });
 }
 
+class CommentActionArg extends CommonArg{
+  CommentType commentType;
+  String? channelOrStreamId;
+  String? affId;
+  CommentPutSchema? newUpdate;
+  dynamic newComment;
+  int limit;
+  int offset;
+  bool like;
+  bool actionAlreadyTaken;
+
+  CommentActionArg({
+    required super.id,
+    required super.cred,
+    required super.sendPort,
+    required this.commentType,
+    this.channelOrStreamId,
+    this.affId,
+    this.newComment,
+    this.newUpdate,
+    this.limit = 0,
+    this.offset = 0,
+    this.like = false,
+    this.actionAlreadyTaken = false,
+  });
+}
+
 class ConditionalWidgetItem{
   dynamic value;
   Widget widget;
@@ -447,6 +477,13 @@ class CountSchema{
     required this.total
   });
 
+  Map<String, dynamic> toJson(){
+    return {
+      "total": total,
+      "countBy": countBy
+    };
+  }
+
   factory CountSchema.fromJson(Map<String, dynamic> json){
     return CountSchema(countBy: json["countBy"], total: json["total"]);
   }
@@ -459,5 +496,43 @@ class CommentPutSchema{
 
   Map<String, dynamic> toJson(){
     return {"message": message};
+  }
+}
+
+class SearchByChannelSchema{
+  String channelId;
+  VideoSearchType category;
+  String title;
+  int? season;
+  int? episode;
+  int? part;
+  String? albumName;
+  int limit;
+  int? offset;
+
+  SearchByChannelSchema({
+    required this.channelId,
+    required this.category,
+    required this.title,
+    required this.limit,
+    this.albumName,
+    this.episode,
+    this.season,
+    this.part,
+    this.offset
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      "title": title,
+      "channelId": channelId,
+      "category": category.name,
+      "limit": limit,
+      if(albumName != null) "albumName": albumName,
+      if(episode != null) "episode": episode,
+      if(season != null) "season": season,
+      if(part != null) "part": part,
+      if(offset != null) "offset": offset,
+    };
   }
 }

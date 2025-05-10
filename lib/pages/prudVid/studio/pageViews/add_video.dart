@@ -183,10 +183,9 @@ class AddVideoState extends State<AddVideo> {
       }
       case AddVideoStep.titles: {
         step = AddVideoStep.titles;
-        debugPrint("Things go here A");
-        if(returnedData != null && returnedData["title"] != null && returnedData["description"] != null) {
-          debugPrint("Things go here B");
+        if(returnedData != null && returnedData["title"] != null && returnedData["part"] != null && returnedData["description"] != null) {
           prudStudioNotifier.newVideo.title = returnedData["title"];
+          prudStudioNotifier.newVideo.part = returnedData["part"];
           prudStudioNotifier.newVideo.description = returnedData["description"];
           step = AddVideoStep.target;
         }

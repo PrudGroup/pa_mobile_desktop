@@ -41,7 +41,12 @@ class PrudVidNotifier extends ChangeNotifier{
   PrudCredential cred = PrudCredential(key: prudApiKey, token: iCloud.affAuthToken!);
   List<VideoPaidFor> videosPaidFor = [];
   List<DownloadedVideo> localVideoLibrary = [];
+  EdittedComment? edittedComment;
 
+  void updateEdittedComment(EdittedComment cmt){
+    edittedComment = cmt;
+    notifyListeners();
+  }
 
   Future<void> addToLocalVideoLibrary(DownloadedVideo vid) async {
     int index = localVideoLibrary.indexWhere((itm) => itm.videoId == vid.videoId);
@@ -200,10 +205,10 @@ class PrudVidNotifier extends ChangeNotifier{
       existingActions: existing,
       cred: cred,
     );
-    await Isolate.spawn(makeLikeDislikeAction, arg, onError: actionPort.sendPort, onExit: actionPort.sendPort);
+    final actionIsolate = await Isolate.spawn(makeLikeDislikeAction, arg, onError: actionPort.sendPort, onExit: actionPort.sendPort);
     actionPort.listen((resp) {
       if(resp == true){
-        prudSocket.emit("thriller_like_dislike", action.toJson());
+        prudSocket.emit(actionType.name, action.toJson());
         getAnExistingActionsFromCache(actionType);
         notifyListeners();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -216,6 +221,7 @@ class PrudVidNotifier extends ChangeNotifier{
         ));
       }
       actionPort.close();
+      actionIsolate.kill(priority: Isolate.immediate);
     });
   }
 
@@ -274,6 +280,24 @@ class PrudVidNotifier extends ChangeNotifier{
     }
   }
 
+  LikeDislikeAction? checkIfLikeOrDislikeActionExist(String objId, ActionType actionType){
+    List<LikeDislikeAction> objList = [];
+    switch(actionType){
+      case ActionType.video: objList = likedVideos;
+      case ActionType.thriller: objList = likedThrillers;
+      case ActionType.channelBroadcast: objList = likedBroadcasts;
+      case ActionType.videoComment: objList = likedVideoComments;
+      case ActionType.thrillerComment: objList = likedThrillerComments;
+      case ActionType.streamBroadcast: objList = likedStreamBroadcast;
+      case ActionType.streamBroadcastComment: objList = likedStreamBroadcastComments;
+      case ActionType.channelBroadcastComment: objList = likedBroadcastComments;
+    }
+    int index = objList.indexWhere((itm) => itm.itemId == objId);
+    if(index > -1){
+      return objList[index];
+    }else{ return null;}
+  }
+
   Future<bool> takeLikeOrDislikeAction({
     required String objId, PrudCredential? cred,
     required ActionType actionType, bool isLike = true, 
@@ -284,8 +308,8 @@ class PrudVidNotifier extends ChangeNotifier{
       case ActionType.video: path = "channels/videos/$objId/liking";
       case ActionType.thriller: path = "channels/videos/thrillers/$objId/liking";
       case ActionType.channelBroadcast: path = "channels/broadcasts/$objId/liked_action";
-      case ActionType.videoComment: path = "channels/videos/coments/$objId/liking";
-      case ActionType.thrillerComment: path = "channels/videos/thrillers/comments/$objId/liking";
+      case ActionType.videoComment: path = "channels/videos/comments/$objId/liked_action";
+      case ActionType.thrillerComment: path = "channels/videos/thrillers/comments/$objId/liked_action";
       case ActionType.streamBroadcast: path = "streams/broadcasts/$objId/liked_action";
       case ActionType.streamBroadcastComment: path = "streams/broadcasts/comments/$objId/liked_action";
       case ActionType.channelBroadcastComment: path = "channels/broadcasts/comments/$objId/liked_action";

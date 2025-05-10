@@ -14,7 +14,7 @@ class PrudVideoPlayer extends StatefulWidget {
   final bool isLive;
   final Duration? startAt;
   final bool loop;
-  final String thumbnail;
+  final dynamic thumbnail;
   final String? channelName;
   final String? vidTitle;
   final int startPlaylistAt;
@@ -123,10 +123,11 @@ class PrudVideoPlayerState extends State<PrudVideoPlayer> {
     );
     _bpSource = BetterPlayerDataSource(
       widget.vidSource,
-      subtitles: widget.subtitles,
-      placeholder: PrudNetworkImage(url: widget.thumbnail, authorizeUrl: true,),
-      widget.vidSource == BetterPlayerDataSourceType.network? iCloud.authorizeDownloadUrl(widget.vid) : widget.vid,
+      widget.vidSource == BetterPlayerDataSourceType.network? iCloud.authorizeDownloadUrl(widget.vid) : "",
       liveStream: widget.isLive,
+      bytes: widget.vidSource == BetterPlayerDataSourceType.network? null : widget.vid.toList(),
+      subtitles: widget.subtitles,
+      placeholder:  widget.vidSource == BetterPlayerDataSourceType.network? PrudNetworkImage(url: widget.thumbnail, authorizeUrl: true,) : Image.memory(widget.thumbnail, fit: BoxFit.cover,),
       cacheConfiguration: BetterPlayerCacheConfiguration(
         useCache: true,
         maxCacheFileSize: 10*1024*1024*1024,
@@ -144,7 +145,7 @@ class PrudVideoPlayerState extends State<PrudVideoPlayer> {
       ),
       notificationConfiguration: BetterPlayerNotificationConfiguration(
         showNotification: true,
-        imageUrl: authorizedThumbnail,
+        imageUrl: widget.vidSource == BetterPlayerDataSourceType.network? authorizedThumbnail : "",
         author: widget.channelName,
         title: widget.vidTitle,
         notificationChannelName: "PrudVid",

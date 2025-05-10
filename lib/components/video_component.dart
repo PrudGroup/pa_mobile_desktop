@@ -422,7 +422,7 @@ class PrudVideoComponentState extends State<PrudVideoComponent> {
                 ),
               ),
               InkWell(
-                onTap: dontRecommendChannel,
+                onTap: report,
                 child: Row(
                   children: [
                     Icon(

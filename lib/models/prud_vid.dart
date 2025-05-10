@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:prudapp/models/backblaze.dart';
+import 'package:prudapp/models/shared_classes.dart';
 import 'package:prudapp/models/user.dart';
 import 'package:prudapp/models/wallet.dart';
 import 'package:prudapp/singletons/currency_math.dart';
@@ -804,6 +805,7 @@ class ChannelVideo {
   String title;
   String uploadedBy; // content_creator_id
   ContentCreator? creator;
+  int part;
   String videoUrl;
   String videoType; // movie, music, news, learn, cuisines
   bool isLive;
@@ -862,6 +864,7 @@ class ChannelVideo {
     this.statusDescription = "just created",
     this.dislikes = 0,
     this.downloads = 0,
+    this.part = 0,
     this.thanks = 0,
     this.watchMinutes = 0,
     this.impressions = 0,
@@ -914,6 +917,7 @@ class ChannelVideo {
       if(sponsored != null) "sponsored":	sponsored!.toJson(),
       "targetAudience": targetAudience,
       "channelId": channelId,
+      "part": part,
       "promoted": promoted,
       "status": status,
       "statusDate": statusDate.toString(),
@@ -949,6 +953,7 @@ class ChannelVideo {
     return ChannelVideo(
       channelId: json["channelId"],
       targetAudience: json["targetAudience"],
+      part: json["part"],
       status: json["status"],
       statusDate: DateTime.parse(json["statusDate"]),
       description: json["description"],
@@ -1548,6 +1553,7 @@ class VideoThrillerComment {
   int dislikes;
   DateTime? createdOn;
   DateTime? updatedOn;
+  bool commentIsFromChannelOwner;
 
   VideoThrillerComment({
     required this.thrillerId,
@@ -1562,6 +1568,7 @@ class VideoThrillerComment {
     this.affiliate,
     this.thriller,
     this.innerCommentId,
+    this.commentIsFromChannelOwner = false
   });
 
   bool isEditted(){
@@ -1580,6 +1587,7 @@ class VideoThrillerComment {
       "madeBy": madeBy,
       "likes": likes,
       "dislikes": dislikes,
+      "commentIsFromChannelOwner": commentIsFromChannelOwner,
       "comment": comment,
       "isInnerComment": isInnerComment,
     };
@@ -1591,6 +1599,7 @@ class VideoThrillerComment {
       madeBy: json["madeBy"],
       comment: json["comment"],
       id: json["id"],
+      commentIsFromChannelOwner: json["commentIsFromChannelOwner"],
       innerCommentId: json["innerCommentId"],
       isInnerComment: json["isInnerComment"],
       likes: json["likes"],
@@ -1621,6 +1630,7 @@ class VideoComment {
   int dislikes;
   DateTime? createdOn;
   DateTime? updatedOn;
+  bool commentIsFromChannelOwner;
 
   VideoComment({
     required this.videoId,
@@ -1629,6 +1639,7 @@ class VideoComment {
     this.likes = 0,
     this.dislikes = 0,
     this.isInnerComment = false,
+    this.commentIsFromChannelOwner = false,
     this.id,
     this.updatedOn,
     this.createdOn,
@@ -1653,6 +1664,7 @@ class VideoComment {
       "madeBy": madeBy,
       "likes": likes,
       "dislikes": dislikes,
+      "commentIsFromChannelOwner": commentIsFromChannelOwner,
       "comment": comment,
       "isInnerComment": isInnerComment,
     };
@@ -1668,15 +1680,11 @@ class VideoComment {
       isInnerComment: json["isInnerComment"],
       likes: json["likes"],
       dislikes: json["dislikes"],
-      createdOn:
-          json["createdOn"] != null ? DateTime.parse(json["createdOn"]) : null,
-      updatedOn:
-          json["updatedOn"] != null ? DateTime.parse(json["updatedOn"]) : null,
-      video: json["video"] != null
-          ? ChannelVideo.fromJson(json["thriller"])
-          : null,
-      affiliate:
-          json["affiliate"] != null ? User.fromJson(json["affiliate"]) : null,
+      commentIsFromChannelOwner: json["commentIsFromChannelOwner"],
+      createdOn: json["createdOn"] != null ? DateTime.parse(json["createdOn"]) : null,
+      updatedOn: json["updatedOn"] != null ? DateTime.parse(json["updatedOn"]) : null,
+      video: json["video"] != null? ChannelVideo.fromJson(json["thriller"]) : null,
+      affiliate:json["affiliate"] != null ? User.fromJson(json["affiliate"]) : null,
     );
   }
 }
@@ -2175,13 +2183,13 @@ class PromoteChannelMetric {
   }
 }
 
-class RatedChannel {
+class RatedObject {
   String id;
   int vote;
   int monthRated;
   int yearRated;
 
-  RatedChannel({
+  RatedObject({
     required this.id,
     required this.vote,
     required this.monthRated,
@@ -2211,8 +2219,8 @@ class RatedChannel {
     yearRated = DateTime.now().year;
   }
 
-  factory RatedChannel.fromJson(Map<String, dynamic> json) {
-    return RatedChannel(
+  factory RatedObject.fromJson(Map<String, dynamic> json) {
+    return RatedObject(
       id: json["id"],
       vote: json["vote"],
       monthRated: json["monthRated"],
@@ -2223,12 +2231,12 @@ class RatedChannel {
 
 class RatingSearchResult {
   int index;
-  RatedChannel? ratedChannel;
+  RatedObject? ratedObject;
   bool canVote;
 
   RatingSearchResult({
     required this.index,
-    this.ratedChannel,
+    this.ratedObject,
     this.canVote = false,
   });
 }
@@ -2349,6 +2357,7 @@ class PendingNewVideo {
   List<String>? tags;
   String? videoThumbnail;
   String? title;
+  int part;
   SaveVideoResponse? saveVideoProgress;
   SaveVideoResponse? saveThrillerProgress;
   String? videoUrl;
@@ -2414,6 +2423,7 @@ class PendingNewVideo {
     this.saveThrillerProgress,
     this.videoLocalFile,
     this.thrillerLocalFile,
+    this.part = 0
   });
 
   Map<String, dynamic> toJson() {
@@ -2428,6 +2438,7 @@ class PendingNewVideo {
       "description": description,
       "videoThumbnail": videoThumbnail,
       "title": title,
+      "part": part,
       "videoUrl": videoUrl,
       "videoType": videoType,
       "isLive": isLive,
@@ -2464,6 +2475,7 @@ class PendingNewVideo {
       description: json["description"],
       videoThumbnail: json["videoThumbnail"],
       title: json["title"],
+      part: json["part"],
       videoUrl: json["videoUrl"],
       liveStartsOn: json["liveStartsOn"] != null? DateTime.parse(json["liveStartsOn"]) : null,
       promoted: json["promoted"],
@@ -3175,6 +3187,9 @@ class DownloadedVideo{
   int chunkCount;
   String filename;
   int placeholderSize;
+  String channelName;
+  String videoTitle;
+  String videoDuration;
 
   DownloadedVideo({
     required this.chucksDownloaded,
@@ -3186,6 +3201,9 @@ class DownloadedVideo{
     required this.videoUrl,
     required this.videoType,
     required this.channelId,
+    required this.channelName,
+    required this.videoTitle,
+    required this.videoDuration,
     this.chunkCount = 0,
     this.placeholderSize = 0,
     this.totalChunkSize = 0,
@@ -3205,7 +3223,10 @@ class DownloadedVideo{
       "placeholderSize": placeholderSize,
       if(placeholder != null) "placeholder": placeholder,
       "videoId": videoId,
+      "videoDuration": videoDuration,
       "filename": filename,
+      "videoTitle": videoTitle,
+      "ChannelName": channelName,
       "chunkCount": chunkCount,
       "totalChunkSize": totalChunkSize,
       "downloadedSize": downloadedSize,
@@ -3224,6 +3245,9 @@ class DownloadedVideo{
 
   factory DownloadedVideo.fromJson(Map<String, dynamic> json){
     return DownloadedVideo(
+      videoDuration: json["videoDuration"],
+      channelName: json["channelName"],
+      videoTitle: json["videoTitle"],
       placeholderSize: json["placeholderSize"],
       chucksDownloaded: json["chucksDownloaded"], 
       chucksRemaining: json["chucksRemaining"], 
@@ -3243,6 +3267,75 @@ class DownloadedVideo{
       videoUrl: json["videoUrl"],
       ended: json["ended"] != null? DateTime.parse(json["ended"]): null,
       placeholder: json["placeholder"]
+    );
+  }
+}
+
+class WhoCommented {
+  String avatar;
+  String username;
+  bool isCreator;
+
+  WhoCommented({
+    required this.avatar,
+    required this.username,
+    required this.isCreator,
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      "avatar": avatar,
+      "username": username,
+      "isCreator": isCreator
+    };
+  }
+
+  factory WhoCommented.fromJson(Map<String, dynamic> json){
+    return WhoCommented(avatar: json["avatar"], username: json["username"], isCreator: json["isCreator"]);
+  }
+}
+
+
+class EdittedComment{
+  String commentId;
+  String comment;
+
+  EdittedComment({
+    required this.commentId,
+    required this.comment
+  });
+}
+
+class Comment{
+  dynamic comment;
+  dynamic whoCommented;
+
+  Comment({
+    required this.comment,
+    required this.whoCommented
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      if(comment != null) "comment": comment.toJson(),
+      if(whoCommented != null) "whoCommented": whoCommented is bool? whoCommented : whoCommented.toJson()
+    };
+  }
+
+  dynamic toComment(Map<String, dynamic> json, CommentType commentType){
+    switch(commentType){
+      case CommentType.videoComment: return VideoComment.fromJson(json);
+      case CommentType.thrillerComment: return VideoThrillerComment.fromJson(json);
+      case CommentType.channelBroadcastComment: return ChannelBroadcastComment.fromJson(json);
+      default: return StreamBroadcastComment.fromJson(json);
+    }
+  }
+
+  factory Comment.fromJson(Map<String, dynamic> json, CommentType commentType){
+    Comment newCom = Comment(comment: null, whoCommented: null);
+    return Comment(
+      comment: json["comment"] != null? newCom.toComment(json["comment"], commentType) : null,
+      whoCommented: json["whoCommented"] != null? (json["whoCommented"] is bool? json["whoCommented"] : WhoCommented.fromJson(json["whoCommented"])) : null, 
     );
   }
 }

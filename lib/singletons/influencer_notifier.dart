@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:prudapp/models/aff_link.dart';
+import 'package:prudapp/models/shared_classes.dart';
 import 'package:prudapp/models/wallet.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
@@ -266,11 +267,13 @@ class InfluencerNotifier extends ChangeNotifier {
     pinBlocked = myStorage.getFromStore(key: "pinBlocked")?? false;
   }
 
-  void setDioHeaders(){
+  void setDioHeaders(PrudCredential? cred){
+    String? token = cred != null? cred.token : iCloud.affAuthToken;
+    String? key = cred != null? cred.key : prudApiKey;
     influencerDio.options.headers.addAll({
       "Content-Type": "application/json",
-      "AppCredential": prudApiKey,
-      "Authorization": iCloud.affAuthToken
+      "AppCredential": key,
+      "Authorization": token
     });
   }
 
@@ -282,9 +285,9 @@ class InfluencerNotifier extends ChangeNotifier {
     });
   }
 
-  Future<User?> getInfluencerById(String id) async {
+  Future<User?> getInfluencerById(String id, {PrudCredential? cred}) async {
     return await tryAsync("getInfluencerById",() async{
-      dynamic res = await makeRequest(path: id);
+      dynamic res = await makeRequest(path: id, cred: cred);
       if(res != null){
         User foundUser = User.fromJson(res);
         return foundUser;
@@ -298,14 +301,19 @@ class InfluencerNotifier extends ChangeNotifier {
 
   Future<dynamic> makeRequest({
     required String path, bool isGet = true, 
+    bool isPut = false, bool isDelete = false, PrudCredential? cred,
     Map<String, dynamic>? data, Map<String, dynamic>? qParams
   }) async {
     currencyMath.loginAutomatically();
-    if(iCloud.affAuthToken != null){
-      setDioHeaders();
+    if(iCloud.affAuthToken != null || cred != null){
+      setDioHeaders(cred);
       String url = "$prudApiUrl/affiliates/$path";
-      Response res = isGet? (await influencerDio.get(url, queryParameters: qParams)) 
-      : (await influencerDio.post(url, data: data));
+      Response res = isGet? (await influencerDio.get(url, queryParameters: qParams))
+          : (isPut
+              ? await influencerDio.put(url, data: data)
+              : (isDelete
+                  ? await influencerDio.delete(url, data: data)
+                  : await influencerDio.post(url, data: data)));
       debugPrint("influencer Request: $res");
       return res.data;
     }else{

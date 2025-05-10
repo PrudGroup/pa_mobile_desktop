@@ -106,7 +106,7 @@ class User {
     return Color.fromARGB((bColor.a * 255).round(), r, g, b);
   }
 
-  Widget getAvatar({double? size, int? shape}){
+  Widget getAvatar({double? size, int? shape, double? radius}){
     Namefully name = Namefully(fullName!);
     String initials = name.initials(withMid: false).join("");
     double avaSize = size?? 25.0;
@@ -115,6 +115,7 @@ class User {
       size: avaSize,
       shape: shape == null || shape == 0? GFAvatarShape.circle : GFAvatarShape.square,
       backgroundColor: bgColor(),
+      radius: radius,
       foregroundColor: fgC,
       child: Text(
         initials.toUpperCase(),

@@ -21,6 +21,7 @@ import 'package:prudapp/pages/prudVid/tabs/views/channel_detail.dart';
 import 'package:prudapp/pages/prudVid/tabs/views/video_detail.dart';
 import 'package:prudapp/pages/prudVid/thriller_views/thriller_detail.dart';
 import 'package:prudapp/pages/prudVid/thrillers.dart';
+import 'package:prudapp/singletons/prud_studio_notifier.dart';
 import 'package:prudapp/singletons/settings_notifier.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 
@@ -135,10 +136,14 @@ final GoRouter prudRouter = GoRouter(
             String vid = state.pathParameters['vid']!;
             String? linkId = state.uri.queryParameters['link_id'];
             if(linkId != null) myStorage.saveVideoReferral(vid, linkId);
-            return VideoDetail(
-              videoId: vid,
-              affLinkId: linkId,
-            );
+            return const Thrillers();
+          },
+          redirect: (BuildContext context, GoRouterState state) async {
+            String vid = state.pathParameters['vid']!;
+            String? linkId = state.uri.queryParameters['link_id'];
+            if(linkId != null) myStorage.saveVideoReferral(vid, linkId);
+            VideoThriller? thriller = await prudStudioNotifier.getThrillerByVideoId(videoId: vid);
+            return thriller != null? '/thrillers/${thriller.id}' : null;
           },
         ),
         GoRoute(

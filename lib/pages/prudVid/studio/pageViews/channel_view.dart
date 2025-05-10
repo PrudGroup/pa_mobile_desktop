@@ -6,6 +6,7 @@ import 'package:prudapp/components/prud_network_image.dart';
 import 'package:prudapp/components/translate_text.dart';
 import 'package:prudapp/components/vid_channel_component.dart';
 import 'package:prudapp/models/images.dart';
+import 'package:prudapp/models/shared_classes.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/add_video.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_tabs/broadcasts.dart';
@@ -53,8 +54,8 @@ class _ChannelViewState extends State<ChannelView> {
   Future<void> rateNow(double rate) async {
     Map<String, dynamic> data = {};
     if (hasVotedB4.canVote) {
-      if (hasVotedB4.index != -1 && hasVotedB4.ratedChannel != null) {
-        data = hasVotedB4.ratedChannel!.toRateSchema(rate.toInt());
+      if (hasVotedB4.index != -1 && hasVotedB4.ratedObject != null) {
+        data = hasVotedB4.ratedObject!.toRateSchema(rate.toInt());
       } else {
         data = {
           "hasRated": false,
@@ -64,18 +65,18 @@ class _ChannelViewState extends State<ChannelView> {
       }
       VidChannel? result = await tryAsync("rateNow", () async {
         if (mounted) setState(() => loading = true);
-        return await prudStudioNotifier.voteChannel(widget.channel.id!, data);
+        return await prudStudioNotifier.voteAnObject(widget.channel.id!, VoteObjectType.channel, data);
       });
       if (result != null) {
         if (mounted) {
           DateTime now = DateTime.now();
-          RatedChannel ratedChannel = RatedChannel(
+          RatedObject ratedChannel = RatedObject(
             id: result.id!,
             vote: rate.toInt(),
             monthRated: now.month,
             yearRated: now.year,
           );
-          await prudStudioNotifier.updateChannelRating(
+          await prudStudioNotifier.updateObjectRating(
             ratedChannel, hasVotedB4.index != -1, hasVotedB4.index
           );
           setState(() {
@@ -113,7 +114,7 @@ class _ChannelViewState extends State<ChannelView> {
     if (mounted) {
       setState(() {
         channel = cha;
-        hasVotedB4 = prudStudioNotifier.checkIfVotedChannel(widget.channel.id!);
+        hasVotedB4 = prudStudioNotifier.checkIfVotedObject(widget.channel.id!);
         tabMenus = [
           InnerMenuItem(
             icon: Icons.info_sharp,
@@ -195,7 +196,7 @@ class _ChannelViewState extends State<ChannelView> {
       if (index != -1) setMenu(prudStudioNotifier.myChannels[index]);
       if (mounted) {
         setState(() {
-          hasVotedB4 = prudStudioNotifier.checkIfVotedChannel(channel.id!);
+          hasVotedB4 = prudStudioNotifier.checkIfVotedObject(channel.id!);
         });
       }
     });

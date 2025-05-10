@@ -62,6 +62,7 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
   bool allPartsAreSaved = false;
   bool finishing = false;
   final receivePort = ReceivePort();
+  Isolate? receiveIsolate;
   bool showProgress = false;
   bool saving = false;
   int durationLimitInMinutes = 300;
@@ -122,7 +123,7 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
                     ),
                     sha1: sha1
                   );
-                  await Isolate.spawn(uploadVideoService, arg, onError: receivePort.sendPort, onExit: receivePort.sendPort);
+                  receiveIsolate = await Isolate.spawn(uploadVideoService, arg, onError: receivePort.sendPort, onExit: receivePort.sendPort);
                 }
               }
               await save(
@@ -241,6 +242,7 @@ class PrudVideoPickerState extends State<PrudVideoPicker> {
 
   void cancel() {
     receivePort.close();
+    receiveIsolate?.kill(priority: Isolate.immediate);
     if(mounted){
       setState(() {
         picking = false;

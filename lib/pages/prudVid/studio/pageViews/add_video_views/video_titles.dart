@@ -20,8 +20,10 @@ class VideoTitles extends StatefulWidget {
 class VideoTitlesState extends State<VideoTitles> {
   final GlobalKey _key1 = GlobalKey();
   final GlobalKey _key2 = GlobalKey();
+  final GlobalKey _key3 = GlobalKey();
   TextEditingController txtCtrl = TextEditingController();
   String? title = prudStudioNotifier.newVideo.title;
+  int part = prudStudioNotifier.newVideo.part;
   String? description = prudStudioNotifier.newVideo.description;
   Map<String, dynamic>? result;
   FocusNode fNode = FocusNode();
@@ -35,6 +37,7 @@ class VideoTitlesState extends State<VideoTitles> {
       setState(() {
         result = {
           "title": prudStudioNotifier.newVideo.title,
+          "part": prudStudioNotifier.newVideo.part,
           "description": prudStudioNotifier.newVideo.description,
         };
       });
@@ -127,6 +130,52 @@ class VideoTitlesState extends State<VideoTitles> {
                       FormBuilderValidators.minLength(3),
                       FormBuilderValidators.maxLength(30),
                       FormBuilderValidators.required(),
+                    ]),
+                  ),
+                  spacer.height,
+                ],
+              )
+            ),
+            spacer.height,
+            PrudContainer(
+              hasTitle: true,
+              hasPadding: true,
+              title: "Part",
+              titleBorderColor: prudColorTheme.bgC,
+              titleAlignment: MainAxisAlignment.end,
+              child: Column(
+                children: [
+                  mediumSpacer.height,
+                  FormBuilderTextField(
+                    initialValue: "$part",
+                    name: 'part',
+                    key: _key3,
+                    autofocus: true,
+                    style: tabData.npStyle,
+                    keyboardType: TextInputType.number,
+                    decoration: getDeco(
+                      "Part What?",
+                      onlyBottomBorder: true,
+                      borderColor: prudColorTheme.lineC
+                    ),
+                    onChanged: (String? value){
+                      if(mounted && value != null) {
+                        setState(() { 
+                          part = int.parse(value.trim());
+                          result = {
+                            "title": title,
+                            "part": part,
+                            "description": description,
+                          };
+                          prudStudioNotifier.newVideo.part = part;
+                        });
+                        prudStudioNotifier.saveNewVideoData();
+                      }
+                    },
+                    valueTransformer: (text) => num.tryParse(text!),
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.min(0),
+                      FormBuilderValidators.max(1000)
                     ]),
                   ),
                   spacer.height,

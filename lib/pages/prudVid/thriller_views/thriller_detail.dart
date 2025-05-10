@@ -3,7 +3,6 @@ import 'dart:isolate';
 import 'package:flick_video_player/flick_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:getwidget/components/avatar/gf_avatar.dart';
 import 'package:getwidget/components/carousel/gf_carousel.dart';
 import 'package:getwidget/components/rating/gf_rating.dart';
 import 'package:prudapp/components/broadcast_component.dart';
@@ -83,6 +82,10 @@ class ThrillerDetailState extends State<ThrillerDetail> {
   final itemPort = ReceivePort();
   final joinedPort = ReceivePort();
   final subscribedPort = ReceivePort();
+  Isolate? receiveIsolate;
+  Isolate? itemIsolate;
+  Isolate? joinedIsolate;
+  Isolate? subscribedIsolate;
   Widget noSuggestions = tabData.getNotFoundWidget(
     title: "No Suggestions",
     desc: "We are unable to suggest any clips nor posts at this time.",
@@ -106,10 +109,17 @@ class ThrillerDetailState extends State<ThrillerDetail> {
   ReceivePort totalCPort = ReceivePort();
   ReceivePort totalMCPort = ReceivePort();
   ReceivePort lastCPort = ReceivePort();
+  Isolate? lastCIsolate;
+  Isolate? totalMCIsolate;
+  Isolate? totalCIsolate;
   VideoThrillerComment? lastComment;
   final GlobalKey _videoContainerKey = GlobalKey();
   final GlobalKey _flickKey = GlobalKey();
   double vHeight = 100;
+  PrudCredential cred = PrudCredential(
+    key: prudApiKey, token: iCloud.affAuthToken!
+  );
+  
 
   void display(){
     displayComment(showComment? false : true);
@@ -136,6 +146,7 @@ class ThrillerDetailState extends State<ThrillerDetail> {
         return CommentsDetailComponent(
           membersOnly: isMembersOnly,
           id: thriller!.id!,
+          channelOrStreamId: isMembersOnly? channel!.id : null,
           commentType: CommentType.thrillerComment,
           parentObjHeight: vHeight,
         );
@@ -144,15 +155,58 @@ class ThrillerDetailState extends State<ThrillerDetail> {
   }
 
   Future<void> getToTalComments() async {
-    
+    totalCIsolate = await Isolate.spawn(
+      getTotalComments, CommentActionArg(
+        id: thriller!.id!,
+        sendPort: totalCPort.sendPort,
+        commentType: CommentType.thrillerComment,
+        cred: cred,
+      ), 
+      onError: totalCPort.sendPort, onExit: totalCPort.sendPort
+    );
+    totalCPort.listen((resp){
+      if(resp != null){
+        CountSchema res = CountSchema.fromJson(resp);
+        if(mounted) setState(() => totalComments = res.total);
+      }
+    });
   }
 
   Future<void> getToTalMemberComments() async {
-    
+    totalMCIsolate = await Isolate.spawn(
+      getTotalMemberComments, CommentActionArg(
+        channelOrStreamId: channel!.id!,
+        id: thriller!.id!,
+        sendPort: totalMCPort.sendPort,
+        commentType: CommentType.thrillerComment,
+        cred: cred,
+      ), 
+      onError: totalMCPort.sendPort, onExit: totalMCPort.sendPort
+    );
+    totalMCPort.listen((resp){
+      if(resp != null){
+        CountSchema res = CountSchema.fromJson(resp);
+        if(mounted) setState(() => totalMembersComment = res.total);
+      }
+    });
   }
 
   Future<void> getLastComment() async {
-    
+    lastCIsolate = await Isolate.spawn(
+      getComments, CommentActionArg(
+        id: thriller!.id!,
+        sendPort: totalMCPort.sendPort,
+        commentType: CommentType.thrillerComment,
+        cred: cred, limit: 1, offset: 0
+      ), 
+      onError: lastCPort.sendPort, onExit: lastCPort.sendPort
+    );
+    lastCPort.listen((resp){
+      if(resp != null && resp.isNotEmpty){
+        VideoThrillerComment res = VideoThrillerComment.fromJson(resp[0]);
+        if(mounted) setState(() => lastComment = res);
+      }
+    });
   }
 
   Future<void> getSuggestedVideos() async {
@@ -165,7 +219,6 @@ class ThrillerDetailState extends State<ThrillerDetail> {
     tryAsync("getSuggestedVideos", () async {
       if(mounted) setState(() => loadingSuggestions = true);
       if(iCloud.affAuthToken != null && video != null && myStorage.user != null){
-        PrudCredential cred = PrudCredential(key: prudApiKey, token: iCloud.affAuthToken!);
         VideoSuggestionServiceArg suggestionArgs = VideoSuggestionServiceArg(
           sendPort: receivePort.sendPort,
           cred: cred,
@@ -183,8 +236,7 @@ class ThrillerDetailState extends State<ThrillerDetail> {
             searchText: video!.title
           ),
         );
-        await Isolate.spawn(getVideoAndBroadcastSuggestions, suggestionArgs, onError: receivePort.sendPort, onExit: receivePort.sendPort);
-
+        receiveIsolate = await Isolate.spawn(getVideoAndBroadcastSuggestions, suggestionArgs, onError: receivePort.sendPort, onExit: receivePort.sendPort);
         receivePort.listen((resp){
           if(resp != null && resp is List && resp.isNotEmpty){
             List<dynamic> related = [];
@@ -319,7 +371,7 @@ class ThrillerDetailState extends State<ThrillerDetail> {
           searchList: channelsSubscribed,
           searchItem: channel!.id
         );
-        await Isolate.spawn(listItemSearch, searchArgs, onError: subscribedPort.sendPort, onExit: subscribedPort.sendPort);
+        subscribedIsolate = await Isolate.spawn(listItemSearch, searchArgs, onError: subscribedPort.sendPort, onExit: subscribedPort.sendPort);
         subscribedPort.listen((resp) {
           if (mounted) {
             setState(() {
@@ -350,7 +402,7 @@ class ThrillerDetailState extends State<ThrillerDetail> {
           searchList: channelsMembered,
           searchItem: channel!.id
         );
-        await Isolate.spawn(listItemSearch, searchArgs, onError: joinedPort.sendPort, onExit: joinedPort.sendPort);
+        joinedIsolate = await Isolate.spawn(listItemSearch, searchArgs, onError: joinedPort.sendPort, onExit: joinedPort.sendPort);
         joinedPort.listen((resp) {
           if (mounted) {
             setState(() {
@@ -515,7 +567,7 @@ class ThrillerDetailState extends State<ThrillerDetail> {
       AffLink? link = await influencerNotifier.createAffLinks(target, category, categoryId);
       if(link != null){
         String msg = "If you haven't watch this clip...sorry! Life has left you behind! Watch now and come back to life. ";
-        final result = await Share.share("$msg ${link.fullShortUrl}", subject: video!.title);
+        final result = await SharePlus.instance.share(ShareParams(text: "$msg ${link.fullShortUrl}", subject: video!.title));
         if (result.status == ShareResultStatus.success && mounted) {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -571,10 +623,10 @@ class ThrillerDetailState extends State<ThrillerDetail> {
       }
     }else{
       if(hasJoined){
-        iCloud.goto(context, VideoDetail(video: video!,));
+        iCloud.goto(context, VideoDetail(video: video!,hasJoined: true, hasSubscribed: hasSubscribed, isOwner: widget.isOwner,));
       }else{
         if(prudVidNotifier.checkIfVideoHasBeenBought(video!.id!)){
-          iCloud.goto(context, VideoDetail(video: video!,));
+          iCloud.goto(context, VideoDetail(video: video!, hasJoined: false, hasSubscribed: hasSubscribed, isOwner: widget.isOwner,));
         }else{
           showModalBottomSheet(
             context: context,
@@ -668,7 +720,16 @@ class ThrillerDetailState extends State<ThrillerDetail> {
     itemPort.close();
     joinedPort.close();
     subscribedPort.close();
-    Isolate.current.kill();
+    totalCPort.close();
+    totalMCPort.close();
+    lastCPort.close();
+    receiveIsolate?.kill(priority: Isolate.immediate);
+    itemIsolate?.kill(priority: Isolate.immediate);
+    joinedIsolate?.kill(priority: Isolate.immediate);
+    subscribedIsolate?.kill(priority: Isolate.immediate);
+    totalCIsolate?.kill(priority: Isolate.immediate);
+    totalMCIsolate?.kill(priority: Isolate.immediate);
+    lastCIsolate?.kill(priority: Isolate.immediate);
     super.dispose();
   }
   
@@ -715,7 +776,7 @@ class ThrillerDetailState extends State<ThrillerDetail> {
     Future.delayed(Duration.zero, (){
       if(mounted) WidgetsBinding.instance.addPostFrameCallback((_) => getSizeAndPosition());
     });
-    itemPositionsListener.itemPositions.addListener((){
+    itemPositionsListener.itemPositions.addListener(() async {
       if(mounted) setState(() => uploadedWhen = myStorage.ago(dDate: video!.uploadedAt, isShort: false));
       var positions = itemPositionsListener.itemPositions.value;
       if (positions.isNotEmpty) {
@@ -729,13 +790,12 @@ class ThrillerDetailState extends State<ThrillerDetail> {
           setState(() => lastScrollPoint = lastVisibleIndex);
           if(relatedVideoAndBroadcasts.isNotEmpty && iCloud.affAuthToken != null){
             dynamic visibleItem = relatedVideoAndBroadcasts[lastVisibleIndex];
-            PrudCredential cred = PrudCredential(key: prudApiKey, token: iCloud.affAuthToken!);
             ServiceArg arg = ServiceArg(
               cred: cred,
               itemId: visibleItem.id,
               sendPort: itemPort.sendPort
             );
-            Isolate.spawn(
+            itemIsolate = await Isolate.spawn(
               visibleItem is ChannelVideo? incrementVideoImpressionService : incrementBroadcastImpressionService, 
               arg, onError: itemPort.sendPort, onExit: itemPort.sendPort
             );
@@ -746,182 +806,6 @@ class ThrillerDetailState extends State<ThrillerDetail> {
     listenToThrillerFromSocket();
   }
 
-  void showMenu(){
-    showModalBottomSheet(
-      context: context,
-      showDragHandle: true,
-      backgroundColor: prudColorTheme.bgE,
-      elevation: 5,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return Container(
-          width: double.maxFinite,
-          margin: const EdgeInsets.all(10),
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
-            color: prudColorTheme.bgF
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 15),
-              InkWell(
-                onTap: watchLater,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.watch_later_outlined, 
-                      size: 25,
-                      color: prudColorTheme.lineC,
-                      semanticLabel: "Watch later",
-                    ),
-                    mediumSpacer.width,
-                    Translate(
-                      text: "Watch Later",
-                      style: prudWidgetStyle.typedTextStyle.copyWith(
-                        color: prudColorTheme.lineC,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        letterSpacing: 1.5,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      align: TextAlign.left,
-                    )
-                  ],
-                ),
-              ),
-              InkWell(
-                onTap: addToPlaylist,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.bookmark_add_outlined, 
-                      size: 25,
-                      color: prudColorTheme.lineC,
-                      semanticLabel: "Save To Current Playlist",
-                    ),
-                    mediumSpacer.width,
-                    Translate(
-                      text: "Save To Current Playlist",
-                      style: prudWidgetStyle.typedTextStyle.copyWith(
-                        color: prudColorTheme.lineC,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        letterSpacing: 1.5,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      align: TextAlign.left,
-                    )
-                  ],
-                ),
-              ),
-              InkWell(
-                onTap: share,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.share_outlined, 
-                      size: 25,
-                      color: prudColorTheme.lineC,
-                      semanticLabel: "Share & get paid",
-                    ),
-                    mediumSpacer.width,
-                    Translate(
-                      text: "Share & Get Paid",
-                      style: prudWidgetStyle.typedTextStyle.copyWith(
-                        color: prudColorTheme.lineC,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        letterSpacing: 1.5,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      align: TextAlign.left,
-                    )
-                  ],
-                ),
-              ),
-              InkWell(
-                onTap: notInterested,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.remove_moderator_outlined, 
-                      size: 25,
-                      color: prudColorTheme.lineC,
-                      semanticLabel: "Not Interested",
-                    ),
-                    mediumSpacer.width,
-                    Translate(
-                      text: "Not Interested",
-                      style: prudWidgetStyle.typedTextStyle.copyWith(
-                        color: prudColorTheme.lineC,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        letterSpacing: 1.5,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      align: TextAlign.left,
-                    )
-                  ],
-                ),
-              ),
-              InkWell(
-                onTap: dontRecommendChannel,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.remove_from_queue_outlined, 
-                      size: 25,
-                      color: prudColorTheme.lineC,
-                      semanticLabel: "Don't Recommend Channel",
-                    ),
-                    mediumSpacer.width,
-                    Translate(
-                      text: "Don't Recommend Channel",
-                      style: prudWidgetStyle.typedTextStyle.copyWith(
-                        color: prudColorTheme.lineC,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        letterSpacing: 1.5,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      align: TextAlign.left,
-                    )
-                  ],
-                ),
-              ),
-              InkWell(
-                onTap: dontRecommendChannel,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.flag_outlined, 
-                      size: 25,
-                      color: prudColorTheme.lineC,
-                      semanticLabel: "Report Channel",
-                    ),
-                    mediumSpacer.width,
-                    Translate(
-                      text: "Report/Claim",
-                      style: prudWidgetStyle.typedTextStyle.copyWith(
-                        color: prudColorTheme.lineC,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        letterSpacing: 1.5,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      align: TextAlign.left,
-                    )
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   void viewChannel(){
     if(channel != null && mounted){
@@ -1246,15 +1130,14 @@ class ThrillerDetailState extends State<ThrillerDetail> {
                                     subValue: "Non-Members",
                                   ),
                                   PrudDataViewer(
-                                    field: "Views",
-                                    value: tabData.getFormattedNumber(video!.nonMemberViews),
-                                    makeTransparent: true,
-                                    size: PrudSize.smaller,
-                                    subValue: "Non-Members",
-                                  ),
-                                  PrudDataViewer(
                                     field: "Total Views",
                                     value: tabData.getFormattedNumber(video!.nonMemberViews + video!.memberViews),
+                                    makeTransparent: true,
+                                    size: PrudSize.smaller,
+                                  ),
+                                  PrudDataViewer(
+                                    field: "Likes",
+                                    value: tabData.getFormattedNumber(video!.likes),
                                     makeTransparent: true,
                                     size: PrudSize.smaller,
                                   ),
@@ -1467,6 +1350,15 @@ class ThrillerDetailState extends State<ThrillerDetail> {
                               hasIcon: true,
                               icon: FaIcon(FontAwesomeIcons.eye, color: prudColorTheme.bgF, size: 13,),
                             ),
+                            spacer.height,
+                            prudWidgetStyle.getShortIconButton(
+                              onPressed: watchLater, 
+                              text: "Watch Later",
+                              isSmall: true,
+                              bgColor: prudColorTheme.textA,
+                              hasIcon: true,
+                              icon: Icon(Icons.watch_later_outlined, color: prudColorTheme.bgF, size: 13,),
+                            ),
                             if(!hasJoined) spacer.width,
                             if(!hasJoined) prudWidgetStyle.getShortIconButton(
                               onPressed: join, 
@@ -1516,6 +1408,33 @@ class ThrillerDetailState extends State<ThrillerDetail> {
                               hasIcon: true,
                               showLoader: unsubscribing,
                               icon: Icon(Icons.alarm_off_outlined, color: prudColorTheme.bgF, size: 13,),
+                            ),
+                            spacer.height,
+                            prudWidgetStyle.getShortIconButton(
+                              onPressed: addToPlaylist, 
+                              text: "Add To Playlist",
+                              isSmall: true,
+                              bgColor: prudColorTheme.textA,
+                              hasIcon: true,
+                              icon: Icon(Icons.bookmark_add_outlined, color: prudColorTheme.bgF, size: 13,),
+                            ),
+                            spacer.height,
+                            prudWidgetStyle.getShortIconButton(
+                              onPressed: dontRecommendChannel, 
+                              text: "Don't Recommend",
+                              isSmall: true,
+                              bgColor: prudColorTheme.textA,
+                              hasIcon: true,
+                              icon: Icon(Icons.remove_from_queue_outlined, color: prudColorTheme.bgF, size: 13,),
+                            ),
+                            spacer.height,
+                            prudWidgetStyle.getShortIconButton(
+                              onPressed: report, 
+                              text: "Report",
+                              isSmall: true,
+                              bgColor: prudColorTheme.textA,
+                              hasIcon: true,
+                              icon: Icon(Icons.flag_outlined, color: prudColorTheme.bgF, size: 13,),
                             ),
                           ],
                         ),

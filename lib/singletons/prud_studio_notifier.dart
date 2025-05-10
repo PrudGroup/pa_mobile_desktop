@@ -38,7 +38,7 @@ class PrudStudioNotifier extends ChangeNotifier {
   );
   List<String> searchedTerms4Channel = [];
   List<CachedChannelCreator> channelCreators = [];
-  List<RatedChannel> channelsRated = [];
+  List<RatedObject> objectsRated = [];
   List<ChannelMembership> affJoined = [];
   List<ChannelSubscriber> affSubscribed = [];
   List<ChannelRefferal> channelRefferals = [];
@@ -55,8 +55,11 @@ class PrudStudioNotifier extends ChangeNotifier {
   );
   List<VisitedChannel> visitedChannels = [];
   List<String> watchedTrillers = [];
+  List<String> watchedVideos = [];
   List<dynamic> thrillerDetailSuggestions = [];
+  List<dynamic> videoDetailSuggestions = [];
   int thrillerDetailLastItemScroll = 0;
+  int videoDetailLastItemScroll = 0;
 
 
   void updateThrillerDetailSuggestions(List<dynamic> items){
@@ -64,7 +67,14 @@ class PrudStudioNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateVideoDetailSuggestions(List<dynamic> items){
+    videoDetailSuggestions = items;
+    notifyListeners();
+  }
+
   bool isThrillerWatched(String thrillerId) => watchedTrillers.contains(thrillerId);
+
+  bool isVideoWatched(String videoId) => watchedVideos.contains(videoId);
 
   void addToWatchedThrillers(String thrillerId){
     bool alreadyExists = watchedTrillers.contains(thrillerId);
@@ -72,10 +82,23 @@ class PrudStudioNotifier extends ChangeNotifier {
     myStorage.addToStore(key: "watchedTrillers", value: watchedTrillers);
   }
 
+  void addToWatchedVideos(String videoId){
+    bool alreadyExists = watchedVideos.contains(videoId);
+    if(!alreadyExists) watchedVideos.add(videoId);
+    myStorage.addToStore(key: "watchedVideos", value: watchedVideos);
+  }
+
   void getWatchedThrillersFromCache(){
     List<dynamic>?  watched = myStorage.getFromStore(key: "watchedTrillers");
     if(watched != null){
       watchedTrillers = watched as List<String>;
+    }
+  }
+
+  void getWatchedVideosFromCache(){
+    List<dynamic>?  watched = myStorage.getFromStore(key: "watchedVideos");
+    if(watched != null){
+      watchedVideos = watched as List<String>;
     }
   }
 
@@ -218,45 +241,45 @@ class PrudStudioNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  RatingSearchResult checkIfVotedChannel(String channelId) {
-    int index = channelsRated.indexWhere((rating) => rating.id == channelId);
+  RatingSearchResult checkIfVotedObject(String objId) {
+    int index = objectsRated.indexWhere((rating) => rating.id == objId);
     if (index != -1) {
-      if (channelsRated[index].monthRated == DateTime.now().month &&
-          channelsRated[index].yearRated == DateTime.now().year) {
+      if (objectsRated[index].monthRated == DateTime.now().month &&
+          objectsRated[index].yearRated == DateTime.now().year) {
         return RatingSearchResult(
-            index: index, ratedChannel: channelsRated[index], canVote: false);
+            index: index, ratedObject: objectsRated[index], canVote: false);
       } else {
         return RatingSearchResult(
-            index: index, ratedChannel: channelsRated[index], canVote: true);
+            index: index, ratedObject: objectsRated[index], canVote: true);
       }
     } else {
-      return RatingSearchResult(index: -1, ratedChannel: null, canVote: true);
+      return RatingSearchResult(index: -1, ratedObject: null, canVote: true);
     }
   }
 
-  Future<void> updateChannelRating(RatedChannel rating, bool hasRatedB4, int index) async {
+  Future<void> updateObjectRating(RatedObject rating, bool hasRatedB4, int index) async {
     if (hasRatedB4) {
-      channelsRated[index] = rating;
+      objectsRated[index] = rating;
     } else {
-      channelsRated.add(rating);
+      objectsRated.add(rating);
     }
-    await saveChannelRatingToCache();
+    await saveObjectRatingToCache();
     notifyListeners();
   }
 
-  Future<void> saveChannelRatingToCache() async {
+  Future<void> saveObjectRatingToCache() async {
     await myStorage.addToStore(
-      key: "channelsRated",
-      value: channelsRated.map((rating) => rating.toJson()).toList()
+      key: "objectsRated",
+      value: objectsRated.map((rating) => rating.toJson()).toList()
     );
   }
 
-  void retrieveChannelRatingFromCache() {
+  void retrieveObjectRatingFromCache() {
     List<dynamic>? channelRatings =
-        myStorage.getFromStore(key: "channelsRated");
+        myStorage.getFromStore(key: "objectsRated");
     if (channelRatings != null) {
-      channelsRated =
-          channelRatings.map((json) => RatedChannel.fromJson(json)).toList();
+      objectsRated =
+          channelRatings.map((json) => RatedObject.fromJson(json)).toList();
       notifyListeners();
     }
   }
@@ -462,6 +485,21 @@ class PrudStudioNotifier extends ChangeNotifier {
         return null;
       }
     });
+  }
+
+  Future<List<ChannelVideo>?> getSuggestedVideosByChannel({required SearchByChannelSchema criteria, PrudCredential? cred}) async {
+    return await tryAsync("getSuggestedVideos", () async {
+      dynamic res = await makeRequest(path: "channels/videos/search_by_channel/", isGet: false, data: criteria.toJson(), cred: cred);
+      if (res != null && res != false && res.length > 0) {
+        List<ChannelVideo> chas = [];
+        for (var item in res) {
+          chas.add(ChannelVideo.fromJson(item));
+        }
+        return chas;
+      } else {
+        return null;
+      }
+    }, error: () => null);
   }
 
   Future<List<ChannelVideo>?> getSuggestedVideos({required VideoSearch criteria, PrudCredential? cred}) async {
@@ -690,17 +728,27 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
-  Future<VidChannel>? voteChannel(
-      String channelId, Map<String, dynamic> rateData) async {
-    return await tryAsync("voteChannel", () async {
+  Future<dynamic> voteAnObject(
+    String objId,  VoteObjectType objType, Map<String, dynamic> rateData, {PrudCredential? cred}
+  ) async {
+    return await tryAsync("voteAnObject", () async {
+      String path = "channels/$objId/rate";
+      switch(objType){
+        case VoteObjectType.channel: path = "channels/$objId/rate"; 
+        case VoteObjectType.stream: path = "streams/$objId/rate";
+        case VoteObjectType.video: path = "channels/videos/$objId/rate";
+        case VoteObjectType.movieCast: path = "channels/videos/movie_details/casts/$objId/rate";
+      }
       dynamic res = await makeRequest(
-          path: "channels/$channelId/rate",
-          isGet: false,
-          isPut: true,
-          data: rateData);
-      if (res != null && res != false) {
-        VidChannel vc = VidChannel.fromJson(res);
-        return vc;
+        path: path, isGet: false, isPut: true, data: rateData, cred: cred,
+      );
+      if (res != null && res != false && res != true) {
+        switch(objType){
+          case VoteObjectType.channel: return VidChannel.fromJson(res); 
+          case VoteObjectType.stream: return VidStream.fromJson(res);
+          case VoteObjectType.video: return ChannelVideo.fromJson(res);
+          case VoteObjectType.movieCast: return VideoMovieCast.fromJson(res);
+        }
       } else {
         return null;
       }
@@ -1105,6 +1153,24 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
+  Future<CountSchema?> getTotalInnerComments(String commentId, CommentType commentType, {PrudCredential? cred}) async {
+    return await tryAsync("getTotalComments", () async {
+      String path = "";
+      switch(commentType){
+        case CommentType.videoComment: path = "channels/videos/comments/$commentId/count/inner";
+        case CommentType.thrillerComment: path = "channels/videos/thrillers/comments/$commentId/count/inner";
+        case CommentType.channelBroadcastComment: path = "channels/broadcasts/comments/$commentId/count/inner";
+        default: path = "streams/broadcasts/comments/$commentId/count/inner";
+      }
+      dynamic res = await makeRequest(path: path, cred: cred);
+      if (res != null && res != false) {
+        return CountSchema.fromJson(res);
+      } else {
+        return null;
+      }
+    });
+  }
+
   Future<CountSchema?> getTotalMemberComments( String channelId, String objId, CommentType commentType, {PrudCredential? cred}) async {
     return await tryAsync("getTotalMemberComments", () async {
       String path = "";
@@ -1123,7 +1189,7 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
-  Future<List<dynamic>?> getComments(String objId, CommentType commentType, {PrudCredential? cred, int limit = 150, int offset = 0}) async {
+  Future<List<Comment>?> getComments(String objId, CommentType commentType, {PrudCredential? cred, int limit = 150, int offset = 0}) async {
     return await tryAsync("getComments", () async {
       String path = "";
       switch(commentType){
@@ -1138,14 +1204,9 @@ class PrudStudioNotifier extends ChangeNotifier {
         "offset": offset
       });
       if (res != null && res != false && res.length > 0) {
-        List<dynamic> result = [];
+        List<Comment> result = [];
         for(var re in res){
-          switch(commentType){
-            case CommentType.videoComment: result.add(VideoComment.fromJson(re));
-            case CommentType.thrillerComment: result.add(VideoThrillerComment.fromJson(re));
-            case CommentType.channelBroadcastComment: result.add(ChannelBroadcastComment.fromJson(re));
-            default: result.add(StreamBroadcastComment.fromJson(re));
-          }
+          result.add(Comment.fromJson(re, commentType));
         }
         return res;
       } else {
@@ -1154,7 +1215,34 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
-  Future<List<dynamic>?> getInnerComments(String commentId, CommentType commentType, {PrudCredential? cred, int limit = 150, int offset = 0}) async {
+  Future<dynamic> getLastComments(String objId, CommentType commentType, {PrudCredential? cred, int limit = 150, int offset = 0}) async {
+    return await tryAsync("getLastComments", () async {
+      String path = "";
+      switch(commentType){
+        case CommentType.videoComment: path = "channels/videos/$objId/comments/main";
+        case CommentType.thrillerComment: path = "channels/videos/thrillers/$objId/comments/main";
+        case CommentType.channelBroadcastComment: path = "channels/broadcasts/$objId/comments/main";
+        default: path = "streams/broadcasts/$objId/comments/main";
+      }
+      dynamic res = await makeRequest(
+        path: path, cred: cred, qParam: {
+        "limit": limit,
+        "offset": offset
+      });
+      if (res != null && res != false) {
+        switch(commentType){
+          case CommentType.videoComment: return VideoComment.fromJson(res);
+          case CommentType.thrillerComment: return VideoThrillerComment.fromJson(res);
+          case CommentType.channelBroadcastComment: return ChannelBroadcastComment.fromJson(res);
+          default: return StreamBroadcastComment.fromJson(res);
+        }
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<List<Comment>?> getInnerComments(String commentId, CommentType commentType, {PrudCredential? cred, int limit = 150, int offset = 0}) async {
     return await tryAsync("getInnerComments", () async {
       String path = "";
       switch(commentType){
@@ -1169,14 +1257,9 @@ class PrudStudioNotifier extends ChangeNotifier {
         "offset": offset
       });
       if (res != null && res != false && res.length > 0) {
-        List<dynamic> result = [];
+        List<Comment> result = [];
         for(var re in res){
-          switch(commentType){
-            case CommentType.videoComment: result.add(VideoComment.fromJson(re));
-            case CommentType.thrillerComment: result.add(VideoThrillerComment.fromJson(re));
-            case CommentType.channelBroadcastComment: result.add(ChannelBroadcastComment.fromJson(re));
-            default: result.add(StreamBroadcastComment.fromJson(re));
-          }
+          result.add(Comment.fromJson(re, commentType));
         }
         return res;
       } else {
@@ -1185,7 +1268,7 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
-  Future<List<dynamic>?> getMembersComments(String channelId, String objId, CommentType commentType, {PrudCredential? cred, int limit = 150, int offset = 0}) async {
+  Future<List<Comment>?> getMembersComments(String channelId, String objId, CommentType commentType, {PrudCredential? cred, int limit = 150, int offset = 0}) async {
     return await tryAsync("getMembersComments", () async {
       String path = "";
       switch(commentType){
@@ -1200,14 +1283,9 @@ class PrudStudioNotifier extends ChangeNotifier {
         "offset": offset
       });
       if (res != null && res != false && res.length > 0) {
-        List<dynamic> result = [];
+        List<Comment> result = [];
         for(var re in res){
-          switch(commentType){
-            case CommentType.videoComment: result.add(VideoComment.fromJson(re));
-            case CommentType.thrillerComment: result.add(VideoThrillerComment.fromJson(re));
-            case CommentType.channelBroadcastComment: result.add(ChannelBroadcastComment.fromJson(re));
-            default: result.add(StreamBroadcastComment.fromJson(re));
-          }
+          result.add(Comment.fromJson(re, commentType));
         }
         return res;
       } else {
@@ -1293,6 +1371,24 @@ class PrudStudioNotifier extends ChangeNotifier {
         }
       } else {
         return false;
+      }
+    });
+  }
+
+  Future<WhoCommented?> isCommentMadeByCreatorOrOwner( String objId, String affId, CommentType commentType, {PrudCredential? cred}) async {
+    return await tryAsync("isCommentMadeByCreatorOrOwner", () async {
+      String path = "";
+      switch(commentType){
+        case CommentType.videoComment: path = "channels/videos/$objId/comments/$affId/who_is_commenting";
+        case CommentType.thrillerComment: path = "channels/videos/thrillers/$objId/comments/$affId/who_is_commenting";
+        case CommentType.channelBroadcastComment: path = "channels/broadcasts/$objId/comments/$affId/who_is_commenting";
+        default: path = "streams/broadcasts/$objId/comments/$affId/who_is_commenting";
+      }
+      dynamic res = await makeRequest(path: path, cred: cred);
+      if (res != null && res != false) {
+        return WhoCommented.fromJson(res);
+      } else {
+        return null;
       }
     });
   }
@@ -1397,8 +1493,7 @@ class PrudStudioNotifier extends ChangeNotifier {
     if (iCloud.affAuthToken != null || cred != null) {
       setDioHeaders(cred);
       String url = "$prudApiUrl/studios/$path";
-      Response res = isGet
-          ? (await prudStudioDio.get(url, queryParameters: qParam))
+      Response res = isGet? (await prudStudioDio.get(url, queryParameters: qParam))
           : (isPut
               ? await prudStudioDio.put(url, data: data)
               : (isDelete
@@ -1417,11 +1512,12 @@ class PrudStudioNotifier extends ChangeNotifier {
       retrieveUnfinishedNewChannelData();
       retrieveUnfinishedNewVideoData();
       getSearchedTerm4ChannelFromCache();
-      retrieveChannelRatingFromCache();
+      retrieveObjectRatingFromCache();
       await getChannelsJoinedFromCache();
       await getChannelsSubscribedFromCache();
       getChannelRefferalsFromCache();
       getWatchedThrillersFromCache();
+      getWatchedVideosFromCache();
       if (studio != null && studio!.id != null) {
         wallet = await getWallet(studio!.id!);
         await getAmACreator();

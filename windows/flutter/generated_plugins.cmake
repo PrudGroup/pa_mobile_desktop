@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
   desktop_window
+  emoji_picker_flutter
   file_selector_windows
   firebase_core
   media_kit_libs_windows_video
