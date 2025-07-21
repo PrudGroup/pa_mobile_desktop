@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/pages/register/register.dart';
@@ -45,12 +47,15 @@ void main() async {
   );
 
   // TODO: take all this to isolate for speed
-  await iCloud.setFirebase(
+  if (Firebase.apps.isEmpty) {
+    await iCloud.setFirebase(
       Constants.fireApiKey,
       Platform.isAndroid? Constants.fireAndroidAppID :
       (Platform.isIOS? Constants.fireIOSAppID : Constants.fireAppID),
       Constants.fireMessageID
-  );
+    );
+  }
+  
   iCloud.setDioHeaders();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await GetStorage.init();
@@ -67,7 +72,7 @@ void main() async {
   _setTargetPlatformForDesktop();
 
 
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 /// If the current platform is desktop, override the default platform to
@@ -88,18 +93,7 @@ class MyApp extends StatelessWidget {
 
   const MyApp({super.key});
 
-  Future<bool> _getCredentials({required context}) async {
-    await precacheImage( AssetImage(prudImages.prudIcon), context);
-    await precacheImage( AssetImage(prudImages.intro), context);
-    await precacheImage( AssetImage(prudImages.intro4), context);
-    await precacheImage( AssetImage(prudImages.intro5), context);
-    await precacheImage( AssetImage(prudImages.intro1), context);
-    await precacheImage( AssetImage(prudImages.intro2), context);
-    await precacheImage( AssetImage(prudImages.intro3), context);
-    await precacheImage( AssetImage(prudImages.bg), context);
-    await precacheImage( AssetImage(prudImages.screen), context);
-    await precacheImage( AssetImage(prudImages.user), context);
-    await precacheImage( AssetImage(prudImages.err), context);
+  Future<bool> _getCredentials({required BuildContext context}) async {
     FlutterNativeSplash.remove();
     final lStore = myStorage.lStore;
     bool isNew = true;
@@ -108,6 +102,7 @@ class MyApp extends StatelessWidget {
     if(isNew == false){
       await currencyMath.loginAutomatically();
       if(iCloud.affAuthToken == null){
+        // ignore: use_build_context_synchronously
         iCloud.showSnackBar("PrudApp Service Unreachable", context);
       }
     }

@@ -1,11 +1,6 @@
 import 'dart:isolate';
 
-import 'package:comment_tree/data/comment.dart' as t;
-import 'package:comment_tree/widgets/comment_tree_widget.dart';
-import 'package:comment_tree/widgets/tree_theme_data.dart';
-import 'package:fast_cached_network_image/fast_cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:getwidget/components/avatar/gf_avatar.dart';
 import 'package:prudapp/components/comment_component.dart';
 import 'package:prudapp/components/loading_component.dart';
 import 'package:prudapp/components/new_comment_component.dart';

@@ -6,7 +6,7 @@ import 'package:prudapp/singletons/tab_data.dart';
 class LocalSettings extends ChangeNotifier{
 
   static final LocalSettings _localSettings = LocalSettings._internal();
-  static get localSettings => _localSettings;
+  static LocalSettings get localSettings => _localSettings;
 
   factory LocalSettings() {
     return _localSettings;

@@ -36,7 +36,7 @@ class WorkInProgress extends StatelessWidget {
               Translate(
                 text: "Work In Progress",
                 style: tabData.tBStyle.copyWith(
-                  color: prudTheme.indicatorColor.withValues(alpha: 0.6),
+                  color: prudTheme.tabBarTheme.indicatorColor!.withValues(alpha: 0.6),
                   fontSize: 20,
                   fontWeight: FontWeight.w500
                 ),

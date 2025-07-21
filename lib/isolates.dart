@@ -6,12 +6,14 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:prudapp/models/backblaze.dart';
 import 'package:prudapp/models/prud_vid.dart';
 import 'package:prudapp/models/shared_classes.dart';
 import 'package:prudapp/models/user.dart';
+import 'package:prudapp/services/search_history.dart';
 import 'package:prudapp/singletons/backblaze_notifier.dart';
 import 'package:prudapp/singletons/influencer_notifier.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';
@@ -20,7 +22,7 @@ import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
 
 @pragma('vm:entry-point')
-uploadVideoService(UploadVideoServiceArg uvSerArg) async {
+Future<void> uploadVideoService(UploadVideoServiceArg uvSerArg) async {
   bool uploaded = false;
   int tryCount = 0;
   UploadPartResponse? uploadPartResponse;
@@ -61,7 +63,7 @@ Future<void> uploadVideoStream(UploadVideoStreamArg uvsArg) async {
 }
 
 @pragma('vm:entry-point')
-getRandom(({int length, SendPort port}) data){
+void getRandom(({int length, SendPort port}) data){
   String chars = "0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
   chars = tabData.shuffle(chars);
   String result = ""; final random = Random();
@@ -88,7 +90,7 @@ Future<void> computeStream(({int length, SendPort port}) arg) async {
 
 
 @pragma('vm:entry-point')
-getRelatedVideoService(VideoSearchServiceArg vssArg) async {
+Future<void> getRelatedVideoService(VideoSearchServiceArg vssArg) async {
   bool foundSome = false;
   int tryCount = 0;
   List<ChannelVideo>? foundVideos;
@@ -108,7 +110,7 @@ getRelatedVideoService(VideoSearchServiceArg vssArg) async {
 
 
 @pragma('vm:entry-point')
-getRelatedBroadcastService(BroadcastSearchServiceArg bssArg) async {
+Future<void> getRelatedBroadcastService(BroadcastSearchServiceArg bssArg) async {
   bool foundSome = false;
   int tryCount = 0;
   List<ChannelBroadcast>? foundCasts;
@@ -127,7 +129,7 @@ getRelatedBroadcastService(BroadcastSearchServiceArg bssArg) async {
 }
 
 @pragma('vm:entry-point')
-incrementBroadcastImpressionService(ServiceArg sArg) async {
+Future<void> incrementBroadcastImpressionService(ServiceArg sArg) async {
   bool done = false;
   int tryCount = 0;
   while (done == false && tryCount < 6) {
@@ -141,7 +143,7 @@ incrementBroadcastImpressionService(ServiceArg sArg) async {
 }
 
 @pragma('vm:entry-point')
-incrementVideoImpressionService(ServiceArg sArg) async {
+Future<void> incrementVideoImpressionService(ServiceArg sArg) async {
   bool done = false;
   int tryCount = 0;
   while (done == false && tryCount < 6) {
@@ -155,7 +157,7 @@ incrementVideoImpressionService(ServiceArg sArg) async {
 }
 
 @pragma('vm:entry-point')
-incrementVideoDownloadService(ServiceArg sArg) async {
+Future<void> incrementVideoDownloadService(ServiceArg sArg) async {
   bool done = false;
   int tryCount = 0;
   while (done == false && tryCount < 6) {
@@ -169,7 +171,7 @@ incrementVideoDownloadService(ServiceArg sArg) async {
 }
 
 @pragma('vm:entry-point')
-incrementVideoWatchMiniutesService(MinuteServiceArg sArg) async {
+Future<void> incrementVideoWatchMiniutesService(MinuteServiceArg sArg) async {
   bool done = false;
   int tryCount = 0;
   while (done == false && tryCount < 6) {
@@ -198,19 +200,22 @@ Future<void> getVideoAndBroadcastSuggestions(VideoSuggestionServiceArg vssArg) a
     limit: vssArg.videoCateria.limit,
     offset: vssArg.videoCateria.offset
   ));
-  await FlutterIsolate.spawn(getRelatedVideoService, VideoSearchServiceArg(
-    cred: vssArg.cred,
-    sendPort: receivePort.sendPort,
-    searchType: vssArg.promotedType,
-    country: vssArg.videoCateria.country,
-    limit: vssArg.videoCateria.limit,
-    offset: vssArg.videoCateria.offset
-  ));
-  await FlutterIsolate.spawn(getRelatedBroadcastService, BroadcastSearchServiceArg(
-    broadcastSearchText: vssArg.broadcastSearchText,
-    cred: vssArg.cred,
-    sendPort: receivePort.sendPort,
-  ));
+  if(!vssArg.onlyVideos){
+    await FlutterIsolate.spawn(getRelatedVideoService, VideoSearchServiceArg(
+      cred: vssArg.cred,
+      sendPort: receivePort.sendPort,
+      searchType: vssArg.promotedType,
+      country: vssArg.videoCateria.country,
+      limit: vssArg.videoCateria.limit,
+      offset: vssArg.videoCateria.offset
+    ));
+    
+    await FlutterIsolate.spawn(getRelatedBroadcastService, BroadcastSearchServiceArg(
+      broadcastSearchText: vssArg.broadcastSearchText,
+      cred: vssArg.cred,
+      sendPort: receivePort.sendPort,
+    ));
+  }
   List<dynamic> result = [];
   int responseCount = 0;
   receivePort.listen((response) {
@@ -247,7 +252,7 @@ Future<void> getVideoAndBroadcastSuggestions(VideoSuggestionServiceArg vssArg) a
 }
 
 @pragma('vm:entry-point')
-listItemSearch(ListItemSearchArg lisArg) async {
+Future<void> listItemSearch(ListItemSearchArg lisArg) async {
   int result = -1;
   if(lisArg.searchItem != null){
     result = lisArg.searchList.indexWhere((item) => item == lisArg.searchItem);
@@ -311,7 +316,7 @@ Future<void> makeLikeDislikeAction(LikeDislikeActionArg actArg) async {
 
 
 @pragma('vm:entry-point')
-downloadChunk(DownloadChunkArg dcArg) async {
+Future<void> downloadChunk(DownloadChunkArg dcArg) async {
   String path = (await getTemporaryDirectory()).path;
   String tempFilePath = '$path${dcArg.filename}.part${dcArg.chunkIndex}';
   File tempFile = File(tempFilePath);
@@ -453,7 +458,7 @@ Future<void> downloadSmallFileInBytes(DownloadSmallFileArg dsfArg) async {
 
 
 @pragma("vm:entry-point")
-mergeBytesData(MergeBytesArg mbArg){
+void mergeBytesData(MergeBytesArg mbArg){
   List<int> mergedFile = [];
   for(int itm in mbArg.arrangedIndex){
     int index = mbArg.actualBytesIndexes.indexWhere((va) => va == itm);
@@ -468,7 +473,7 @@ mergeBytesData(MergeBytesArg mbArg){
 
 
 @pragma('vm:entry-point')
-getChannelFromCloud(CommonArg comArg) async {
+Future<void> getChannelFromCloud(CommonArg comArg) async {
   int trials = 0;
   VidChannel? result;
   while (result == null && trials < 3){
@@ -485,7 +490,7 @@ getChannelFromCloud(CommonArg comArg) async {
 
 
 @pragma('vm:entry-point')
-getVideoFromCloud(CommonArg comArg) async {
+Future<void> getVideoFromCloud(CommonArg comArg) async {
   int trials = 0;
   ChannelVideo? result;
   while (result == null && trials < 3){
@@ -501,7 +506,7 @@ getVideoFromCloud(CommonArg comArg) async {
 }
 
 @pragma('vm:entry-point')
-getThrillerFromCloud(CommonArg comArg) async {
+Future<void> getThrillerFromCloud(CommonArg comArg) async {
   int trials = 0;
   VideoThriller? result;
   while (result == null && trials < 3){
@@ -706,19 +711,71 @@ Future<void> getInfluencerById(CommonArg cArg) async {
 
 
 @pragma("vm:entry-point")
-Future<void> getVideoSuggestionsByChannel(CommentActionArg caArg) async {
-  bool updated = false;
+Future<void> getVideoSuggestionsByChannel(SearchVideosByChannelArg svcArg) async {
+  List<ChannelVideo>? foundVideos;
   int trials = 0;
-  if(caArg.newUpdate == null){
-    caArg.sendPort.send(null);
-    return;
-  }
-  while(updated == false && trials > 3){
+  while(foundVideos == null && trials > 3){
     trials++;
-    updated = await prudStudioNotifier.updateComments(
-      caArg.id, caArg.commentType, cred: caArg.cred,
-      newUpdate: caArg.newUpdate!
+    foundVideos = await prudStudioNotifier.getSuggestedVideosByChannel(
+      criteria: svcArg.criteria, cred: svcArg.cred,
     );
   }
-  caArg.sendPort.send(updated);
+  svcArg.port.send(foundVideos?.map((itm) => itm.toJson()));
+}
+
+
+@pragma("vm:entry-point")
+Future<String?> writeBytesToFileInIsolate(List<dynamic> args) async {
+  try {
+    final Uint8List bytes = args[0];
+    final String filename = args[1];
+    final tempDir = await getTemporaryDirectory();
+    final file = File('${tempDir.path}/$filename.mp4');
+    await file.writeAsBytes(bytes);
+    return file.path;
+  } catch (e) {
+    debugPrint('Error writing bytes to file in isolate: $e');
+    return null;
+  }
+}
+
+@pragma("vm:entry-point")
+Future<Uint8List> readFileBytesInIsolate(String filePath) async {
+  try {
+    return await File(filePath).readAsBytes();
+  } catch (e) {
+    debugPrint('Error reading file bytes in isolate: $e');
+    throw Exception('Failed to read file: $e');
+  }
+}
+
+@pragma("vm:entry-point")
+void storageIsolateEntry(SendPort mainSendPort) async {
+  final ReceivePort isolateReceivePort = ReceivePort();
+  mainSendPort.send(isolateReceivePort.sendPort); // Send Isolate's SendPort back to main
+
+  await GetStorage.init(); // Initialize GetStorage in the Isolate
+
+  await for (var message in isolateReceivePort) {
+    if (message is SearchHistoryArg) {
+      final box = GetStorage();
+      List<String> history = box.read<List<dynamic>>(searchHistoryKey)?.cast<String>() ?? [];
+
+      if (message.action == HistroyAction.save && message.searchText != null) {
+        // Remove existing entry if it's already in the history to move it to the front
+        history.remove(message.searchText);
+        // Add new search text to the beginning
+        history.insert(0, message.searchText!);
+        // Trim history to max size
+        if (history.length > maxHistorySize) {
+          history = history.sublist(0, maxHistorySize);
+        }
+        await box.write(searchHistoryKey, history);
+        // Optionally, send a confirmation back
+        message.sendPort?.send('saved');
+      } else if (message.action == HistroyAction.load) {
+        message.sendPort?.send(history);
+      }
+    }
+  }
 }

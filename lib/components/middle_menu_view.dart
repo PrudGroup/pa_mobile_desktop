@@ -91,19 +91,19 @@ class MiddleMenuViewState extends State<MiddleMenuView> {
                   widget.topMenus[index].imageIcon == null?
                   Icon(
                     widget.topMenus[index].icon,
-                    color: selectedTopIndex == index? prudTheme.indicatorColor : prudTheme.primaryColor,
+                    color: selectedTopIndex == index? prudTheme.tabBarTheme.indicatorColor : prudTheme.primaryColor,
                   )
                       :
                   ImageIcon(
                     AssetImage(widget.topMenus[index].imageIcon!),
-                    color: selectedTopIndex == index? prudTheme.indicatorColor : prudTheme.primaryColor,
+                    color: selectedTopIndex == index? prudTheme.tabBarTheme.indicatorColor : prudTheme.primaryColor,
                   )
               ) : const SizedBox(),
               hoverElevation: 0.0,
               focusElevation: 0.0,
               size: GFSize.LARGE,
               text: widget.topMenus[index].title,
-              textColor: selectedTopIndex == index? prudTheme.indicatorColor : prudTheme.primaryColor,
+              textColor: selectedTopIndex == index? prudTheme.tabBarTheme.indicatorColor : prudTheme.primaryColor,
               child: const Center(),
             ),
           ),
@@ -133,19 +133,19 @@ class MiddleMenuViewState extends State<MiddleMenuView> {
                   widget.bottomMenus[index].imageIcon == null?
                   Icon(
                     widget.bottomMenus[index].icon,
-                    color: selectedBottomIndex == index? prudTheme.indicatorColor : prudTheme.primaryColor,
+                    color: selectedBottomIndex == index? prudTheme.tabBarTheme.indicatorColor : prudTheme.primaryColor,
                   )
                       :
                   ImageIcon(
                     AssetImage(widget.bottomMenus[index].imageIcon!),
-                    color: selectedBottomIndex == index? prudTheme.indicatorColor : prudTheme.primaryColor,
+                    color: selectedBottomIndex == index? prudTheme.tabBarTheme.indicatorColor : prudTheme.primaryColor,
                   )
               ) : const SizedBox(),
               hoverElevation: 0.0,
               focusElevation: 0.0,
               size: GFSize.LARGE,
               text: widget.bottomMenus[index].title,
-              textColor: selectedBottomIndex == index? prudTheme.indicatorColor : prudTheme.primaryColor,
+              textColor: selectedBottomIndex == index? prudTheme.tabBarTheme.indicatorColor : prudTheme.primaryColor,
               child: const Center(),
             ),
           ),

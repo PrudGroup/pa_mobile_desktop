@@ -23,7 +23,7 @@ class InfluencerLinksState extends State<InfluencerLinks> {
     InnerMenuItem(title: "Switz Stores", menu: const SwitzStoreLinks()),
   ];
 
-  void gotoTab(index){
+  void gotoTab(int index){
     if(widget.goToTab != null) widget.goToTab!(index);
   }
 

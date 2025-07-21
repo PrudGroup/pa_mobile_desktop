@@ -15,7 +15,7 @@ class InfluencerPoints extends StatefulWidget {
 
 class InfluencerPointsState extends State<InfluencerPoints> {
 
-  void gotoTab(index){
+  void gotoTab(int index){
     if(widget.goToTab != null) widget.goToTab!(index);
   }
   @override

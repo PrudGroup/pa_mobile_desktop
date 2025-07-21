@@ -419,7 +419,7 @@ class CommentComponentState extends State<CommentComponent> {
                       spacing: 4,
                       children: [
                         Text(
-                          "${tabData.getFormattedNumber(comment.likes)}",
+                          tabData.getFormattedNumber(comment.likes),
                           style: prudWidgetStyle.tabTextStyle.copyWith(
                             fontSize: 12,
                             color: prudColorTheme.lineC,
@@ -447,7 +447,7 @@ class CommentComponentState extends State<CommentComponent> {
                       spacing: 4,
                       children: [
                         Text(
-                          "${tabData.getFormattedNumber(comment.dislikes)}",
+                          tabData.getFormattedNumber(comment.dislikes),
                           style: prudWidgetStyle.tabTextStyle.copyWith(
                             fontSize: 12,
                             color: prudColorTheme.lineC,
@@ -468,7 +468,7 @@ class CommentComponentState extends State<CommentComponent> {
                       spacing: 4,
                       children: [
                         Text(
-                          "${tabData.getFormattedNumber(totalReplies)}",
+                          tabData.getFormattedNumber(totalReplies),
                           style: prudWidgetStyle.tabTextStyle.copyWith(
                             fontSize: 12,
                             color: prudColorTheme.lineC,

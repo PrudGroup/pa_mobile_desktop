@@ -56,7 +56,7 @@ enum BoardLoginState { existingOperator, newOperator, newFirm }
 
 class ICloud extends ChangeNotifier {
   static final ICloud _iCloud = ICloud._internal();
-  static get iCloud => _iCloud;
+  static ChangeNotifier get iCloud => _iCloud;
   RegisterState registerState = RegisterState.first;
   String? affAuthToken;
   String mapKey = " ";
@@ -314,18 +314,18 @@ class ICloud extends ChangeNotifier {
   List<Widget> getShowroom(BuildContext context, {int? showroomItems}) {
     List<Widget> showroom = [
       InkWell(
-        onTap: () => iCloud.goto(context, const PrudVidStudio()),
+        onTap: () => goto(context, const PrudVidStudio()),
         child: PrudContainer(hasPadding: false, child: Image.asset(prudImages.front1)),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const Ads()),
+        onTap: () => goto(context, const Ads()),
         child: PrudContainer(
           hasPadding: false,
           child: Image.asset(prudImages.front6),
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const PrudCuisine()),
+        onTap: () => goto(context, const PrudCuisine()),
         child: PrudContainer(
           hasPadding: false,
           hasTitle: true,
@@ -334,21 +334,21 @@ class ICloud extends ChangeNotifier {
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const PrudLearn()),
+        onTap: () => goto(context, const PrudLearn()),
         child: PrudContainer(
           hasPadding: false,
           child: Image.asset(prudImages.front12),
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const PrudNews()),
+        onTap: () => goto(context, const PrudNews()),
         child: PrudContainer(
           hasPadding: false,
           child: Image.asset(prudImages.front10),
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const PrudStreamStudio()),
+        onTap: () => goto(context, const PrudStreamStudio()),
         child: PrudContainer(
           hasPadding: false,
           hasTitle: true,
@@ -357,14 +357,14 @@ class ICloud extends ChangeNotifier {
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const PrudMusic()),
+        onTap: () => goto(context, const PrudMusic()),
         child: PrudContainer(
           hasPadding: false,
           child: Image.asset(prudImages.front11),
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const PrudPredict()),
+        onTap: () => goto(context, const PrudPredict()),
         child: PrudContainer(
           hasPadding: false,
           hasTitle: true,
@@ -374,7 +374,7 @@ class ICloud extends ChangeNotifier {
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const PrudMovies()),
+        onTap: () => goto(context, const PrudMovies()),
         child: PrudContainer(
           hasPadding: false,
           hasTitle: true,
@@ -383,14 +383,14 @@ class ICloud extends ChangeNotifier {
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const PrudNews()),
+        onTap: () => goto(context, const PrudNews()),
         child: PrudContainer(
           hasPadding: false,
           child: Image.asset(prudImages.front8),
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const Thrillers()),
+        onTap: () => goto(context, const Thrillers()),
         child: PrudContainer(
           hasPadding: false,
           hasTitle: true,
@@ -399,14 +399,14 @@ class ICloud extends ChangeNotifier {
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const PrudVidStudio()),
+        onTap: () => goto(context, const PrudVidStudio()),
         child: PrudContainer(
           hasPadding: false,
           child: Image.asset(prudImages.front4),
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const Influencers()),
+        onTap: () => goto(context, const Influencers()),
         child: PrudContainer(
           hasPadding: false,
           hasTitle: true,
@@ -415,14 +415,14 @@ class ICloud extends ChangeNotifier {
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const PrudVid()),
+        onTap: () => goto(context, const PrudVid()),
         child: PrudContainer(
           hasPadding: false,
           child: Image.asset(prudImages.front7),
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const PrudPredict()),
+        onTap: () => goto(context, const PrudPredict()),
         child: PrudContainer(
           hasPadding: false,
           hasTitle: true,
@@ -431,7 +431,7 @@ class ICloud extends ChangeNotifier {
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const PrudPredict()),
+        onTap: () => goto(context, const PrudPredict()),
         child: PrudContainer(
           hasPadding: false,
           hasTitle: true,
@@ -440,7 +440,7 @@ class ICloud extends ChangeNotifier {
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const PrudPredict()),
+        onTap: () => goto(context, const PrudPredict()),
         child: PrudContainer(
           hasPadding: false,
           hasTitle: true,
@@ -449,7 +449,7 @@ class ICloud extends ChangeNotifier {
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const PrudPredict()),
+        onTap: () => goto(context, const PrudPredict()),
         child: PrudContainer(
           hasPadding: false,
           hasTitle: true,
@@ -458,7 +458,7 @@ class ICloud extends ChangeNotifier {
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const PrudPredict()),
+        onTap: () => goto(context, const PrudPredict()),
         child: PrudContainer(
           hasPadding: false,
           hasTitle: true,
@@ -467,7 +467,7 @@ class ICloud extends ChangeNotifier {
         ),
       ),
       InkWell(
-        onTap: () => iCloud.goto(context, const PrudPredict()),
+        onTap: () => goto(context, const PrudPredict()),
         child: PrudContainer(
           hasPadding: false,
           hasTitle: true,
@@ -528,35 +528,76 @@ class ICloud extends ChangeNotifier {
     }
     pushMessages.add(PushMessage(msg, notice));
   }
+  
 
-  Future<FirebaseApp> setFirebase(
-      String apiKey, String appId, String msgID) async {
+  Future<FirebaseApp> setFirebase(String apiKey, String appId, String msgID) async {
     FirebaseApp? fireApp;
-    if (Platform.isAndroid || Platform.isIOS) {
-      fireApp = await Firebase.initializeApp(
-        options: FirebaseOptions(
-          apiKey: apiKey,
-          appId: appId,
-          messagingSenderId: msgID,
-          projectId: 'prudapp',
-        ),
-      );
-    } else {
-      fireApp = await Firebase.initializeApp();
+    
+    try {
+      if (Platform.isAndroid || Platform.isIOS) {
+        // Check if Firebase is already initialized
+        if (Firebase.apps.isEmpty) {
+          fireApp = await Firebase.initializeApp(
+            options: FirebaseOptions(
+              apiKey: apiKey,
+              appId: appId,
+              messagingSenderId: msgID,
+              projectId: 'prudapp',
+            ),
+          );
+        } else {
+          // Use existing Firebase app
+          fireApp = Firebase.app();
+        }
+      } else {
+        // For web/desktop
+        if (Firebase.apps.isEmpty) {
+          fireApp = await Firebase.initializeApp();
+        } else {
+          fireApp = Firebase.app();
+        }
+      }
+      
+      // Initialize messaging after Firebase is ready
+      await _initializeMessaging();
+      
+      return fireApp;
+    } catch (e) {
+      debugPrint("Error initializing Firebase: $e");
+      // If it's a duplicate app error, return the existing app
+      if (e.toString().contains('duplicate-app')) {
+        return Firebase.app();
+      }
+      rethrow;
     }
-    await FirebaseMessaging.instance.getToken();
-    FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      debugPrint("_messaging onMessageOpenedApp: $message");
-      iCloud.addPushMessages(message);
-    });
-    FirebaseMessaging.instance.getInitialMessage().then((value) {
-      debugPrint("_messaging getInitialMessage: $value");
-    });
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint("_messaging onMessage: $message");
-      iCloud.addPushMessages(message);
-    });
-    return fireApp;
+  }
+
+  Future<void> _initializeMessaging() async {
+    try {
+      // Get FCM token
+      String? token = await FirebaseMessaging.instance.getToken();
+      debugPrint("FCM Token: $token");
+      
+      // Set up message listeners
+      FirebaseMessaging.onMessageOpenedApp.listen((message) {
+        debugPrint("_messaging onMessageOpenedApp: $message");
+        addPushMessages(message);
+      });
+      
+      FirebaseMessaging.instance.getInitialMessage().then((value) {
+        debugPrint("_messaging getInitialMessage: $value");
+        if (value != null) {
+          addPushMessages(value);
+        }
+      });
+      
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        debugPrint("_messaging onMessage: $message");
+        addPushMessages(message);
+      });
+    } catch (e) {
+      debugPrint("Error setting up messaging: $e");
+    }
   }
 
   void setDioHeaders() {
@@ -723,7 +764,6 @@ const String paystackHook = "$prudApiUrl/payments/paystack_hook";
 const double waveVat = 0.07;
 const bool paymentIsInTestMode = isProduction ? false : true;
 List<PushMessage> pushMessages = [];
-const reloadlySmsFee = 300.0;
 const installReferralCommission = 0.25;
 const referralCommission = 0.25;
 const merchantReferralCommission = 0.25;

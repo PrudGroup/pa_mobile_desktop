@@ -65,7 +65,7 @@ class ChannelSearchComponentState extends State<ChannelSearchComponent> {
         widget.onResultReady(results, seekingResults, filterValue, searchTerm!);
         if(mounted) setState(() => loading = false);
       }, 
-      error: (){
+      done: (){
         if(mounted) setState(() => loading = false);
       });
     }

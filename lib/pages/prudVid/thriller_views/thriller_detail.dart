@@ -125,7 +125,7 @@ class ThrillerDetailState extends State<ThrillerDetail> {
     displayComment(showComment? false : true);
   }
 
-  getSizeAndPosition() {
+  void getSizeAndPosition() {
     vHeight = _videoContainerKey.currentContext?.size?.height?? 0;
     if(UniversalPlatform.isAndroid == false && UniversalPlatform.isIOS == false){
       vHeight = _flickKey.currentContext?.size?.height?? 0;
@@ -133,7 +133,7 @@ class ThrillerDetailState extends State<ThrillerDetail> {
     setState(() {});
   }
 
-  displayComment(bool isMembersOnly){
+  void displayComment(bool isMembersOnly){
     showModalBottomSheet(
       context: context,
       backgroundColor: prudColorTheme.bgF,
@@ -931,7 +931,7 @@ class ThrillerDetailState extends State<ThrillerDetail> {
                       ),
                     ),
                   ),
-                  if(flickManager != null && UniversalPlatform.isAndroid == false && UniversalPlatform.isIOS == false) VisibilityDetector(
+                  if(/* flickManager != null && */ UniversalPlatform.isAndroid == false && UniversalPlatform.isIOS == false) VisibilityDetector(
                     key: ObjectKey(flickManager),
                     onVisibilityChanged: (visibility) {
                       if (visibility.visibleFraction == 0 && mounted) {
@@ -1309,7 +1309,7 @@ class ThrillerDetailState extends State<ThrillerDetail> {
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       Translate(
-                                        text: "${tabData.getFormattedNumber(thriller!.likes)}",
+                                        text: tabData.getFormattedNumber(thriller!.likes),
                                         style: prudWidgetStyle.typedTextStyle.copyWith(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,
@@ -1328,7 +1328,7 @@ class ThrillerDetailState extends State<ThrillerDetail> {
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       Translate(
-                                        text: "${tabData.getFormattedNumber(thriller!.dislikes)}",
+                                        text: tabData.getFormattedNumber(thriller!.dislikes),
                                         style: prudWidgetStyle.typedTextStyle.copyWith(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,

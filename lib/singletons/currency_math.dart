@@ -6,7 +6,7 @@ import 'i_cloud.dart';
 class CurrencyMath extends ChangeNotifier{
 
   static final CurrencyMath _currencyMath = CurrencyMath._internal();
-  static get currencyMath => _currencyMath;
+  static CurrencyMath get currencyMath => _currencyMath;
 
   bool hasExpired = false;
 
@@ -69,7 +69,7 @@ class CurrencyMath extends ChangeNotifier{
     await iCloud.checkIfAffLoggedIn("$prudApiUrl/affiliates/auth/login");
   }
 
-  onError(dynamic ex){
+  bool onError(dynamic ex){
     debugPrint("Error: Transaction: CurrencyMath: $ex");
     return false;
   }

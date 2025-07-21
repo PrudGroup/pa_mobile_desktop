@@ -14,7 +14,7 @@ class InfluencerPromotion extends StatefulWidget {
 }
 
 class InfluencerPromotionState extends State<InfluencerPromotion> {
-  void gotoTab(index){
+  void gotoTab(int index){
     if(widget.goToTab != null) widget.goToTab!(index);
   }
   @override

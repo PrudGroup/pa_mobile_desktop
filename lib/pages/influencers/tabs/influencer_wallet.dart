@@ -15,7 +15,7 @@ class InfluencerWallet extends StatefulWidget {
 
 class InfluencerWalletState extends State<InfluencerWallet> {
 
-  void gotoTab(index){
+  void gotoTab(int index){
     if(widget.goToTab != null) widget.goToTab!(index);
   }
   @override

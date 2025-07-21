@@ -231,6 +231,7 @@ class VideoSuggestionServiceArg{
   List<String> unwantedChannels;
   List<String> unwantedVideos;
   List<String> unwantedBroadcasts;
+  bool onlyVideos;
 
   VideoSuggestionServiceArg({
     required this.sendPort,
@@ -241,9 +242,26 @@ class VideoSuggestionServiceArg{
     required this.unwantedChannels,
     required this.unwantedVideos,
     required this.unwantedBroadcasts,
+    this.onlyVideos = false
   });
 }
 
+enum HistroyAction {
+  save,
+  load
+}
+
+class SearchHistoryArg {
+  final HistroyAction action;
+  final String? searchText;
+  final SendPort? sendPort; // To send results back to the main Isolate
+
+  SearchHistoryArg({
+    this.searchText, 
+    this.sendPort, 
+    this.action = HistroyAction.save
+  });
+}
 
 class BroadcastSearchServiceArg{
   SendPort sendPort;
@@ -501,7 +519,7 @@ class CommentPutSchema{
 
 class SearchByChannelSchema{
   String channelId;
-  VideoSearchType category;
+  String category;
   String title;
   int? season;
   int? episode;
@@ -526,7 +544,7 @@ class SearchByChannelSchema{
     return {
       "title": title,
       "channelId": channelId,
-      "category": category.name,
+      "category": category,
       "limit": limit,
       if(albumName != null) "albumName": albumName,
       if(episode != null) "episode": episode,
@@ -535,4 +553,16 @@ class SearchByChannelSchema{
       if(offset != null) "offset": offset,
     };
   }
+}
+
+class SearchVideosByChannelArg{
+  SearchByChannelSchema criteria;
+  PrudCredential cred;
+  SendPort port;
+
+  SearchVideosByChannelArg({
+    required this.criteria,
+    required this.cred,
+    required this.port,
+  }); 
 }

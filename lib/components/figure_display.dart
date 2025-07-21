@@ -37,7 +37,7 @@ class FigureDisplayState extends State<FigureDisplay> {
   double containerHeight = 220;
 
 
-  getSizeAndPosition() {
+  void getSizeAndPosition() {
     containerHeight = _containerKey.currentContext!.size!.height;
     setState(() {});
   }
@@ -120,7 +120,7 @@ class FigureDisplayState extends State<FigureDisplay> {
                           children: [
                             currency,
                             Text(
-                              "${tabData.getFormattedNumber(getTotal())}",
+                              tabData.getFormattedNumber(getTotal()),
                               style: prudWidgetStyle.typedTextStyle.copyWith(
                                 color: prudColorTheme.bgA,
                                 fontSize: 35

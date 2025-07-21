@@ -12,7 +12,7 @@ import 'package:crypto/crypto.dart';
 
 class BackblazeNotifier extends ChangeNotifier {
   static final BackblazeNotifier _backblazeNotifier = BackblazeNotifier._internal();
-  static get backblazeNotifier => _backblazeNotifier;
+  static BackblazeNotifier get backblazeNotifier => _backblazeNotifier;
   
 
   factory BackblazeNotifier(){

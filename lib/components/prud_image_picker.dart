@@ -60,7 +60,7 @@ class PrudImagePickerState extends State<PrudImagePicker> {
       String? url = await iCloud.saveFileToCloud(file, widget.destination);
       if(widget.onSaveToCloud != null) widget.onSaveToCloud!(url);
       if(mounted) setState(() => existingUrl = url);
-    }, error: (){
+    }, done: (){
       if(mounted) setState(() => picking = false);
     });
   }

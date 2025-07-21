@@ -8,8 +8,10 @@ list(APPEND FLUTTER_PLUGIN_LIST
   emoji_picker_flutter
   file_selector_windows
   firebase_core
+  flutter_webrtc
   media_kit_libs_windows_video
   media_kit_video
+  permission_handler_windows
   printing
   share_plus
   url_launcher_windows

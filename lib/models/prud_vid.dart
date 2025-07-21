@@ -1489,6 +1489,7 @@ class VideoThriller {
   int impressions;
   int shared;
   List<VideoThrillerComment>? comments;
+  int? commentCount;
 
   VideoThriller({
     required this.videoId,
@@ -1497,6 +1498,7 @@ class VideoThriller {
     this.impressions = 0,
     this.dislikes = 0,
     this.shared = 0,
+    this.commentCount,
     this.durationInMinutes,
     this.id,
     this.video,
@@ -1532,6 +1534,7 @@ class VideoThriller {
       id: json["id"],
       durationInMinutes: json["durationInMinutes"],
       durationInSeconds: json["durationInSeconds"],
+      commentCount: json["comment_count"],
       video: json["video"] != null ? ChannelVideo.fromJson(json["video"]) : null,
       comments: json["comments"]?.map<VideoThrillerComment>(
         (cha) => VideoThrillerComment.fromJson(cha))

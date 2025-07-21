@@ -119,7 +119,7 @@ class PrudVideoComponentState extends State<PrudVideoComponent> {
       AffLink? link = await influencerNotifier.createAffLinks(target, category, categoryId);
       if(link != null){
         String msg = "If you haven't watch this clip...sorry! Life has left you behind! Watch now and come back to life. ";
-        final result = await Share.share("$msg ${link.fullShortUrl}", subject: video!.title);
+        final result = await SharePlus.instance.share(ShareParams(text: "$msg ${link.fullShortUrl}", subject: video!.title));
         if (result.status == ShareResultStatus.success && mounted) {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

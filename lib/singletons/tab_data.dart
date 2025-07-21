@@ -14,7 +14,7 @@ import 'package:prudapp/singletons/shared_local_storage.dart';
 
 class TabData extends ChangeNotifier {
   static final TabData _tabData = TabData._internal();
-  static get tabData => _tabData;
+  static TabData get tabData => _tabData;
 
   int totalItemInCart = 0;
   double newVote = 0.0;
@@ -240,7 +240,7 @@ class TabData extends ChangeNotifier {
 
   dynamic getCurrency(String curCode) => CurrencyService().findByCode(curCode);
 
-  getFormattedNumber(dynamic nu){
+  String getFormattedNumber(dynamic nu){
     return NumberFormat.compactCurrency(decimalDigits: 0, symbol: '').format(nu);
   }
 
@@ -364,7 +364,7 @@ class TabData extends ChangeNotifier {
 
   String decryptString(String str) => encrypter.decrypt64(str, iv: enIV);
 
-  bool isBase64(str) {
+  bool isBase64(String str) {
     RegExp regExp = RegExp(
       r"^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$",
       caseSensitive: false,

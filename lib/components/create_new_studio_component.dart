@@ -81,7 +81,7 @@ class _CreateNewStudioComponentState extends State<CreateNewStudioComponent> {
       }else{
         if(mounted) iCloud.showSnackBar("Name/User needed", context);
       }
-    }, error: (){
+    }, done: (){
       if(mounted) setState(() => loading = false);
     });
   }

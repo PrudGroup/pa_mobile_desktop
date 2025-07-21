@@ -379,7 +379,7 @@ class ChannelInfoState extends State<ChannelInfo> {
                               spinnerColor: prudColorTheme.secondary,
                             )
                           : Text(
-                              "${tabData.getFormattedNumber(widget.channel.subscriberLinks != null ? widget.channel.subscriberLinks!.length : subscribers)}",
+                              tabData.getFormattedNumber(widget.channel.subscriberLinks != null ? widget.channel.subscriberLinks!.length : subscribers),
                               style: prudWidgetStyle.btnTextStyle.copyWith(
                                 fontSize: 14,
                                 color: prudColorTheme.secondary,
@@ -459,7 +459,7 @@ class ChannelInfoState extends State<ChannelInfo> {
                               spinnerColor: prudColorTheme.secondary,
                             )
                           : Text(
-                              "${tabData.getFormattedNumber(widget.channel.memberLinks != null ? widget.channel.subscriberLinks!.length : members)}",
+                              tabData.getFormattedNumber(widget.channel.memberLinks != null ? widget.channel.subscriberLinks!.length : members),
                               style: prudWidgetStyle.btnTextStyle.copyWith(
                                 fontSize: 14,
                                 color: prudColorTheme.secondary,

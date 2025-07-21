@@ -19,7 +19,7 @@ import 'package:prudapp/singletons/tab_data.dart';
 class PrudVidNotifier extends ChangeNotifier{
 
   static final PrudVidNotifier _prudVidNotifier = PrudVidNotifier._internal();
-  static get prudVidNotifier => _prudVidNotifier;
+  static PrudVidNotifier get prudVidNotifier => _prudVidNotifier;
 
   factory PrudVidNotifier() {
     return _prudVidNotifier;

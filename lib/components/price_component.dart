@@ -33,7 +33,7 @@ class PriceComponent extends StatelessWidget {
   Widget build(BuildContext context) {
     List<String> strPrice = getPriceInArray();
     String mainPrice = strPrice[0];
-    String decimalPrice = strPrice[1]?? '00';
+    String decimalPrice = strPrice[1];
     
     return Row(
       children: [

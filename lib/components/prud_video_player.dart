@@ -5,6 +5,7 @@ import 'package:prudapp/components/prud_network_image.dart';
 import 'package:prudapp/components/video_loading.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/i_cloud.dart';
+import 'package:prudapp/singletons/prudio_client.dart';
 import 'package:prudapp/singletons/tab_data.dart';
     
 class PrudVideoPlayer extends StatefulWidget {
@@ -42,11 +43,35 @@ class PrudVideoPlayer extends StatefulWidget {
 class PrudVideoPlayerState extends State<PrudVideoPlayer> {
   late BetterPlayerController _bpCtrl;
   late BetterPlayerDataSource _bpSource;
+  GlobalKey bpKey = GlobalKey();
   bool finished = false;
+  Duration? lastPosition;
+  // bool deviceCanPip = false;
+
+
+  void addWatchMinutesOrLastDuration(){
+    Future.delayed(Duration.zero, () async {
+      Duration? current = await _bpCtrl.videoPlayerController?.position;
+      if(current != null && lastPosition != null){
+        int minutesWatched = current.inMinutes - lastPosition!.inMinutes;
+        if(minutesWatched >= 1 && prudSocket.connected){
+          prudSocket.emit("increment_video_watch_minutes", {"minutes": minutesWatched});
+        }
+        if(mounted) setState(() => lastPosition = current);
+      }
+
+    });
+  }
   
 
   @override
   void initState(){
+    /* Future.delayed(Duration.zero, () async {
+      if(mounted){
+        bool canPip = await _bpCtrl.isPictureInPictureSupported();
+        setState(()  => deviceCanPip = canPip);
+      }
+    }); */
     String authorizedThumbnail = iCloud.authorizeDownloadUrl(widget.thumbnail);
     BetterPlayerConfiguration bpConfig = BetterPlayerConfiguration(
       fit: BoxFit.fill,
@@ -93,7 +118,10 @@ class PrudVideoPlayerState extends State<PrudVideoPlayer> {
             });
           }
           case BetterPlayerEventType.progress: {
-
+            addWatchMinutesOrLastDuration();
+          }
+          case BetterPlayerEventType.bufferingUpdate:{
+            addWatchMinutesOrLastDuration();
           }
           case BetterPlayerEventType.exception: {
 
@@ -159,6 +187,7 @@ class PrudVideoPlayerState extends State<PrudVideoPlayer> {
     );
     _bpCtrl.setupDataSource(_bpSource);
     super.initState();
+    prudSocket.on("", (dynamic resp){});
   }
 
   @override
@@ -168,7 +197,7 @@ class PrudVideoPlayerState extends State<PrudVideoPlayer> {
       children: [
         AspectRatio(
           aspectRatio: 16 / 9,
-          child: BetterPlayer(controller: _bpCtrl),
+          child: BetterPlayer(controller: _bpCtrl, key: bpKey,),
         ),
         if(widget.finishedWidget != null && finished) widget.finishedWidget!,
       ],

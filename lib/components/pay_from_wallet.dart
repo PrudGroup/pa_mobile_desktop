@@ -88,12 +88,11 @@ class PayFromWalletState extends State<PayFromWallet> {
           if(mounted){
             setState(() {
               unableToGetWallet = true;
-              loading = false;
             });
           }
         }
       }
-    },error: (){
+    },done: (){
       if(mounted) setState(() => loading = false);
     });
   }

@@ -15,7 +15,7 @@ class ShareableIncome extends StatefulWidget {
 
 class ShareableIncomeState extends State<ShareableIncome> {
 
-  void gotoTab(index){
+  void gotoTab(int index){
     if(widget.goToTab != null) widget.goToTab!(index);
   }
   @override

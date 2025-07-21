@@ -46,7 +46,10 @@ class AddAsCreatorState extends State<AddAsCreator>{
   }
 
   void share() async {
-    final result = await Share.share('I am a content creator on Prudapp with creator id ${creator!.id}', subject: "CreatorID");
+    final result = await SharePlus.instance.share(ShareParams(
+      text: "I am a content creator on Prudapp with creator id ${creator!.id}", 
+      subject: "CreatorID"
+    ));
     if (result.status == ShareResultStatus.success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("CreatorID Shared"),

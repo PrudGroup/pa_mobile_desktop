@@ -114,7 +114,9 @@ class VideoDetailState extends State<VideoDetail> {
   ReceivePort totalCPort = ReceivePort();
   ReceivePort totalMCPort = ReceivePort();
   ReceivePort lastCPort = ReceivePort();
+  ReceivePort minPort = ReceivePort();
   Isolate? lastCIsolate;
+  Isolate? minIsolate;
   Isolate? totalMCIsolate;
   Isolate? totalCIsolate;
   VideoComment? lastComment;
@@ -139,7 +141,7 @@ class VideoDetailState extends State<VideoDetail> {
     displayComment(showComment? false : true);
   }
 
-  getSizeAndPosition() {
+  void getSizeAndPosition() {
     vHeight = _videoContainerKey.currentContext?.size?.height?? 0;
     if(UniversalPlatform.isAndroid == false && UniversalPlatform.isIOS == false){
       vHeight = _flickKey.currentContext?.size?.height?? 0;
@@ -147,7 +149,7 @@ class VideoDetailState extends State<VideoDetail> {
     setState(() {});
   }
 
-  displayComment(bool isMembersOnly){
+  void displayComment(bool isMembersOnly){
     if(
       widget.localVid == null && widget.video == null && 
       widget.videoId == null &&  widget.channel == null && 
@@ -221,7 +223,7 @@ class VideoDetailState extends State<VideoDetail> {
     lastCIsolate = await Isolate.spawn(
       getComments, CommentActionArg(
         id: widget.localVid?.videoId?? widget.video?.id?? widget.videoId?? video!.id!,
-        sendPort: totalMCPort.sendPort,
+        sendPort: lastCPort.sendPort,
         commentType: CommentType.videoComment,
         cred: cred, limit: 1, offset: 0
       ), 
@@ -233,6 +235,16 @@ class VideoDetailState extends State<VideoDetail> {
         if(mounted) setState(() => lastComment = res);
       }
     });
+  }
+
+  Future<void> incrementWatchMinute() async {
+    minIsolate = await Isolate.spawn(
+      incrementVideoWatchMiniutesService, MinuteServiceArg(
+        itemId: widget.localVid?.videoId?? widget.video?.id?? widget.videoId?? video!.id!,
+        sendPort: minPort.sendPort, cred: cred, minutes: 1
+      ), 
+      onError: minPort.sendPort, onExit: minPort.sendPort
+    );
   }
 
   Future<void> getSuggestedVideos() async {
@@ -777,6 +789,7 @@ class VideoDetailState extends State<VideoDetail> {
     totalMCPort.close();
     lastCPort.close();
     joinedPort.close();
+    minPort.close();
     subscribedPort.close();
     receiveIsolate?.kill(priority: Isolate.immediate);
     itemIsolate?.kill(priority: Isolate.immediate);
@@ -785,6 +798,7 @@ class VideoDetailState extends State<VideoDetail> {
     totalCIsolate?.kill(priority: Isolate.immediate);
     totalMCIsolate?.kill(priority: Isolate.immediate);
     lastCIsolate?.kill(priority: Isolate.immediate);
+    minIsolate?.kill(priority: Isolate.immediate);
     super.dispose();
   }
   
@@ -849,8 +863,7 @@ class VideoDetailState extends State<VideoDetail> {
       if(mounted) setState(() => uploadedWhen = myStorage.ago(dDate: video!.uploadedAt, isShort: false));
       var positions = itemPositionsListener.itemPositions.value;
       if (positions.isNotEmpty) {
-        int lastVisibleIndex = positions
-          .where((ItemPosition position) => position.itemLeadingEdge < 1)
+        int lastVisibleIndex = positions.where((ItemPosition position) => position.itemLeadingEdge < 1)
           .reduce((ItemPosition max, ItemPosition position) =>
             position.itemLeadingEdge > max.itemLeadingEdge? position : max)
           .index;
@@ -940,11 +953,14 @@ class VideoDetailState extends State<VideoDetail> {
                       videoId: video!.id!,
                       channnelId: video!.channelId,
                       title: video!.title,
-                      tags: video!.tags,
+                      part: video!.part,
+                      season: video!.movieDetail?.season,
+                      episode: video!.movieDetail?.episode,
+                      album: video!.musicDetail?.albumTitle,
                       category: video!.videoType,
                     ),
                   ),
-                  if(flickManager != null && UniversalPlatform.isAndroid == false && UniversalPlatform.isIOS == false) VisibilityDetector(
+                  if(/* flickManager != null && */ UniversalPlatform.isAndroid == false && UniversalPlatform.isIOS == false) VisibilityDetector(
                     key: ObjectKey(flickManager),
                     onVisibilityChanged: (visibility) {
                       if (visibility.visibleFraction == 0 && mounted) {
@@ -1108,6 +1124,13 @@ class VideoDetailState extends State<VideoDetail> {
                                     size: PrudSize.smaller,
                                     subValue: "Membership",
                                   ),
+                                  if(widget.isOwner) PrudDataViewer(
+                                    field: "Total",
+                                    value: "${video?.watchMinutes}",
+                                    makeTransparent: true,
+                                    size: PrudSize.smaller,
+                                    subValue: "Watch Minutes",
+                                  ),
                                 ],
                               ),
                             ),
@@ -1264,7 +1287,7 @@ class VideoDetailState extends State<VideoDetail> {
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       Translate(
-                                        text: "${tabData.getFormattedNumber(video!.likes)}",
+                                        text: tabData.getFormattedNumber(video!.likes),
                                         style: prudWidgetStyle.typedTextStyle.copyWith(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,
@@ -1283,7 +1306,7 @@ class VideoDetailState extends State<VideoDetail> {
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       Translate(
-                                        text: "${tabData.getFormattedNumber(video!.dislikes)}",
+                                        text: tabData.getFormattedNumber(video!.dislikes),
                                         style: prudWidgetStyle.typedTextStyle.copyWith(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,

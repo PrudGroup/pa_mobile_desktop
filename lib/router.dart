@@ -18,7 +18,6 @@ import 'package:prudapp/pages/prudVid/prud_vid_studio.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/add_video.dart';
 import 'package:prudapp/pages/prudVid/studio/pageViews/channel_view.dart';
 import 'package:prudapp/pages/prudVid/tabs/views/channel_detail.dart';
-import 'package:prudapp/pages/prudVid/tabs/views/video_detail.dart';
 import 'package:prudapp/pages/prudVid/thriller_views/thriller_detail.dart';
 import 'package:prudapp/pages/prudVid/thrillers.dart';
 import 'package:prudapp/singletons/prud_studio_notifier.dart';

@@ -92,19 +92,19 @@ class InnerMenuState extends State<InnerMenu> {
                   widget.menus[index].imageIcon == null?
                   Icon(
                     widget.menus[index].icon,
-                    color: selectedIndex == index? prudTheme.indicatorColor : prudTheme.primaryColor,
+                    color: selectedIndex == index? prudTheme.tabBarTheme.indicatorColor : prudTheme.primaryColor,
                   )
                       :
                   ImageIcon(
                     AssetImage(widget.menus[index].imageIcon!),
-                    color: selectedIndex == index? prudTheme.indicatorColor : prudTheme.primaryColor,
+                    color: selectedIndex == index? prudTheme.tabBarTheme.indicatorColor : prudTheme.primaryColor,
                   )
               ) : const SizedBox(),
               hoverElevation: 0.0,
               focusElevation: 0.0,
               size: GFSize.LARGE,
               text: widget.menus[index].title,
-              textColor: selectedIndex == index? prudTheme.indicatorColor : prudTheme.primaryColor,
+              textColor: selectedIndex == index? prudTheme.tabBarTheme.indicatorColor : prudTheme.primaryColor,
               child: const Center(),
             ),
           ),

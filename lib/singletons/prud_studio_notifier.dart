@@ -7,6 +7,7 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:prudapp/isolates.dart';
 import 'package:prudapp/models/shared_classes.dart';
 import 'package:prudapp/models/wallet.dart';
+import 'package:prudapp/services/search_history.dart';
 import 'package:prudapp/singletons/currency_math.dart';
 import 'package:prudapp/singletons/shared_local_storage.dart';
 import 'package:prudapp/singletons/tab_data.dart';
@@ -17,7 +18,7 @@ import 'i_cloud.dart';
 
 class PrudStudioNotifier extends ChangeNotifier {
   static final PrudStudioNotifier _prudStudioNotifier = PrudStudioNotifier._internal();
-  static get prudStudioNotifier => _prudStudioNotifier;
+  static PrudStudioNotifier get prudStudioNotifier => _prudStudioNotifier;
 
   factory PrudStudioNotifier() {
     return _prudStudioNotifier;
@@ -60,6 +61,17 @@ class PrudStudioNotifier extends ChangeNotifier {
   List<dynamic> videoDetailSuggestions = [];
   int thrillerDetailLastItemScroll = 0;
   int videoDetailLastItemScroll = 0;
+  final SearchHistoryManager searchHistoryManager = SearchHistoryManager();
+
+
+  Future<void> loadSearchHistory() async {
+    searchHistory = await searchHistoryManager.loadSearchHistory();
+  }
+
+  Future<void> saveSearchHistory(String searchText) async {
+    await searchHistoryManager.saveSearchText(searchText);
+    await loadSearchHistory();
+  }
 
 
   void updateThrillerDetailSuggestions(List<dynamic> items){
@@ -1334,6 +1346,7 @@ class PrudStudioNotifier extends ChangeNotifier {
     });
   }
 
+
   Future<bool> updateComments(String commentId, CommentType commentType, {PrudCredential? cred, required CommentPutSchema newUpdate}) async {
     return await tryAsync("updateComments", () async {
       String path = "";
@@ -1509,6 +1522,7 @@ class PrudStudioNotifier extends ChangeNotifier {
   Future<void> initPrudStudio() async {
     try {
       await getStudio();
+      await loadSearchHistory();
       retrieveUnfinishedNewChannelData();
       retrieveUnfinishedNewVideoData();
       getSearchedTerm4ChannelFromCache();
@@ -1575,3 +1589,4 @@ List<String> channelRequestStatuses = [
   "REJECTED",
   "ACCEPTED"
 ];
+List<String> searchHistory = [];

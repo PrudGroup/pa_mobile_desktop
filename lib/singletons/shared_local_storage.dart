@@ -5,6 +5,7 @@ import 'package:fast_cached_network_image/fast_cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:prudapp/models/theme.dart';
 import 'package:prudapp/singletons/currency_math.dart';
@@ -20,7 +21,7 @@ import '../models/user.dart';
 
 class MyStorage extends ChangeNotifier {
   static final MyStorage _myStorage = MyStorage._internal();
-  static get myStorage => _myStorage;
+  static MyStorage get myStorage => _myStorage;
 
   GetStorage lStore = GetStorage();
   String networkImageLocation = "";
@@ -87,49 +88,49 @@ class MyStorage extends ChangeNotifier {
     }
   }
 
-  saveThrillerReferral(String tid, String linkId){
+  void saveThrillerReferral(String tid, String linkId){
     Future.delayed(Duration.zero, () async {
       String key = "thriller_${tid}_referral";
       await addToStore(key: key, value: linkId);
     });
   }
 
-  saveAdsReferral(String adsId, String linkId){
+  void saveAdsReferral(String adsId, String linkId){
     Future.delayed(Duration.zero, () async {
       String key = "ads_${adsId}_referral";
       await addToStore(key: key, value: linkId);
     });
   }
 
-  saveVideoReferral(String vid, String linkId){
+  void saveVideoReferral(String vid, String linkId){
     Future.delayed(Duration.zero, () async {
       String key = "video_${vid}_referral";
       await addToStore(key: key, value: linkId);
     });
   }
 
-  saveChannelReferral(String cid, String linkId){
+  void saveChannelReferral(String cid, String linkId){
     Future.delayed(Duration.zero, () async {
       String key = "channel_${cid}_referral";
       await addToStore(key: key, value: linkId);
     });
   }
 
-  saveGeneralReferral(String linkId){
+  void saveGeneralReferral(String linkId){
     Future.delayed(Duration.zero, () async {
       String key = "general_referral";
       await addToStore(key: key, value: linkId);
     });
   }
 
-  saveStreamReferral(String sid, String linkId){
+  void saveStreamReferral(String sid, String linkId){
     Future.delayed(Duration.zero, () async {
       String key = "stream_${sid}_referral";
       await addToStore(key: key, value: linkId);
     });
   }
 
-  saveAppInstallReferral(String code){
+  void saveAppInstallReferral(String code){
     Future.delayed(Duration.zero, () async {
       String key = "install_referral_code";
       await addToStore(key: key, value: code);
@@ -200,9 +201,19 @@ class MyStorage extends ChangeNotifier {
     return isShort? time_ago.format(dDate, locale: 'en_short') : time_ago.format(dDate);
   }
 
+  String getDeviceLanguage() {
+    String locale = Intl.getCurrentLocale();
+    return locale; // Returns format like "en_US" or "es_ES"
+  }
+
+  String getLanguageCode() {
+    String locale = Intl.getCurrentLocale();
+    return locale.split('_')[0]; // Returns "en", "es", etc.
+  }
+
   Future<String> translate({required String text, String fromLocaleCode= 'en'}) async{
     final translator = GoogleTranslator();
-    final String lang = myStorage.user !=null && myStorage.user.locale != null? myStorage.user.locale : "en";
+    final String lang = getLanguageCode();
     String translation = (await translator.translate(text,from: fromLocaleCode, to: lang)) as String;
     return translation;
   }
@@ -230,7 +241,6 @@ ThemeData prudTheme = ThemeData(
   brightness: Brightness.light,
   primaryColor: prudColorTheme.primary,
   disabledColor: prudColorTheme.bgA,
-  indicatorColor: Colors.black,
   pageTransitionsTheme: const PageTransitionsTheme(
     builders: <TargetPlatform, PageTransitionsBuilder>{
       TargetPlatform.android: ZoomPageTransitionsBuilder(),
@@ -259,8 +269,9 @@ ThemeData prudTheme = ThemeData(
     backgroundColor: prudColorTheme.primary,
     elevation: 0.0,
   ),
-  tabBarTheme: const TabBarTheme(
+  tabBarTheme: const TabBarThemeData(
     splashFactory: NoSplash.splashFactory,
+    indicatorColor: Colors.black,
   ),
   bottomNavigationBarTheme: BottomNavigationBarThemeData(
     backgroundColor: prudColorTheme.primary,

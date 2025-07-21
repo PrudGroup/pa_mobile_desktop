@@ -15,7 +15,7 @@ import 'i_cloud.dart';
 
 class InfluencerNotifier extends ChangeNotifier {
   static final InfluencerNotifier _influencerNotifier = InfluencerNotifier._internal();
-  static get influencerNotifier => _influencerNotifier;
+  static InfluencerNotifier get influencerNotifier => _influencerNotifier;
 
   factory InfluencerNotifier(){
     return _influencerNotifier;

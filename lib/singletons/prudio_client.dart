@@ -5,7 +5,7 @@ import 'package:socket_io_client/socket_io_client.dart';
 
 class PrudioNotifier extends ChangeNotifier {
   static final PrudioNotifier _prudioNotifier = PrudioNotifier._internal();
-  static get prudioNotifier => _prudioNotifier;
+  static PrudioNotifier get prudioNotifier => _prudioNotifier;
 
   factory PrudioNotifier() {
     return _prudioNotifier;

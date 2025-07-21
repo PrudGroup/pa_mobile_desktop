@@ -353,7 +353,7 @@ class _ChannelViewState extends State<ChannelView> {
                                         spacing: 2,
                                         children: [
                                           Text(
-                                            "${tabData.getFormattedNumber(channel.voters)}",
+                                            tabData.getFormattedNumber(channel.voters),
                                             style: prudWidgetStyle.btnTextStyle.copyWith(
                                               color: prudColorTheme.secondary,
                                               fontWeight: FontWeight.w600,

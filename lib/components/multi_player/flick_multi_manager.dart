@@ -6,7 +6,7 @@ class FlickMultiManager {
   FlickManager? _activeManager;
   bool _isMute = true;
 
-  init(FlickManager flickManager) {
+  void init(FlickManager flickManager) {
     _flickManagers.add(flickManager);
     if (_isMute) {
       flickManager.flickControlManager?.mute();
@@ -18,7 +18,7 @@ class FlickMultiManager {
     }
   }
 
-  remove(FlickManager flickManager) {
+  void remove(FlickManager flickManager) {
     if (_activeManager == flickManager) {
       _activeManager = null;
     }
@@ -26,7 +26,7 @@ class FlickMultiManager {
     _flickManagers.remove(flickManager);
   }
 
-  togglePlay(FlickManager flickManager) {
+  void togglePlay(FlickManager flickManager) {
     if (_activeManager?.flickVideoManager?.isPlaying == true &&
         flickManager == _activeManager) {
       pause();
@@ -35,11 +35,11 @@ class FlickMultiManager {
     }
   }
 
-  pause() {
+  void pause() {
     _activeManager?.flickControlManager?.pause();
   }
 
-  play([FlickManager? flickManager]) {
+  void play([FlickManager? flickManager]) {
     if (flickManager != null) {
       _activeManager?.flickControlManager?.pause();
       _activeManager = flickManager;
@@ -54,7 +54,7 @@ class FlickMultiManager {
     _activeManager?.flickControlManager?.play();
   }
 
-  toggleMute() {
+  void toggleMute() {
     _activeManager?.flickControlManager?.toggleMute();
     _isMute = _activeManager?.flickControlManager?.isMute ?? false;
     if (_isMute) {

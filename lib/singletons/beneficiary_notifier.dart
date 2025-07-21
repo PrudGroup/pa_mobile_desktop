@@ -6,7 +6,7 @@ import '../models/reloadly.dart';
 
 class BeneficiaryNotifier extends ChangeNotifier {
   static final BeneficiaryNotifier _beneficiaryNotifier = BeneficiaryNotifier._internal();
-  static get beneficiaryNotifier => _beneficiaryNotifier;
+  static BeneficiaryNotifier get beneficiaryNotifier => _beneficiaryNotifier;
 
   factory BeneficiaryNotifier(){
     return _beneficiaryNotifier;

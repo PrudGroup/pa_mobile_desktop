@@ -36,13 +36,13 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   url_launcher: ^6.3.1
-  flutter_local_notifications: ^19.1.0
+  flutter_local_notifications: ^19.3.0
   font_awesome_flutter: ^10.8.0
   dio: ^5.8.0+1
   intro_slider: ^4.2.1
-  flutter_launcher_icons: ^0.14.3
-  rate_my_app: ^2.3.1
-  provider: ^6.1.4
+  flutter_launcher_icons: ^0.14.4
+  rate_my_app: ^2.3.2
+  provider: ^6.1.5
   flutter_form_builder: ^10.0.1
   flutter_spinkit: ^5.2.1
   desktop_window: ^0.4.2
@@ -53,23 +53,23 @@ dependencies:
   country_picker: ^2.0.27
   intl_phone_number_input: ^0.7.4
   flutter_shimmer: ^2.1.2
-  internet_connection_checker_plus: ^2.7.1
-  timeago: ^3.7.0
-  form_builder_validators: ^11.1.2
-  firebase_core: ^3.13.0
-  firebase_messaging: ^15.2.5
-  firebase_analytics: ^11.4.5
-  firebase_remote_config: ^5.4.3
+  internet_connection_checker_plus: ^2.7.2
+  timeago: ^3.7.1
+  form_builder_validators: ^11.2.0
+  firebase_core: ^3.14.0
+  firebase_messaging: ^15.2.7
+  firebase_analytics: ^11.5.0
+  firebase_remote_config: ^5.4.5
   get_storage: ^2.1.1
-  awesome_snackbar_content: ^0.1.5
+  awesome_snackbar_content: ^0.1.6
   encrypt: ^5.0.3
-  flutter_advanced_drawer: ^1.4.0
+  flutter_advanced_drawer: ^1.5.0
   flutter_fgbg: ^0.7.1
   motion_tab_bar_v2: ^0.4.0
   country_state_city: ^0.1.6
   flutter_vector_icons: ^2.0.0
   uuid: ^4.5.1
-  go_router: ^15.1.1
+  go_router: ^15.2.4
   currency_picker: ^2.0.21
   forex_currency_conversion: ^0.9.1
   avatar_stack: ^3.0.0
@@ -83,15 +83,15 @@ dependencies:
   pdf: ^3.11.3
   share_plus: ^11.0.0
   printing: ^5.14.2
-  socket_io_client: ^3.1.1
-  camerawesome: ^2.3.0
+  socket_io_client: ^3.1.2
+  camerawesome: ^2.5.0
   paystack_for_flutter: ^1.0.4
-  carousel_slider: ^5.0.0
-  syncfusion_flutter_sliders: ^29.1.39
+  carousel_slider: ^5.1.1
+  syncfusion_flutter_sliders: ^30.1.37
   flutter_swipe_detector: ^2.0.0
   crypto: ^3.0.6
-  file_picker: ^10.1.2
-  video_player: ^2.9.5
+  file_picker: ^10.2.0
+  video_player: ^2.10.0
   mime: ^2.0.0
   http_parser: ^4.1.2
   flick_video_player: ^0.9.0
@@ -113,10 +113,23 @@ dependencies:
   better_player_plus: ^1.0.8
   pretty_dio_logger: ^1.4.0
   dashed_circular_progress_bar: ^0.0.6
-  fade_shimmer: ^2.3.0
+  fade_shimmer: ^2.4.0
   namefully: ^0.2.1
   comment_tree: ^0.3.0
   emoji_picker_flutter: ^4.3.0
+  permission_handler: ^12.0.1
+  copy_with_extension: ^6.0.1
+  flutter_debouncer: ^2.0.0
+  logger: ^2.6.0
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+  shared_preferences: ^2.5.3
+  flutter_cache_manager: ^3.4.1
+  freezed_annotation: ^3.0.0
+  retrofit: ^4.4.2
+  camera: ^0.11.1
+  webrtc_interface: ^1.2.2+hotfix.2
+  flutter_webrtc: ^0.14.2
   
 dependency_overrides: 
   intl: ">=0.20.2"
@@ -125,17 +138,24 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  msix: ^3.16.8
-  lints: ^5.1.1
+  msix: ^3.16.9
+  lints: ^6.0.0
   mockito: ^5.4.6
-  build_runner: ^2.4.15
+  build_runner: ^2.5.4
+  retrofit_generator: ^9.2.0
+  riverpod_generator: ^2.6.5
+  flutter_gen_runner: ^5.10.0
+  change_app_package_name: ^1.5.0
+  copy_with_extension_gen: ^6.0.1
+  json_serializable: ^6.9.5
+  freezed: ^3.0.6
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   test: ^1.25.15
 
 flutter_launcher_icons:
@@ -173,116 +193,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/fonts/Autobus.ttf
-    - assets/fonts/Champagne-Bold.ttf
-    - assets/fonts/Champagne.ttf
-    - assets/fonts/cherione.ttf
-    - assets/fonts/Lato-Italic.ttf
-    - assets/fonts/NexaDemo-Bold.ttf
-    - assets/fonts/NexaDemo-Light.ttf
-    - assets/fonts/OpenSans-Bold.ttf
-    - assets/fonts/OpenSans-Regular.ttf
-    - assets/fonts/OpenSans-SemiBold.ttf
-    - assets/fonts/Oswald-Regular.ttf
-    - assets/fonts/Proxima-Light.otf
-    - assets/fonts/Qhinanttika.otf
-    - assets/fonts/revans.ttf
-    - assets/fonts/valeria.ttf
-    - assets/fonts/tamil-sangam-mn.otf
-    - assets/images/prudapp_icon.png
-    - assets/images/prud_logo.png
-    - assets/images/intros/intro.jpg
-    - assets/images/intros/intro1.jpg
-    - assets/images/intros/intro2.jpg
-    - assets/images/intros/intro3.jpg
-    - assets/images/intros/intro4.jpg
-    - assets/images/intros/intro5.jpg
-    - assets/images/like.png
-    - assets/images/dislike.png
-    - assets/images/settings.png
-    - assets/images/user.png
-    - assets/images/gh.jpg
-    - assets/images/plain_gh.jpg
-    - assets/images/gg.jpg
-    - assets/images/err.jpg
-    - assets/images/carousels/1.jpg
-    - assets/images/carousels/2.jpg
-    - assets/images/carousels/3.jpg
-    - assets/images/carousels/4.jpg
-    - assets/images/carousels/5.jpg
-    - assets/images/carousels/6.jpg
-    - assets/images/carousels/7.jpg
-    - assets/images/carousels/8.jpg
-    - assets/images/carousels/9.jpg
-    - assets/images/carousels/10.jpg
-    - assets/images/carousels/11.jpg
-    - assets/images/carousels/12.jpg
-    - assets/images/carousels/13.jpg
-    - assets/images/carousels/14.jpg
-    - assets/images/carousels/15.jpg
-    - assets/images/carousels/16.jpg
-    - assets/images/carousels/17.jpg
-    - assets/images/carousels/18.jpg
-    - assets/images/carousels/19.jpg
-    - assets/images/carousels/20.jpg
-    - assets/images/carousels/21.jpg
-    - assets/images/call-center.png
-    - assets/images/document.png
-    - assets/images/influencer.png
-    - assets/images/influencer-1.png
-    - assets/images/megaphone-1.png
-    - assets/images/message.png
-    - assets/images/promotion.png
-    - assets/images/prediction.png
-    - assets/images/tv.png
-    - assets/images/tv-1.png
-    - assets/images/video.png
-    - assets/images/video-ad.png
-    - assets/images/delivery.png
-    - assets/images/account.png
-    - assets/images/link.png
-    - assets/images/subscriber.png
-    - assets/images/subscribe.png
-    - assets/images/subscribe1.png
-    - assets/images/discount.png
-    - assets/images/marketing.png
-    - assets/images/passive-income.png
-    - assets/images/wallet.png
-    - assets/images/link1.png
-    - assets/images/smart-tv.png
-    - assets/images/smart-tv1.png
-    - assets/images/history.png
-    - assets/images/boy.png
-    - assets/images/man.png
-    - assets/images/woman.png
-    - assets/images/woman1.png
-    - assets/images/prudapp_logo_white.png
-    - assets/images/icon_1152.png
-    - assets/images/add-friend.png
-    - assets/images/management.png
-    - assets/images/likedVideo.png
-    - assets/images/localVideoLibrary.png
-    - assets/images/videoMembership.png
-    - assets/images/videoSearch.png
-    - assets/images/prudVid.png
-    - assets/images/videoHome.png
-    - assets/images/prudVidStudio.png
-    - assets/images/playlist.png
-    - assets/images/prudVider.png
-    - assets/images/studio.png
-    - assets/images/live.png
-    - assets/images/thriller.png
-    - assets/images/thriller-dark.png
-    - assets/images/stream.png
-    - assets/images/stream-dark.png
-    - assets/images/stream-studio.png
-    - assets/images/stream-studio-dark.png
-    - assets/images/comedy.png
-    - assets/images/movie.png
-    - assets/images/world-news.png
-    - assets/images/cuisine.png
-    - assets/images/music.png
-    - assets/images/learn.png
+    - assets/images/
+    - assets/fonts/
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
